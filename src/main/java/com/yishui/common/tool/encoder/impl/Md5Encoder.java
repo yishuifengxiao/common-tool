@@ -3,7 +3,11 @@
  */
 package com.yishui.common.tool.encoder.impl;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.Assert;
+
 import com.yishui.common.tool.encoder.Encoder;
+import com.yishui.common.tool.utils.Md5Util;
 
 /**
  * @author yishui
@@ -12,21 +16,30 @@ import com.yishui.common.tool.encoder.Encoder;
  */
 public class Md5Encoder implements Encoder {
 
-	/* (non-Javadoc)
-	 * @see com.yishui.common.tool.encoder.Encoder#encode(java.lang.CharSequence)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yishui.common.tool.encoder.Encoder#encode(java.lang.CharSequence)
 	 */
 	@Override
-	public String encode(CharSequence rawPassword) {
-		// TODO Auto-generated method stub
-		return null;
+	public String encode(String rawPassword) {
+		Assert.notNull(rawPassword, "待加密的内容不能为空");
+		return Md5Util.getMd5(rawPassword);
 	}
 
-	/* (non-Javadoc)
-	 * @see com.yishui.common.tool.encoder.Encoder#matches(java.lang.CharSequence, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.yishui.common.tool.encoder.Encoder#matches(java.lang.CharSequence,
+	 * java.lang.String)
 	 */
 	@Override
-	public boolean matches(CharSequence rawPassword, String encodedPassword) {
-		// TODO Auto-generated method stub
+	public boolean matches(String rawPassword, String encodedPassword) {
+		if (StringUtils.isNoneBlank(rawPassword, encodedPassword)) {
+			return StringUtils.equals(this.encode(rawPassword), encodedPassword);
+		}
 		return false;
 	}
 
