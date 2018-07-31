@@ -15,7 +15,7 @@ import java.net.URL;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Base64Utils;
 
-import sun.misc.BASE64Decoder;
+
 
 
 /**
@@ -117,11 +117,10 @@ public class Base64ToImage {
 
 		if (StringUtils.isEmpty(imgStr)) {// 图像数据为空
 			return false;
-		}
-		BASE64Decoder decoder = new BASE64Decoder();
+		}	
 		try {
 			// Base64解码
-			byte[] b = decoder.decodeBuffer(imgStr);
+			byte[] b = Base64Utils.decodeFromString(imgStr);
 			for (int i = 0; i < b.length; ++i) {
 				if (b[i] < 0) {// 调整异常数据
 					b[i] += 256;
