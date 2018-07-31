@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
@@ -22,6 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @Version 0.0.1
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@ApiModel(value="通用返回实体类",description="用于所有接口的通用返回数据")
 public class Response implements Serializable {
 	/**
 	 * 
