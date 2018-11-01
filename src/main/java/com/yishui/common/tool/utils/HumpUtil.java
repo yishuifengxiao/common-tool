@@ -58,7 +58,7 @@ public class HumpUtil {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(camelCaseName("sda"));
+		System.out.println(camelCaseName("AAAAAA_AAAA"));
 		
 		System.out.println(underscoreName("asdadAasd"));
 	}

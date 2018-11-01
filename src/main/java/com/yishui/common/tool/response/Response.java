@@ -23,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @Version 0.0.1
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ApiModel(value="通用返回实体类",description="用于所有接口的通用返回数据")
+@ApiModel(value = "通用返回实体类", description = "用于所有接口的通用返回数据")
 public class Response implements Serializable {
 	/**
 	 * 
@@ -84,16 +84,17 @@ public class Response implements Serializable {
 	public static Response badParam(String msg) {
 		return new Response(HttpStatus.BAD_REQUEST, msg);
 	}
-	
+
 	/**
 	 * 无权访问
-	 * @param msg 无权访问的原因
-	 * @return  无权访问访问时的信息
+	 * 
+	 * @param msg
+	 *            无权访问的原因
+	 * @return 无权访问访问时的信息
 	 */
-	public static Response forbidden(String msg){
+	public static Response forbidden(String msg) {
 		return new Response(HttpStatus.FORBIDDEN, msg);
 	}
-	
 
 	/**
 	 * 服务器内部异常时返回的数据
@@ -117,8 +118,9 @@ public class Response implements Serializable {
 	 * @param id
 	 *            the id to set
 	 */
-	public void setId(String id) {
+	public Response setId(String id) {
 		this.id = id;
+		return this;
 	}
 
 	/**
@@ -132,8 +134,9 @@ public class Response implements Serializable {
 	 * @param token
 	 *            the token to set
 	 */
-	public void setToken(String token) {
+	public Response setToken(String token) {
 		this.token = token;
+		return this;
 	}
 
 	/**
@@ -147,8 +150,9 @@ public class Response implements Serializable {
 	 * @param msg
 	 *            the msg to set
 	 */
-	public void setMsg(String msg) {
+	public Response setMsg(String msg) {
 		this.msg = msg;
+		return this;
 	}
 
 	/**
@@ -162,8 +166,9 @@ public class Response implements Serializable {
 	 * @param data
 	 *            the data to set
 	 */
-	public void setData(Object data) {
+	public Response setData(Object data) {
 		this.data = data;
+		return this;
 	}
 
 	/**
@@ -184,16 +189,18 @@ public class Response implements Serializable {
 	 * @param code
 	 *            the code to set
 	 */
-	public void setCode(HttpStatus code) {
+	public Response setCode(HttpStatus code) {
 		this.code = code;
+		return this;
 	}
 
 	/**
 	 * @param date
 	 *            the date to set
 	 */
-	public void setDate(Date date) {
+	public Response setDate(Date date) {
 		this.date = date;
+		return this;
 	}
 
 	/**

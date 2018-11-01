@@ -6,9 +6,6 @@ package com.yishui.common.tool.utils;
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * 自定义随机工具类
  * 
@@ -17,7 +14,6 @@ import org.slf4j.LoggerFactory;
  * @Version 0.0.1
  */
 public class RandomUtil {
-	private final static Logger log = LoggerFactory.getLogger(RandomUtil.class);
 
 	/**
 	 * 随机生成一个常见的汉字
