@@ -3,8 +3,6 @@ package com.yishui.common.tool.swagger;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -30,10 +28,9 @@ import springfox.documentation.swagger.common.SwaggerPluginSupport;
  * @Version 0.0.1
  */
 public class Swagger2Builder implements ModelPropertyBuilderPlugin {
-	@SuppressWarnings("unused")
 	private final DescriptionResolver descriptions;
 
-	@Autowired
+	
 	public Swagger2Builder(DescriptionResolver descriptions) {
 		this.descriptions = descriptions;
 	}
@@ -50,6 +47,13 @@ public class Swagger2Builder implements ModelPropertyBuilderPlugin {
 			context.getBuilder().extensions(annotation.transform(toExtension()).orNull());
 		}
 
+	}
+
+	/**
+	 * @return the descriptions
+	 */
+	public DescriptionResolver getDescriptions() {
+		return descriptions;
 	}
 
 	public boolean supports(DocumentationType delimiter) {
