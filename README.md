@@ -14,9 +14,9 @@
 3. xxxx
 
 #### 更新说明
-1.修改版本号为0.1.0
-2.修改swagger-ui的版本由2.2.2提升为2.9.2
-3.增加swagger-bootstrap-ui界面
+1. 修改版本号为0.1.0
+2. 修改swagger-ui的版本由2.2.2提升为2.9.2
+3. 增加swagger-bootstrap-ui界面
 
 #### 使用说明
 
