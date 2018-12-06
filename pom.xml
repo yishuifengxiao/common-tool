@@ -30,6 +30,7 @@
 		<pagehelper.version>1.2.5</pagehelper.version>
 		<druid.version>1.1.10</druid.version>
 		<!-- <swagger2.version>2.2.2</swagger2.version> -->
+		<swagger-bootstrap-ui.version>1.8.7</swagger-bootstrap-ui.version>
 		<swagger2.version>2.9.2</swagger2.version>
 		<swagger.v3.versopm>1.5.21</swagger.v3.versopm>
 		<swagger-bootstrap-ui.version>1.8.7</swagger-bootstrap-ui.version>
@@ -64,25 +65,24 @@
 			<version>${swagger2.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-annotations</artifactId>
-			<version>1.5.21</version>
-		</dependency>
-		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-models</artifactId>
-			<version>${swagger.v3.versopm}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-models</artifactId>
-			<version>${swagger.v3.versopm}</version>
-		</dependency>
-
-		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>${swagger2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-annotations</artifactId>
+			<version>${swagger.v3.versopm}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-models</artifactId>
+			<version>${swagger.v3.versopm}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.xiaoymin</groupId>
+			<artifactId>swagger-bootstrap-ui</artifactId>
+			<version>${swagger-bootstrap-ui.version}</version>
 		</dependency>
 		<!-- swagger2 -->
 		<dependency>
