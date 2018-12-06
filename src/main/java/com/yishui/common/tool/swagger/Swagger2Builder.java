@@ -3,6 +3,9 @@ package com.yishui.common.tool.swagger;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -28,9 +31,9 @@ import springfox.documentation.swagger.common.SwaggerPluginSupport;
  * @Version 0.0.1
  */
 public class Swagger2Builder implements ModelPropertyBuilderPlugin {
+	private final static Logger log = LoggerFactory.getLogger(Swagger2Builder.class);
 	private final DescriptionResolver descriptions;
 
-	
 	public Swagger2Builder(DescriptionResolver descriptions) {
 		this.descriptions = descriptions;
 	}
@@ -64,6 +67,7 @@ public class Swagger2Builder implements ModelPropertyBuilderPlugin {
 	static Function<ApiModelProperty, List<VendorExtension>> toExtension() {
 		return new Function<ApiModelProperty, List<VendorExtension>>() {
 			public List<VendorExtension> apply(ApiModelProperty annotation) {
+				log.debug("==========================> 获取到的ApiModelProperty 属性的名字为 {}", annotation);
 				Extension[] extensions = annotation.extensions();
 				List<VendorExtension> list = new ArrayList<>();
 				if (extensions != null && extensions.length > 0) {

@@ -14,6 +14,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+
+
 /**
  * 公有返回信息类<br/>
  * <b>不会序列化null字段</b>
