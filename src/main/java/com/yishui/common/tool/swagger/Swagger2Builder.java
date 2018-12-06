@@ -29,12 +29,12 @@ import springfox.documentation.swagger.common.SwaggerPluginSupport;
  * @date 2018年12月5日
  * @Version 0.0.1
  */
-public class SwaggerModelPropertyPropertyBuilder implements ModelPropertyBuilderPlugin {
+public class Swagger2Builder implements ModelPropertyBuilderPlugin {
 	@SuppressWarnings("unused")
 	private final DescriptionResolver descriptions;
 
 	@Autowired
-	public SwaggerModelPropertyPropertyBuilder(DescriptionResolver descriptions) {
+	public Swagger2Builder(DescriptionResolver descriptions) {
 		this.descriptions = descriptions;
 	}
 
