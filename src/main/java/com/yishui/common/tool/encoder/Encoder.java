@@ -16,6 +16,10 @@ public interface Encoder {
 	 * Encode the raw password. Generally, a good encoding algorithm applies a
 	 * SHA-1 or greater hash combined with an 8-byte or greater randomly
 	 * generated salt.
+	 * 
+	 * @param rawPassword
+	 *            需要加密的内容
+	 * @return 加密后的内容
 	 */
 	String encode(String rawPassword);
 

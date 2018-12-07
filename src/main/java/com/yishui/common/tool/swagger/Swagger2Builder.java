@@ -37,7 +37,7 @@ public class Swagger2Builder implements ModelPropertyBuilderPlugin {
 	public Swagger2Builder(DescriptionResolver descriptions) {
 		this.descriptions = descriptions;
 	}
-
+   @Override
 	public void apply(ModelPropertyContext context) {
 		Optional<ApiModelProperty> annotation = Optional.absent();
 
@@ -58,7 +58,7 @@ public class Swagger2Builder implements ModelPropertyBuilderPlugin {
 	public DescriptionResolver getDescriptions() {
 		return descriptions;
 	}
-
+	@Override
 	public boolean supports(DocumentationType delimiter) {
 		return SwaggerPluginSupport.pluginDoesApply(delimiter);
 	}
@@ -66,6 +66,7 @@ public class Swagger2Builder implements ModelPropertyBuilderPlugin {
 	@SuppressWarnings("rawtypes")
 	static Function<ApiModelProperty, List<VendorExtension>> toExtension() {
 		return new Function<ApiModelProperty, List<VendorExtension>>() {
+			@Override
 			public List<VendorExtension> apply(ApiModelProperty annotation) {
 				log.debug("==========================> 获取到的ApiModelProperty 属性的名字为 {}", annotation);
 				Extension[] extensions = annotation.extensions();
@@ -76,7 +77,7 @@ public class Swagger2Builder implements ModelPropertyBuilderPlugin {
 						Extension extension = extensions[i];
 						String name = extension.name();
 						ObjectVendorExtension objectVendorExtension = new ObjectVendorExtension(name);
-						if (!name.equals("")) {
+						if (!"".equals(name)) {
 							for (int j = 0; j < extension.properties().length; j++) {
 								ExtensionProperty extensionProperty = extension.properties()[j];
 								StringVendorExtension stringVendorExtension = new StringVendorExtension(

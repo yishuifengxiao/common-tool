@@ -29,7 +29,8 @@ public class PasswordValidator implements ConstraintValidator<Password, String> 
 
 		for (String word : forbiddenWords) {
 			if (value.contains(word)) {
-				return false;// 验证失败
+				// 验证失败
+				return false;
 			}
 		}
 		return true;

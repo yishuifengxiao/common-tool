@@ -382,14 +382,6 @@ public class Response implements Serializable {
 		return token;
 	}
 
-	/**
-	 * @param token
-	 *            the token to set
-	 */
-	public Response setToken(String token) {
-		this.token = token;
-		return this;
-	}
 
 	/**
 	 * @return the msg
@@ -494,35 +486,20 @@ public class Response implements Serializable {
 		this.date = date;
 	}
 
-	public Response(String id, String token, int code, String msg, Object data, Date date) {
-		this.id = id;
-		this.token = token;
-		this.code = code;
-		this.msg = msg;
-		this.data = data;
-		this.date = date;
-	}
+
 
 	public Response() {
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#toString()
-	 */
+	
 	@Override
 	public String toString() {
 		return "Response [id=" + id + ", token=" + token + ", code=" + code + ", msg=" + msg + ", data=" + data
 				+ ", date=" + date + "]";
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#hashCode()
-	 */
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -535,42 +512,49 @@ public class Response implements Serializable {
 		return result;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
+	
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Response other = (Response) obj;
-		if (code != other.code)
+		if (code != other.code) {
 			return false;
+		}
 		if (data == null) {
-			if (other.data != null)
-				return false;
-		} else if (!data.equals(other.data))
+			if (other.data != null){
+				return false;}
+		} else if (!data.equals(other.data)) {
 			return false;
+		}
 		if (date == null) {
-			if (other.date != null)
+			if (other.date != null) {
 				return false;
-		} else if (!date.equals(other.date))
+			}
+		} else if (!date.equals(other.date)) {
 			return false;
+		}
 		if (id == null) {
-			if (other.id != null)
+			if (other.id != null) {
 				return false;
-		} else if (!id.equals(other.id))
+			}
+		} else if (!id.equals(other.id)) {
 			return false;
+		}
 		if (msg == null) {
-			if (other.msg != null)
+			if (other.msg != null) {
 				return false;
-		} else if (!msg.equals(other.msg))
+			}
+		} else if (!msg.equals(other.msg)) {
 			return false;
+		}
 		return true;
 	}
 

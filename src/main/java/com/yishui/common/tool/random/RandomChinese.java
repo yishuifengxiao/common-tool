@@ -50,11 +50,4 @@ public class RandomChinese {
 		return sb.toString();
 	}
 
-	public static void main(String[] args) throws UnsupportedEncodingException {
-		String str = "";
-		for (int i = 0; i < 5; i++) {
-			str = getRandomChar();
-			System.out.print(str + " ");
-		}
-	}
 }

@@ -16,25 +16,14 @@ import com.yishui.common.tool.encoder.Md5Util;
  */
 public class Md5Encoder implements Encoder {
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.yishui.common.tool.encoder.Encoder#encode(java.lang.CharSequence)
-	 */
+	
 	@Override
 	public String encode(String rawPassword) {
 		Assert.notNull(rawPassword, "待加密的内容不能为空");
 		return Md5Util.getMd5(rawPassword);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.yishui.common.tool.encoder.Encoder#matches(java.lang.CharSequence,
-	 * java.lang.String)
-	 */
+	
 	@Override
 	public boolean matches(String rawPassword, String encodedPassword) {
 		if (StringUtils.isNoneBlank(rawPassword, encodedPassword)) {
