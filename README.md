@@ -1,28 +1,34 @@
 # tool
 
 #### 项目介绍
-日常工具类
-
-#### 软件架构
-软件架构说明
+日常工具类,主要是封装了一些日常会使用的常用工具方法。
 
 
-#### 安装教程
+#### 使用说明
 
-1. xxxx
-2. xxxx
-3. xxxx
+1. 由于未上传到maven的中央仓库，故需要自己下载源码生成jar
+2. maven的引入坐标为:
+
+		<dependency>
+			<groupId>com.yishui.common</groupId>
+			<artifactId>tool</artifactId>
+			<version>${版本号}</version>
+		</dependency>
+
+接下来就可以使用对应的工具类了
+
 
 #### 更新说明
+2018.12.07
+1. 修改版本号为0.2.0
+2. 增加基于spring的对象拷贝实现类
+3. 优化项目目录分类
+
+2018.12.06
 1. 修改版本号为0.1.0
 2. 修改swagger-ui的版本由2.2.2提升为2.9.2
 3. 增加swagger-bootstrap-ui界面
 
-#### 使用说明
-
-1. xxxx
-2. xxxx
-3. xxxx
 
 #### 参与贡献
 
