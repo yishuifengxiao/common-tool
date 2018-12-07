@@ -96,14 +96,12 @@ public class Response implements Serializable {
 	private Date date;
 
 	/**
-	 * 默认的请求成功的返回信息(200响应码)
+	 * 默认的请求成功时的返回信息(200响应码)
 	 * 
-	 * @param data
-	 *            请求成功时返回的数据信息
 	 * @return 请求成功的返回信息
 	 */
-	public static Response suc(Object data) {
-		return new Response(HttpStatus.OK.value(), OK, data);
+	public static Response suc() {
+		return new Response(HttpStatus.OK.value(), OK);
 	}
 
 	/**
@@ -115,6 +113,39 @@ public class Response implements Serializable {
 	 */
 	public static Response suc(String msg) {
 		return new Response(HttpStatus.OK.value(), msg);
+	}
+
+	/**
+	 * 默认的请求成功时的返回信息(200响应码)
+	 * 
+	 * @param msg
+	 *            请求成功时返回的基本信息
+	 * @param data
+	 *            请求成功时返回的数据信息
+	 * @return 请求成功的返回信息
+	 */
+	public static Response suc(String msg, Object data) {
+		return new Response(HttpStatus.OK.value(), msg, data);
+	}
+
+	/**
+	 * 默认的请求成功的返回信息(200响应码)
+	 * 
+	 * @param data
+	 *            请求成功时返回的数据信息
+	 * @return 请求成功的返回信息
+	 */
+	public static Response sucResult(Object data) {
+		return new Response(HttpStatus.OK.value(), OK, data);
+	}
+
+	/**
+	 * 默认的参数有误的返回信息(400响应码)
+	 * 
+	 * @return 参数有误时返回信息
+	 */
+	public static Response badParam() {
+		return new Response(HttpStatus.BAD_REQUEST.value(), BAD_REQUEST);
 	}
 
 	/**
@@ -131,12 +162,34 @@ public class Response implements Serializable {
 	/**
 	 * 默认的参数有误的返回信息(400响应码)
 	 * 
+	 * @param msg
+	 *            参数有误时返回的基本信息
+	 * @param data
+	 *            BAD_REQUEST
+	 * @return 默认的参数有误的返回信息
+	 */
+	public static Response badParam(String msg, Object data) {
+		return new Response(HttpStatus.BAD_REQUEST.value(), msg, data);
+	}
+
+	/**
+	 * 默认的参数有误的返回信息(400响应码)
+	 * 
 	 * @param data
 	 *            参数有误时返回的数据信息
 	 * @return 参数有误时返回信息
 	 */
-	public static Response badParam(Object data) {
+	public static Response badParamResult(Object data) {
 		return new Response(HttpStatus.BAD_REQUEST.value(), BAD_REQUEST, data);
+	}
+
+	/**
+	 * 资源未授权的返回信息(401响应码)
+	 * 
+	 * @return 资源未授权的返回信息
+	 */
+	public static Response unAuth() {
+		return new Response(HttpStatus.UNAUTHORIZED.value(), UNAUTHORIZED);
 	}
 
 	/**
@@ -144,7 +197,7 @@ public class Response implements Serializable {
 	 * 
 	 * @param msg
 	 *            资源未授权的返回信息的基本信息
-	 * @return 访问权限为401时的信息
+	 * @return 资源未授权的返回信息
 	 */
 	public static Response unAuth(String msg) {
 		return new Response(HttpStatus.UNAUTHORIZED.value(), msg);
@@ -153,12 +206,34 @@ public class Response implements Serializable {
 	/**
 	 * 资源未授权的返回信息(401响应码)
 	 * 
+	 * @param msg
+	 *            资源未授权的返回信息的基本信息
 	 * @param data
 	 *            资源未授权的返回信息的数据信息
-	 * @return 访问权限为401时的信息
+	 * @return 资源未授权的返回信息
 	 */
-	public static Response unAuth(Object data) {
+	public static Response unAuth(String msg, Object data) {
+		return new Response(HttpStatus.UNAUTHORIZED.value(), msg, data);
+	}
+
+	/**
+	 * 资源未授权的返回信息(401响应码)
+	 * 
+	 * @param data
+	 *            资源未授权的返回信息的数据信息
+	 * @return 资源未授权的返回信息
+	 */
+	public static Response unAuthResult(Object data) {
 		return new Response(HttpStatus.UNAUTHORIZED.value(), UNAUTHORIZED, data);
+	}
+
+	/**
+	 * 资源不可用时的返回信息(403响应码)
+	 * 
+	 * @return 无权访问访问时的信息
+	 */
+	public static Response notAllow() {
+		return new Response(HttpStatus.FORBIDDEN.value(), FORBIDDEN);
 	}
 
 	/**
@@ -175,12 +250,34 @@ public class Response implements Serializable {
 	/**
 	 * 资源不可用时的返回信息(403响应码)
 	 * 
+	 * @param msg
+	 *            参数有误时返回的基本信息
 	 * @param data
 	 *            参数有误时返回的数据信息
 	 * @return 无权访问访问时的信息
 	 */
-	public static Response notAllow(Object data) {
+	public static Response notAllow(String msg, Object data) {
+		return new Response(HttpStatus.FORBIDDEN.value(), msg, data);
+	}
+
+	/**
+	 * 资源不可用时的返回信息(403响应码)
+	 * 
+	 * @param data
+	 *            参数有误时返回的数据信息
+	 * @return 无权访问访问时的信息
+	 */
+	public static Response notAllowResult(Object data) {
 		return new Response(HttpStatus.FORBIDDEN.value(), FORBIDDEN, data);
+	}
+
+	/**
+	 * 默认的路径不存在时的返回信息(404响应码)
+	 * 
+	 * @return 默认的路径不存在时的返回信息
+	 */
+	public static Response notFoundt() {
+		return new Response(HttpStatus.NOT_FOUND.value(), NOT_FOUND);
 	}
 
 	/**
@@ -198,11 +295,33 @@ public class Response implements Serializable {
 	 * 默认的路径不存在时的返回信息(404响应码)
 	 * 
 	 * @param msg
+	 *            路径不存在时返回的基本信息
+	 * @param data
+	 *            路径不存在时返回的数据信息
+	 * @return 默认的路径不存在时的返回信息
+	 */
+	public static Response notFoundt(String msg, Object data) {
+		return new Response(HttpStatus.NOT_FOUND.value(), msg, data);
+	}
+
+	/**
+	 * 默认的路径不存在时的返回信息(404响应码)
+	 * 
+	 * @param msg
 	 *            路径不存在时返回的数据信息
 	 * @return 默认的路径不存在时的返回信息
 	 */
 	public static Response notFoundt(Object data) {
 		return new Response(HttpStatus.NOT_FOUND.value(), NOT_FOUND, data);
+	}
+
+	/**
+	 * 服务器内部异常时的返回信息(500响应码)
+	 * 
+	 * @return 服务器内部异常500时的返回信息
+	 */
+	public static Response error() {
+		return new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR);
 	}
 
 	/**
@@ -219,11 +338,24 @@ public class Response implements Serializable {
 	/**
 	 * 服务器内部异常时的返回信息(500响应码)
 	 * 
+	 * @param msg
+	 *            服务器内部异常时的返回信息的基本信息
 	 * @param data
 	 *            服务器内部异常时的返回信息的数据信息
 	 * @return 服务器内部异常500时的返回信息
 	 */
-	public static Response error(Object data) {
+	public static Response error(String msg, Object data) {
+		return new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, data);
+	}
+
+	/**
+	 * 服务器内部异常时的返回信息(500响应码)
+	 * 
+	 * @param data
+	 *            服务器内部异常时的返回信息的数据信息
+	 * @return 服务器内部异常500时的返回信息
+	 */
+	public static Response errorResult(Object data) {
 		return new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, data);
 	}
 
