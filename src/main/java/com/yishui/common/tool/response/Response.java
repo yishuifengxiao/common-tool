@@ -28,13 +28,37 @@ import io.swagger.annotations.ApiParam;
 @ApiModel(value = "通用返回实体类", description = "用于所有接口的通用返回数据")
 public class Response implements Serializable {
 	/**
+	 * 200响应码对应的默认信息
+	 */
+	private final static String OK = "请求成功";
+	/**
+	 * 400响应码对应的默认信息
+	 */
+	private final static String BAD_REQUEST = "请求参数有误";
+	/**
+	 * 401响应码对应的默认信息
+	 */
+	private final static String UNAUTHORIZED = "请求要求身份验证";
+	/**
+	 * 403响应码对应的默认信息
+	 */
+	private final static String FORBIDDEN = "无权访问此资源";
+	/**
+	 * 404响应码对应的默认信息
+	 */
+	private final static String NOT_FOUND = "访问的资源路径不存在";
+	/**
+	 * 500响应码对应的默认信息
+	 */
+	private final static String INTERNAL_SERVER_ERROR = "请求失败";
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1306449295746670286L;
 	/**
 	 * 返回消息的序列号
 	 */
-	@ApiModelProperty("请求 ID .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
+	@ApiModelProperty("请求ID .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机,用于请求追踪")
 	private String id;
 	/**
 	 * 返回消息中包含的token信息<br/>
@@ -51,7 +75,7 @@ public class Response implements Serializable {
 	 * @see 具体的响应值的信息可以参见
 	 *      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 	 */
-	@ApiModelProperty("请求的响应吗,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)")
+	@ApiModelProperty("请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)")
 	private int code;
 
 	/**
@@ -79,7 +103,7 @@ public class Response implements Serializable {
 	 * @return 请求成功的返回信息
 	 */
 	public static Response suc(Object data) {
-		return new Response(HttpStatus.OK.value(), "请求成功", data);
+		return new Response(HttpStatus.OK.value(), OK, data);
 	}
 
 	/**
@@ -112,7 +136,7 @@ public class Response implements Serializable {
 	 * @return 参数有误时返回信息
 	 */
 	public static Response badParam(Object data) {
-		return new Response(HttpStatus.BAD_REQUEST.value(), "请求参数有误", data);
+		return new Response(HttpStatus.BAD_REQUEST.value(), BAD_REQUEST, data);
 	}
 
 	/**
@@ -134,7 +158,7 @@ public class Response implements Serializable {
 	 * @return 访问权限为401时的信息
 	 */
 	public static Response unAuth(Object data) {
-		return new Response(HttpStatus.UNAUTHORIZED.value(), "请求要求身份验证", data);
+		return new Response(HttpStatus.UNAUTHORIZED.value(), UNAUTHORIZED, data);
 	}
 
 	/**
@@ -156,7 +180,7 @@ public class Response implements Serializable {
 	 * @return 无权访问访问时的信息
 	 */
 	public static Response notAllow(Object data) {
-		return new Response(HttpStatus.FORBIDDEN.value(), "无权访问此资源", data);
+		return new Response(HttpStatus.FORBIDDEN.value(), FORBIDDEN, data);
 	}
 
 	/**
@@ -178,7 +202,7 @@ public class Response implements Serializable {
 	 * @return 默认的路径不存在时的返回信息
 	 */
 	public static Response notFoundt(Object data) {
-		return new Response(HttpStatus.NOT_FOUND.value(), "访问的路径不存在", data);
+		return new Response(HttpStatus.NOT_FOUND.value(), NOT_FOUND, data);
 	}
 
 	/**
@@ -200,7 +224,7 @@ public class Response implements Serializable {
 	 * @return 服务器内部异常500时的返回信息
 	 */
 	public static Response error(Object data) {
-		return new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), "操作失败", data);
+		return new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, data);
 	}
 
 	/**
