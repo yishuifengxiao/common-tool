@@ -58,7 +58,7 @@ public class Response implements Serializable {
 	/**
 	 * 返回消息的序列号
 	 */
-	@ApiModelProperty("请求ID .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机,用于请求追踪")
+	@ApiModelProperty("请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
 	private String id;
 	/**
 	 * 返回消息中包含的token信息<br/>
@@ -81,17 +81,17 @@ public class Response implements Serializable {
 	/**
 	 * 返回的基本信息
 	 */
-	@ApiModelProperty("返回的基本信息")
+	@ApiModelProperty("响应的简单基本信息,一般与响应码的状态对应,对响应结果进行简单地描述")
 	private String msg;
 	/**
 	 * 返回的数据信息
 	 */
-	@ApiModelProperty("返回的数据信息")
+	@ApiModelProperty("响应的数据信息，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
 	private Object data;
 	/**
 	 * 返回数据的时间
 	 */
-	@ApiModelProperty("返回数据的时间")
+	@ApiModelProperty("响应的时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date date;
 
