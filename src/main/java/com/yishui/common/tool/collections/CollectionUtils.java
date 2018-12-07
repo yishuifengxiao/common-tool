@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.yishui.common.tool.utils;
+package com.yishui.common.tool.collections;
 
 import java.util.ArrayList;
 import java.util.List;

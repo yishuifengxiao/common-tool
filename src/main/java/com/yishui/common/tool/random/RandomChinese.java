@@ -1,25 +1,25 @@
 /**
  * 
  */
-package com.yishui.common.tool.utils;
+package com.yishui.common.tool.random;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Random;
 
 /**
- * 自定义随机工具类
+ * 随机生成汉字
  * 
  * @author yishui
  * @date 2018年8月6日
  * @Version 0.0.1
  */
-public class RandomUtil {
+public class RandomChinese {
 
 	/**
 	 * 随机生成一个常见的汉字
 	 * 
 	 * @return
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
 	public static String getRandomChar() throws UnsupportedEncodingException {
 		Random random = new Random();
@@ -31,12 +31,20 @@ public class RandomUtil {
 		byte[] b = new byte[2];
 		b[0] = (Integer.valueOf(highCode)).byteValue();
 		b[1] = (Integer.valueOf(lowCode)).byteValue();
-			return new String(b, "GBK");
+		return new String(b, "GBK");
 	}
-	
-	public static String getRandomChar(int len) throws UnsupportedEncodingException{
-		StringBuffer sb=new StringBuffer();
-		for(int i=0;i<len;i++){
+
+	/**
+	 * 生成指定长度的汉字
+	 * 
+	 * @param len
+	 *            汉字长度
+	 * @return
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String getRandomChar(int len) throws UnsupportedEncodingException {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < len; i++) {
 			sb.append(getRandomChar());
 		}
 		return sb.toString();

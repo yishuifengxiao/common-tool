@@ -1,7 +1,4 @@
-/**
- * 
- */
-package com.yishui.common.tool.utils;
+package com.yishui.common.tool.convert;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;

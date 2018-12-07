@@ -1,7 +1,4 @@
-/**
- * 
- */
-package com.yishui.common.tool.utils;
+package com.yishui.common.tool.encoder;
 
 import java.math.BigInteger;
 import java.security.MessageDigest;

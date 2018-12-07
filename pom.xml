@@ -4,7 +4,7 @@
 
 	<groupId>com.yishui.common</groupId>
 	<artifactId>tool</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.20-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>tool</name>
@@ -38,6 +38,7 @@
 		<poi.version>3.15</poi.version>
 		<tk.mybatis.version>2.0.3</tk.mybatis.version>
 		<lombok.version>1.18.2</lombok.version>
+		<cglib.version>3.2.9</cglib.version>
 	</properties>
 
 	<dependencies>
@@ -90,7 +91,11 @@
 			<artifactId>lombok</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib</artifactId>
+			<version>${cglib.version}</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<finalName>yishui-common</finalName>

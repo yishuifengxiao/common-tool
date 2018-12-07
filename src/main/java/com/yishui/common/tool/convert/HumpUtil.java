@@ -1,4 +1,4 @@
-package com.yishui.common.tool.utils;
+package com.yishui.common.tool.convert;
 /**
  * 下划线与驼峰互转工具类
  * @author yishui

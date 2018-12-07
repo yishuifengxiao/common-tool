@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import com.yishui.common.tool.encoder.Encoder;
-import com.yishui.common.tool.utils.Md5Util;
+import com.yishui.common.tool.encoder.Md5Util;
 
 /**
  * @author yishui
