@@ -68,9 +68,10 @@
 1. 提交代码
 1. 新建 Pull Request
 
-**联系作者**
+##有问题反馈
+在使用中有任何问题，欢迎反馈给我，可以用以下联系方式跟我交流
 
-作者官网： www.yishuifengxiao.com
-
-邮箱： zhiyubujian@163.com
+* 邮件(zhiyubujian#163.com, 把#换成@)
+* QQ: 979653327
+* 开源中国: [@止于不见](https://gitee.com/zhiyubujian)
   
