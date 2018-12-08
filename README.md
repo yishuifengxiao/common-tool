@@ -1,58 +1,76 @@
-# tool
-
-#### 项目介绍
-日常工具类,主要是封装了一些日常会使用的常用工具方法。
+# 工具介绍
+&nbsp;&nbsp;&nbsp;&nbsp;本工具包主要集成了目前在项目开发过程中个人经常会使用到的一些工具类，对工具类进行了一下简单的封装。工具包目前集成了**通用响应实体**、对象拷贝、集合转换、加密工具、格式化工具、随机中文、JSR校验、常用自定义异常、swagger-ui和驼峰转换等工具。
 
 
-#### 使用说明
-
-1. 由于未上传到maven的中央仓库，故需要自己下载源码生成jar
-2. maven的引入坐标为:
-
+  &nbsp;&nbsp;&nbsp;&nbsp;由于工具包为发布到maven中央仓库，需要自行下载源码并编译。
+  
+  &nbsp;&nbsp;&nbsp;&nbsp;工具包的maven坐标为：
+  
 		<dependency>
 			<groupId>com.yishui.common</groupId>
 			<artifactId>common-tool</artifactId>
 			<version>${版本号}</version>
 		</dependency>
 
-接下来就可以使用对应的工具类了
+---
+		
+## 工具介绍
+-com<br/>
+--yishui<br/>
+----common<br/>
+------tool<br/>
+------- bean &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 对象操作有关的工具类<br/>
+-------  collections &nbsp; &nbsp; 集合操作有关的工具类<br/>
+-------  convert &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;转换操作有关的工具类<br/>
+-------  encoder &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;加密有关的工具类<br/>
+-------  exception &nbsp; &nbsp;&nbsp; 常用异常类<br/>
+-------  format &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 格式化相关的工具类<br/>
+-------  random &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 随机工具类<br/>
+-------  response &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;通用响应实体<br/>
+-------  utils &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其他工具类<br/>
+-------  validate &nbsp; &nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;JSR校验相关的工具类<br/>
+
+## 版本更新说明
 
 
-#### 更新说明
-1.0.0 版本更新
-1. 更新版本号为1.0.0
-2. 修改maven坐标
-3. 升级spring-boot版本为最新的2.1.1
-4. 增加一些常用的异常类封装
 
-0.2.1 版本更新
-1. 修改版本号为0.2.1
-2. 优化公有返回实体类，增加注释和封装
+**1.0.0 版本更新** 
+- 更新版本号为1.0.0
+- 修改maven坐标
+- 升级spring-boot版本为最新的2.1.1
+- 增加一些常用的异常类封装
 
-0.2.0 版本更新
-1. 修改版本号为0.2.0
-2. 增加基于spring的对象拷贝实现类
-3. 优化项目目录分类
+<br/><br/>
 
-0.1.0 版本更新
-1. 修改版本号为0.1.0
-2. 修改swagger-ui的版本由2.2.2提升为2.9.2
-3. 增加swagger-bootstrap-ui界面
+**0.2.1 版本更新**
+
+- 修改版本号为0.2.1
+- 优化公有返回实体类，增加注释和封装
+
+<br/><br/>
+
+**0.2.0 版本更新**
+- 修改版本号为0.2.0
+- 增加基于spring的对象拷贝实现类
+- 优化项目目录分类
+
+<br/><br/>
+
+**0.1.0 版本更新**
+- 修改版本号为0.1.0
+- 修改swagger-ui的版本由2.2.2提升为2.9.2
+- 增加swagger-bootstrap-ui界面
 
 
-#### 参与贡献
-
+## 参与贡献
 1. Fork 本项目
-2. 新建 Feat_xxx 分支
-3. 提交代码
-4. 新建 Pull Request
+1. 新建 Feat_xxx 分支
+1. 提交代码
+1. 新建 Pull Request
 
+**联系作者**
 
-#### 码云特技
+作者官网： www.yishuifengxiao.com
 
-1. 使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2. 码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3. 你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4. [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5. 码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6. 码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+邮箱： zhiyubujian@163.com
+  
