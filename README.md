@@ -11,7 +11,7 @@
 
 		<dependency>
 			<groupId>com.yishui.common</groupId>
-			<artifactId>tool</artifactId>
+			<artifactId>common-tool</artifactId>
 			<version>${版本号}</version>
 		</dependency>
 
@@ -19,6 +19,12 @@
 
 
 #### 更新说明
+1.0.0 版本更新
+1. 更新版本号为1.0.0
+2. 修改maven坐标
+3. 升级spring-boot版本为最新的2.1.1
+4. 增加一些常用的异常类封装
+
 0.2.1 版本更新
 1. 修改版本号为0.2.1
 2. 优化公有返回实体类，增加注释和封装
