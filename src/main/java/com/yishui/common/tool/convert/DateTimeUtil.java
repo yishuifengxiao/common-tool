@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * LocalDateTime与DateTime转换
  * 
@@ -16,6 +19,7 @@ import java.util.Date;
  * @Version 0.0.1
  */
 public final class DateTimeUtil {
+	private final static Logger log=LoggerFactory.getLogger(DateTimeUtil.class);
 	/**
 	 * 将Date转换为 LocalDateTime
 	 * 
@@ -25,6 +29,7 @@ public final class DateTimeUtil {
 	public static synchronized LocalDateTime date2LocalDateTime(Date date) {
 		Instant instant = date.toInstant();
 		ZoneId zone = ZoneId.systemDefault();
+		log.debug("当前时区为 {}",zone);
 		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
 		return localDateTime;
 	}
@@ -37,6 +42,7 @@ public final class DateTimeUtil {
 	 */
 	public static synchronized Date localDateTime2Date(LocalDateTime localDateTime) {
 		ZoneId zone = ZoneId.systemDefault();
+		log.debug("当前时区为 {}",zone);
 		Instant instant = localDateTime.atZone(zone).toInstant();
 		java.util.Date date = Date.from(instant);
 		return date;
