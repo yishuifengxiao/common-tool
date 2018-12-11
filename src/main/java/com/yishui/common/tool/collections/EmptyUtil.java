@@ -71,4 +71,20 @@ public final class EmptyUtil {
 		return !isEmpty(list);
 	}
 
+	/**
+	 * 判断 列表是否只有一个元素
+	 * 
+	 * @param list
+	 *            列表
+	 * @return 如果只有一个元素返回为true，否则为false
+	 */
+	public static <T> boolean onlyOneElement(List<T> list) {
+		if (notEmpty(list)) {
+			if (list.size() == 1) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
