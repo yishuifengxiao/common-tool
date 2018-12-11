@@ -5,7 +5,7 @@ package com.yishui.common.tool.convert;
  * @date 2018年8月3日
  * @Version 0.0.1
  */
-public class HumpUtil {
+public final class HumpUtil {
 
 	/**
 	 * 转换为下划线

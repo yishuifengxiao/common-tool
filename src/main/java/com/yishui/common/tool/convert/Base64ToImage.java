@@ -21,7 +21,7 @@ import org.springframework.util.Base64Utils;
  * @date 2018年7月27日
  * @Version 0.0.1
  */
-public class Base64ToImage {
+public final class Base64ToImage {
 	private final static Logger log = LoggerFactory.getLogger(Base64ToImage.class);
 
 	/**

@@ -12,7 +12,7 @@ import org.springframework.cglib.beans.BeanCopier;
  * @date 2018年12月6日
  * @Version 0.0.1
  */
-public class BeanUtil {
+public final class BeanUtil {
 	/**
 	 * 将源对象里属性值复制给目标对象
 	 * 
@@ -21,7 +21,7 @@ public class BeanUtil {
 	 * @param converter 目标对象
 	 * @return
 	 */
-	public static <U, T> T copy(U source, T target) {
+	public static <S, T> T copy(S source, T target) {
 		BeanCopier.create(source.getClass(), target.getClass(), false).copy(source, target, null);
 		return target;
 

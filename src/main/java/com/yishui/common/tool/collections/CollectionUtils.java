@@ -13,7 +13,7 @@ import java.util.List;
  * @date 2018年10月17日
  * @Version 0.0.1
  */
-public class CollectionUtils {
+public final class CollectionUtils {
 
 	/**
 	 * 将数组转为list
