@@ -39,6 +39,7 @@
 		<tk.mybatis.version>2.0.3</tk.mybatis.version>
 		<lombok.version>1.18.2</lombok.version>
 		<cglib.version>3.2.9</cglib.version>
+		<pagehelper.version>5.1.4</pagehelper.version>
 	</properties>
 
 	<dependencies>
@@ -86,6 +87,13 @@
 			<version>${swagger-bootstrap-ui.version}</version>
 		</dependency>
 		<!-- swagger2 -->
+		<!-- pagehelper -->
+		<dependency>
+			<groupId>com.github.pagehelper</groupId>
+			<artifactId>pagehelper</artifactId>
+			<version>${pagehelper.version}</version>
+		</dependency>
+		<!-- pagehelper -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
