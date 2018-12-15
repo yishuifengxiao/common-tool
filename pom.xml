@@ -49,29 +49,11 @@
 		<version>2.1.1.RELEASE</version>
 	</parent>
 	<properties>
-		<argLine>-Dfile.encoding=UTF-8</argLine>
-		<fastjson.version>1.2.47</fastjson.version>
-		<spring-social.version>1.1.6.RELEASE</spring-social.version>
-		<commons-collections.version>3.2.1</commons-collections.version>
-		<lettuce.version>5.0.2.RELEASE</lettuce.version>
-		<commons-lang3.version>3.4</commons-lang3.version>
-		<camel-core.version>2.21.0</camel-core.version>
-		<logback-redis-appender.version>1.1.5</logback-redis-appender.version>
-		<spring-social-version>1.1.4.RELEASE</spring-social-version>
-		<spring-security-oauth2.version>2.0.2.RELEASE</spring-security-oauth2.version>
-		<commons-collections.version>3.2.2</commons-collections.version>
-		<camel-core.version>2.21.0</camel-core.version>
-		<mybatis.version>1.3.2</mybatis.version>
 		<pagehelper.version>1.2.5</pagehelper.version>
-		<druid.version>1.1.10</druid.version>
 		<swagger-bootstrap-ui.version>1.8.7</swagger-bootstrap-ui.version>
 		<swagger2.version>2.9.2</swagger2.version>
 		<swagger.v3.versopm>1.5.21</swagger.v3.versopm>
 		<swagger-bootstrap-ui.version>1.8.7</swagger-bootstrap-ui.version>
-		<hibernate-validator.version>6.0.9.Final</hibernate-validator.version>
-		<poi.version>3.15</poi.version>
-		<tk.mybatis.version>2.0.3</tk.mybatis.version>
-		<lombok.version>1.18.2</lombok.version>
 		<cglib.version>3.2.9</cglib.version>
 		<pagehelper.version>5.1.4</pagehelper.version>
 	</properties>
@@ -139,7 +121,6 @@
 			<version>${cglib.version}</version>
 		</dependency>
 	</dependencies>
-
 	<profiles>
 		<profile>
 			<id>disable-javadoc-doclint</id>
@@ -150,65 +131,106 @@
 				<javadoc.opts>-Xdoclint:none</javadoc.opts>
 			</properties>
 		</profile>
-	</profiles>
-
-
-
-
-
-
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>attach-sources</id>
-						<goals>
-							<goal>jar-no-fork</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.4</version><!--$NO-MVN-MAN-VER$-->
-				<configuration>
-					<encoding>${chartset.UTF8}</encoding>
-					<aggregate>true</aggregate>
-					<charset>${chartset.UTF8}</charset>
-					<docencoding>${chartset.UTF8}</docencoding>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<phase>package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
+		<profile>
+			<!-- 本地开发环境 -->
+			<id>dev</id>
+			<properties>
+				<profiles.active>dev</profiles.active>
+			</properties>
+			<activation>
+				<!-- 设置默认激活这个配置 -->
+				<activeByDefault>false</activeByDefault>
+			</activation>
+		</profile>
+		<!-- 发布环境 -->
+		<profile>
+			<id>release</id>
+			<properties>
+				<profiles.active>release</profiles.active>
+			</properties>
+			<activation>
+				<!-- 设置默认激活这个配置 -->
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.3</version>
+						<extensions>true</extensions>
 						<configuration>
-							<additionalparam>-Xdoclint:none</additionalparam>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.6</version>
-				<executions>
-					<execution>
-						<id>sign-artifacts</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>sign</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-release-plugin</artifactId>
+						<version>2.5</version>
+						<configuration>
+							<autoVersionSubmodules>true</autoVersionSubmodules>
+							<useReleaseProfile>false</useReleaseProfile>
+							<releaseProfiles>release</releaseProfiles>
+							<goals>deploy</goals>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<version>3.0</version>
+						<configuration>
+							<source>1.8</source>
+							<target>1.8</target>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.4</version><!--$NO-MVN-MAN-VER$ -->
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<additionalparam>-Xdoclint:none</additionalparam>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<!-- 发布环境 -->
+	</profiles>
 </project>
