@@ -4,7 +4,7 @@
 
 	<groupId>com.yishuifengxiao.common</groupId>
 	<artifactId>common-tool</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.0.1-release</version>
 	<packaging>jar</packaging>
 	<description>本工具包主要集成了目前在项目开发过程中个人经常会使用到的一些工具类，对工具类进行了一下简单的封装</description>
 	<name>common-tool</name>
@@ -30,7 +30,7 @@
 		<developerConnection>
          scm:git:https://gitee.com/zhiyubujian/tool.git
       </developerConnection>
-		<url>https://gitee.com/zhiyubujian/tool</url>
+		<url>https://gitee.com/zhiyubujian/tool/tree/master</url>
 		<tag>v1.0.0</tag>
 	</scm>
 	<distributionManagement>
@@ -49,6 +49,7 @@
 		<version>2.1.1.RELEASE</version>
 	</parent>
 	<properties>
+		<argLine>-Dfile.encoding=UTF-8</argLine>
 		<fastjson.version>1.2.47</fastjson.version>
 		<spring-social.version>1.1.6.RELEASE</spring-social.version>
 		<commons-collections.version>3.2.1</commons-collections.version>
@@ -139,6 +140,24 @@
 		</dependency>
 	</dependencies>
 
+	<profiles>
+		<profile>
+			<id>disable-javadoc-doclint</id>
+			<activation>
+				<jdk>[1.8,)</jdk>
+			</activation>
+			<properties>
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+			</properties>
+		</profile>
+	</profiles>
+
+
+
+
+
+
+
 	<build>
 		<plugins>
 			<plugin>
@@ -153,22 +172,33 @@
 					</execution>
 				</executions>
 			</plugin>
-		<!-- 	<plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<configuration>
+					<encoding>${chartset.UTF8}</encoding>
+					<aggregate>true</aggregate>
+					<charset>${chartset.UTF8}</charset>
+					<docencoding>${chartset.UTF8}</docencoding>
+				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
+						<phase>package</phase>
 						<goals>
 							<goal>jar</goal>
 						</goals>
+						<configuration>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
 					</execution>
 				</executions>
-			</plugin> -->
-		<!-- 	<plugin>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>1.5</version>
+				<version>1.6</version>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
@@ -178,15 +208,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin> -->
-			<!-- 打包时跳过测试 -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>true</skipTests>
-					<useSystemClassLoader>false</useSystemClassLoader>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
