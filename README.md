@@ -2,12 +2,10 @@
 &nbsp;&nbsp;&nbsp;&nbsp;本工具包主要集成了目前在项目开发过程中个人经常会使用到的一些工具类，对工具类进行了一下简单的封装。工具包目前集成了**通用响应实体**、对象拷贝、集合转换、加密工具、格式化工具、随机中文、JSR校验、常用自定义异常、swagger-ui和驼峰转换等工具。
 
 
-  &nbsp;&nbsp;&nbsp;&nbsp;由于工具包为发布到maven中央仓库，需要自行下载源码并编译。
-  
-  &nbsp;&nbsp;&nbsp;&nbsp;工具包的maven坐标为：
+  &nbsp;&nbsp;&nbsp;&nbsp;工具包已经发布到maven中央仓库，目前最新的版本1.0.1-release。其引用座为：
   
 		<dependency>
-			<groupId>com.yishui.common</groupId>
+			<groupId>com.yishuifengxiao.common</groupId>
 			<artifactId>common-tool</artifactId>
 			<version>${版本号}</version>
 		</dependency>

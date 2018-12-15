@@ -139,7 +139,7 @@
 			</properties>
 			<activation>
 				<!-- 设置默认激活这个配置 -->
-				<activeByDefault>false</activeByDefault>
+				<activeByDefault>true</activeByDefault>
 			</activation>
 		</profile>
 		<!-- 发布环境 -->
@@ -150,7 +150,7 @@
 			</properties>
 			<activation>
 				<!-- 设置默认激活这个配置 -->
-				<activeByDefault>true</activeByDefault>
+				<activeByDefault>false</activeByDefault>
 			</activation>
 			<build>
 				<plugins>
