@@ -4,7 +4,7 @@
 
 	<groupId>com.yishuifengxiao.common</groupId>
 	<artifactId>common-tool</artifactId>
-	<version>1.0.2-release</version>
+	<version>1.0.3-release</version>
 	<packaging>jar</packaging>
 	<description>本工具包主要集成了目前在项目开发过程中个人经常会使用到的一些工具类，对工具类进行了一下简单的封装</description>
 	<name>common-tool</name>
@@ -53,7 +53,7 @@
 		<swagger-bootstrap-ui.version>1.8.8</swagger-bootstrap-ui.version>
 		<swagger2.version>2.9.2</swagger2.version>
 		<swagger.v3.versopm>1.5.21</swagger.v3.versopm>
-		<swagger-bootstrap-ui.version>1.8.7</swagger-bootstrap-ui.version>
+		<swagger-bootstrap-ui.version>1.8.8</swagger-bootstrap-ui.version>
 		<cglib.version>3.2.9</cglib.version>
 		<pagehelper.version>5.1.4</pagehelper.version>
 	</properties>
