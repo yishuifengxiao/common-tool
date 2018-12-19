@@ -115,9 +115,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 请求成功的返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response suc() {
-		return new Response(HttpStatus.OK.value(), Msg.OK);
+	public static Response<String> suc() {
+		return new Response<String>(HttpStatus.OK.value(), Const.MSG_OK);
 	}
 
 	/**
@@ -127,9 +126,8 @@ public class Response<T> implements Serializable {
 	 *            请求成功时返回的基本信息
 	 * @return 请求成功的返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response suc(String msg) {
-		return new Response(HttpStatus.OK.value(), msg);
+	public static Response<String> suc(String msg) {
+		return new Response<String>(HttpStatus.OK.value(), msg);
 	}
 
 	/**
@@ -137,9 +135,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 参数有误时返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response badParam() {
-		return new Response(HttpStatus.BAD_REQUEST.value(), Msg.BAD_REQUEST);
+	public static Response<String> badParam() {
+		return new Response<String>(HttpStatus.BAD_REQUEST.value(), Const.MSG_BAD_REQUEST);
 	}
 
 	/**
@@ -149,9 +146,8 @@ public class Response<T> implements Serializable {
 	 *            参数有误时返回的基本信息
 	 * @return 参数有误时返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response badParam(String msg) {
-		return new Response(HttpStatus.BAD_REQUEST.value(), msg);
+	public static Response<String> badParam(String msg) {
+		return new Response<String>(HttpStatus.BAD_REQUEST.value(), msg);
 	}
 
 	/**
@@ -159,9 +155,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 资源未授权的返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response unAuth() {
-		return new Response(HttpStatus.UNAUTHORIZED.value(), Msg.UNAUTHORIZED);
+	public static Response<String> unAuth() {
+		return new Response<String>(HttpStatus.UNAUTHORIZED.value(), Const.MSG_UNAUTHORIZED);
 	}
 
 	/**
@@ -171,9 +166,8 @@ public class Response<T> implements Serializable {
 	 *            资源未授权的返回信息的基本信息
 	 * @return 资源未授权的返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response unAuth(String msg) {
-		return new Response(HttpStatus.UNAUTHORIZED.value(), msg);
+	public static Response<String> unAuth(String msg) {
+		return new Response<String>(HttpStatus.UNAUTHORIZED.value(), msg);
 	}
 
 	/**
@@ -181,9 +175,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 无权访问访问时的信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response notAllow() {
-		return new Response(HttpStatus.FORBIDDEN.value(), Msg.FORBIDDEN);
+	public static Response<String> notAllow() {
+		return new Response<String>(HttpStatus.FORBIDDEN.value(), Const.MSG_FORBIDDEN);
 	}
 
 	/**
@@ -193,9 +186,8 @@ public class Response<T> implements Serializable {
 	 *            参数有误时返回的基本信息
 	 * @return 无权访问访问时的信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response notAllow(String msg) {
-		return new Response(HttpStatus.FORBIDDEN.value(), msg);
+	public static Response<String> notAllow(String msg) {
+		return new Response<String>(HttpStatus.FORBIDDEN.value(), msg);
 	}
 
 	/**
@@ -203,9 +195,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 默认的路径不存在时的返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response notFoundt() {
-		return new Response(HttpStatus.NOT_FOUND.value(), Msg.NOT_FOUND);
+	public static Response<String> notFoundt() {
+		return new Response<String>(HttpStatus.NOT_FOUND.value(),Const.MSG_NOT_FOUND);
 	}
 
 	/**
@@ -213,9 +204,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 服务器内部异常500时的返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response error() {
-		return new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), Msg.INTERNAL_SERVER_ERROR);
+	public static Response<String> error() {
+		return new Response<String>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR);
 	}
 
 	/**
@@ -225,9 +215,9 @@ public class Response<T> implements Serializable {
 	 *            服务器内部异常时的返回信息的基本信息
 	 * @return 服务器内部异常500时的返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response error(String msg) {
-		return new Response(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg);
+
+	public static Response<String> error(String msg) {
+		return new Response<String>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg);
 	}
 
 	/**
@@ -237,14 +227,9 @@ public class Response<T> implements Serializable {
 	 *            路径不存在时返回的基本信息
 	 * @return 默认的路径不存在时的返回信息
 	 */
-	@SuppressWarnings("rawtypes")
-	public static Response notFoundt(String msg) {
-		return new Response(HttpStatus.NOT_FOUND.value(), msg);
+	public static Response<String> notFoundt(String msg) {
+		return new Response<String>(HttpStatus.NOT_FOUND.value(), msg);
 	}
-
-
-
-
 
 	public String getId() {
 		return id;
@@ -290,49 +275,63 @@ public class Response<T> implements Serializable {
 		this.date = date;
 		return this;
 	}
-
-
-
-
-
-	/**
-	 * 默认的返回信息
-	 * 
-	 * @author yishui
-	 * @date 2018年12月18日
-	 * @Version 0.0.1
-	 */
-	interface Msg {
+    /**
+     * 通用返回响应类的常用属性信息
+     * @author yishui
+     * @date 2018年12月19日
+     * @Version 0.0.1
+     */
+	public static class Const {
 		/**
 		 * 200响应码对应的默认信息
 		 */
-		public final static String OK = "请求成功";
+		public final static String MSG_OK = "请求成功";
+		/**
+		 * 200响应码
+		 */
+		public final static int CODE_OK = 200;
 		/**
 		 * 400响应码对应的默认信息
 		 */
-		public final static String BAD_REQUEST = "请求参数有误";
+		public final static String MSG_BAD_REQUEST = "请求参数有误";
+		/**
+		 * 400响应码
+		 */
+		public final static int CODE_BAD_REQUEST = 400;
 		/**
 		 * 401响应码对应的默认信息
 		 */
-		public final static String UNAUTHORIZED = "请求要求身份验证";
+		public final static String MSG_UNAUTHORIZED = "请求要求身份验证";
+		/**
+		 * 401响应码
+		 */
+		public final static int CODE_UNAUTHORIZED = 401;
 		/**
 		 * 403响应码对应的默认信息
 		 */
-		public final static String FORBIDDEN = "无权访问此资源";
+		public final static String MSG_FORBIDDEN = "无权访问此资源";
+		/**
+		 * 403响应码
+		 */
+		public final static int CODE_FORBIDDEN = 403;
 		/**
 		 * 404响应码对应的默认信息
 		 */
-		public final static String NOT_FOUND = "访问的资源路径不存在";
+		public final static String MSG_NOT_FOUND = "访问的资源路径不存在";
+		/**
+		 * 404响应码
+		 */
+		public final static int CODE_NOT_FOUND = 404;
 		/**
 		 * 500响应码对应的默认信息
 		 */
-		public final static String INTERNAL_SERVER_ERROR = "请求失败";
+		public final static String MSG_INTERNAL_SERVER_ERROR = "请求失败";
+		/**
+		 * 500响应码
+		 */
+		public final static int CODE_INTERNAL_SERVER_ERROR = 500;
+
 	}
-
-
-
-
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -396,8 +395,7 @@ public class Response<T> implements Serializable {
 	public String toString() {
 		return "Response [id=" + id + ", code=" + code + ", msg=" + msg + ", data=" + data + ", date=" + date + "]";
 	}
-	
-	
+
 	
 
 }
