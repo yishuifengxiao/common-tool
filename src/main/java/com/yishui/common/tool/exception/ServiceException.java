@@ -4,29 +4,30 @@
 package com.yishui.common.tool.exception;
 
 /**
- * dao层统一封装的异常类
+ * 逻辑层通用异常
+ * 
  * @author yishui
- * @date 2018年12月8日
+ * @date 2018年12月27日
  * @Version 0.0.1
  */
-public class DaoException extends CustomException {
+public class ServiceException extends Exception {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -4353278980810247543L;
+	private static final long serialVersionUID = 9137605901063408685L;
 
 	/**
 	 * 
 	 */
-	public DaoException() {
+	public ServiceException() {
 		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param message
 	 */
-	public DaoException(String message) {
+	public ServiceException(String message) {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}
@@ -34,7 +35,7 @@ public class DaoException extends CustomException {
 	/**
 	 * @param cause
 	 */
-	public DaoException(Throwable cause) {
+	public ServiceException(Throwable cause) {
 		super(cause);
 		// TODO Auto-generated constructor stub
 	}
@@ -43,7 +44,7 @@ public class DaoException extends CustomException {
 	 * @param message
 	 * @param cause
 	 */
-	public DaoException(String message, Throwable cause) {
+	public ServiceException(String message, Throwable cause) {
 		super(message, cause);
 		// TODO Auto-generated constructor stub
 	}
@@ -54,7 +55,7 @@ public class DaoException extends CustomException {
 	 * @param enableSuppression
 	 * @param writableStackTrace
 	 */
-	public DaoException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+	public ServiceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 		// TODO Auto-generated constructor stub
 	}

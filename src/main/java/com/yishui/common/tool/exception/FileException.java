@@ -9,7 +9,7 @@ package com.yishui.common.tool.exception;
  * @date 2018年12月12日
  * @Version 0.0.1
  */
-public class FileException extends Exception {
+public class FileException extends CustomException {
 
 	/**
 	 * 
