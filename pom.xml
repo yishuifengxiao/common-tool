@@ -56,6 +56,7 @@
 		<swagger-bootstrap-ui.version>1.8.8</swagger-bootstrap-ui.version>
 		<cglib.version>3.2.9</cglib.version>
 		<pagehelper.version>5.1.4</pagehelper.version>
+		<commons-text.version>1.6</commons-text.version>
 	</properties>
 
 	<dependencies>
@@ -72,6 +73,12 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>${commons-text.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.hibernate.validator</groupId>
 			<artifactId>hibernate-validator</artifactId>
