@@ -9,7 +9,7 @@ package com.yishui.common.tool.exception;
  * @date 2018年12月10日
  * @Version 0.0.1
  */
-public class BadCredentialsException extends CustomException {
+public class BadCredentialsException extends UserException {
 
 	/**
 	 * 
