@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.response;
+package com.yishuifengxiao.common.tool.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.yishuifengxiao.common.tool.utils.UID;
+import com.yishuifengxiao.common.tool.random.UID;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

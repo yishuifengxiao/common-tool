@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.generator;
+package com.yishuifengxiao.common.tool.random;
 
 /**
  * snowflake 算法是 twitter 开源的分布式 id 生成算法，就是把一个 64 位的 long 型的 id，1 个 bit 是不用的，用其中的
