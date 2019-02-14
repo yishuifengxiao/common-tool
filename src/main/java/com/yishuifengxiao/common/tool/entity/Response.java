@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yishuifengxiao.common.tool.random.UID;
 
 import io.swagger.annotations.ApiModel;
@@ -36,6 +37,7 @@ public class Response<T> implements Serializable {
 	 * 返回消息的序列号
 	 */
 	@ApiModelProperty("请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
+	@JsonProperty("requtest-id")
 	private String id;
 
 	/**
@@ -62,6 +64,7 @@ public class Response<T> implements Serializable {
 	 */
 	@ApiModelProperty("响应的时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@JsonProperty("response-time")
 	private Date date;
 
 	/**
@@ -196,7 +199,7 @@ public class Response<T> implements Serializable {
 	 * @return 默认的路径不存在时的返回信息
 	 */
 	public static Response<String> notFoundt() {
-		return new Response<String>(HttpStatus.NOT_FOUND.value(),Const.MSG_NOT_FOUND);
+		return new Response<String>(HttpStatus.NOT_FOUND.value(), Const.MSG_NOT_FOUND);
 	}
 
 	/**
@@ -275,12 +278,14 @@ public class Response<T> implements Serializable {
 		this.date = date;
 		return this;
 	}
-    /**
-     * 通用返回响应类的常用属性信息
-     * @author yishui
-     * @date 2018年12月19日
-     * @Version 0.0.1
-     */
+
+	/**
+	 * 通用返回响应类的常用属性信息
+	 * 
+	 * @author yishui
+	 * @date 2018年12月19日
+	 * @Version 0.0.1
+	 */
 	public static class Const {
 		/**
 		 * 200响应码对应的默认信息
@@ -332,6 +337,7 @@ public class Response<T> implements Serializable {
 		public final static int CODE_INTERNAL_SERVER_ERROR = 500;
 
 	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -395,7 +401,5 @@ public class Response<T> implements Serializable {
 	public String toString() {
 		return "Response [id=" + id + ", code=" + code + ", msg=" + msg + ", data=" + data + ", date=" + date + "]";
 	}
-
-	
 
 }
