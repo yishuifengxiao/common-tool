@@ -47,7 +47,7 @@ public final class BeanUtil {
 			throws IllegalArgumentException, IllegalAccessException, SecurityException {
 		Field[] fields = source.getClass().getDeclaredFields();
 		for (Field field : fields) {
-			if (field.getGenericType().toString().equals("class java.lang.String")) {
+			if ("class java.lang.String".equals(field.getGenericType().toString())) {
 				field.setAccessible(true);
 				Object obj = field.get(source);
 				if (obj != null && obj.equals("")) {

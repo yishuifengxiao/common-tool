@@ -10,6 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yishuifengxiao.common.tool.collections.EmptyUtil;
+
 /**
  * cookie 操作工具类
  * 
@@ -79,7 +81,8 @@ public class CookieUtil {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param name     这个是名称，不是值
+	 * @param name
+	 *            这个是名称，不是值
 	 */
 	public void removeCookie(String name) {
 		if (null == name) {
@@ -142,14 +145,15 @@ public class CookieUtil {
 	 * @return
 	 */
 	public Map<String, Cookie> getCookieMap() {
-		Map<String, Cookie> cookieMap = new HashMap<>();
+
 		Cookie[] cookies = request.getCookies();
-		if (cookies != null && cookies.length > 1) {
+		if (EmptyUtil.notEmpty(cookies)) {
+			Map<String, Cookie> cookieMap = new HashMap<>(cookies.length);
 			for (Cookie cookie : cookies) {
 				cookieMap.put(cookie.getName(), cookie);
 			}
 		}
-		return cookieMap;
+		return null;
 	}
 
 	public HttpServletRequest getRequest() {

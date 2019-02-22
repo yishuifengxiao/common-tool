@@ -23,10 +23,14 @@ public class IdWorker {
 	private long workerIdBits = 5L;
 	private long datacenterIdBits = 5L;
 
-	// 这个是二进制运算，就是 5 bit最多只能有31个数字，也就是说机器id最多只能是32以内
+	/**
+	 * 这个是二进制运算，就是 5 bit最多只能有31个数字，也就是说机器id最多只能是32以内
+	 */
 	private long maxWorkerId = -1L ^ (-1L << workerIdBits);
 
-	// 这个是一个意思，就是 5 bit最多只能有31个数字，机房id最多只能是32以内
+	/**
+	 * 这个是一个意思，就是 5 bit最多只能有31个数字，机房id最多只能是32以内
+	 */
 	private long maxDatacenterId = -1L ^ (-1L << datacenterIdBits);
 	private long sequenceBits = 12L;
 	private long workerIdShift = sequenceBits;
@@ -38,7 +42,9 @@ public class IdWorker {
 	public IdWorker(long workerId, long datacenterId, long sequence) {
 		// sanity check for workerId
 
-		// 这儿不就检查了一下，要求就是你传递进来的机房id和机器id不能超过32，不能小于0
+		/**
+		 * 这儿不就检查了一下，要求就是你传递进来的机房id和机器id不能超过32，不能小于0
+		 */
 		if ((workerId > maxWorkerId) || (workerId < 0)) {
 			throw new IllegalArgumentException(
 					String.format("worker Id can't be greater than %d or less than 0", maxWorkerId));
@@ -73,7 +79,9 @@ public class IdWorker {
 	}
 
 	public synchronized long nextId() {
-		// 这儿就是获取当前时间戳，单位是毫秒
+		/**
+		 * 这儿就是获取当前时间戳，单位是毫秒
+		 */
 		long timestamp = timeGen();
 
 		if (timestamp < lastTimestamp) {
