@@ -50,6 +50,22 @@ public class RequestUtil {
 		return value;
 	}
 
+	/**
+	 * 将session域里面的属性放置到请求域中，并返回对应的值
+	 * 
+	 * @param name
+	 *            属性的名字
+	 * @return 属性的值
+	 */
+	public Object session2Attribute(String name) {
+		Object value = request.getSession().getAttribute(name);
+		if (null != value) {
+			request.setAttribute(name, value);
+			request.getSession().removeAttribute(name);
+		}
+		return value;
+	}
+
 	private RequestUtil(HttpServletRequest request) {
 		this.request = request;
 	}
