@@ -9,7 +9,6 @@ import java.util.Date;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yishuifengxiao.common.tool.random.UID;
 
@@ -25,7 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @date 2018年7月26日
  * @Version 0.0.1
  */
-@JsonInclude(JsonInclude.Include.NON_NULL)
+// @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "通用返回实体类", description = "用于所有接口的通用返回数据")
 public class Response<T> implements Serializable {
 
@@ -68,49 +67,40 @@ public class Response<T> implements Serializable {
 	private Date date;
 
 	/**
+	 * 默认的请求成功时的返回信息(200响应码)
 	 * 
-	 */
-	public Response() {
-
-	}
-
-	/**
-	 * @param id
-	 * @param code
-	 * @param msg
 	 * @param data
-	 * @param date
+	 *            请求成功时返回的数据信息
+	 * @return 请求成功的返回信息
 	 */
-	public Response(String id, int code, String msg, T data, Date date) {
-		this.id = id;
-		this.code = code;
-		this.msg = msg;
-		this.data = data;
-		this.date = date;
+	public static Response<Iterable<?>> of(Iterable<?> data) {
+		return new Response<>(HttpStatus.OK.value(), Const.MSG_OK, data);
 	}
 
 	/**
-	 * @param code
-	 * @param msg
+	 * 默认的请求成功时的返回信息(200响应码)
+	 * 
 	 * @param data
+	 *            请求成功时返回的数据信息
+	 * @return 请求成功的返回信息
 	 */
-	public Response(int code, String msg, T data) {
-		this.id = UID.uuid();
-		this.code = code;
-		this.msg = msg;
-		this.data = data;
-		this.date = new Date();
+	public static Response<?> of(Object data) {
+		return new Response<>(HttpStatus.OK.value(), Const.MSG_OK, data);
 	}
 
 	/**
+	 * 构建一个通用的响应对象
+	 * 
 	 * @param code
+	 *            响应码
 	 * @param msg
+	 *            响应的基本信息
+	 * @param data
+	 *            响应的数据信息
+	 * @return 响应对象
 	 */
-	public Response(int code, String msg) {
-		this.id = UID.uuid();
-		this.code = code;
-		this.msg = msg;
-		this.date = new Date();
+	public static Response<?> of(int code, String msg, Iterable<?> data) {
+		return new Response<>(code, msg, data);
 	}
 
 	/**
@@ -232,6 +222,52 @@ public class Response<T> implements Serializable {
 	 */
 	public static Response<String> notFoundt(String msg) {
 		return new Response<String>(HttpStatus.NOT_FOUND.value(), msg);
+	}
+
+	/**
+	 * 
+	 */
+	public Response() {
+
+	}
+
+	/**
+	 * @param id
+	 * @param code
+	 * @param msg
+	 * @param data
+	 * @param date
+	 */
+	public Response(String id, int code, String msg, T data, Date date) {
+		this.id = id;
+		this.code = code;
+		this.msg = msg;
+		this.data = data;
+		this.date = date;
+	}
+
+	/**
+	 * @param code
+	 * @param msg
+	 * @param data
+	 */
+	public Response(int code, String msg, T data) {
+		this.id = UID.uuid();
+		this.code = code;
+		this.msg = msg;
+		this.data = data;
+		this.date = new Date();
+	}
+
+	/**
+	 * @param code
+	 * @param msg
+	 */
+	public Response(int code, String msg) {
+		this.id = UID.uuid();
+		this.code = code;
+		this.msg = msg;
+		this.date = new Date();
 	}
 
 	public String getId() {
