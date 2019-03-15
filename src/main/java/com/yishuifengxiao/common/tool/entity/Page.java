@@ -7,6 +7,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.data.domain.PageImpl;
+
 import com.github.pagehelper.PageInfo;
 
 import io.swagger.annotations.ApiModel;
@@ -61,6 +63,7 @@ public class Page<T> implements Serializable {
 	 * @return 自定义分页对象
 	 */
 	public synchronized static Page<?> of(PageInfo<?> page) {
+		page = page == null ? PageInfo.of(new ArrayList<>()) : page;
 		return new Page<>(page.getPageSize(), page.getPageNum(), page.getList(), page.getPages(), page.getTotal());
 
 	}
@@ -73,6 +76,7 @@ public class Page<T> implements Serializable {
 	 * @return 自定义分页对象
 	 */
 	public synchronized static Page<?> of(org.springframework.data.domain.Page<?> page) {
+		page = page == null ? new PageImpl<>(new ArrayList<>()) : page;
 		return new Page<>(page.getSize(), page.getNumber() + 1, page.getContent(), page.getTotalPages(),
 				page.getTotalElements());
 	}
