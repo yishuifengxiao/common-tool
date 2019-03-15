@@ -30,16 +30,16 @@ public class Page<T> implements Serializable {
 	private static final long serialVersionUID = 1466782682580092020L;
 
 	@ApiModelProperty("分页大小")
-	private Integer pageSize;
+	private Long pageSize;
 
 	@ApiModelProperty("当前页页码(从1开始)")
-	private Integer pageNum;
+	private Long pageNum;
 
 	@ApiModelProperty("当前分页里的数据")
 	private List<T> data;
 
 	@ApiModelProperty("总的分页数")
-	private Integer totalPage;
+	private Long totalPage;
 
 	@ApiModelProperty("总的记录数")
 	private Long total;
@@ -52,7 +52,7 @@ public class Page<T> implements Serializable {
 	 */
 	public static <T> Page<T> of(List<T> data) {
 		data = data == null ? new ArrayList<>() : data;
-		return new Page<>(data.size(), 1, data, 1, data.size() + 0L);
+		return new Page<>(data.size() + 0L, 1L, data, 1L, data.size() + 0L);
 	}
 
 	/**
@@ -64,7 +64,8 @@ public class Page<T> implements Serializable {
 	 */
 	public synchronized static <T> Page<T> of(PageInfo<T> page) {
 		page = page == null ? PageInfo.of(new ArrayList<>()) : page;
-		return new Page<>(page.getPageSize(), page.getPageNum(), page.getList(), page.getPages(), page.getTotal());
+		return new Page<>(page.getPageSize() + 0L, page.getPageNum() + 0L, page.getList(), page.getPages() + 0L,
+				page.getTotal());
 
 	}
 
@@ -77,7 +78,7 @@ public class Page<T> implements Serializable {
 	 */
 	public synchronized static <T> Page<T> of(org.springframework.data.domain.Page<T> page) {
 		page = page == null ? new PageImpl<>(new ArrayList<>()) : page;
-		return new Page<>(page.getSize(), page.getNumber() + 1, page.getContent(), page.getTotalPages(),
+		return new Page<>(page.getSize() + 0L, page.getNumber() + 1L, page.getContent(), page.getTotalPages() + 0L,
 				page.getTotalElements());
 	}
 
@@ -96,25 +97,25 @@ public class Page<T> implements Serializable {
 	 *            总的记录数
 	 * @return
 	 */
-	public static <T> Page<T> of(Integer pageSize, Integer pageNum, List<T> data, Integer totalPage, Long total) {
+	public static <T> Page<T> of(Long pageSize, Long pageNum, List<T> data, Long totalPage, Long total) {
 
 		return new Page<>(pageSize, pageNum, data, totalPage, total);
 	}
 
-	public Integer getPageSize() {
+	public Long getPageSize() {
 		return pageSize;
 	}
 
-	public Page<T> setPageSize(Integer pageSize) {
+	public Page<T> setPageSize(Long pageSize) {
 		this.pageSize = pageSize;
 		return this;
 	}
 
-	public Integer getPageNum() {
+	public Long getPageNum() {
 		return pageNum;
 	}
 
-	public Page<T> setPageNum(Integer pageNum) {
+	public Page<T> setPageNum(Long pageNum) {
 		this.pageNum = pageNum;
 		return this;
 	}
@@ -137,7 +138,7 @@ public class Page<T> implements Serializable {
 		return this;
 	}
 
-	public Page(Integer pageSize, Integer pageNum, List<T> data, Integer totalPage, Long total) {
+	public Page(Long pageSize, Long pageNum, List<T> data, Long totalPage, Long total) {
 		this.pageSize = pageSize;
 		this.pageNum = pageNum;
 		this.data = data;
