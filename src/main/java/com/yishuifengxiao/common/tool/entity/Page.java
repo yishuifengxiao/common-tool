@@ -50,7 +50,7 @@ public class Page<T> implements Serializable {
 	 * @param data
 	 * @return
 	 */
-	public static Page<?> of(List<?> data) {
+	public static <T> Page<T> of(List<T> data) {
 		data = data == null ? new ArrayList<>() : data;
 		return new Page<>(data.size(), 1, data, 1, data.size() + 0L);
 	}
@@ -62,7 +62,7 @@ public class Page<T> implements Serializable {
 	 *            mybatis的分页对象
 	 * @return 自定义分页对象
 	 */
-	public synchronized static Page<?> of(PageInfo<?> page) {
+	public synchronized static <T> Page<T> of(PageInfo<T> page) {
 		page = page == null ? PageInfo.of(new ArrayList<>()) : page;
 		return new Page<>(page.getPageSize(), page.getPageNum(), page.getList(), page.getPages(), page.getTotal());
 
@@ -75,7 +75,7 @@ public class Page<T> implements Serializable {
 	 *            spring data的分页对象
 	 * @return 自定义分页对象
 	 */
-	public synchronized static Page<?> of(org.springframework.data.domain.Page<?> page) {
+	public synchronized static <T> Page<T> of(org.springframework.data.domain.Page<T> page) {
 		page = page == null ? new PageImpl<>(new ArrayList<>()) : page;
 		return new Page<>(page.getSize(), page.getNumber() + 1, page.getContent(), page.getTotalPages(),
 				page.getTotalElements());
@@ -96,7 +96,7 @@ public class Page<T> implements Serializable {
 	 *            总的记录数
 	 * @return
 	 */
-	public static Page<?> of(Integer pageSize, Integer pageNum, List<?> data, Integer totalPage, Long total) {
+	public static <T> Page<T> of(Integer pageSize, Integer pageNum, List<T> data, Integer totalPage, Long total) {
 
 		return new Page<>(pageSize, pageNum, data, totalPage, total);
 	}

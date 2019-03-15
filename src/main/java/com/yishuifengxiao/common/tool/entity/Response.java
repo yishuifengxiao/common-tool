@@ -67,28 +67,6 @@ public class Response<T> implements Serializable {
 	private Date date;
 
 	/**
-	 * 默认的请求成功时的返回信息(200响应码)
-	 * 
-	 * @param data
-	 *            请求成功时返回的数据信息
-	 * @return 请求成功的返回信息
-	 */
-	public static Response<Iterable<?>> of(Iterable<?> data) {
-		return new Response<>(HttpStatus.OK.value(), Const.MSG_OK, data);
-	}
-
-	/**
-	 * 默认的请求成功时的返回信息(200响应码)
-	 * 
-	 * @param data
-	 *            请求成功时返回的数据信息
-	 * @return 请求成功的返回信息
-	 */
-	public static Response<?> of(Object data) {
-		return new Response<>(HttpStatus.OK.value(), Const.MSG_OK, data);
-	}
-
-	/**
 	 * 构建一个通用的响应对象
 	 * 
 	 * @param code
@@ -99,8 +77,19 @@ public class Response<T> implements Serializable {
 	 *            响应的数据信息
 	 * @return 响应对象
 	 */
-	public static Response<?> of(int code, String msg, Iterable<?> data) {
+	public static <T> Response<T> of(int code, String msg, T data) {
 		return new Response<>(code, msg, data);
+	}
+
+	/**
+	 * 默认的请求成功时的返回信息(200响应码)
+	 * 
+	 * @param data
+	 *            请求成功时返回的数据信息
+	 * @return 请求成功的返回信息
+	 */
+	public static <T> Response<T> suc(T data) {
+		return new Response<>(HttpStatus.OK.value(), Const.MSG_OK, data);
 	}
 
 	/**
