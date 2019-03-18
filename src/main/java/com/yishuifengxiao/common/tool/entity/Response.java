@@ -57,6 +57,7 @@ public class Response<T> implements Serializable {
 	 * 返回的数据信息
 	 */
 	@ApiModelProperty("响应的数据信息，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
+	@JsonProperty("result")
 	private T data;
 	/**
 	 * 返回数据的时间
