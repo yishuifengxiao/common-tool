@@ -3,8 +3,11 @@ package com.yishuifengxiao.common.tool.encoder;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Md5加密工具类
+ * 
  * @author yishui
  * @date 2018年7月27日
  * @Version 0.0.1
@@ -16,9 +19,9 @@ public class Md5Util {
 	 * 
 	 * @param str
 	 *            传入要加密的字符串
-	 * @return MD5加密后的字符串
+	 * @return MD5加密后的字符串(32位)
 	 */
-	public static String getMd5(String str) {
+	public static String md5(String str) {
 		try {
 			// 生成一个MD5加密计算摘要
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -34,14 +37,28 @@ public class Md5Util {
 	}
 
 	/**
+	 * 对字符串md5加密(小写+字母)
+	 * 
+	 * @param str
+	 *            传入要加密的字符串
+	 * @return MD5加密后的字符串(16位)
+	 */
+	public static String md5Short(String str) {
+		if (StringUtils.isBlank(str)) {
+			return null;
+		}
+		return StringUtils.substring(md5(str), 8, 24);
+	}
+
+	/**
 	 * 对字符串md5加密(大写+数字)
 	 * 
 	 * @param str
 	 *            传入要加密的字符串
-	 * @return MD5加密后的字符串
+	 * @return MD5加密后的字符串 (32位)
 	 */
 
-	public static String md5(String s) {
+	public static String md5UpperCase(String s) {
 		char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
 		try {
@@ -69,7 +86,7 @@ public class Md5Util {
 	}
 
 	public static void main(String[] args) {
-		String md52 = getMd5("123456");
+		String md52 = md5Short("123456");
 		System.out.println(md52);
 	}
 

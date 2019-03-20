@@ -20,7 +20,7 @@ public class Md5Encoder implements Encoder {
 	@Override
 	public String encode(String rawPassword) {
 		Assert.notNull(rawPassword, "待加密的内容不能为空");
-		return Md5Util.getMd5(rawPassword);
+		return Md5Util.md5Short(rawPassword);
 	}
 
 	
