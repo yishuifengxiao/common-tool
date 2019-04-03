@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2018年7月27日
  * @Version 0.0.1
  */
-public class Md5Util {
+public class Md5 {
 
 	/**
 	 * 对字符串md5加密(小写+字母)
