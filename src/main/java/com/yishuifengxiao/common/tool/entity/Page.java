@@ -102,6 +102,37 @@ public class Page<T> implements Serializable {
 		return new Page<>(pageSize, pageNum, data, totalPage, total);
 	}
 
+	/**
+	 * 生成分页对象
+	 * 
+	 * @param data
+	 *            当前页数据
+	 * @param pageSize
+	 *            分页大小
+	 * @param pageNum
+	 *            当前页页码
+	 * @param total
+	 *            总的记录数
+	 * @return
+	 */
+	public static <T> Page<T> of(List<T> data, Long pageSize, Long pageNum, Long total) {
+		long totalPage = (total % pageSize == 0) ? (total / pageSize) : (total / pageSize + 1);
+		return new Page<>(pageSize, pageNum, data, totalPage, total);
+	}
+
+	/**
+	 * 根据分页信息来源对象生成分页对象
+	 * 
+	 * @param data
+	 *            当前页数据
+	 * @param source
+	 *            分页信息来源对象
+	 * @return
+	 */
+	public static <T, U> Page<T> of(List<T> data, Page<U> source) {
+		return new Page<>(source.getPageSize(), source.getPageNum(), data, source.getTotalPage(), source.getTotal());
+	}
+
 	public Long getPageSize() {
 		return pageSize;
 	}
@@ -136,6 +167,14 @@ public class Page<T> implements Serializable {
 	public Page<T> setData(List<T> data) {
 		this.data = data;
 		return this;
+	}
+
+	public Long getTotalPage() {
+		return totalPage;
+	}
+
+	public void setTotalPage(Long totalPage) {
+		this.totalPage = totalPage;
 	}
 
 	public Page(Long pageSize, Long pageNum, List<T> data, Long totalPage, Long total) {
