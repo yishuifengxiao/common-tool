@@ -3,9 +3,15 @@
  */
 package com.yishuifengxiao.common.tool.bean;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 
 import org.apache.commons.text.StringEscapeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cglib.beans.BeanCopier;
 
 /**
@@ -16,6 +22,8 @@ import org.springframework.cglib.beans.BeanCopier;
  * @Version 0.0.1
  */
 public final class BeanUtil {
+	private final static Logger log = LoggerFactory.getLogger(BeanUtil.class);
+
 	/**
 	 * 将源对象里属性值复制给目标对象
 	 * 
@@ -62,6 +70,79 @@ public final class BeanUtil {
 			}
 		}
 		return source;
+	}
+
+	/**
+	 * 将Java对象序列化为二进制数据
+	 * 
+	 * @param obj
+	 *            需要序列化的的对象
+	 * @return 二进制数据
+	 */
+	public static byte[] objectToByte(Object obj) {
+		byte[] bytes = null;
+		try {
+			// object to bytearray
+			ByteArrayOutputStream bo = new ByteArrayOutputStream();
+			ObjectOutputStream oo = new ObjectOutputStream(bo);
+			oo.writeObject(obj);
+
+			bytes = bo.toByteArray();
+
+			bo.close();
+			oo.close();
+		} catch (Exception e) {
+			log.info("====================> 对象序列化出现问题，出现问题的原因为 {}", e.getMessage());
+		}
+		return bytes;
+	}
+
+	/**
+	 * 将序列化化后的二进制数据反序列化为对象
+	 * 
+	 * @param bytes
+	 *            序列化化后的二进制数据
+	 * @return 对象
+	 */
+	public static Object byteToObject(byte[] bytes) {
+		Object obj = null;
+		try {
+			// bytearray to object
+			ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
+			ObjectInputStream oi = new ObjectInputStream(bi);
+			obj = oi.readObject();
+			bi.close();
+			oi.close();
+		} catch (Exception e) {
+			log.info("====================> 对象反序列化出现问题，出现问题的原因为 {}", e.getMessage());
+		}
+		return obj;
+	}
+
+	/**
+	 * 将序列化化后的二进制数据反序列化为对象
+	 * 
+	 * @param t
+	 *            希望序列化成的数据类型，不能为空
+	 * 
+	 * @param bytes
+	 *            序列化化后的二进制数据
+	 * @return 对象
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T byteToObject(T t, byte[] bytes) {
+
+		try {
+			// bytearray to object
+			ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
+			ObjectInputStream oi = new ObjectInputStream(bi);
+			t = (T) oi.readObject();
+			bi.close();
+			oi.close();
+		} catch (Exception e) {
+			log.info("====================> 对象反序列化出现问题，出现问题的原因为 {}", e.getMessage());
+		}
+		return t;
 	}
 
 }
