@@ -129,7 +129,7 @@ public class Page<T> implements Serializable {
 	 *            分页信息来源对象
 	 * @return
 	 */
-	public static <T, U> Page<T> of(List<T> data, Page<U> source) {
+	public static <T, U> Page<T> of(Page<U> source,List<T> data) {
 		return new Page<>(source.getPageSize(), source.getPageNum(), data, source.getTotalPage(), source.getTotal());
 	}
 
