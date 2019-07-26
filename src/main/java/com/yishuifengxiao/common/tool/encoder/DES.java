@@ -205,8 +205,8 @@ public class DES {
 
 	// 测试用例，不需要传递任何参数，直接执行即可。
 	public static void main(String[] args) {
-		String basestr = "sfsfsfsf";
-		String str1 = encrypt("sdd", basestr);
+		String basestr = "zczc123456";
+		String str1 = encrypt(basestr);
 
 		System.out.println("原始值: " + basestr);
 		System.out.println("加密后: " + str1);

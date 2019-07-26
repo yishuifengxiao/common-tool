@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
 import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cglib.beans.BeanCopier;
+import org.springframework.beans.BeanUtils;
 
 /**
  * 对象转换类
@@ -27,25 +27,23 @@ public final class BeanUtil {
 	/**
 	 * 将源对象里属性值复制给目标对象
 	 * 
-	 * @param source
-	 *            源对象
-	 * @param target
-	 *            目标对象
-	 * @param converter
-	 *            目标对象
+	 * @param source    源对象
+	 * @param target    目标对象
+	 * @param converter 目标对象
 	 * @return
 	 */
 	public static <S, T> T copy(S source, T target) {
-		BeanCopier.create(source.getClass(), target.getClass(), false).copy(source, target, null);
+		if (source == null || target == null) {
+			return null;
+		}
+		BeanUtils.copyProperties(source, target);
 		return target;
-
 	}
 
 	/**
 	 * 去除对象里非空属性之外的属性和制表符
 	 * 
-	 * @param source
-	 *            原始对象
+	 * @param source 原始对象
 	 * @return 过滤后的对象
 	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
@@ -75,8 +73,7 @@ public final class BeanUtil {
 	/**
 	 * 将Java对象序列化为二进制数据
 	 * 
-	 * @param obj
-	 *            需要序列化的的对象
+	 * @param obj 需要序列化的的对象
 	 * @return 二进制数据
 	 */
 	public static byte[] objectToByte(Object obj) {
@@ -92,7 +89,7 @@ public final class BeanUtil {
 			bo.close();
 			oo.close();
 		} catch (Exception e) {
-			log.info("====================> 对象序列化出现问题，出现问题的原因为 {}", e.getMessage());
+			log.info(" 对象序列化出现问题，出现问题的原因为 {}", e.getMessage());
 		}
 		return bytes;
 	}
@@ -100,8 +97,7 @@ public final class BeanUtil {
 	/**
 	 * 将序列化化后的二进制数据反序列化为对象
 	 * 
-	 * @param bytes
-	 *            序列化化后的二进制数据
+	 * @param bytes 序列化化后的二进制数据
 	 * @return 对象
 	 */
 	public static Object byteToObject(byte[] bytes) {
@@ -114,7 +110,7 @@ public final class BeanUtil {
 			bi.close();
 			oi.close();
 		} catch (Exception e) {
-			log.info("====================> 对象反序列化出现问题，出现问题的原因为 {}", e.getMessage());
+			log.info("对象反序列化出现问题，出现问题的原因为 {}", e.getMessage());
 		}
 		return obj;
 	}
@@ -122,11 +118,9 @@ public final class BeanUtil {
 	/**
 	 * 将序列化化后的二进制数据反序列化为对象
 	 * 
-	 * @param t
-	 *            希望序列化成的数据类型，不能为空
+	 * @param t     希望序列化成的数据类型，不能为空
 	 * 
-	 * @param bytes
-	 *            序列化化后的二进制数据
+	 * @param bytes 序列化化后的二进制数据
 	 * @return 对象
 	 */
 	@SuppressWarnings("unchecked")
@@ -140,7 +134,7 @@ public final class BeanUtil {
 			bi.close();
 			oi.close();
 		} catch (Exception e) {
-			log.info("====================> 对象反序列化出现问题，出现问题的原因为 {}", e.getMessage());
+			log.info(" 对象反序列化出现问题，出现问题的原因为 {}", e.getMessage());
 		}
 		return t;
 	}
