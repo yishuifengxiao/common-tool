@@ -53,7 +53,7 @@
 		<cglib.version>3.2.9</cglib.version>
 		<pagehelper.version>5.1.4</pagehelper.version>
 		<commons-text.version>1.6</commons-text.version>
-		<swagger.v3.version>1.5.21</swagger.v3.version>
+		<swagger.v3.version>1.5.22</swagger.v3.version>
 		<commons-collections4.version>4.3</commons-collections4.version>
 	</properties>
 
