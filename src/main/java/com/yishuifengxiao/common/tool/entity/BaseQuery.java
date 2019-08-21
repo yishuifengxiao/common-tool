@@ -54,10 +54,8 @@ public class BaseQuery implements Serializable {
 
 	/**
 	 * 
-	 * @param pageSize
-	 *            分页大小
-	 * @param pageNum
-	 *            当前页页码
+	 * @param pageSize 分页大小
+	 * @param pageNum  当前页页码
 	 */
 	public BaseQuery(Integer pageSize, Integer pageNum) {
 		this.pageSize = pageSize;
@@ -70,7 +68,13 @@ public class BaseQuery implements Serializable {
 
 	@Override
 	public String toString() {
-		return "BaseQuery [pageSize=" + pageSize + ", pageNum=" + pageNum + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("BaseQuery [pageSize=");
+		builder.append(pageSize);
+		builder.append(", pageNum=");
+		builder.append(pageNum);
+		builder.append("]");
+		return builder.toString();
 	}
 
 	@Override
@@ -103,7 +107,5 @@ public class BaseQuery implements Serializable {
 			return false;
 		return true;
 	}
-	
-	
 
 }

@@ -39,7 +39,7 @@ public class Page<T> implements Serializable {
 	private List<T> data;
 
 	@ApiModelProperty("总的分页数")
-	private Long totalPage;
+	private Long pages;
 
 	@ApiModelProperty("总的记录数")
 	private Long total;
@@ -58,8 +58,7 @@ public class Page<T> implements Serializable {
 	/**
 	 * 根据mybatis的分页对象构建一个的自定义分页对象
 	 * 
-	 * @param page
-	 *            mybatis的分页对象
+	 * @param page mybatis的分页对象
 	 * @return 自定义分页对象
 	 */
 	public synchronized static <T> Page<T> of(PageInfo<T> page) {
@@ -72,8 +71,7 @@ public class Page<T> implements Serializable {
 	/**
 	 * 根据spring data的分页对象构造一个分页对象
 	 * 
-	 * @param page
-	 *            spring data的分页对象
+	 * @param page spring data的分页对象
 	 * @return 自定义分页对象
 	 */
 	public synchronized static <T> Page<T> of(org.springframework.data.domain.Page<T> page) {
@@ -85,16 +83,11 @@ public class Page<T> implements Serializable {
 	/**
 	 * 生成分页对象
 	 * 
-	 * @param pageSize
-	 *            分页大小
-	 * @param pageNum
-	 *            当前页页码
-	 * @param data
-	 *            当前页数据
-	 * @param totalPage
-	 *            总的页码数
-	 * @param total
-	 *            总的记录数
+	 * @param pageSize  分页大小
+	 * @param pageNum   当前页页码
+	 * @param data      当前页数据
+	 * @param totalPage 总的页码数
+	 * @param total     总的记录数
 	 * @return
 	 */
 	public static <T> Page<T> of(Long pageSize, Long pageNum, List<T> data, Long totalPage, Long total) {
@@ -105,14 +98,10 @@ public class Page<T> implements Serializable {
 	/**
 	 * 生成分页对象
 	 * 
-	 * @param data
-	 *            当前页数据
-	 * @param pageSize
-	 *            分页大小
-	 * @param pageNum
-	 *            当前页页码
-	 * @param total
-	 *            总的记录数
+	 * @param data     当前页数据
+	 * @param pageSize 分页大小
+	 * @param pageNum  当前页页码
+	 * @param total    总的记录数
 	 * @return
 	 */
 	public static <T> Page<T> of(List<T> data, Long pageSize, Long pageNum, Long total) {
@@ -123,14 +112,12 @@ public class Page<T> implements Serializable {
 	/**
 	 * 根据分页信息来源对象生成分页对象
 	 * 
-	 * @param data
-	 *            当前页数据
-	 * @param source
-	 *            分页信息来源对象
+	 * @param data   当前页数据
+	 * @param source 分页信息来源对象
 	 * @return
 	 */
-	public static <T, U> Page<T> of(Page<U> source,List<T> data) {
-		return new Page<>(source.getPageSize(), source.getPageNum(), data, source.getTotalPage(), source.getTotal());
+	public static <T, U> Page<T> of(Page<U> source, List<T> data) {
+		return new Page<>(source.getPageSize(), source.getPageNum(), data, source.getPages(), source.getTotal());
 	}
 
 	public Long getPageSize() {
@@ -169,19 +156,19 @@ public class Page<T> implements Serializable {
 		return this;
 	}
 
-	public Long getTotalPage() {
-		return totalPage;
+	public Long getPages() {
+		return pages;
 	}
 
-	public void setTotalPage(Long totalPage) {
-		this.totalPage = totalPage;
+	public void setPages(Long pages) {
+		this.pages = pages;
 	}
 
-	public Page(Long pageSize, Long pageNum, List<T> data, Long totalPage, Long total) {
+	public Page(Long pageSize, Long pageNum, List<T> data, Long pages, Long total) {
 		this.pageSize = pageSize;
 		this.pageNum = pageNum;
 		this.data = data;
-		this.totalPage = totalPage;
+		this.pages = pages;
 		this.total = total;
 	}
 
@@ -191,8 +178,19 @@ public class Page<T> implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Page [pageSize=" + pageSize + ", pageNum=" + pageNum + ", data=" + data + ", totalPage=" + totalPage
-				+ ", total=" + total + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("Page [pageSize=");
+		builder.append(pageSize);
+		builder.append(", pageNum=");
+		builder.append(pageNum);
+		builder.append(", data=");
+		builder.append(data);
+		builder.append(", pages=");
+		builder.append(pages);
+		builder.append(", total=");
+		builder.append(total);
+		builder.append("]");
+		return builder.toString();
 	}
 
 }
