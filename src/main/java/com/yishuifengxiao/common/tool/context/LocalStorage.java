@@ -12,7 +12,7 @@ import org.springframework.util.Assert;
  * @date 2019年10月29日
  * @version 1.0.0
  */
-public class SessionStorage {
+public class LocalStorage {
 	/**
 	 * 本地线程存储
 	 */
