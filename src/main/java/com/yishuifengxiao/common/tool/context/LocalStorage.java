@@ -31,6 +31,20 @@ public class LocalStorage {
 	}
 
 	/**
+	 * 检索出对象并清除当前副本对象
+	 * 
+	 * @param key 存储的键
+	 * @return
+	 */
+	public static Object pop(String key) {
+		try {
+			return get(key);
+		} finally {
+			clear();
+		}
+	}
+
+	/**
 	 * 向本地线程副本里存储信息
 	 * 
 	 * @param key   信息的键

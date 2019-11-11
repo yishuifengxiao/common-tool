@@ -45,6 +45,36 @@ public class Page<T> implements Serializable {
 	private Long total;
 
 	/**
+	 * 判断一个分页对象是否为空
+	 * @param <T>
+	 * @param pages
+	 * @return 如果为空则返回true，否则为false
+	 */
+	public static <T> boolean isEmpty(PageInfo<T> pages) {
+
+		if (pages == null) {
+			return true;
+		}
+		if (pages.getList() == null || pages.getList().size() == 0) {
+			return true;
+		}
+		return false;
+
+	}
+	
+
+	/**
+	 * 判断是否为一个非空的分页对象
+	 * 
+	 * @param pages
+	 *            分页对象
+	 * @return 如果是空返回为false，否则为true
+	 */
+	public static <T> boolean notEmpty(PageInfo<T> pages) {
+		return !isEmpty(pages);
+	}
+
+	/**
 	 * 根据数据构造当前页为1，分页大小为数据大小的分页对象
 	 * 
 	 * @param data
