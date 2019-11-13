@@ -23,7 +23,18 @@ import io.swagger.annotations.ApiModelProperty;
  */
 @ApiModel(value = "通用分页实体类", description = "用于所有接口的通用返回数据")
 public class Page<T> implements Serializable {
-
+	/**
+	 * 默认的当前页的页码
+	 */
+	public final static int DEFAULT_PAGE_NUM = 0;
+	/**
+	 * 默认的最小页的页码
+	 */
+	public final static int MIN_PAGE_NUM = 1;
+	/**
+	 * 默认的第一个元素的索引
+	 */
+	public final static int FIRST_ELEMENT_INDEX = 0;
 	/**
 	 * 
 	 */
@@ -60,6 +71,19 @@ public class Page<T> implements Serializable {
 		}
 		return false;
 
+	}
+	
+	/**
+	 * 对页码进行减一转换
+	 * 
+	 * @param pageSize 页码
+	 * @return 当页码数小于1时，返回为0，否则为原始值减1
+	 */
+	public static int reduce(Integer pageSize) {
+		if (pageSize == null || pageSize < MIN_PAGE_NUM) {
+			return DEFAULT_PAGE_NUM;
+		}
+		return pageSize > DEFAULT_PAGE_NUM ? pageSize - MIN_PAGE_NUM : pageSize;
 	}
 	
 
