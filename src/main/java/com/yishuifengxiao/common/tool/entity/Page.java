@@ -7,10 +7,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.springframework.data.domain.PageImpl;
-
-import com.github.pagehelper.PageInfo;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -56,24 +52,6 @@ public class Page<T> implements Serializable {
 	private Long total;
 
 	/**
-	 * 判断一个分页对象是否为空
-	 * @param <T>
-	 * @param pages
-	 * @return 如果为空则返回true，否则为false
-	 */
-	public static <T> boolean isEmpty(PageInfo<T> pages) {
-
-		if (pages == null) {
-			return true;
-		}
-		if (pages.getList() == null || pages.getList().size() == 0) {
-			return true;
-		}
-		return false;
-
-	}
-	
-	/**
 	 * 对页码进行减一转换
 	 * 
 	 * @param pageSize 页码
@@ -85,18 +63,6 @@ public class Page<T> implements Serializable {
 		}
 		return pageSize > DEFAULT_PAGE_NUM ? pageSize - MIN_PAGE_NUM : pageSize;
 	}
-	
-
-	/**
-	 * 判断是否为一个非空的分页对象
-	 * 
-	 * @param pages
-	 *            分页对象
-	 * @return 如果是空返回为false，否则为true
-	 */
-	public static <T> boolean notEmpty(PageInfo<T> pages) {
-		return !isEmpty(pages);
-	}
 
 	/**
 	 * 根据数据构造当前页为1，分页大小为数据大小的分页对象
@@ -107,31 +73,6 @@ public class Page<T> implements Serializable {
 	public static <T> Page<T> of(List<T> data) {
 		data = data == null ? new ArrayList<>() : data;
 		return new Page<>(data.size() + 0L, 1L, data, 1L, data.size() + 0L);
-	}
-
-	/**
-	 * 根据mybatis的分页对象构建一个的自定义分页对象
-	 * 
-	 * @param page mybatis的分页对象
-	 * @return 自定义分页对象
-	 */
-	public synchronized static <T> Page<T> of(PageInfo<T> page) {
-		page = page == null ? PageInfo.of(new ArrayList<>()) : page;
-		return new Page<>(page.getPageSize() + 0L, page.getPageNum() + 0L, page.getList(), page.getPages() + 0L,
-				page.getTotal());
-
-	}
-
-	/**
-	 * 根据spring data的分页对象构造一个分页对象
-	 * 
-	 * @param page spring data的分页对象
-	 * @return 自定义分页对象
-	 */
-	public synchronized static <T> Page<T> of(org.springframework.data.domain.Page<T> page) {
-		page = page == null ? new PageImpl<>(new ArrayList<>()) : page;
-		return new Page<>(page.getSize() + 0L, page.getNumber() + 1L, page.getContent(), page.getTotalPages() + 0L,
-				page.getTotalElements());
 	}
 
 	/**
