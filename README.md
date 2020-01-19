@@ -55,4 +55,8 @@
 * 邮件(zhiyubujian#163.com, 把#换成@)
 * QQ: 979653327
 * 开源中国: [@止于不见](https://gitee.com/zhiyubujian)
+
+
+<a target="_blank" href="https://www.jetbrains.com/?from=common-tool"><img border="0" src="https://images.gitee.com/uploads/images/2020/0119/090541_0eb1faab_400404.png" alt="IDEA支持" title="IDEA支持"></a> 
+
   
