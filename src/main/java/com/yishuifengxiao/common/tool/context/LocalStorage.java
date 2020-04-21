@@ -31,6 +31,18 @@ public class LocalStorage {
 	}
 
 	/**
+	 * 根据键获取存储的值
+	 * 
+	 * @param key 存储的键
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T get(Class<T> clazz) {
+		Assert.notNull(clazz, "key值不能为空");
+		return (T) get(clazz.getName());
+	}
+
+	/**
 	 * 检索出对象并清除当前副本对象
 	 * 
 	 * @param key 存储的键
@@ -42,6 +54,31 @@ public class LocalStorage {
 		} finally {
 			clear();
 		}
+	}
+
+	/**
+	 * 检索出对象并清除当前副本对象
+	 * 
+	 * @param key 存储的键
+	 * @return
+	 */
+	public static <T> T pop(Class<T> clazz) {
+		try {
+			return get(clazz);
+		} finally {
+			clear();
+		}
+	}
+
+	/**
+	 * 将数据存储到本地线程副本中
+	 * 
+	 * @param <T>
+	 * @param t   要存储的数据，不能为null
+	 */
+	public static <T> void put(T t) {
+		Assert.notNull(t, "存储的值不能为空");
+		put(t.getClass().getName(), t);
 	}
 
 	/**
