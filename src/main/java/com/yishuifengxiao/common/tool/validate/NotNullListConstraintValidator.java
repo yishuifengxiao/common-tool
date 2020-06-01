@@ -9,7 +9,12 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yishuifengxiao.common.tool.collections.EmptyUtil;
-
+/**
+ * 非空校验
+ * @author yishui
+ * @date 2018年7月27日
+ * @Version 0.0.1
+ */
 @SuppressWarnings("rawtypes")
 public class NotNullListConstraintValidator implements ConstraintValidator<NotNullList, List> {
 

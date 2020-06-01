@@ -88,23 +88,30 @@ public class BaseQuery implements Serializable {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		BaseQuery other = (BaseQuery) obj;
 		if (pageNum == null) {
-			if (other.pageNum != null)
+			if (other.pageNum != null) {
 				return false;
-		} else if (!pageNum.equals(other.pageNum))
+			}
+		} else if (!pageNum.equals(other.pageNum)) {
 			return false;
+		}
 		if (pageSize == null) {
-			if (other.pageSize != null)
+			if (other.pageSize != null) {
 				return false;
-		} else if (!pageSize.equals(other.pageSize))
+			}
+		} else if (!pageSize.equals(other.pageSize)) {
 			return false;
+		}
 		return true;
 	}
 

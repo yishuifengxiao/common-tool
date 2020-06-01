@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.convert;
+package com.yishuifengxiao.common.tool.utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -65,11 +65,11 @@ public final class Base64ToImage {
 	 * @author ZHANGJL
 	 * @dateTime 2018-02-23 14:43:18
 	 */
-	public static String imageToBase64ByOnline(String imgURL) {
+	public static String imageToBase64ByOnline(String imgUrl) {
 		ByteArrayOutputStream data = new ByteArrayOutputStream();
 		try {
 			// 创建URL
-			URL url = new URL(imgURL);
+			URL url = new URL(imgUrl);
 			byte[] by = new byte[1024];
 			// 创建链接
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();

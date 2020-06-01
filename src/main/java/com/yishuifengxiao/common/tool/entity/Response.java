@@ -24,7 +24,6 @@ import io.swagger.annotations.ApiModelProperty;
  * @date 2018年7月26日
  * @Version 0.0.1
  */
-// @JsonInclude(JsonInclude.Include.NON_NULL)
 @ApiModel(value = "通用返回实体类", description = "用于所有接口的通用返回数据")
 public class Response<T> implements Serializable {
 

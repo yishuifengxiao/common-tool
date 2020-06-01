@@ -48,7 +48,7 @@ public class LocalStorage {
 	 * @param key 存储的键
 	 * @return
 	 */
-	public static Object pop(String key) {
+	public synchronized static Object pop(String key) {
 		try {
 			return get(key);
 		} finally {
@@ -62,7 +62,7 @@ public class LocalStorage {
 	 * @param key 存储的键
 	 * @return
 	 */
-	public static <T> T pop(Class<T> clazz) {
+	public synchronized static <T> T pop(Class<T> clazz) {
 		try {
 			return get(clazz);
 		} finally {
@@ -76,7 +76,7 @@ public class LocalStorage {
 	 * @param <T>
 	 * @param t   要存储的数据，不能为null
 	 */
-	public static <T> void put(T t) {
+	public synchronized static <T> void put(T t) {
 		Assert.notNull(t, "存储的值不能为空");
 		put(t.getClass().getName(), t);
 	}
@@ -87,7 +87,7 @@ public class LocalStorage {
 	 * @param key   信息的键
 	 * @param value 信息的值
 	 */
-	public static void put(String key, Object value) {
+	public synchronized static void put(String key, Object value) {
 		Assert.notNull(key, "key值不能为空");
 		Map<String, Object> map = get();
 		map.put(key, value);
@@ -98,7 +98,7 @@ public class LocalStorage {
 	 * 
 	 * @param key 信息的键
 	 */
-	public static void remove(String key) {
+	public synchronized static void remove(String key) {
 		Assert.notNull(key, "key值不能为空");
 		Map<String, Object> map = get();
 		map.put(key, null);
@@ -108,7 +108,7 @@ public class LocalStorage {
 	/**
 	 * 清空本地线程副本
 	 */
-	public static void clear() {
+	public synchronized static void clear() {
 		CONTEXT_HOLLDER.remove();
 	}
 

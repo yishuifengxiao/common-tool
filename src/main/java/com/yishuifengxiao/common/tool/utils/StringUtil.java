@@ -20,10 +20,11 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String toLowerCaseFirstOne(String s) {
-		if (Character.isLowerCase(s.charAt(0)))
+		if (Character.isLowerCase(s.charAt(0))) {
 			return s;
-		else
+		} else {
 			return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
+		}
 	}
 
 	/**
@@ -34,10 +35,11 @@ public class StringUtil {
 	 * @return
 	 */
 	public static String toUpperCaseFirstOne(String s) {
-		if (Character.isUpperCase(s.charAt(0)))
+		if (Character.isUpperCase(s.charAt(0))) {
 			return s;
-		else
+		} else {
 			return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
+		}
 	}
 
 }
