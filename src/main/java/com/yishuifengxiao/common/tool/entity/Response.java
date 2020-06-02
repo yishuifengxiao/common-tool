@@ -97,8 +97,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 请求成功的返回信息
 	 */
-	public static Response<String> suc() {
-		return new Response<String>(HttpStatus.OK.value(), Const.MSG_OK);
+	public static Response<Object> suc() {
+		return new Response<Object>(HttpStatus.OK.value(), Const.MSG_OK);
 	}
 
 	/**
@@ -108,8 +108,8 @@ public class Response<T> implements Serializable {
 	 *            请求成功时返回的基本信息
 	 * @return 请求成功的返回信息
 	 */
-	public static Response<String> suc(String msg) {
-		return new Response<String>(HttpStatus.OK.value(), msg);
+	public static Response<Object> suc(String msg) {
+		return new Response<Object>(HttpStatus.OK.value(), msg);
 	}
 
 	/**
@@ -117,8 +117,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 参数有误时返回信息
 	 */
-	public static Response<String> badParam() {
-		return new Response<String>(HttpStatus.BAD_REQUEST.value(), Const.MSG_BAD_REQUEST);
+	public static Response<Object> badParam() {
+		return new Response<Object>(HttpStatus.BAD_REQUEST.value(), Const.MSG_BAD_REQUEST);
 	}
 
 	/**
@@ -128,8 +128,8 @@ public class Response<T> implements Serializable {
 	 *            参数有误时返回的基本信息
 	 * @return 参数有误时返回信息
 	 */
-	public static Response<String> badParam(String msg) {
-		return new Response<String>(HttpStatus.BAD_REQUEST.value(), msg);
+	public static Response<Object> badParam(String msg) {
+		return new Response<Object>(HttpStatus.BAD_REQUEST.value(), msg);
 	}
 
 	/**
@@ -137,8 +137,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 资源未授权的返回信息
 	 */
-	public static Response<String> unAuth() {
-		return new Response<String>(HttpStatus.UNAUTHORIZED.value(), Const.MSG_UNAUTHORIZED);
+	public static Response<Object> unAuth() {
+		return new Response<Object>(HttpStatus.UNAUTHORIZED.value(), Const.MSG_UNAUTHORIZED);
 	}
 
 	/**
@@ -148,8 +148,8 @@ public class Response<T> implements Serializable {
 	 *            资源未授权的返回信息的基本信息
 	 * @return 资源未授权的返回信息
 	 */
-	public static Response<String> unAuth(String msg) {
-		return new Response<String>(HttpStatus.UNAUTHORIZED.value(), msg);
+	public static Response<Object> unAuth(String msg) {
+		return new Response<Object>(HttpStatus.UNAUTHORIZED.value(), msg);
 	}
 
 	/**
@@ -157,8 +157,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 无权访问访问时的信息
 	 */
-	public static Response<String> notAllow() {
-		return new Response<String>(HttpStatus.FORBIDDEN.value(), Const.MSG_FORBIDDEN);
+	public static Response<Object> notAllow() {
+		return new Response<Object>(HttpStatus.FORBIDDEN.value(), Const.MSG_FORBIDDEN);
 	}
 
 	/**
@@ -168,8 +168,8 @@ public class Response<T> implements Serializable {
 	 *            参数有误时返回的基本信息
 	 * @return 无权访问访问时的信息
 	 */
-	public static Response<String> notAllow(String msg) {
-		return new Response<String>(HttpStatus.FORBIDDEN.value(), msg);
+	public static Response<Object> notAllow(String msg) {
+		return new Response<Object>(HttpStatus.FORBIDDEN.value(), msg);
 	}
 
 	/**
@@ -177,8 +177,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 默认的路径不存在时的返回信息
 	 */
-	public static Response<String> notFoundt() {
-		return new Response<String>(HttpStatus.NOT_FOUND.value(), Const.MSG_NOT_FOUND);
+	public static Response<Object> notFoundt() {
+		return new Response<Object>(HttpStatus.NOT_FOUND.value(), Const.MSG_NOT_FOUND);
 	}
 
 	/**
@@ -186,8 +186,8 @@ public class Response<T> implements Serializable {
 	 * 
 	 * @return 服务器内部异常500时的返回信息
 	 */
-	public static Response<String> error() {
-		return new Response<String>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR);
+	public static Response<Object> error() {
+		return new Response<Object>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR);
 	}
 
 	/**
@@ -198,8 +198,8 @@ public class Response<T> implements Serializable {
 	 * @return 服务器内部异常500时的返回信息
 	 */
 
-	public static Response<String> error(String msg) {
-		return new Response<String>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg);
+	public static Response<Object> error(String msg) {
+		return new Response<Object>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg);
 	}
 
 	/**
@@ -209,8 +209,8 @@ public class Response<T> implements Serializable {
 	 *            路径不存在时返回的基本信息
 	 * @return 默认的路径不存在时的返回信息
 	 */
-	public static Response<String> notFoundt(String msg) {
-		return new Response<String>(HttpStatus.NOT_FOUND.value(), msg);
+	public static Response<Object> notFoundt(String msg) {
+		return new Response<Object>(HttpStatus.NOT_FOUND.value(), msg);
 	}
 
 	/**
