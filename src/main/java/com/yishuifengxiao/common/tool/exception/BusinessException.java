@@ -5,6 +5,7 @@ package com.yishuifengxiao.common.tool.exception;
 
 /**
  * 业务类异常
+ * 
  * @author yishui
  * @date 2018年12月27日
  * @version 0.0.1
