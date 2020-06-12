@@ -1,6 +1,12 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import java.time.LocalDate;
+
 import org.apache.commons.lang3.StringUtils;
+
+import com.yishuifengxiao.common.tool.exception.ValidateException;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 身份证号校验工具<br/>
@@ -10,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2018年12月11日
  * @Version 0.0.1
  */
+@Slf4j
 public class CertNoUtil {
 
 	// 每位加权因子
@@ -20,13 +27,17 @@ public class CertNoUtil {
 	private final static int LENGTH_LONG_IDCARD = 18;
 
 	/**
-	 * 校验身份证号的合法性
+	 * 校验身份证号的合法性<br/>
+	 * 非完全校验，未校验数据内容是否正确
 	 * 
 	 * @param idcard 身份证号
 	 * @return true表示合法，false不合法
 	 */
 	public synchronized static boolean isValid(String idcard) { // 非18位为假
-		if (StringUtils.length(idcard) != LENGTH_LONG_IDCARD) {
+		// 判断出生日期是否正确
+		try {
+			getBirthday(idcard);
+		} catch (ValidateException e) {
 			return false;
 		}
 		// 获取前17位
@@ -56,6 +67,30 @@ public class CertNoUtil {
 		}
 
 		return true;
+	}
+
+	/**
+	 * 从身份证号里提取出出生日期
+	 * 
+	 * @param str 身份证号
+	 * @return 出生日期
+	 * @throws ValidateException
+	 */
+	public synchronized static LocalDate getBirthday(String str) throws ValidateException {
+		if (StringUtils.length(str) != LENGTH_LONG_IDCARD) {
+			throw new ValidateException("身份证号格式不正确");
+		}
+		LocalDate localDate = null;
+		try {
+			String year = StringUtils.substring(str, 6, 10);
+			String month = StringUtils.substring(str, 10, 12);
+			String day = StringUtils.substring(str, 12, 14);
+			localDate = LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+		} catch (Exception e) {
+			log.info("从身份证号{}中提取出生日期时出现异常，出现异常的原因为 {}", str, e.getMessage());
+			throw new ValidateException("身份证号出生日期格式不正确");
+		}
+		return localDate;
 	}
 
 	/**
@@ -157,11 +192,13 @@ public class CertNoUtil {
 		return a;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ValidateException {
 		System.out.println(isValid("110101199003078275"));
 		System.out.println(isValid("110101199003075453"));
 		System.out.println(isValid("11010119900307301X"));
 		System.out.println(isValid("110101199003073011"));
 		System.out.println(isValid("42010319900307291X"));
+
+		System.out.println(getBirthday("42010319900307291X"));
 	}
 }
