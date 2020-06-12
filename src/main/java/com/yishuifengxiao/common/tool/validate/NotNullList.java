@@ -12,8 +12,6 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import com.yishuifengxiao.common.tool.validate.Password;
-
 /**
  * 校验不是一个空的list，且不是一个只包含null的list
  * 
