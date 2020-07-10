@@ -10,7 +10,7 @@ package com.yishuifengxiao.common.tool.exception;
  * @date 2018年12月27日
  * @Version 0.0.1
  */
-public class ServiceException extends BusinessException {
+public class ServiceException extends CustomException {
 
 	/**
 	 * 

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.exception;
+package com.yishuifengxiao.common.tool.exception.user;
 
 /**
  * 密码不正确异常

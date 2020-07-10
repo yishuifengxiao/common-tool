@@ -24,7 +24,7 @@ public class LocalDateFormatter implements Formatter<LocalDate> {
 	}
 
 	@Override
-	public LocalDate parse(String s, Locale locale) throws ParseException {
+	public synchronized LocalDate parse(String s, Locale locale) throws ParseException {
 		try {
 			return LocalDate.parse(s, DateTimeFormatter.ofPattern(datePattern));
 		} catch (Exception e) {
@@ -34,7 +34,7 @@ public class LocalDateFormatter implements Formatter<LocalDate> {
 	}
 
 	@Override
-	public String print(LocalDate localDate, Locale locale) {
+	public synchronized String print(LocalDate localDate, Locale locale) {
 		return localDate.format(formatter);
 	}
 }

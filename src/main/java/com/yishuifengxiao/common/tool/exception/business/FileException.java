@@ -1,32 +1,34 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.exception;
+package com.yishuifengxiao.common.tool.exception.business;
+
+import com.yishuifengxiao.common.tool.exception.ServiceException;
 
 /**
- * 与存储记录相关的异常
+ * 文件相关的异常
  * @author yishui
- * @date 2018年12月8日
+ * @date 2018年12月12日
  * @Version 0.0.1
  */
-public class RecordException extends DataException {
+public class FileException extends ServiceException {
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -7647265601515104500L;
+	private static final long serialVersionUID = 7633606666606471596L;
 
 	/**
 	 * 
 	 */
-	public RecordException() {
+	public FileException() {
 		// TODO Auto-generated constructor stub
 	}
 
 	/**
 	 * @param message
 	 */
-	public RecordException(String message) {
+	public FileException(String message) {
 		super(message);
 		// TODO Auto-generated constructor stub
 	}
@@ -34,7 +36,7 @@ public class RecordException extends DataException {
 	/**
 	 * @param cause
 	 */
-	public RecordException(Throwable cause) {
+	public FileException(Throwable cause) {
 		super(cause);
 		// TODO Auto-generated constructor stub
 	}
@@ -43,7 +45,7 @@ public class RecordException extends DataException {
 	 * @param message
 	 * @param cause
 	 */
-	public RecordException(String message, Throwable cause) {
+	public FileException(String message, Throwable cause) {
 		super(message, cause);
 		// TODO Auto-generated constructor stub
 	}
@@ -54,7 +56,7 @@ public class RecordException extends DataException {
 	 * @param enableSuppression
 	 * @param writableStackTrace
 	 */
-	public RecordException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+	public FileException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 		// TODO Auto-generated constructor stub
 	}

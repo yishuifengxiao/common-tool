@@ -19,7 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CertNoUtil {
 
-	// 每位加权因子
+	/**
+	 * 每位加权因子
+	 */
 	private final static int POWER[] = { 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 };
 	/**
 	 * 二代身份证号的长度

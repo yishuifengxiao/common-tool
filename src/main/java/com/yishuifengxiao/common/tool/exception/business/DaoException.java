@@ -1,7 +1,9 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.exception;
+package com.yishuifengxiao.common.tool.exception.business;
+
+import com.yishuifengxiao.common.tool.exception.ServiceException;
 
 /**
  * dao层统一封装的异常类
@@ -9,7 +11,7 @@ package com.yishuifengxiao.common.tool.exception;
  * @date 2018年12月8日
  * @Version 0.0.1
  */
-public class DaoException extends BusinessException {
+public class DaoException extends ServiceException {
 
 	/**
 	 * 

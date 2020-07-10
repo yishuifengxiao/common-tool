@@ -1,7 +1,9 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.exception;
+package com.yishuifengxiao.common.tool.exception.business;
+
+import com.yishuifengxiao.common.tool.exception.ServiceException;
 
 /**
  * 业务类异常
@@ -10,7 +12,7 @@ package com.yishuifengxiao.common.tool.exception;
  * @date 2018年12月27日
  * @version 0.0.1
  */
-public class BusinessException extends CustomException {
+public class BusinessException extends ServiceException {
 
 	/**
 	 * 
