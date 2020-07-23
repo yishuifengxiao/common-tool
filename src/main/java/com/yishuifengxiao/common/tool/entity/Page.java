@@ -64,6 +64,18 @@ public class Page<T> implements Serializable {
 		return pageSize > DEFAULT_PAGE_NUM ? pageSize - MIN_PAGE_NUM : pageSize;
 	}
 
+	
+	/**
+	 * 构造一个空的分页对象
+	 * 
+	 * @param t 分页数据里的数据类型
+	 * @return
+	 */
+	public static <T> Page<T> ofEmpty(T t) {
+		return new Page<>( 0L, 1L, new ArrayList<>(), 0L,0L);
+	}
+
+	
 	/**
 	 * 根据数据构造当前页为1，分页大小为数据大小的分页对象
 	 * 
