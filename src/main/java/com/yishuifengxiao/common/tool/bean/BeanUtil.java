@@ -10,9 +10,9 @@ import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 
 import org.apache.commons.text.StringEscapeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
+
+import com.yishuifengxiao.common.tool.exception.CustomException;
 
 /**
  * 对象转换类
@@ -22,7 +22,6 @@ import org.springframework.beans.BeanUtils;
  * @Version 0.0.1
  */
 public final class BeanUtil {
-	private final static Logger log = LoggerFactory.getLogger(BeanUtil.class);
 
 	/**
 	 * 将源对象里属性值复制给目标对象
@@ -75,21 +74,20 @@ public final class BeanUtil {
 	 * 
 	 * @param obj 需要序列化的的对象
 	 * @return 二进制数据
+	 * @throws CustomException
 	 */
-	public static byte[] objectToByte(Object obj) {
+	public static byte[] objectToByte(Object obj) throws CustomException {
 		byte[] bytes = null;
 		try {
 			// object to bytearray
 			ByteArrayOutputStream bo = new ByteArrayOutputStream();
 			ObjectOutputStream oo = new ObjectOutputStream(bo);
 			oo.writeObject(obj);
-
 			bytes = bo.toByteArray();
-
 			bo.close();
 			oo.close();
 		} catch (Exception e) {
-			log.info(" 对象序列化出现问题，出现问题的原因为 {}", e.getMessage());
+			throw new CustomException(e.getMessage());
 		}
 		return bytes;
 	}
@@ -99,8 +97,9 @@ public final class BeanUtil {
 	 * 
 	 * @param bytes 序列化化后的二进制数据
 	 * @return 对象
+	 * @throws CustomException
 	 */
-	public static Object byteToObject(byte[] bytes) {
+	public static Object byteToObject(byte[] bytes) throws CustomException {
 		Object obj = null;
 		try {
 			// bytearray to object
@@ -110,7 +109,7 @@ public final class BeanUtil {
 			bi.close();
 			oi.close();
 		} catch (Exception e) {
-			log.info("对象反序列化出现问题，出现问题的原因为 {}", e.getMessage());
+			throw new CustomException(e.getMessage());
 		}
 		return obj;
 	}
@@ -122,9 +121,10 @@ public final class BeanUtil {
 	 * 
 	 * @param bytes 序列化化后的二进制数据
 	 * @return 对象
+	 * @throws CustomException
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T byteToObject(T t, byte[] bytes) {
+	public static <T> T byteToObject(T t, byte[] bytes) throws CustomException {
 
 		try {
 			// bytearray to object
@@ -134,7 +134,7 @@ public final class BeanUtil {
 			bi.close();
 			oi.close();
 		} catch (Exception e) {
-			log.info(" 对象反序列化出现问题，出现问题的原因为 {}", e.getMessage());
+			throw new CustomException(e.getMessage());
 		}
 		return t;
 	}
