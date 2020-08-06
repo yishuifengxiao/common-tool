@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.utils;
+package com.yishuifengxiao.common.tool.image;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;

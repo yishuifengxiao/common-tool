@@ -41,8 +41,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 请求的响应吗,这里借用HttpStatus作为状态标识
 	 * 
-	 * @see 具体的响应值的信息可以参见
-	 *      https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+	 * @see 具体的响应值的信息可以参见 https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 	 */
 	@ApiModelProperty("请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)")
 	private int code;
@@ -69,12 +68,9 @@ public class Response<T> implements Serializable {
 	/**
 	 * 构建一个通用的响应对象
 	 * 
-	 * @param code
-	 *            响应码
-	 * @param msg
-	 *            响应的基本信息
-	 * @param data
-	 *            响应的数据信息
+	 * @param code 响应码
+	 * @param msg  响应的基本信息
+	 * @param data 响应的数据信息
 	 * @return 响应对象
 	 */
 	public static <T> Response<T> of(int code, String msg, T data) {
@@ -84,8 +80,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 默认的请求成功时的返回信息(200响应码)
 	 * 
-	 * @param data
-	 *            请求成功时返回的数据信息
+	 * @param data 请求成功时返回的数据信息
 	 * @return 请求成功的返回信息
 	 */
 	public static <T> Response<T> suc(T data) {
@@ -104,8 +99,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 默认的请求成功时的返回信息(200响应码)
 	 * 
-	 * @param msg
-	 *            请求成功时返回的基本信息
+	 * @param msg 请求成功时返回的基本信息
 	 * @return 请求成功的返回信息
 	 */
 	public static Response<Object> suc(String msg) {
@@ -124,8 +118,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 默认的参数有误的返回信息(400响应码)
 	 * 
-	 * @param msg
-	 *            参数有误时返回的基本信息
+	 * @param msg 参数有误时返回的基本信息
 	 * @return 参数有误时返回信息
 	 */
 	public static Response<Object> badParam(String msg) {
@@ -144,8 +137,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 资源未授权的返回信息(401响应码)
 	 * 
-	 * @param msg
-	 *            资源未授权的返回信息的基本信息
+	 * @param msg 资源未授权的返回信息的基本信息
 	 * @return 资源未授权的返回信息
 	 */
 	public static Response<Object> unAuth(String msg) {
@@ -164,8 +156,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 资源不可用时的返回信息(403响应码)
 	 * 
-	 * @param msg
-	 *            参数有误时返回的基本信息
+	 * @param msg 参数有误时返回的基本信息
 	 * @return 无权访问访问时的信息
 	 */
 	public static Response<Object> notAllow(String msg) {
@@ -193,8 +184,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 服务器内部异常时的返回信息(500响应码)
 	 * 
-	 * @param msg
-	 *            服务器内部异常时的返回信息的基本信息
+	 * @param msg 服务器内部异常时的返回信息的基本信息
 	 * @return 服务器内部异常500时的返回信息
 	 */
 
@@ -205,8 +195,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 默认的路径不存在时的返回信息(404响应码)
 	 * 
-	 * @param msg
-	 *            路径不存在时返回的基本信息
+	 * @param msg 路径不存在时返回的基本信息
 	 * @return 默认的路径不存在时的返回信息
 	 */
 	public static Response<Object> notFoundt(String msg) {

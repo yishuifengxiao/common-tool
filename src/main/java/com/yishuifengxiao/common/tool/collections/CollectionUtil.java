@@ -22,13 +22,12 @@ public final class CollectionUtil {
 	/**
 	 * 将数组转为list
 	 * 
-	 * @param objs
-	 *            需要转换的数组
+	 * @param objs 需要转换的数组
 	 * @return 转换后的list
 	 */
 	public static <T> List<T> toList(T[] objs) {
 		if (EmptyUtil.isEmpty(objs)) {
-			return null;
+			return new ArrayList<>();
 		}
 		List<T> list = new ArrayList<>();
 		for (T t : objs) {
@@ -40,13 +39,12 @@ public final class CollectionUtil {
 	/**
 	 * 将数组转换为set
 	 * 
-	 * @param objs
-	 *            需要转换的数组
+	 * @param objs 需要转换的数组
 	 * @return 转换后的set
 	 */
 	public static <T> Set<T> toSet(T[] objs) {
 		if (EmptyUtil.isEmpty(objs)) {
-			return null;
+			return new HashSet<>();
 		}
 		Set<T> set = new HashSet<>();
 		for (T t : objs) {

@@ -207,15 +207,5 @@ public class DES {
 		return b2;
 	}
 
-	// 测试用例，不需要传递任何参数，直接执行即可。
-	public static void main(String[] args) {
-		String basestr = "zczc123456";
-		String str1 = encrypt(basestr);
-
-		System.out.println("原始值: " + basestr);
-		System.out.println("加密后: " + str1);
-		System.out.println("解密后: " + decrypt("sdd",str1.toLowerCase()));
-		System.out.println("为空时 is : " + decrypt(encrypt("")));
-	}
 
 }
