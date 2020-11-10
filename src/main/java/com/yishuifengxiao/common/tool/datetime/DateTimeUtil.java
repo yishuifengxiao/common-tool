@@ -1,15 +1,12 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.utils;
+package com.yishuifengxiao.common.tool.datetime;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * LocalDateTime与DateTime转换
@@ -19,7 +16,12 @@ import org.slf4j.LoggerFactory;
  * @Version 0.0.1
  */
 public final class DateTimeUtil {
-	private final static Logger log=LoggerFactory.getLogger(DateTimeUtil.class);
+
+	/**
+	 * 默认的时区,上海
+	 */
+	private final static String DEFAULT_ZONE = "Asia/Shanghai";
+
 	/**
 	 * 将Date转换为 LocalDateTime
 	 * 
@@ -27,10 +29,11 @@ public final class DateTimeUtil {
 	 * @return
 	 */
 	public static synchronized LocalDateTime date2LocalDateTime(Date date) {
+		if (null == date) {
+			return null;
+		}
 		Instant instant = date.toInstant();
-		ZoneId zone = ZoneId.systemDefault();
-		log.debug("当前时区为 {}",zone);
-		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zone);
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.of(DEFAULT_ZONE));
 		return localDateTime;
 	}
 
@@ -41,9 +44,10 @@ public final class DateTimeUtil {
 	 * @return
 	 */
 	public static synchronized Date localDateTime2Date(LocalDateTime localDateTime) {
-		ZoneId zone = ZoneId.systemDefault();
-		log.debug("当前时区为 {}",zone);
-		Instant instant = localDateTime.atZone(zone).toInstant();
+		if (null == localDateTime) {
+			return null;
+		}
+		Instant instant = localDateTime.atZone(ZoneId.of(DEFAULT_ZONE)).toInstant();
 		java.util.Date date = Date.from(instant);
 		return date;
 	}
