@@ -23,6 +23,15 @@ public final class DateTimeUtil {
 	private final static String DEFAULT_ZONE = "Asia/Shanghai";
 
 	/**
+	 * 获取北京时间的ZoneId
+	 * 
+	 * @return 北京时间的ZoneId
+	 */
+	public static synchronized ZoneId zoneIdOfChina() {
+		return ZoneId.of(DEFAULT_ZONE);
+	}
+
+	/**
 	 * 将Date转换为 LocalDateTime
 	 * 
 	 * @param date
@@ -33,7 +42,7 @@ public final class DateTimeUtil {
 			return null;
 		}
 		Instant instant = date.toInstant();
-		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.of(DEFAULT_ZONE));
+		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zoneIdOfChina());
 		return localDateTime;
 	}
 
@@ -47,7 +56,7 @@ public final class DateTimeUtil {
 		if (null == localDateTime) {
 			return null;
 		}
-		Instant instant = localDateTime.atZone(ZoneId.of(DEFAULT_ZONE)).toInstant();
+		Instant instant = localDateTime.atZone(zoneIdOfChina()).toInstant();
 		java.util.Date date = Date.from(instant);
 		return date;
 	}
