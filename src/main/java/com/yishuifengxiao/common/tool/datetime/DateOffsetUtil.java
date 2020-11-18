@@ -104,6 +104,9 @@ public class DateOffsetUtil {
 	 * @return 输入日期的0时0分0秒
 	 */
 	public static LocalDateTime getDayStart(LocalDateTime dateTime) {
+		if (null == dateTime) {
+			return null;
+		}
 		return dateTime.withHour(START_OF_TIME).withMinute(START_OF_TIME).withSecond(START_OF_TIME)
 				.withNano(START_OF_TIME);
 	}
@@ -115,7 +118,9 @@ public class DateOffsetUtil {
 	 * @return 输入日期的当月1号0时0分0秒
 	 */
 	public static LocalDateTime getMonthStart(LocalDateTime dateTime) {
-
+		if (null == dateTime) {
+			return null;
+		}
 		return getDayStart(dateTime.withDayOfMonth(START_DAY_OF_MONTH));
 
 	}

@@ -35,6 +35,9 @@ public class LocalDateFormatter implements Formatter<LocalDate> {
 
 	@Override
 	public synchronized String print(LocalDate localDate, Locale locale) {
+		if (null == localDate) {
+			return null;
+		}
 		return localDate.format(formatter);
 	}
 }
