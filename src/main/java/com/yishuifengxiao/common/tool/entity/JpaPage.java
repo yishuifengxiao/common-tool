@@ -28,7 +28,7 @@ public class JpaPage<S> extends Page<S> {
 	 * @param page spring data的分页对象
 	 * @return 自定义分页对象
 	 */
-	public synchronized static <S> Page<S> of(org.springframework.data.domain.Page<S> page) {
+	public static synchronized <S> Page<S> of(org.springframework.data.domain.Page<S> page) {
 		page = page == null ? new PageImpl<>(new ArrayList<>()) : page;
 
 		return Page.of(page.getContent(), page.getTotalElements(), page.getSize() + 0L, page.getNumber() + 1L);

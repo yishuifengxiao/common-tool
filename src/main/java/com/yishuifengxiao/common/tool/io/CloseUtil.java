@@ -23,7 +23,7 @@ public class CloseUtil {
 	 * 
 	 * @param inputStream 输入流
 	 */
-	public synchronized static void close(InputStream inputStream) {
+	public static synchronized  void close(InputStream inputStream) {
 		if (null != inputStream) {
 			try {
 				inputStream.close();

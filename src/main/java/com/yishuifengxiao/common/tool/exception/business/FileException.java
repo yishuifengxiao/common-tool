@@ -7,6 +7,7 @@ import com.yishuifengxiao.common.tool.exception.ServiceException;
 
 /**
  * 文件相关的异常
+ * 
  * @author yishui
  * @date 2018年12月12日
  * @Version 0.0.1
@@ -22,7 +23,7 @@ public class FileException extends ServiceException {
 	 * 
 	 */
 	public FileException() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -30,7 +31,7 @@ public class FileException extends ServiceException {
 	 */
 	public FileException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -38,7 +39,7 @@ public class FileException extends ServiceException {
 	 */
 	public FileException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -47,7 +48,7 @@ public class FileException extends ServiceException {
 	 */
 	public FileException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -58,7 +59,7 @@ public class FileException extends ServiceException {
 	 */
 	public FileException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
-		// TODO Auto-generated constructor stub
+
 	}
 
 }

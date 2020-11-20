@@ -26,15 +26,15 @@ public class Page<S> implements Serializable {
 	/**
 	 * 默认的当前页的页码
 	 */
-	public final static int DEFAULT_PAGE_NUM = 0;
+	public static final  int DEFAULT_PAGE_NUM = 0;
 	/**
 	 * 默认的最小页的页码
 	 */
-	public final static int MIN_PAGE_NUM = 1;
+	public static  final  int MIN_PAGE_NUM = 1;
 	/**
 	 * 默认的第一个元素的索引
 	 */
-	public final static int FIRST_ELEMENT_INDEX = 0;
+	public static final  int FIRST_ELEMENT_INDEX = 0;
 	/**
 	 * 
 	 */
@@ -128,7 +128,7 @@ public class Page<S> implements Serializable {
 	 * @param t 分页数据里的数据类型
 	 * @return
 	 */
-	public static <S> Page<S> ofEmpty(S t) {
+	public static <S> Page<S> ofEmpty() {
 		return new Page<>(new ArrayList<>(), 0L, 0L, 0L, 1L);
 	}
 

@@ -9,35 +9,39 @@ import javax.crypto.spec.DESKeySpec;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 字符串加密解密工具，可逆加密，秘钥很重要，一定要自己改秘钥，打死也不要告诉其他人
  * 
  * @author 夏增明
  * @version 1.0 Date:2013年2月8日15:45:56
  */
+@Slf4j
 public class DES {
 
 	/**
 	 * 密钥，是加密解密的凭据，长度为8的倍数
 	 */
 	private static final String PASSWORD_CRYPT_KEY = "yishui@#";
-	private final static String DES = "DES";
+	/**
+	 * 加密方式
+	 */
+	private static final String TYPE = "DES";
 
 	/**
 	 * 对输入的数据进行加密
 	 * 
-	 * @param key
-	 *            加密的密钥，如果为空则以默认密码进行加密，如果密钥长度不是8的倍数，系统会自动补0
-	 * @param data
-	 *            需要加密的数据
+	 * @param key  加密的密钥，如果为空则以默认密码进行加密，如果密钥长度不是8的倍数，系统会自动补0
+	 * @param data 需要加密的数据
 	 * @return 加密后的数据,null表示加密失败
 	 */
-	public final static String encrypt(String key, String data) {
+	public static final String encrypt(String key, String data) {
 		Assert.notNull(data, "需要加密的数据不能为空");
 		try {
 			return byte2hex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
 		} catch (Exception e) {
-
+			log.info("使用密钥加密数据 {} 时出现问题，出现问题的原因为 {}", data, e.getMessage());
 		}
 		return null;
 	}
@@ -45,29 +49,26 @@ public class DES {
 	/**
 	 * 用默认的密码进行数据加密
 	 * 
-	 * @param data
-	 *            需要加密的数据
+	 * @param data 需要加密的数据
 	 * @return 加密后的数据,null表示加密失败
 	 */
-	public final static String encrypt(String data) {
+	public static final String encrypt(String data) {
 		return encrypt(null, data);
 	}
 
 	/**
 	 * 对输入的数据进行解密
 	 * 
-	 * @param key
-	 *            解密的密钥，如果为空则以默认密码进行加密，如果密钥长度不是8的倍数，系统会自动补0
-	 * @param data
-	 *            需要解密的数据
+	 * @param key  解密的密钥，如果为空则以默认密码进行加密，如果密钥长度不是8的倍数，系统会自动补0
+	 * @param data 需要解密的数据
 	 * @return 解密后的数据,null表示解密失败
 	 */
-	public final static String decrypt(String key, String data) {
+	public static final String decrypt(String key, String data) {
 		Assert.notNull(data, "需要解密的数据不能为空");
 		try {
 			return new String(decrypt(hex2byte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
 		} catch (Exception e) {
-
+			log.info("使用密钥解密数据 {} 时出现问题，出现问题的原因为 {}", data, e.getMessage());
 		}
 		return null;
 	}
@@ -75,21 +76,18 @@ public class DES {
 	/**
 	 * 用默认的密码进行数据解密
 	 * 
-	 * @param data
-	 *            需要解密的数据
+	 * @param data 需要解密的数据
 	 * @return 解密后的数据,null表示解密失败
 	 */
-	public final static String decrypt(String data) {
+	public static final String decrypt(String data) {
 		return decrypt(null, data);
 	}
 
 	/**
 	 * 加密
 	 * 
-	 * @param src
-	 *            数据源
-	 * @param key
-	 *            密钥，长度必须是8的倍数
+	 * @param src 数据源
+	 * @param key 密钥，长度必须是8的倍数
 	 * @return 返回加密后的数据
 	 * @throws Exception
 	 */
@@ -103,12 +101,12 @@ public class DES {
 
 		// 创建一个密匙工厂，然后用它把DESKeySpec转换成
 		// 一个SecretKey对象
-		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DES);
+		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(TYPE);
 
 		SecretKey securekey = keyFactory.generateSecret(dks);
 
 		// Cipher对象实际完成加密操作
-		Cipher cipher = Cipher.getInstance(DES);
+		Cipher cipher = Cipher.getInstance(TYPE);
 
 		// 用密匙初始化Cipher对象
 		cipher.init(Cipher.ENCRYPT_MODE, securekey, sr);
@@ -122,10 +120,8 @@ public class DES {
 	/**
 	 * 解密
 	 * 
-	 * @param src
-	 *            数据源
-	 * @param key
-	 *            密钥，长度必须是8的倍数
+	 * @param src 数据源
+	 * @param key 密钥，长度必须是8的倍数
 	 * @return 返回解密后的原始数据
 	 * @throws Exception
 	 */
@@ -138,12 +134,12 @@ public class DES {
 
 		// 创建一个密匙工厂，然后用它把DESKeySpec对象转换成
 		// 一个SecretKey对象
-		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(DES);
+		SecretKeyFactory keyFactory = SecretKeyFactory.getInstance(TYPE);
 
 		SecretKey securekey = keyFactory.generateSecret(dks);
 
 		// Cipher对象实际完成解密操作
-		Cipher cipher = Cipher.getInstance(DES);
+		Cipher cipher = Cipher.getInstance(TYPE);
 
 		// 用密匙初始化Cipher对象
 		cipher.init(Cipher.DECRYPT_MODE, securekey, sr);
@@ -161,16 +157,17 @@ public class DES {
 	 * @return
 	 */
 	private static String keyValidate(String key) {
+		StringBuilder sb = new StringBuilder();
 		if (StringUtils.isBlank(key)) {
-			key = PASSWORD_CRYPT_KEY;
+			sb = new StringBuilder(PASSWORD_CRYPT_KEY);
 		} else {
 			if (key.length() % 8 != 0) {
 				for (int i = 0; i < key.length() % 8; i++) {
-					key += "0";
+					sb.append("0");
 				}
 			}
 		}
-		return key;
+		return sb.toString();
 	}
 
 	/**
@@ -181,17 +178,19 @@ public class DES {
 	 */
 	private static String byte2hex(byte[] b) {
 
-		String hs = "";
-		String stmp = "";
+		StringBuilder hs = new StringBuilder();
+
+		StringBuilder stmp = new StringBuilder();
+
 		for (int n = 0; n < b.length; n++) {
-			stmp = (java.lang.Integer.toHexString(b[n] & 0XFF));
+			stmp = new StringBuilder((java.lang.Integer.toHexString(b[n] & 0XFF)));
 			if (stmp.length() == 1) {
-				hs = hs + "0" + stmp;
+				hs = hs.append("0").append(stmp);
 			} else {
-				hs = hs + stmp;
+				hs = hs.append(stmp);
 			}
 		}
-		return hs.toUpperCase();
+		return hs.toString().toUpperCase();
 	}
 
 	private static byte[] hex2byte(byte[] b) {
@@ -206,6 +205,5 @@ public class DES {
 		}
 		return b2;
 	}
-
 
 }

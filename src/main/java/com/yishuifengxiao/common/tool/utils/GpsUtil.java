@@ -14,7 +14,7 @@ public class GpsUtil {
 	/**
 	 * 地球半径，单位千米
 	 */
-	private static double EARTH_RADIUS = 6378.137;
+	private static final double EARTH_RADIUS = 6378.137;
 
 	/**
 	 * Lat1 Lung1 表示A点经纬度，Lat2 Lung2 表示B点经纬度； a=Lat1 – Lat2 为两点纬度之差 b=Lung1 -Lung2
@@ -26,7 +26,7 @@ public class GpsUtil {
 	 * @param lat2 B点纬度
 	 * @return 通过经纬度获取的距离(单位 ： 千米)
 	 */
-	public synchronized static Double getDistance(double lng1, double lat1, double lng2, double lat2) {
+	public static synchronized  Double getDistance(double lng1, double lat1, double lng2, double lat2) {
 		double radLat1 = rad(lat1);
 		double radLat2 = rad(lat2);
 		double a = radLat1 - radLat2;

@@ -5,6 +5,8 @@ import java.security.MessageDigest;
 
 import org.apache.commons.lang3.StringUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Md5加密工具类
  * 
@@ -12,13 +14,13 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2018年7月27日
  * @Version 0.0.1
  */
+@Slf4j
 public class Md5 {
 
 	/**
 	 * 对字符串md5加密(小写+字母)
 	 * 
-	 * @param str
-	 *            传入要加密的字符串
+	 * @param str 传入要加密的字符串
 	 * @return MD5加密后的字符串(32位)
 	 */
 	public static String md5(String str) {
@@ -31,7 +33,7 @@ public class Md5 {
 			// BigInteger函数则将8位的字符串转换成16位hex值，用字符串来表示；得到字符串形式的hash值
 			return new BigInteger(1, md.digest()).toString(16);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.info("使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", str, e.getMessage());
 			return null;
 		}
 	}
@@ -39,8 +41,7 @@ public class Md5 {
 	/**
 	 * 对字符串md5加密(小写+字母)
 	 * 
-	 * @param str
-	 *            传入要加密的字符串
+	 * @param str 传入要加密的字符串
 	 * @return MD5加密后的字符串(16位)
 	 */
 	public static String md5Short(String str) {
@@ -53,13 +54,12 @@ public class Md5 {
 	/**
 	 * 对字符串md5加密(大写+数字)
 	 * 
-	 * @param str
-	 *            传入要加密的字符串
+	 * @param str 传入要加密的字符串
 	 * @return MD5加密后的字符串 (32位)
 	 */
 
 	public static String md5UpperCase(String s) {
-		char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+		char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
 		try {
 			byte[] btInput = s.getBytes();
@@ -71,7 +71,7 @@ public class Md5 {
 			byte[] md = mdInst.digest();
 			// 把密文转换成十六进制的字符串形式
 			int j = md.length;
-			char str[] = new char[j * 2];
+			char[] str = new char[j * 2];
 			int k = 0;
 			for (int i = 0; i < j; i++) {
 				byte byte0 = md[i];
@@ -80,14 +80,10 @@ public class Md5 {
 			}
 			return new String(str);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.info("使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", s, e.getMessage());
 			return null;
 		}
 	}
 
-	public static void main(String[] args) {
-		String md52 = md5Short("123456");
-		System.out.println(md52);
-	}
 
 }

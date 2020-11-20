@@ -1,6 +1,8 @@
 package com.yishuifengxiao.common.tool.utils;
+
 /**
  * 下划线与驼峰互转工具类
+ * 
  * @author yishui
  * @date 2018年8月3日
  * @Version 0.0.1
@@ -55,12 +57,6 @@ public final class HumpUtil {
 			}
 		}
 		return result.toString();
-	}
-	
-	public static void main(String[] args) {
-		System.out.println(camelCaseName("AAAAAA_AAAA"));
-		
-		System.out.println(underscoreName("asdadAasd"));
 	}
 
 }

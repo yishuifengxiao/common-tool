@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * cookie 操作工具类
  * 
@@ -19,6 +21,7 @@ import com.yishuifengxiao.common.tool.collections.EmptyUtil;
  * @date 2019年1月26日
  * @version v1.0.0
  */
+@Slf4j
 public class CookieUtil {
 
 	public static final int COOKIE_MAX_AGE = 7 * 24 * 3600;
@@ -81,8 +84,7 @@ public class CookieUtil {
 	 * 
 	 * @param request
 	 * @param response
-	 * @param name
-	 *            这个是名称，不是值
+	 * @param name     这个是名称，不是值
 	 */
 	public void removeCookie(String name) {
 		if (null == name) {
@@ -123,7 +125,7 @@ public class CookieUtil {
 		try {
 			response.flushBuffer();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log.debug("设置cookie时出现问题，出现问题的原因为 {} ", e.getMessage());
 		}
 	}
 

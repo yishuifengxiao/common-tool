@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Base64Utils;
 
 import com.yishuifengxiao.common.tool.exception.CustomException;
+import com.yishuifengxiao.common.tool.io.CloseUtil;
 
 /**
  * base64与图片转换类
@@ -36,17 +37,17 @@ public final class Base64ToImage {
 		if (!new File(imgFile).exists()) {
 			throw new CustomException("本地图片不存在");
 		}
-
+		InputStream inputStream =null;
 		byte[] data = null;
 		// 读取图片字节数组
 		try {
-			InputStream inputStream = new FileInputStream(imgFile);
+			 inputStream = new FileInputStream(imgFile);
 			data = new byte[inputStream.available()];
 			inputStream.read(data);
-			inputStream.close();
-			inputStream = null;
 		} catch (IOException e) {
 			throw new CustomException(e.getMessage());
+		}finally {
+			CloseUtil.close(inputStream);
 		}
 		// 返回Base64编码过的字节数组字符串
 		return Base64Utils.encodeToString(data);
@@ -63,6 +64,7 @@ public final class Base64ToImage {
 		if (!StringUtils.isNoneBlank(imgBase64Str, imagePath)) {
 			throw new CustomException("输入参数错误");
 		}
+		OutputStream out = null;
 		try {
 			// Base64解码
 			byte[] b = Base64Utils.decodeFromString(imgBase64Str);
@@ -72,13 +74,14 @@ public final class Base64ToImage {
 					b[i] += 256;
 				}
 			}
-			OutputStream out = new FileOutputStream(imagePath);
+			out = new FileOutputStream(imagePath);
 			out.write(b);
 			out.flush();
-			out.close();
-			out = null;
+
 		} catch (Exception e) {
 			throw new CustomException(e.getMessage());
+		}finally {
+			CloseUtil.close(out);
 		}
 	}
 

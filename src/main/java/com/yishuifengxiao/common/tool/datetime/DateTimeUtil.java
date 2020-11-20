@@ -61,8 +61,7 @@ public final class DateTimeUtil {
 			return null;
 		}
 		Instant instant = date.toInstant();
-		LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, zoneIdOfChina());
-		return localDateTime;
+		return LocalDateTime.ofInstant(instant, zoneIdOfChina());
 	}
 
 	/**
@@ -76,8 +75,7 @@ public final class DateTimeUtil {
 			return null;
 		}
 		Instant instant = localDateTime.atZone(zoneIdOfChina()).toInstant();
-		java.util.Date date = Date.from(instant);
-		return date;
+		return Date.from(instant);
 	}
 
 	/**

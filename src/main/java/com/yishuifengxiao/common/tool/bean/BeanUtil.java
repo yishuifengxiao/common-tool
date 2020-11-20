@@ -44,12 +44,9 @@ public final class BeanUtil {
 	 * 
 	 * @param source 原始对象
 	 * @return 过滤后的对象
-	 * @throws IllegalArgumentException
 	 * @throws IllegalAccessException
-	 * @throws SecurityException
 	 */
-	public static <T> T setNullValue(T source)
-			throws IllegalArgumentException, IllegalAccessException, SecurityException {
+	public static <T> T setNullValue(T source) throws IllegalAccessException {
 		Field[] fields = source.getClass().getDeclaredFields();
 		for (Field field : fields) {
 			if ("class java.lang.String".equals(field.getGenericType().toString())) {
