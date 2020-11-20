@@ -12,10 +12,10 @@ import io.swagger.annotations.ApiModel;
  * @author yishui
  * @date 2019年11月13日
  * @version 1.0.0
- * @param <T>
+ * @param <S>
  */
 @ApiModel(value = "JPA通用分页实体类", description = "用于所有接口的基于jpa分页对象的通用返回数据")
-public class JpaPage<T> extends Page<T> {
+public class JpaPage<S> extends Page<S> {
 
 	/**
 	 * 
@@ -28,10 +28,10 @@ public class JpaPage<T> extends Page<T> {
 	 * @param page spring data的分页对象
 	 * @return 自定义分页对象
 	 */
-	public synchronized static <T> Page<T> of(org.springframework.data.domain.Page<T> page) {
+	public synchronized static <S> Page<S> of(org.springframework.data.domain.Page<S> page) {
 		page = page == null ? new PageImpl<>(new ArrayList<>()) : page;
-		return new Page<>(page.getSize() + 0L, page.getNumber() + 1L, page.getContent(), page.getTotalPages() + 0L,
-				page.getTotalElements());
+
+		return Page.of(page.getContent(), page.getTotalElements(), page.getSize() + 0L, page.getNumber() + 1L);
 	}
 
 	@Override
@@ -56,6 +56,5 @@ public class JpaPage<T> extends Page<T> {
 		builder.append("]");
 		return builder.toString();
 	}
-	
-	
+
 }

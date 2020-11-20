@@ -25,7 +25,7 @@ public final class EmptyUtil {
 	 * @param pages 分页对象
 	 * @return 如果是空返回为true，否则为false
 	 */
-	public static <T> boolean isEmpty(Page<T> page) {
+	public synchronized static <T> boolean isEmpty(Page<T> page) {
 
 		if (page == null) {
 			return true;
@@ -38,41 +38,13 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断分页对象是否为空，若不为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param pages 分页对象
-	 * @param msg   异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertEmpty(Page<T> page, String msg) throws ValidateException {
-		if (!isEmpty(page)) {
-			throw new ValidateException(msg);
-		}
-	}
-
-	/**
 	 * 判断是否为一个非空的分页对象
 	 * 
 	 * @param pages 分页对象
 	 * @return 如果是空返回为false，否则为true
 	 */
-	public static <T> boolean notEmpty(Page<T> pages) {
+	public synchronized static <T> boolean notEmpty(Page<T> pages) {
 		return !isEmpty(pages);
-	}
-
-	/**
-	 * 判断分页对象是否不为空，若为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param pages 分页对象
-	 * @param msg   异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertNoEmpty(Page<T> page, String msg) throws ValidateException {
-		if (!notEmpty(page)) {
-			throw new ValidateException(msg);
-		}
 	}
 
 	/**
@@ -81,7 +53,7 @@ public final class EmptyUtil {
 	 * @param pages 分页对象
 	 * @return 如果是空返回为true，否则为false
 	 */
-	public static <T> boolean isEmpty(org.springframework.data.domain.Page<T> page) {
+	public synchronized static <T> boolean isEmpty(org.springframework.data.domain.Page<T> page) {
 
 		if (page == null) {
 			return true;
@@ -94,43 +66,13 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断分页对象是否为空，若不为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param pages 分页对象
-	 * @param msg   异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertEmpty(org.springframework.data.domain.Page<T> page, String msg)
-			throws ValidateException {
-		if (!isEmpty(page)) {
-			throw new ValidateException(msg);
-		}
-	}
-
-	/**
 	 * 判断是否为一个非空的分页对象
 	 * 
 	 * @param pages 分页对象
 	 * @return 如果是空返回为false，否则为true
 	 */
-	public static <T> boolean notEmpty(org.springframework.data.domain.Page<T> page) {
+	public synchronized static <T> boolean notEmpty(org.springframework.data.domain.Page<T> page) {
 		return !isEmpty(page);
-	}
-
-	/**
-	 * 判断分页对象是否不为空，若为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param pages 分页对象
-	 * @param msg   异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertNoEmpty(org.springframework.data.domain.Page<T> page, String msg)
-			throws ValidateException {
-		if (!notEmpty(page)) {
-			throw new ValidateException(msg);
-		}
 	}
 
 	/**
@@ -139,22 +81,8 @@ public final class EmptyUtil {
 	 * @param data 需要判断的数组
 	 * @return 如果为空则返回true
 	 */
-	public static <T> boolean isEmpty(T[] data) {
+	public synchronized static <T> boolean isEmpty(T[] data) {
 		return data == null || data.length == 0;
-	}
-
-	/**
-	 * 判断数组是否为空，若不为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param data 数组数据
-	 * @param msg  异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertEmpty(T[] data, String msg) throws ValidateException {
-		if (!isEmpty(data)) {
-			throw new ValidateException(msg);
-		}
 	}
 
 	/**
@@ -163,22 +91,8 @@ public final class EmptyUtil {
 	 * @param data 需要判断的数组
 	 * @return 如果不为空则返回true
 	 */
-	public static <T> boolean notEmpty(T[] data) {
+	public synchronized static <T> boolean notEmpty(T[] data) {
 		return !isEmpty(data);
-	}
-
-	/**
-	 * 判断数组是否不为空，若为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param pages 数组数据
-	 * @param msg   异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertNoEmpty(T[] data, String msg) throws ValidateException {
-		if (!notEmpty(data)) {
-			throw new ValidateException(msg);
-		}
 	}
 
 	/**
@@ -187,22 +101,8 @@ public final class EmptyUtil {
 	 * @param data 需要判断的数组
 	 * @return 如果为空则返回为true
 	 */
-	public static <T> boolean isEmpty(Set<T> data) {
+	public synchronized static <T> boolean isEmpty(Set<T> data) {
 		return data == null || data.size() == 0;
-	}
-
-	/**
-	 * 判断set是否为空，若不为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param data set数据
-	 * @param msg  异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertEmpty(Set<T> data, String msg) throws ValidateException {
-		if (!isEmpty(data)) {
-			throw new ValidateException(msg);
-		}
 	}
 
 	/**
@@ -211,22 +111,8 @@ public final class EmptyUtil {
 	 * @param data 需要判断的数组
 	 * @return 如果不为空则返回为true
 	 */
-	public static <T> boolean notEmpty(Set<T> data) {
+	public synchronized static <T> boolean notEmpty(Set<T> data) {
 		return !isEmpty(data);
-	}
-
-	/**
-	 * 判断Set是否不为空，若为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param pages Set数据
-	 * @param msg   异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertNoEmpty(Set<T> data, String msg) throws ValidateException {
-		if (!notEmpty(data)) {
-			throw new ValidateException(msg);
-		}
 	}
 
 	/**
@@ -235,7 +121,7 @@ public final class EmptyUtil {
 	 * @param list 列表
 	 * @return 如果为空返回为true，否则为false
 	 */
-	public static <T> boolean isEmpty(List<T> list) {
+	public synchronized static <T> boolean isEmpty(List<T> list) {
 		if (list == null) {
 			return true;
 		}
@@ -253,7 +139,7 @@ public final class EmptyUtil {
 	 * @param msg  异常提示信息
 	 * @throws ValidateException
 	 */
-	public static <T> void assertEmpty(List<T> list, String msg) throws ValidateException {
+	public synchronized static <T> void assertEmpty(List<T> list, String msg) throws ValidateException {
 		if (!isEmpty(list)) {
 			throw new ValidateException(msg);
 		}
@@ -265,22 +151,8 @@ public final class EmptyUtil {
 	 * @param list 列表
 	 * @return 如果为空返回为false，否则为true
 	 */
-	public static <T> boolean notEmpty(List<T> list) {
+	public synchronized static <T> boolean notEmpty(List<T> list) {
 		return !isEmpty(list);
-	}
-
-	/**
-	 * 判断List是否不为空，若为空则抛出异常
-	 * 
-	 * @param <T>
-	 * @param pages List数据
-	 * @param msg   异常提示信息
-	 * @throws ValidateException
-	 */
-	public static <T> void assertNoEmpty(List<T> data, String msg) throws ValidateException {
-		if (!notEmpty(data)) {
-			throw new ValidateException(msg);
-		}
 	}
 
 	/**
@@ -289,7 +161,7 @@ public final class EmptyUtil {
 	 * @param data 列表
 	 * @return 如果只有一个元素返回为true，否则为false
 	 */
-	public static <T> boolean onlyOneElement(Collection<T> data) {
+	public synchronized static <T> boolean onlyOneElement(Collection<T> data) {
 		if (null == data) {
 			return false;
 		}
@@ -300,17 +172,20 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断集合里是否只有一个元素，若不是只有一个元素则抛出异常
+	 * 判断集合是否不是只有一个元素,若集合为空或不是只有一个元素则返回为true
 	 * 
 	 * @param <T>
-	 * @param data 集合
-	 * @param msg  异常提示信息
-	 * @throws ValidateException
+	 * @param data
+	 * @return 集合是否不是只有一个元素
 	 */
-	public static <T> void assertOnlyOne(Collection<T> data, String msg) throws ValidateException {
-		if (!onlyOneElement(data)) {
-			throw new ValidateException(msg);
+	public synchronized static <T> boolean notOnlyOneElement(Collection<T> data) {
+		if (null == data) {
+			return true;
 		}
+		if (data.isEmpty()) {
+			return true;
+		}
+		return data.size() != 1;
 	}
 
 }

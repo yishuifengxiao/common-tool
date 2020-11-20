@@ -13,7 +13,7 @@ import java.util.Set;
 import com.yishuifengxiao.common.tool.exception.data.RecordException;
 
 /**
- * 集合工具类
+ * 集合元素获取工具类
  * 
  * @author yishui
  * @date 2018年10月17日
@@ -56,7 +56,7 @@ public final class DataUtil {
 	}
 
 	/**
-	 * 取出链表的第一个元素
+	 * 取出链表的第一个元素,如果链表为空则返回null
 	 * 
 	 * @param data
 	 * @return
@@ -69,6 +69,18 @@ public final class DataUtil {
 	}
 
 	/**
+	 * 取出链表的第一个元素, 若链表为空则返回给定的缺省值
+	 * 
+	 * @param data
+	 * @param defaultValue 给定的缺省值
+	 * @return
+	 */
+	public synchronized static <T> T first(List<T> data, T defaultValue) {
+		T t = first(data);
+		return null == t ? defaultValue : t;
+	}
+
+	/**
 	 * 取出链表的第一个元素，若链表为空则抛出异常
 	 * 
 	 * @param <T>
@@ -78,14 +90,15 @@ public final class DataUtil {
 	 * @throws RecordException
 	 */
 	public synchronized static <T> T first(List<T> data, String errorMsg) throws RecordException {
-		if (data == null || data.size() == 0) {
+		T t = first(data);
+		if (null == t) {
 			throw new RecordException(errorMsg);
 		}
-		return data.get(0);
+		return t;
 	}
 
 	/**
-	 * 获取set集合的第一个元素
+	 * 获取set集合的第一个元素,如果set为空则返回null
 	 * 
 	 * @param data
 	 * @return
@@ -99,6 +112,18 @@ public final class DataUtil {
 	}
 
 	/**
+	 * 取出Set的第一个元素, 若Set为空则返回给定的缺省值
+	 * 
+	 * @param data
+	 * @param defaultValue 给定的缺省值
+	 * @return
+	 */
+	public synchronized static <T> T first(Set<T> data, T defaultValue) {
+		T t = first(data);
+		return null == t ? defaultValue : t;
+	}
+
+	/**
 	 * 从set里取出第一个元素，若set集合为空则抛出异常
 	 * 
 	 * @param <T>
@@ -108,15 +133,15 @@ public final class DataUtil {
 	 * @throws RecordException
 	 */
 	public synchronized static <T> T first(Set<T> data, String errorMsg) throws RecordException {
-		if (data == null || data.size() == 0) {
+		T t = first(data);
+		if (null == t) {
 			throw new RecordException(errorMsg);
 		}
-		Iterator<T> it = data.iterator();
-		return it.next();
+		return t;
 	}
 
 	/**
-	 * 取出数组的第一个元素
+	 * 取出数组的第一个元素, 若数组为空则返回null
 	 * 
 	 * @param data
 	 * @return
@@ -129,6 +154,18 @@ public final class DataUtil {
 	}
 
 	/**
+	 * 取出数组的第一个元素，若数组为空则返回给定的缺省值
+	 * 
+	 * @param data
+	 * @param defaultValue 给定的缺省值
+	 * @return
+	 */
+	public synchronized static <T> T first(T[] data, T defaultValue) {
+		T t = first(data);
+		return null == t ? defaultValue : t;
+	}
+
+	/**
 	 * 从数组里取出第一个元素，如果数组为空，则抛出异常
 	 * 
 	 * @param <T>
@@ -137,11 +174,12 @@ public final class DataUtil {
 	 * @return
 	 * @throws RecordException
 	 */
-	public  synchronized static <T> T first(T[] data, String errorMsg) throws RecordException {
-		if (data == null || data.length == 0) {
+	public synchronized static <T> T first(T[] data, String errorMsg) throws RecordException {
+		T t = first(data);
+		if (null == t) {
 			throw new RecordException(errorMsg);
 		}
-		return data[0];
+		return t;
 	}
 
 	/**
@@ -159,6 +197,18 @@ public final class DataUtil {
 	}
 
 	/**
+	 * 取出集合的第一个元素，若链表为空则返回给定的缺省值
+	 * 
+	 * @param data
+	 * @param defaultValue 给定的缺省值
+	 * @return
+	 */
+	public synchronized static <T> T first(Collection<T> data, T defaultValue) {
+		T t = first(data);
+		return null == t ? defaultValue : t;
+	}
+
+	/**
 	 * 取出集合的第一个元素，如果集合为空，则抛出异常
 	 * 
 	 * @param <T>
@@ -168,11 +218,11 @@ public final class DataUtil {
 	 * @throws RecordException
 	 */
 	public synchronized static <T> T first(Collection<T> data, String errorMsg) throws RecordException {
-		if (data == null || data.size() == 0) {
+		T t = first(data);
+		if (null == t) {
 			throw new RecordException(errorMsg);
 		}
-		Iterator<T> it = data.iterator();
-		return it.next();
+		return t;
 	}
 
 }
