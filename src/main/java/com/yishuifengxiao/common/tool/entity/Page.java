@@ -26,15 +26,15 @@ public class Page<S> implements Serializable {
 	/**
 	 * 默认的当前页的页码
 	 */
-	public static final  int DEFAULT_PAGE_NUM = 0;
+	public static final int DEFAULT_PAGE_NUM = 0;
 	/**
 	 * 默认的最小页的页码
 	 */
-	public static  final  int MIN_PAGE_NUM = 1;
+	public static final int MIN_PAGE_NUM = 1;
 	/**
 	 * 默认的第一个元素的索引
 	 */
-	public static final  int FIRST_ELEMENT_INDEX = 0;
+	public static final int FIRST_ELEMENT_INDEX = 0;
 	/**
 	 * 
 	 */
@@ -101,14 +101,14 @@ public class Page<S> implements Serializable {
 			this.data = new ArrayList<>();
 		}
 		List<T> list = new ArrayList<>();
-		for (S t : this.data) {
-			T s = converter.convert(t);
+		for (S s : this.data) {
+			T t = converter.convert(s);
 			if (isFilterNull) {
-				if (null != s) {
-					list.add(s);
+				if (null != t) {
+					list.add(t);
 				}
 			} else {
-				list.add(s);
+				list.add(t);
 			}
 		}
 		return Page.of(list, total, pageSize, pageNum);
@@ -153,11 +153,11 @@ public class Page<S> implements Serializable {
 	}
 
 	/**
-	 * 从总的数据中根据分页参数获取分页对象<br/>
+	 * 从总的数据中根据分页参数获取一个分页对象<br/>
 	 *
 	 * @param list     总的分页数据数据集
 	 * @param pageSize 分页大小
-	 * @param pageNum  当前页页码
+	 * @param pageNum  当前页页码，从1开始
 	 * @return 当前分页数据集
 	 */
 	public static <S> Page<S> toPage(List<S> list, int pageSize, int pageNum) {
@@ -203,7 +203,7 @@ public class Page<S> implements Serializable {
 	 * @param data     当前页数据
 	 * @param total    总的记录数
 	 * @param pageSize 分页大小
-	 * @param pageNum  当前页页码
+	 * @param pageNum  当前页页码，从1开始
 	 * @return
 	 */
 	public static <S> Page<S> of(List<S> data, long total, long pageSize, long pageNum) {
@@ -286,7 +286,7 @@ public class Page<S> implements Serializable {
 	 * @param total    记录总数
 	 * @param pages    总的分页数
 	 * @param pageSize 分页大小
-	 * @param pageNum  当前页页码
+	 * @param pageNum  当前页页码，从1开始
 	 */
 	public Page(List<S> data, Long total, Long pages, Long pageSize, Long pageNum) {
 		this.pageSize = pageSize;
