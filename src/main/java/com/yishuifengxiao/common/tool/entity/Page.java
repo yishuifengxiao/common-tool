@@ -177,9 +177,9 @@ public class Page<S> implements Serializable {
 		// 结束量
 		int endNum = pageNum * pageSize;
 		// 当前页的数据
-		List<S> data = null;
+		List<S> data = new ArrayList<>();
 
-		if (endNum < list.size()) {
+		if (endNum <= list.size()) {
 			// 正常情况下
 			data = list.subList(startNum, endNum);
 		}
