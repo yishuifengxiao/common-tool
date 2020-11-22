@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.ValidateException;
 
@@ -15,6 +17,84 @@ import com.yishuifengxiao.common.tool.exception.ValidateException;
  * @Version 0.0.1
  */
 public class Assert {
+
+	/**
+	 * 判断传入的参数是否为空，若有传入的参数有一个不为空就抛出异常
+	 * 
+	 * @param msg    提示信息
+	 * @param values 需要判断的数据
+	 * @throws ValidateException
+	 */
+	public static void assertBlank(String msg, Object... values) throws ValidateException {
+		if (EmptyUtil.notEmpty(values)) {
+			for (Object value : values) {
+				if (null != value) {
+					if (value instanceof String) {
+						if (StringUtils.isNotBlank(value.toString())) {
+							new ValidateException(msg);
+						}
+					} else {
+						new ValidateException(msg);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * 判断传入的参数是否不为空，若有传入的参数有一个为空就抛出异常
+	 * 
+	 * @param msg    提示信息
+	 * @param values 需要判断的数据
+	 * @throws ValidateException
+	 */
+	public static void assertNotBlank(String msg, Object... values) throws ValidateException {
+		if (EmptyUtil.notEmpty(values)) {
+			for (Object value : values) {
+				if (null == value) {
+					new ValidateException(msg);
+				} else {
+					if (StringUtils.isBlank(value.toString())) {
+						new ValidateException(msg);
+					}
+
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * 对象是否为null(或空字符串)，若不为空(或空字符串)则抛出异常
+	 * 
+	 * @param value 需要判断的数据
+	 * @param msg   提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertNull(Object value, String msg) throws ValidateException {
+		if (null != value) {
+			if (value instanceof String) {
+				if (StringUtils.isNotBlank(value.toString())) {
+					new ValidateException(msg);
+				}
+			} else {
+				new ValidateException(msg);
+			}
+		}
+	}
+
+	/**
+	 * 对象是否不为null(或空字符串)，若为空(或空字符串)则抛出异常
+	 * 
+	 * @param value 需要判断的数据
+	 * @param msg   提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertNotNull(Object value, String msg) throws ValidateException {
+		if (null == value || StringUtils.isBlank("" + value)) {
+			new ValidateException(msg);
+		}
+	}
 
 	/**
 	 * 判断分页对象是否为空，若不为空则抛出异常
