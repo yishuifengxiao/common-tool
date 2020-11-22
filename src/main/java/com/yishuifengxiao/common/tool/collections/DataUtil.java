@@ -9,7 +9,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import com.yishuifengxiao.common.tool.exception.ValidateException;
 import com.yishuifengxiao.common.tool.exception.data.RecordException;
 
 /**
@@ -20,6 +22,190 @@ import com.yishuifengxiao.common.tool.exception.data.RecordException;
  * @Version 0.0.1
  */
 public final class DataUtil {
+
+	/**
+	 * 将数据安全地转换成串行流Stream<br/>
+	 * 该操作不会引起NPE
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @return 串行流Stream
+	 */
+	public static <T> Stream<T> stream(List<T> list) {
+		if (EmptyUtil.isEmpty(list)) {
+			list = new ArrayList<>();
+		}
+		return list.stream();
+	}
+
+	/**
+	 * 将数据转换成串行流Stream，如果传入的数据为null则抛出异常
+	 * 
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @param msg  提示信息
+	 * @return 串行流Stream
+	 * @throws ValidateException
+	 */
+	public static <T> Stream<T> stream(List<T> list, String msg) throws ValidateException {
+		if (EmptyUtil.isEmpty(list)) {
+			throw new ValidateException(msg);
+		}
+		return list.stream();
+	}
+
+	/**
+	 * 将数据安全地转换成串行流Stream<br/>
+	 * 该操作不会引起NPE
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @return 串行流Stream
+	 */
+	public static <T> Stream<T> stream(Set<T> set) {
+		if (EmptyUtil.isEmpty(set)) {
+			set = new HashSet<>();
+		}
+		return set.stream();
+	}
+
+	/**
+	 * 将数据转换成串行流Stream<br/>
+	 * 该操作不会引起NPE
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @param msg  提示信息
+	 * @return 串行流Stream
+	 * @throws ValidateException
+	 */
+	public static <T> Stream<T> stream(Set<T> set, String msg) throws ValidateException {
+		if (EmptyUtil.isEmpty(set)) {
+			throw new ValidateException(msg);
+		}
+		return set.stream();
+	}
+
+	/**
+	 * 将数据安全地转换成串行流Stream<br/>
+	 * 该操作不会引起NPE
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @return 串行流Stream
+	 */
+	public static <T> Stream<T> stream(T[] data) {
+		return stream(toList(data));
+	}
+
+	/**
+	 * 将数据转换成串行流Stream,如果传入的数据为null则抛出异常
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @param msg  提示信息
+	 * @return 串行流Stream
+	 * @throws ValidateException
+	 */
+	public static <T> Stream<T> stream(T[] data, String msg) throws ValidateException {
+		if (null == data) {
+			throw new ValidateException(msg);
+		}
+		return stream(toList(data));
+	}
+
+	/**
+	 * 将数据安全地转换成并行流ParallelStream<br/>
+	 * 该操作不会引起NPE
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @return 并行流Stream
+	 */
+	public static <T> Stream<T> parallelStream(List<T> list) {
+		if (EmptyUtil.isEmpty(list)) {
+			list = new ArrayList<>();
+		}
+		return list.parallelStream();
+	}
+
+	/**
+	 * 将数据转换成并行流ParallelStream，如果传入的数据为null则抛出异常
+	 * 
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @param msg  提示信息
+	 * @return 并行流ParallelStream
+	 * @throws ValidateException
+	 */
+	public static <T> Stream<T> parallelStream(List<T> list, String msg) throws ValidateException {
+		if (EmptyUtil.isEmpty(list)) {
+			throw new ValidateException(msg);
+		}
+		return list.parallelStream();
+	}
+
+	/**
+	 * 将数据安全地转换成并行流ParallelStream<br/>
+	 * 该操作不会引起NPE
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @return 并行流ParallelStream
+	 */
+	public static <T> Stream<T> parallelStream(Set<T> set) {
+		if (EmptyUtil.isEmpty(set)) {
+			set = new HashSet<>();
+		}
+		return set.parallelStream();
+	}
+
+	/**
+	 * 将数据转换成并行流ParallelStream,如果传入的数据为null则抛出异常
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @param msg  提示信息
+	 * @return 并行流ParallelStream
+	 * @throws ValidateException
+	 */
+	public static <T> Stream<T> parallelStream(Set<T> set, String msg) throws ValidateException {
+		if (EmptyUtil.isEmpty(set)) {
+			throw new ValidateException(msg);
+		}
+		return set.parallelStream();
+	}
+
+	/**
+	 * 将数据安全地转换成并行流ParallelStream<br/>
+	 * 该操作不会引起NPE
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @return 并行流ParallelStream
+	 */
+	public static <T> Stream<T> parallelStream(T[] data) {
+		return parallelStream(toList(data));
+	}
+
+	/**
+	 * 将数据安全地转换成并行流ParallelStream<br/>
+	 * 该操作不会引起NPE
+	 * 
+	 * @param <T>
+	 * @param list 需要转换的数据
+	 * @param msg  提示信息
+	 * @return 并行流ParallelStream
+	 * @throws ValidateException
+	 */
+	public static <T> Stream<T> parallelStream(T[] data, String msg) throws ValidateException {
+		if (null == data) {
+			throw new ValidateException(msg);
+		}
+		return parallelStream(toList(data));
+	}
 
 	/**
 	 * 将数组转为list

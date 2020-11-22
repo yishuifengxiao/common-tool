@@ -183,6 +183,20 @@ public class Assert {
 	}
 
 	/**
+	 * 判断List是否为空，若不为空则抛出异常
+	 * 
+	 * @param <T>
+	 * @param data list数据
+	 * @param msg  异常提示信息
+	 * @throws ValidateException
+	 */
+	public synchronized static <T> void assertEmpty(List<T> list, String msg) throws ValidateException {
+		if (EmptyUtil.notEmpty(list)) {
+			throw new ValidateException(msg);
+		}
+	}
+
+	/**
 	 * 判断set是否为空，若不为空则抛出异常
 	 * 
 	 * @param <T>

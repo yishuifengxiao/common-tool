@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import com.yishuifengxiao.common.tool.entity.Page;
-import com.yishuifengxiao.common.tool.exception.ValidateException;
 
 /**
  * 空集合判断类
@@ -132,17 +131,32 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断List是否为空，若不为空则抛出异常
+	 * 判断是否为空的列表
 	 * 
-	 * @param <T>
-	 * @param data list数据
-	 * @param msg  异常提示信息
-	 * @throws ValidateException
+	 * @param list 列表
+	 * @return 如果为空返回为false，否则为true
 	 */
-	public synchronized static <T> void assertEmpty(List<T> list, String msg) throws ValidateException {
-		if (!isEmpty(list)) {
-			throw new ValidateException(msg);
+	public synchronized static <T> boolean notEmpty(List<T> list) {
+		return !isEmpty(list);
+	}
+
+	/**
+	 * 判断集合是否为空的列表
+	 * 
+	 * @param data 元素集合
+	 * @return 如果为空返回为true，否则为false
+	 */
+	public synchronized static <T> boolean isEmpty(Collection<T> data) {
+		if (data == null) {
+			return true;
 		}
+		if (data.size() == 0) {
+			return true;
+		}
+		if (data.isEmpty()) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -151,8 +165,8 @@ public final class EmptyUtil {
 	 * @param list 列表
 	 * @return 如果为空返回为false，否则为true
 	 */
-	public synchronized static <T> boolean notEmpty(List<T> list) {
-		return !isEmpty(list);
+	public synchronized static <T> boolean notEmpty(Collection<T> data) {
+		return !isEmpty(data);
 	}
 
 	/**
