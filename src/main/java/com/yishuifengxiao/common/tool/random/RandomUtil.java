@@ -24,7 +24,7 @@ public class RandomUtil {
 	/**
 	 * 时间格式化器
 	 */
-	private static final  DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyyMMddhhmmss");
+	private static final DateTimeFormatter FORMAT = DateTimeFormatter.ofPattern("yyyyMMddhhmmss");
 
 	/**
 	 * 随机生成一个常见的汉字
@@ -32,7 +32,7 @@ public class RandomUtil {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static final  String chinese() throws UnsupportedEncodingException {
+	public static final String chinese() throws UnsupportedEncodingException {
 		Random random = new Random(System.currentTimeMillis());
 		// B0 + 0~39(16~55)
 		// 一级汉字所占区
@@ -52,7 +52,7 @@ public class RandomUtil {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	public static final  String chinese(int len) throws UnsupportedEncodingException {
+	public static final String chinese(int len) throws UnsupportedEncodingException {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < len; i++) {
 			sb.append(chinese());
@@ -65,8 +65,20 @@ public class RandomUtil {
 	 * 
 	 * @return 形如yyyyMMddhhmmss的字符串
 	 */
-	public static final synchronized  String fromNow() {
+	public static final synchronized String fromNow() {
 		return LocalDateTime.now(DateTimeUtil.zoneIdOfChina()).format(FORMAT);
+
+	}
+
+	/**
+	 * 根据当前时间生成形如 前缀+yyyyMMddhhmmss的字符串
+	 * 
+	 * @param prefix 增加的前缀
+	 * @return 形如 前缀+yyyyMMddhhmmss的字符串
+	 */
+	public static final synchronized String fromNow(String prefix) {
+		return new StringBuffer(prefix).append(LocalDateTime.now(DateTimeUtil.zoneIdOfChina()).format(FORMAT))
+				.toString();
 
 	}
 
@@ -76,7 +88,7 @@ public class RandomUtil {
 	 * 
 	 * @return 形如yyyyMMddhhmmss100的字符串
 	 */
-	public static final synchronized  String fromNowWithNumber() {
+	public static final synchronized String fromNowWithNumber() {
 		return new StringBuffer(LocalDateTime.now(DateTimeUtil.zoneIdOfChina()).format(FORMAT))
 				.append(RandomUtils.nextInt(100, 999)).toString();
 	}

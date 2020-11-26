@@ -125,6 +125,61 @@ public final class NumberUtil {
 	}
 
 	/**
+	 * 判断数据是否为null，如果为null则返回默认值，否则返回为输入值
+	 * 
+	 * @param value        输入值
+	 * @param defaultValue 默认值
+	 * @return
+	 */
+	public static Boolean get(Boolean value, boolean defaultValue) {
+		return null == value ? defaultValue : value;
+	}
+
+	/**
+	 * 判断数据是否为null，如果为null则返回默认值，否则返回为输入值
+	 * 
+	 * @param value        输入值
+	 * @param defaultValue 默认值
+	 * @return
+	 */
+	public static Integer get(Integer value, int defaultValue) {
+		return null == value ? defaultValue : value;
+	}
+
+	/**
+	 * 判断数据是否为null，如果为null则返回默认值，否则返回为输入值
+	 * 
+	 * @param value        输入值
+	 * @param defaultValue 默认值
+	 * @return
+	 */
+	public static Long get(Long value, long defaultValue) {
+		return null == value ? defaultValue : value;
+	}
+
+	/**
+	 * 判断数据是否为null，如果为null则返回默认值，否则返回为输入值
+	 * 
+	 * @param value        输入值
+	 * @param defaultValue 默认值
+	 * @return
+	 */
+	public static Float get(Float value, float defaultValue) {
+		return null == value ? defaultValue : value;
+	}
+
+	/**
+	 * 判断数据是否为null，如果为null则返回默认值，否则返回为输入值
+	 * 
+	 * @param value        输入值
+	 * @param defaultValue 默认值
+	 * @return
+	 */
+	public static Double get(Double value, double defaultValue) {
+		return null == value ? defaultValue : value;
+	}
+
+	/**
 	 * 将字符串转为Double
 	 * 
 	 * @param str 需要解析的字符串

@@ -32,12 +32,17 @@ public final class DateTimeUtil {
 	private final static String DEFAULT_ZONE = "Asia/Shanghai";
 
 	/**
-	 * 默认的日期时间的字符串形式
+	 * 默认的日期时间的字符串形式 yyyy-MM-dd HH:mm:ss形式
 	 */
 	private final static String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 	/**
-	 * 默认的日期字符串形式
+	 * 默认的日期时间的字符串形式 yyyy-MM-dd HH:mm
+	 */
+	private final static String SIMPLE_DATETIME_FORMAT = "yyyy-MM-dd HH:mm";
+
+	/**
+	 * 默认的日期字符串形式 yyyy-MM-dd
 	 */
 	private final static String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 
@@ -117,7 +122,7 @@ public final class DateTimeUtil {
 	/**
 	 * 将字符串解析为LocalDateTime 形式的时间<br/>
 	 * 
-	 * 默认采用yyyy-MM-dd HH:mm:ss 和 yyyy-MM-dd 形式解析
+	 * 默认采用yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm 或 yyyy-MM-dd 形式解析
 	 * 
 	 * @param timeStr 需要解析的字符串
 	 * @param pattern 解析规则 当未填写解析规则时，
@@ -125,7 +130,7 @@ public final class DateTimeUtil {
 	 * @throws CustomException
 	 */
 	public static synchronized LocalDateTime parse(String timeStr) throws CustomException {
-		return parse(timeStr, DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT);
+		return parse(timeStr, DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT, SIMPLE_DATETIME_FORMAT);
 	}
 
 	/**
@@ -172,20 +177,10 @@ public final class DateTimeUtil {
 	}
 
 	/**
-	 * 将Date形式的时间格式化为yyyy-MM-dd HH:mm:ss格式的字符串
-	 * 
-	 * @param localDateTime
-	 * @return yyyy-MM-dd HH:mm:ss格式的字符串
-	 */
-	public static synchronized String format(Date date) {
-		return format(date, DEFAULT_DATETIME_FORMAT);
-	}
-
-	/**
 	 * 将Date形式的时间格式化为 格式化为指定形式的字符串
 	 * 
-	 * @param localDateTime
-	 * @param pattern       格式化形式，例如yyyy-MM-dd HH:mm:ss
+	 * @param Date
+	 * @param pattern 格式化形式，例如yyyy-MM-dd HH:mm:ss
 	 * @return
 	 */
 	public static synchronized String format(Date date, String pattern) {
@@ -194,6 +189,36 @@ public final class DateTimeUtil {
 		}
 		DateTimeFormatter format = DateTimeFormatter.ofPattern(pattern);
 		return format.format(date2LocalDateTime(date));
+	}
+
+	/**
+	 * 将Date形式的时间格式化为yyyy-MM-dd HH:mm:ss格式的字符串
+	 * 
+	 * @param Date
+	 * @return yyyy-MM-dd HH:mm:ss格式的字符串
+	 */
+	public static synchronized String format(Date date) {
+		return format(date, DEFAULT_DATETIME_FORMAT);
+	}
+
+	/**
+	 * 将Date形式的时间格式化为yyyy-MM-dd格式的字符串
+	 * 
+	 * @param Date
+	 * @return yyyy-MM-dd 格式的字符串
+	 */
+	public static synchronized String formatDate(Date date) {
+		return format(date, DEFAULT_DATE_FORMAT);
+	}
+
+	/**
+	 * 将Date形式的时间格式化为yyyy-MM-dd格式的字符串
+	 * 
+	 * @param LocalDateTime
+	 * @return yyyy-MM-dd 格式的字符串
+	 */
+	public static synchronized String formatDate(LocalDateTime localDateTime) {
+		return format(localDateTime, DEFAULT_DATE_FORMAT);
 	}
 
 }
