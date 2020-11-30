@@ -15,6 +15,42 @@ import lombok.extern.slf4j.Slf4j;
 public final class NumberUtil {
 
 	/**
+	 * 获取一个自然数
+	 * 
+	 * @param value 输入的数据
+	 * @return 如果输入的数据为null或负数则返回为0，否则返回为原始值
+	 */
+	public static Integer getNumber(Integer value) {
+		if (null == value || value < 0) {
+			return 0;
+		}
+		return value;
+	}
+
+	/**
+	 * 获取一个自然数
+	 * 
+	 * @param value 输入的数据
+	 * @return 如果输入的数据为null或负数则返回为0，否则返回为原始值
+	 */
+	public static Long getNumber(Long value) {
+		if (null == value || value < 0) {
+			return 0L;
+		}
+		return value;
+	}
+
+	/**
+	 * 获取一个自然数
+	 * 
+	 * @param value 输入的数据
+	 * @return 如果输入的数据为数据类型，当转化后的数据为null或负数则返回为0，否则返回为原始值
+	 */
+	public static Long getNumber(String value) {
+		return getNumber(parseLong(value));
+	}
+
+	/**
 	 * 将字符串形式的数字转成Boolean值<br/>
 	 * 1 如果数字为null，返回为false<br/>
 	 * 2 数字小于或等于0返回为false<br/>
