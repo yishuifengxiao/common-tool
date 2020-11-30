@@ -11,8 +11,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import com.yishuifengxiao.common.tool.constant.ErrorCode;
+import com.yishuifengxiao.common.tool.exception.DataException;
 import com.yishuifengxiao.common.tool.exception.ValidateException;
-import com.yishuifengxiao.common.tool.exception.data.RecordException;
 
 /**
  * 集合元素获取工具类
@@ -50,7 +51,7 @@ public final class DataUtil {
 	 */
 	public static <T> Stream<T> stream(List<T> list, String msg) throws ValidateException {
 		if (EmptyUtil.isEmpty(list)) {
-			throw new ValidateException(msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 		return list.stream();
 	}
@@ -82,7 +83,7 @@ public final class DataUtil {
 	 */
 	public static <T> Stream<T> stream(Set<T> set, String msg) throws ValidateException {
 		if (EmptyUtil.isEmpty(set)) {
-			throw new ValidateException(msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 		return set.stream();
 	}
@@ -110,7 +111,7 @@ public final class DataUtil {
 	 */
 	public static <T> Stream<T> stream(T[] data, String msg) throws ValidateException {
 		if (null == data) {
-			throw new ValidateException(msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 		return stream(toList(data));
 	}
@@ -142,7 +143,7 @@ public final class DataUtil {
 	 */
 	public static <T> Stream<T> parallelStream(List<T> list, String msg) throws ValidateException {
 		if (EmptyUtil.isEmpty(list)) {
-			throw new ValidateException(msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 		return list.parallelStream();
 	}
@@ -173,7 +174,7 @@ public final class DataUtil {
 	 */
 	public static <T> Stream<T> parallelStream(Set<T> set, String msg) throws ValidateException {
 		if (EmptyUtil.isEmpty(set)) {
-			throw new ValidateException(msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 		return set.parallelStream();
 	}
@@ -202,7 +203,7 @@ public final class DataUtil {
 	 */
 	public static <T> Stream<T> parallelStream(T[] data, String msg) throws ValidateException {
 		if (null == data) {
-			throw new ValidateException(msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 		return parallelStream(toList(data));
 	}
@@ -273,12 +274,12 @@ public final class DataUtil {
 	 * @param data     链表数据
 	 * @param errorMsg 异常提示信息
 	 * @return
-	 * @throws RecordException
+	 * @throws DataException
 	 */
-	public synchronized static <T> T first(List<T> data, String errorMsg) throws RecordException {
+	public synchronized static <T> T first(List<T> data, String errorMsg) throws DataException {
 		T t = first(data);
 		if (null == t) {
-			throw new RecordException(errorMsg);
+			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
 	}
@@ -316,12 +317,12 @@ public final class DataUtil {
 	 * @param data
 	 * @param errorMsg 异常提示信息
 	 * @return
-	 * @throws RecordException
+	 * @throws DataException
 	 */
-	public synchronized static <T> T first(Set<T> data, String errorMsg) throws RecordException {
+	public synchronized static <T> T first(Set<T> data, String errorMsg) throws DataException {
 		T t = first(data);
 		if (null == t) {
-			throw new RecordException(errorMsg);
+			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
 	}
@@ -358,12 +359,12 @@ public final class DataUtil {
 	 * @param data
 	 * @param errorMsg 异常提示信息
 	 * @return
-	 * @throws RecordException
+	 * @throws DataException
 	 */
-	public synchronized static <T> T first(T[] data, String errorMsg) throws RecordException {
+	public synchronized static <T> T first(T[] data, String errorMsg) throws DataException {
 		T t = first(data);
 		if (null == t) {
-			throw new RecordException(errorMsg);
+			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
 	}
@@ -401,12 +402,12 @@ public final class DataUtil {
 	 * @param data
 	 * @param errorMsg 异常提示信息
 	 * @return
-	 * @throws RecordException
+	 * @throws DataException
 	 */
-	public synchronized static <T> T first(Collection<T> data, String errorMsg) throws RecordException {
+	public synchronized static <T> T first(Collection<T> data, String errorMsg) throws DataException {
 		T t = first(data);
 		if (null == t) {
-			throw new RecordException(errorMsg);
+			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
 	}

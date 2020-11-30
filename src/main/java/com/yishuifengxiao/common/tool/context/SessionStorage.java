@@ -1,25 +1,25 @@
 package com.yishuifengxiao.common.tool.context;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import org.springframework.util.Assert;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 全局存储工具类
+ * 本地线程存储工具类
  * 
  * @author yishui
  * @date 2019年10月29日
  * @version 1.0.0
  */
 @Slf4j
-public final class LocalStorage {
+public final class SessionStorage {
 	/**
 	 * 本地线程存储
 	 */
-	private static final Map<String, Object> LOCAL_HOLLDER = new HashMap<>();
+	private static final ThreadLocal<Map<String, Object>> CONTEXT_HOLLDER = new ThreadLocal<>();
 
 	/**
 	 * 根据键获取存储的值
@@ -29,7 +29,8 @@ public final class LocalStorage {
 	 */
 	public synchronized static Object get(String key) {
 		Assert.notNull(key, "key值不能为空");
-		return LOCAL_HOLLDER.get(key);
+		Map<String, Object> map = get();
+		return map.get(key);
 	}
 
 	/**
@@ -97,7 +98,8 @@ public final class LocalStorage {
 	 */
 	public synchronized static void put(String key, Object value) {
 		Assert.notNull(key, "key值不能为空");
-		LOCAL_HOLLDER.put(key, value);
+		Map<String, Object> map = get();
+		map.put(key, value);
 	}
 
 	/**
@@ -107,15 +109,16 @@ public final class LocalStorage {
 	 */
 	public synchronized static void remove(String key) {
 		Assert.notNull(key, "key值不能为空");
-		LOCAL_HOLLDER.put(key, null);
-		LOCAL_HOLLDER.remove(key);
+		Map<String, Object> map = get();
+		map.put(key, null);
+		map.remove(key);
 	}
 
 	/**
 	 * 清空本地线程副本
 	 */
 	public synchronized static void clear() {
-		LOCAL_HOLLDER.clear();
+		CONTEXT_HOLLDER.remove();
 	}
 
 	/**
@@ -123,8 +126,13 @@ public final class LocalStorage {
 	 * 
 	 * @return
 	 */
-	public static Map<String, Object> getAll() {
-
-		return LOCAL_HOLLDER;
+	private static Map<String, Object> get() {
+		Map<String, Object> map = CONTEXT_HOLLDER.get();
+		if (map == null) {
+			map = new WeakHashMap<>();
+			CONTEXT_HOLLDER.set(map);
+		}
+		return map;
 	}
+
 }

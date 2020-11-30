@@ -125,7 +125,7 @@ public class CookieUtil {
 		try {
 			response.flushBuffer();
 		} catch (IOException e) {
-			log.debug("设置cookie时出现问题，出现问题的原因为 {} ", e.getMessage());
+			log.debug("【易水工具】设置cookie时出现问题，出现问题的原因为 {} ", e.getMessage());
 		}
 	}
 

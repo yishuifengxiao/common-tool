@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2018年12月11日
  * @Version 0.0.1
  */
-public class MapUtil {
+public final class MapUtil {
 
 	/**
 	 * 数据存储对象

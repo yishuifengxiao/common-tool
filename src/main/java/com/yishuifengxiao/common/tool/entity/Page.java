@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.yishuifengxiao.common.tool.collections.EmptyUtil;
+import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.converter.PageConverter;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 
@@ -95,7 +96,7 @@ public class Page<S> implements Serializable {
 	 */
 	public <T> Page<T> convert(PageConverter<S, T> converter, boolean isFilterNull) throws CustomException {
 		if (null == converter) {
-			throw new CustomException("转换器不能为空");
+			throw new CustomException(ErrorCode.PARAM_NULL, "转换器不能为空");
 		}
 		if (null == this.data) {
 			this.data = new ArrayList<>();

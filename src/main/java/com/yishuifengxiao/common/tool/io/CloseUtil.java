@@ -29,7 +29,7 @@ public class CloseUtil {
 				inputStream.close();
 				inputStream = null;
 			} catch (Exception e) {
-				log.debug("关闭输入流时出现问题，出现问题的原因为 {}", e.getMessage());
+				log.debug("【易水工具】关闭输入流时出现问题，出现问题的原因为 {}", e.getMessage());
 			}
 		}
 	}
@@ -45,7 +45,7 @@ public class CloseUtil {
 				outputStream.close();
 				outputStream = null;
 			} catch (Exception e) {
-				log.debug("关闭输出流时出现问题，出现问题的原因为 {}", e.getMessage());
+				log.debug("【易水工具】关闭输出流时出现问题，出现问题的原因为 {}", e.getMessage());
 			}
 		}
 	}
@@ -61,7 +61,7 @@ public class CloseUtil {
 				reader.close();
 				reader = null;
 			} catch (Exception e) {
-				log.debug("关闭字符流读取器时出现问题，出现问题的原因为 {}", e.getMessage());
+				log.debug("【易水工具】关闭字符流读取器时出现问题，出现问题的原因为 {}", e.getMessage());
 			}
 		}
 	}
@@ -77,7 +77,7 @@ public class CloseUtil {
 				writer.close();
 				writer = null;
 			} catch (Exception e) {
-				log.debug("关闭字符流写入器时出现问题，出现问题的原因为 {}", e.getMessage());
+				log.debug("【易水工具】关闭字符流写入器时出现问题，出现问题的原因为 {}", e.getMessage());
 			}
 		}
 	}
@@ -93,7 +93,7 @@ public class CloseUtil {
 				closeable.close();
 				closeable = null;
 			} catch (Exception e) {
-				log.debug("关闭可以关闭的数据的源或目的地时出现问题，出现问题的原因为 {}", e.getMessage());
+				log.debug("【易水工具】关闭可以关闭的数据的源或目的地时出现问题，出现问题的原因为 {}", e.getMessage());
 			}
 		}
 	}

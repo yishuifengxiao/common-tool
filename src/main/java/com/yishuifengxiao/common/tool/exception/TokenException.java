@@ -4,7 +4,12 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 与token相关的异常
+ * 凭证异常<br/>
+ * <br/>
+ * 主要使用到的场景有:<br/>
+ * 1 应该携带访问凭证的地方没有携带<br/>
+ * 2 携带了一个非法的访问凭证
+ * 
  * @author yishui
  * @date 2018年12月8日
  * @Version 0.0.1
@@ -31,6 +36,10 @@ public class TokenException extends CustomException {
 
 	}
 
+	public TokenException(int errorCode, String message) {
+		super(errorCode, message);
+	}
+	
 	/**
 	 * @param cause
 	 */

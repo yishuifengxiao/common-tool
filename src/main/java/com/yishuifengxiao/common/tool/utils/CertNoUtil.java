@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.exception.ValidateException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,7 @@ public class CertNoUtil {
 	 * @param idcard 身份证号
 	 * @return true表示合法，false不合法
 	 */
-	public static synchronized  boolean isValid(String idcard) { // 非18位为假
+	public static synchronized boolean isValid(String idcard) { // 非18位为假
 		// 判断出生日期是否正确
 		try {
 			extractBirthday(idcard);
@@ -78,9 +79,9 @@ public class CertNoUtil {
 	 * @return 出生日期
 	 * @throws ValidateException
 	 */
-	private static synchronized  LocalDate extractBirthday(String str) throws ValidateException {
+	private static synchronized LocalDate extractBirthday(String str) throws ValidateException {
 		if (StringUtils.length(str) != LENGTH_LONG_IDCARD) {
-			throw new ValidateException("身份证号格式不正确");
+			throw new ValidateException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号格式不正确");
 		}
 		try {
 			String year = StringUtils.substring(str, 6, 10);
@@ -88,8 +89,8 @@ public class CertNoUtil {
 			String day = StringUtils.substring(str, 12, 14);
 			return LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
 		} catch (Exception e) {
-			log.info("从身份证号{}中提取出生日期时出现异常，出现异常的原因为 {}", str, e.getMessage());
-			throw new ValidateException("身份证号出生日期格式不正确");
+			log.info("【易水工具】从身份证号{}中提取出生日期时出现异常，出现异常的原因为 {}", str, e.getMessage());
+			throw new ValidateException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号出生日期格式不正确");
 		}
 	}
 
@@ -100,10 +101,10 @@ public class CertNoUtil {
 	 * @return 出生日期
 	 * @throws ValidateException
 	 */
-	public static synchronized  LocalDate getBirthday(String str) throws ValidateException {
+	public static synchronized LocalDate getBirthday(String str) throws ValidateException {
 
 		if (!isValid(str)) {
-			throw new ValidateException("身份证号格式不正确");
+			throw new ValidateException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号格式不正确");
 		}
 		return extractBirthday(str);
 	}

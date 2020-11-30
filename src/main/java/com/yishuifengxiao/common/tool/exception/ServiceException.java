@@ -4,7 +4,11 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 逻辑层通用异常
+ * 逻辑异常<br/>
+ * <br/>
+ * 主要使用到的场景有:<br/>
+ * 1 在处理业务逻辑时出现异常情况
+ * 2 一般在逻辑层使用较多
  * 
  * @author yishui
  * @date 2018年12月27日
@@ -30,6 +34,10 @@ public class ServiceException extends CustomException {
 	public ServiceException(String message) {
 		super(message);
 
+	}
+
+	public ServiceException(int errorCode, String message) {
+		super(errorCode, message);
 	}
 
 	/**

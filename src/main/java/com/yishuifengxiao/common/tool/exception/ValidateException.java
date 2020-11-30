@@ -4,7 +4,11 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 与验证相关的异常类
+ * 验证异常<br/>
+ * <br/>
+ * 主要使用到的场景有:<br/>
+ * 1 在进行业务校验逻辑时出现问题
+ * 
  * @author yishui
  * @date 2018年12月8日
  * @Version 0.0.1
@@ -29,6 +33,10 @@ public class ValidateException extends CustomException {
 	public ValidateException(String message) {
 		super(message);
 
+	}
+	
+	public ValidateException(int errorCode, String message) {
+		super(errorCode, message);
 	}
 
 	/**

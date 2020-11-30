@@ -41,7 +41,7 @@ public class DES {
 		try {
 			return byte2hex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
 		} catch (Exception e) {
-			log.info("使用密钥加密数据 {} 时出现问题，出现问题的原因为 {}", data, e.getMessage());
+			log.info("【易水工具】使用密钥加密数据 {} 时出现问题，出现问题的原因为 {}", data, e.getMessage());
 		}
 		return null;
 	}
@@ -68,7 +68,7 @@ public class DES {
 		try {
 			return new String(decrypt(hex2byte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
 		} catch (Exception e) {
-			log.info("使用密钥解密数据 {} 时出现问题，出现问题的原因为 {}", data, e.getMessage());
+			log.info("【易水工具】使用密钥解密数据 {} 时出现问题，出现问题的原因为 {}", data, e.getMessage());
 		}
 		return null;
 	}

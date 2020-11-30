@@ -1,12 +1,14 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.exception.data;
-
-import com.yishuifengxiao.common.tool.exception.CustomException;
+package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 数据类异常
+ * 数据异常<br/>
+ * <br/>
+ * 主要使用到的场景有:<br/>
+ * 1 期待的数据与获取到的数据不一致<br/>
+ * 2 获取到的数据里包含有非法数据
  * 
  * @author yishui
  * @date 2018年12月27日
@@ -32,6 +34,10 @@ public class DataException extends CustomException {
 	public DataException(String message) {
 		super(message);
 
+	}
+
+	public DataException(int errorCode, String message) {
+		super(errorCode, message);
 	}
 
 	/**

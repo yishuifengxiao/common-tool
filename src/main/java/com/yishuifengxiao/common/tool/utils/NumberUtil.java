@@ -192,7 +192,7 @@ public final class NumberUtil {
 				return Double.parseDouble(str.trim());
 			}
 		} catch (Exception e) {
-			log.debug("将字符串 {} 解析为 Double 时出现问题，出现问题的原因为 {}", str, e.getMessage());
+			log.debug("【易水工具】将字符串 {} 解析为 Double 时出现问题，出现问题的原因为 {}", str, e.getMessage());
 		}
 		return null;
 	}
@@ -222,7 +222,7 @@ public final class NumberUtil {
 				return Float.parseFloat(str.trim());
 			}
 		} catch (Exception e) {
-			log.debug("将字符串 {} 解析为 Float 时出现问题，出现问题的原因为 {}", str, e.getMessage());
+			log.debug("【易水工具】将字符串 {} 解析为 Float 时出现问题，出现问题的原因为 {}", str, e.getMessage());
 		}
 		return null;
 	}
@@ -252,7 +252,7 @@ public final class NumberUtil {
 				return Integer.parseInt(str.trim());
 			}
 		} catch (Exception e) {
-			log.debug("将字符串 {} 解析为 Integer 时出现问题，出现问题的原因为 {}", str, e.getMessage());
+			log.debug("【易水工具】将字符串 {} 解析为 Integer 时出现问题，出现问题的原因为 {}", str, e.getMessage());
 		}
 		return null;
 	}
@@ -282,7 +282,7 @@ public final class NumberUtil {
 				return Long.parseLong(str.trim());
 			}
 		} catch (Exception e) {
-			log.debug("将字符串 {} 解析为 Integer 时出现问题，出现问题的原因为 {}", str, e.getMessage());
+			log.debug("【易水工具】将字符串 {} 解析为 Integer 时出现问题，出现问题的原因为 {}", str, e.getMessage());
 		}
 		return null;
 	}

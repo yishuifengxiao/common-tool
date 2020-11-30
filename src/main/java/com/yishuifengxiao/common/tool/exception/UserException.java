@@ -1,12 +1,15 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.exception.user;
-
-import com.yishuifengxiao.common.tool.exception.CustomException;
+package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 用户相关的异常
+ * 用户异常<br/>
+ * <br/>
+ * 主要使用到的场景有:<br/>
+ * 1 获取用户信息失败<br/>
+ * 2 根据用户信息进行校验时发生了异常<br/>
+ * 
  * @author yishui
  * @date 2018年12月8日
  * @Version 0.0.1
@@ -33,6 +36,11 @@ public class UserException extends CustomException {
 
 	}
 
+	
+	public UserException(int errorCode, String message) {
+		super(errorCode, message);
+	}
+	
 	/**
 	 * @param cause
 	 */

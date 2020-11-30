@@ -33,7 +33,7 @@ public class Md5 {
 			// BigInteger函数则将8位的字符串转换成16位hex值，用字符串来表示；得到字符串形式的hash值
 			return new BigInteger(1, md.digest()).toString(16);
 		} catch (Exception e) {
-			log.info("使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", str, e.getMessage());
+			log.info("【易水工具】使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", str, e.getMessage());
 			return null;
 		}
 	}
@@ -80,7 +80,7 @@ public class Md5 {
 			}
 			return new String(str);
 		} catch (Exception e) {
-			log.info("使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", s, e.getMessage());
+			log.info("【易水工具】使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", s, e.getMessage());
 			return null;
 		}
 	}

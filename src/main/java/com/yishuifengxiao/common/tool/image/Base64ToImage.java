@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Base64Utils;
 
+import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
 
@@ -31,22 +32,22 @@ public final class Base64ToImage {
 	public static synchronized String imageToBase64ByLocal(String imgFile) throws CustomException {
 
 		if (StringUtils.isBlank(imgFile)) {
-			throw new CustomException("本地图片的地址不能为空");
+			throw new CustomException(ErrorCode.PARAM_NULL, "本地图片的地址不能为空");
 		}
 
 		if (!new File(imgFile).exists()) {
-			throw new CustomException("本地图片不存在");
+			throw new CustomException(ErrorCode.PARAM_NULL, "本地图片不存在");
 		}
-		InputStream inputStream =null;
+		InputStream inputStream = null;
 		byte[] data = null;
 		// 读取图片字节数组
 		try {
-			 inputStream = new FileInputStream(imgFile);
+			inputStream = new FileInputStream(imgFile);
 			data = new byte[inputStream.available()];
 			inputStream.read(data);
 		} catch (IOException e) {
-			throw new CustomException(e.getMessage());
-		}finally {
+			throw new CustomException(ErrorCode.PARSE_ERROR, e.getMessage());
+		} finally {
 			CloseUtil.close(inputStream);
 		}
 		// 返回Base64编码过的字节数组字符串
@@ -62,7 +63,7 @@ public final class Base64ToImage {
 	 */
 	public static synchronized void base64ToImage(String imgBase64Str, String imagePath) throws CustomException {
 		if (!StringUtils.isNoneBlank(imgBase64Str, imagePath)) {
-			throw new CustomException("输入参数错误");
+			throw new CustomException(ErrorCode.PARAM_NULL, "输入参数错误");
 		}
 		OutputStream out = null;
 		try {
@@ -79,8 +80,8 @@ public final class Base64ToImage {
 			out.flush();
 
 		} catch (Exception e) {
-			throw new CustomException(e.getMessage());
-		}finally {
+			throw new CustomException(ErrorCode.PARSE_ERROR, e.getMessage());
+		} finally {
 			CloseUtil.close(out);
 		}
 	}

@@ -12,7 +12,9 @@ import java.lang.reflect.Field;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.BeanUtils;
 
+import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.exception.CustomException;
+import com.yishuifengxiao.common.tool.exception.ValidateException;
 
 /**
  * 对象转换类
@@ -30,13 +32,22 @@ public final class BeanUtil {
 	 * @param target    目标对象
 	 * @param converter 目标对象
 	 * @return
+	 * @throws ValidateException
 	 */
-	public static <S, T> T copy(S source, T target) {
-		if (source == null || target == null) {
-			return null;
+	public synchronized static <S, T> T copy(S source, T target) throws ValidateException {
+		if (source == null) {
+			throw new ValidateException(ErrorCode.PARAM_NULL, "源数据不能为空");
 		}
-		BeanUtils.copyProperties(source, target);
-		return target;
+		if (target == null) {
+			throw new ValidateException(ErrorCode.PARAM_NULL, "目标填充不能为空");
+		}
+		try {
+			BeanUtils.copyProperties(source, target);
+			return target;
+		} catch (Exception e) {
+			throw new ValidateException(ErrorCode.DATA_CONVERT_ERROR, e.getMessage());
+		}
+
 	}
 
 	/**
@@ -84,7 +95,7 @@ public final class BeanUtil {
 			bo.close();
 			oo.close();
 		} catch (Exception e) {
-			throw new CustomException(e.getMessage());
+			throw new CustomException(ErrorCode.BEAN_EXCEPTION, e.getMessage());
 		}
 		return bytes;
 	}
@@ -106,7 +117,7 @@ public final class BeanUtil {
 			bi.close();
 			oi.close();
 		} catch (Exception e) {
-			throw new CustomException(e.getMessage());
+			throw new CustomException(ErrorCode.BEAN_EXCEPTION, e.getMessage());
 		}
 		return obj;
 	}
@@ -131,7 +142,7 @@ public final class BeanUtil {
 			bi.close();
 			oi.close();
 		} catch (Exception e) {
-			throw new CustomException(e.getMessage());
+			throw new CustomException(ErrorCode.BEAN_EXCEPTION, e.getMessage());
 		}
 		return t;
 	}

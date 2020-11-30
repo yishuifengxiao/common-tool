@@ -12,6 +12,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
 
+import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -146,8 +147,8 @@ public final class DateTimeUtil {
 		try {
 			return date2LocalDateTime(DateUtils.parseDate(timeStr, patterns));
 		} catch (ParseException e) {
-			log.info("按照解析规则 {} 从字符串 {} 中解析出时间时出现问题，出现问题的原因为{}", patterns, timeStr, e.getMessage());
-			throw new CustomException("从字符串中解析时间失败");
+			log.info("【易水工具】按照解析规则 {} 从字符串 {} 中解析出时间时出现问题，出现问题的原因为{}", patterns, timeStr, e.getMessage());
+			throw new CustomException(ErrorCode.PARAM_FORMAT_ERROR,"从字符串中解析时间失败");
 		}
 	}
 
