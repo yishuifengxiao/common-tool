@@ -1,9 +1,11 @@
-package com.yishuifengxiao.common.tool.validate;
+package com.yishuifengxiao.common.tool.validate.validator;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.springframework.util.StringUtils;
+
+import com.yishuifengxiao.common.tool.validate.Password;
 
 /**
  * 自定义密码校验器

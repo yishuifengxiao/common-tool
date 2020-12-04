@@ -17,7 +17,7 @@ import com.yishuifengxiao.common.tool.exception.ValidateException;
  * @date 2020年12月4日
  * @version 1.0.0
  */
-public class ValidatorUtil {
+public class BeanValidator {
 	private final static Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
 	/**
