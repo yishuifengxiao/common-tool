@@ -15,6 +15,56 @@ import lombok.extern.slf4j.Slf4j;
 public final class NumberUtil {
 
 	/**
+	 * 判断两个数据是否相等
+	 * 
+	 * @param originalValue 原始值，如果原始值为null直接返回为 false
+	 * @param value         被比较值
+	 * @return 如果两个值相等返回为true,否则为false
+	 */
+	public static boolean equals(Integer originalValue, Integer value) {
+		if (null == originalValue) {
+			return false;
+		}
+		return originalValue.equals(value);
+	}
+
+	/**
+	 * 判断两个数据是否相等
+	 * 
+	 * @param originalValue 原始值，如果原始值为null直接返回为 false
+	 * @param value         被比较值
+	 * @return 如果两个值相等返回为true,否则为false
+	 */
+	public static boolean equals(Long originalValue, Long value) {
+		if (null == originalValue) {
+			return false;
+		}
+		return originalValue.equals(value);
+	}
+
+	/**
+	 * 判断数据里是否有等于目标数据的数字
+	 * 
+	 * @param originalValue 目标数据，如果为null直接返回为false
+	 * @param values        待比较的数据，如果为null直接返回为false
+	 * @return 待比较的数据里包含了目标数据就返回为true，否则为false
+	 */
+	public static boolean contains(Integer originalValue, Integer... values) {
+		if (null == originalValue) {
+			return false;
+		}
+		if (null == values) {
+			return false;
+		}
+		for (Integer value : values) {
+			if (equals(originalValue, value)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * 获取一个自然数
 	 * 
 	 * @param value 输入的数据

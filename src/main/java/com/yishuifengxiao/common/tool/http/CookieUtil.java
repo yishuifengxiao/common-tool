@@ -116,6 +116,7 @@ public class CookieUtil {
 		}
 		Cookie cookie = new Cookie(name, value);
 		cookie.setPath("/");
+		cookie.setSecure(true);
 		if (maxValue != 0) {
 			cookie.setMaxAge(maxValue);
 		} else {

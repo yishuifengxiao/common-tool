@@ -34,7 +34,8 @@ public final class BeanUtil {
 	 * @return
 	 * @throws ValidateException
 	 */
-	public synchronized static <S, T> T copy(S source, T target) throws ValidateException {
+	@SuppressWarnings("unused")
+	public static synchronized <S, T> T copy(S source, T target) throws ValidateException {
 		if (source == null) {
 			throw new ValidateException(ErrorCode.PARAM_NULL, "源数据不能为空");
 		}
@@ -43,6 +44,9 @@ public final class BeanUtil {
 		}
 		try {
 			BeanUtils.copyProperties(source, target);
+			if (null == target) {
+				throw new ValidateException(ErrorCode.PARAM_NULL, "目标填充不能为空");
+			}
 			return target;
 		} catch (Exception e) {
 			throw new ValidateException(ErrorCode.DATA_CONVERT_ERROR, e.getMessage());
@@ -132,8 +136,8 @@ public final class BeanUtil {
 	 * @throws CustomException
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T byteToObject(T t, byte[] bytes) throws CustomException {
-
+	public static <T> T byteToObject(byte[] bytes, Class<T> clazz) throws CustomException {
+		T t = null;
 		try {
 			// bytearray to object
 			ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
