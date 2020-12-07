@@ -44,6 +44,13 @@ public @interface InInt {
 	int[] value() default {};
 
 	/**
+	 * 是否允许目标值为null，默认为true
+	 * 
+	 * @return
+	 */
+	boolean nullable() default true;
+
+	/**
 	 * 分组
 	 * 
 	 * @return

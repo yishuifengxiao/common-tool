@@ -35,6 +35,13 @@ public @interface InString {
 	 * @return
 	 */
 	String message() default "非法的数据";
+	
+	/**
+	 * 是否允许目标值为null，默认为true
+	 * 
+	 * @return
+	 */
+	boolean nullable() default true;
 
 	/**
 	 * 指定的数据集合

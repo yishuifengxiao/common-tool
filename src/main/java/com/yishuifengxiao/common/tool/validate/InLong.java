@@ -15,10 +15,10 @@ import javax.validation.Payload;
 
 import com.yishuifengxiao.common.tool.validate.validator.InLongValidator;
 
-
 /**
  * 目标数据必须在指定的数据集合之内<br/>
  * 针对长整型数据
+ * 
  * @author qingteng
  * @date 2020年12月4日
  * @version 1.0.0
@@ -42,6 +42,13 @@ public @interface InLong {
 	 * @return
 	 */
 	long[] value() default {};
+
+	/**
+	 * 是否允许目标值为null，默认为true
+	 * 
+	 * @return
+	 */
+	boolean nullable() default true;
 
 	/**
 	 * 分组

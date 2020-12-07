@@ -17,17 +17,17 @@ import com.yishuifengxiao.common.tool.validate.InInt;
 public class InIntValidator implements ConstraintValidator<InInt, Integer> {
 
 	private int[] values;
-	
-
+	private boolean nullable = true;
 
 	@Override
 	public void initialize(InInt constraintAnnotation) {
 		this.values = constraintAnnotation.value();
+		this.nullable = constraintAnnotation.nullable();
 	}
 
 	@Override
 	public boolean isValid(Integer value, ConstraintValidatorContext context) {
-		if (null == value) {
+		if (null == value && !this.nullable) {
 			return false;
 		}
 		boolean contain = false;

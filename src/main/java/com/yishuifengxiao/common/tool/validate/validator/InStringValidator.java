@@ -19,14 +19,17 @@ public class InStringValidator implements ConstraintValidator<InString, String> 
 
 	private String[] values;
 
+	private boolean nullable = true;
+
 	@Override
 	public void initialize(InString constraintAnnotation) {
 		this.values = constraintAnnotation.value();
+		this.nullable = constraintAnnotation.nullable();
 	}
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext context) {
-		if (null == value) {
+		if (null == value && !this.nullable) {
 			return false;
 		}
 		boolean contain = false;

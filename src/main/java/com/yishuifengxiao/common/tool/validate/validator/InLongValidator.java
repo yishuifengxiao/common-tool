@@ -16,15 +16,17 @@ import com.yishuifengxiao.common.tool.validate.InLong;
 public class InLongValidator implements ConstraintValidator<InLong, Long> {
 
 	private long[] values;
+	private boolean nullable = true;
 
 	@Override
 	public void initialize(InLong constraintAnnotation) {
 		this.values = constraintAnnotation.value();
+		this.nullable = constraintAnnotation.nullable();
 	}
 
 	@Override
 	public boolean isValid(Long value, ConstraintValidatorContext context) {
-		if (null == value) {
+		if (null == value && !this.nullable) {
 			return false;
 		}
 		boolean contain = false;
