@@ -25,7 +25,8 @@ public final class NumberUtil {
 		if (null == originalValue) {
 			return false;
 		}
-		return originalValue.equals(value);
+		return originalValue == value || originalValue.equals(value)
+				|| StringUtils.equalsIgnoreCase("" + originalValue, "" + value);
 	}
 
 	/**
@@ -39,7 +40,8 @@ public final class NumberUtil {
 		if (null == originalValue) {
 			return false;
 		}
-		return originalValue.equals(value);
+		return originalValue == value || originalValue.equals(value)
+				|| StringUtils.equalsIgnoreCase("" + originalValue, "" + value);
 	}
 
 	/**
