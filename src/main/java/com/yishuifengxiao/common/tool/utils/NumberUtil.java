@@ -22,11 +22,10 @@ public final class NumberUtil {
 	 * @return 如果两个值相等返回为true,否则为false
 	 */
 	public static boolean equals(Integer originalValue, Integer value) {
-		if (null == originalValue) {
+		if (null == originalValue || null == value) {
 			return false;
 		}
-		return originalValue == value || originalValue.equals(value)
-				|| StringUtils.equalsIgnoreCase("" + originalValue, "" + value);
+		return originalValue.equals(value) || StringUtils.equalsIgnoreCase(originalValue.toString(), value.toString());
 	}
 
 	/**
@@ -37,11 +36,10 @@ public final class NumberUtil {
 	 * @return 如果两个值相等返回为true,否则为false
 	 */
 	public static boolean equals(Long originalValue, Long value) {
-		if (null == originalValue) {
+		if (null == originalValue || null == value) {
 			return false;
 		}
-		return originalValue == value || originalValue.equals(value)
-				|| StringUtils.equalsIgnoreCase("" + originalValue, "" + value);
+		return originalValue.equals(value) || StringUtils.equalsIgnoreCase(originalValue.toString(), value.toString());
 	}
 
 	/**

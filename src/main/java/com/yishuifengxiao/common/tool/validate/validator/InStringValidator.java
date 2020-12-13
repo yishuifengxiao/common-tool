@@ -35,7 +35,7 @@ public class InStringValidator implements ConstraintValidator<InString, String> 
 		boolean contain = false;
 		if (null != values) {
 			for (String val : values) {
-				if (StringUtils.equals(value, val)) {
+				if (StringUtils.equalsIgnoreCase(value, val)) {
 					contain = true;
 					break;
 				}
