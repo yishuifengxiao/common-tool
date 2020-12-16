@@ -1,5 +1,6 @@
-package com.yishuifengxiao.common.tool.collections;
+package com.yishuifengxiao.common.tool.utils;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -8,10 +9,10 @@ import java.util.Set;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.ValidateException;
-import com.yishuifengxiao.common.tool.utils.BetweenUtil;
 
 /**
  * 集合断言工具类
@@ -23,6 +24,166 @@ import com.yishuifengxiao.common.tool.utils.BetweenUtil;
 public final class Assert {
 
 	/**
+	 * 判断给定的值是否大于或等于0,如果为null或小于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterEqualZero(Integer value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于或等于0,如果为null或小于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterEqualZero(Long value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于或等于0,如果为null或小于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterEqualZero(Float value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于或等于0,如果为null或小于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterEqualZero(Double value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于或等于0,如果为null或小于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterEqualZero(BigDecimal value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于0,如果为null或小于0或等于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterZero(Integer value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于0,如果为null或小于0或等于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterZero(Long value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于0,如果为null或小于0或等于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterZero(Float value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于0,如果为null或小于0或等于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterZero(Double value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否大于0,如果为null或小于0或等于0就抛出异常
+	 * 
+	 * @param value 需要比较的值
+	 * @param msg   异常提示信息
+	 * @throws ValidateException
+	 */
+	public static void assertGreaterZero(BigDecimal value, String msg) throws ValidateException {
+		if (!NumberUtil.greaterZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断两个值是否相等，如果不相等就抛出异常<br/>
+	 * 任何比较值为null则抛出异常
+	 * 
+	 * @param originalValue 原始值
+	 * @param value         比较值
+	 * @param msg           异常信息
+	 * @throws ValidateException
+	 */
+	public static void assertEquals(Integer originalValue, Integer value, String msg) throws ValidateException {
+		if (!NumberUtil.equals(originalValue, value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断两个值是否相等，如果不相等就抛出异常<br/>
+	 * 任何比较值为null则抛出异常
+	 * 
+	 * @param originalValue 原始值
+	 * @param value         比较值
+	 * @param msg           异常信息
+	 * @throws ValidateException
+	 */
+	public static void assertEquals(Long originalValue, Long value, String msg) throws ValidateException {
+		if (!NumberUtil.equals(originalValue, value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
 	 * 判断数据是否为true,如果不是为true则抛出异常
 	 * 
 	 * @param bool 需要判断的数据
@@ -31,8 +192,44 @@ public final class Assert {
 	 */
 	public static void assertTrue(Boolean bool, String msg) throws ValidateException {
 		if (!BooleanUtils.isTrue(bool)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
+	}
+
+	/**
+	 * 判读所有给定的数据为true,如果有一个数据不为true就抛出异常
+	 * 
+	 * @param msg    异常提示信息
+	 * @param values 需要判断的值
+	 * @throws ValidateException
+	 */
+	public static void assertTrue(String msg, boolean... values) throws ValidateException {
+		if (null != values) {
+			for (boolean value : values) {
+				if (!value) {
+					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+				}
+			}
+		}
+
+	}
+
+	/**
+	 * 判读所有给定的数据为false,如果有一个数据不为false就抛出异常
+	 * 
+	 * @param msg    异常提示信息
+	 * @param values 需要判断的值
+	 * @throws ValidateException
+	 */
+	public static void assertFalse(String msg, boolean... values) throws ValidateException {
+		if (null != values) {
+			for (boolean value : values) {
+				if (value) {
+					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+				}
+			}
+		}
+
 	}
 
 	/**
@@ -44,7 +241,7 @@ public final class Assert {
 	 */
 	public static void assertFalse(Boolean bool, String msg) throws ValidateException {
 		if (!BooleanUtils.isFalse(bool)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -64,7 +261,7 @@ public final class Assert {
 	public static void assertBetween(String msg, Integer compareValue, Integer startValue, Integer endValue)
 			throws ValidateException {
 		if (!BetweenUtil.isBetween(compareValue, startValue, endValue)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -84,7 +281,7 @@ public final class Assert {
 	public static void assertBetween(String msg, Long compareValue, Long startValue, Long endValue)
 			throws ValidateException {
 		if (!BetweenUtil.isBetween(compareValue, startValue, endValue)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -98,7 +295,7 @@ public final class Assert {
 	 */
 	public static void assertObjectEquals(String msg, Object value1, Object value2) throws ValidateException {
 		if (!equals(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -112,7 +309,7 @@ public final class Assert {
 	 */
 	public static void assertObjectNotEquals(String msg, Object value1, Object value2) throws ValidateException {
 		if (equals(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -149,7 +346,7 @@ public final class Assert {
 	 */
 	public static void assertEquals2String(String msg, Object value1, Object value2) throws ValidateException {
 		if (!equals2String(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -167,7 +364,7 @@ public final class Assert {
 	 */
 	public static void assertNotEquals2String(String msg, Object value1, Object value2) throws ValidateException {
 		if (equals2String(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -199,7 +396,7 @@ public final class Assert {
 	 */
 	public static void assertEquals(String msg, String value1, String value2) throws ValidateException {
 		if (!StringUtils.equals(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -213,7 +410,7 @@ public final class Assert {
 	 */
 	public static void assertNotEquals(String msg, String value1, String value2) throws ValidateException {
 		if (StringUtils.equals(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -227,7 +424,7 @@ public final class Assert {
 	 */
 	public static void assertEquals(String msg, Integer value1, Integer value2) throws ValidateException {
 		if (!equals(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -241,7 +438,7 @@ public final class Assert {
 	 */
 	public static void assertNotEquals(String msg, Integer value1, Integer value2) throws ValidateException {
 		if (equals(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -255,7 +452,7 @@ public final class Assert {
 	 */
 	public static void assertEqualsIgnoreCase(String msg, String value1, String value2) throws ValidateException {
 		if (!StringUtils.equalsIgnoreCase(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -269,7 +466,7 @@ public final class Assert {
 	 */
 	public static void assertNotEqualsIgnoreCase(String msg, String value1, String value2) throws ValidateException {
 		if (StringUtils.equalsIgnoreCase(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -286,10 +483,10 @@ public final class Assert {
 				if (null != value) {
 					if (value instanceof String) {
 						if (StringUtils.isNotBlank(value.toString())) {
-							throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+							throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 						}
 					} else {
-						throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+						throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 					}
 				}
 			}
@@ -307,10 +504,10 @@ public final class Assert {
 		if (EmptyUtil.notEmpty(values)) {
 			for (Object value : values) {
 				if (null == value) {
-					throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 				} else {
 					if (StringUtils.isBlank(value.toString())) {
-						throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+						throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 					}
 
 				}
@@ -340,7 +537,7 @@ public final class Assert {
 				}
 			}
 			if (!contain) {
-				throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+				throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 			}
 		}
 	}
@@ -367,7 +564,7 @@ public final class Assert {
 				}
 			}
 			if (contain) {
-				throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+				throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 			}
 		}
 	}
@@ -383,7 +580,7 @@ public final class Assert {
 	public static <T> void assertOptionalNull(Optional<T> optional, String msg) throws ValidateException {
 		if (null != optional) {
 			if (optional.isPresent()) {
-				throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+				throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 			}
 		}
 	}
@@ -398,10 +595,10 @@ public final class Assert {
 	 */
 	public static <T> void assertOptionalNotNull(Optional<T> optional, String msg) throws ValidateException {
 		if (null == optional) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 		if (!optional.isPresent()) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -417,10 +614,10 @@ public final class Assert {
 		if (null != data) {
 			if (data instanceof String) {
 				if (StringUtils.isNotBlank(data.toString())) {
-					throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 				}
 			} else {
-				throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+				throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 			}
 		}
 	}
@@ -435,12 +632,12 @@ public final class Assert {
 	 */
 	public static <T> void assertNotNull(Object data, String msg) throws ValidateException {
 		if (null == data) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 
 		} else {
 			if (data instanceof String) {
 				if (StringUtils.isBlank(data.toString())) {
-					throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 				}
 			}
 		}
@@ -456,7 +653,7 @@ public final class Assert {
 	 */
 	public static <T> void assertEmpty(Page<T> page, String msg) throws ValidateException {
 		if (EmptyUtil.notEmpty(page)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -470,7 +667,7 @@ public final class Assert {
 	 */
 	public static <T> void assertNoEmpty(Page<T> page, String msg) throws ValidateException {
 		if (EmptyUtil.isEmpty(page)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -485,7 +682,7 @@ public final class Assert {
 	public static <T> void assertEmpty(org.springframework.data.domain.Page<T> page, String msg)
 			throws ValidateException {
 		if (EmptyUtil.notEmpty(page)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -500,7 +697,7 @@ public final class Assert {
 	public static <T> void assertNoEmpty(org.springframework.data.domain.Page<T> page, String msg)
 			throws ValidateException {
 		if (EmptyUtil.isEmpty(page)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -514,7 +711,7 @@ public final class Assert {
 	 */
 	public static <T> void assertEmpty(T[] data, String msg) throws ValidateException {
 		if (EmptyUtil.notEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -528,7 +725,7 @@ public final class Assert {
 	 */
 	public static <T> void assertNoEmpty(T[] data, String msg) throws ValidateException {
 		if (EmptyUtil.isEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -542,7 +739,7 @@ public final class Assert {
 	 */
 	public synchronized static <T> void assertEmpty(List<T> list, String msg) throws ValidateException {
 		if (EmptyUtil.notEmpty(list)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -556,7 +753,7 @@ public final class Assert {
 	 */
 	public static <T> void assertEmpty(Set<T> data, String msg) throws ValidateException {
 		if (EmptyUtil.notEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -570,7 +767,7 @@ public final class Assert {
 	 */
 	public static <T> void assertNoEmpty(Set<T> data, String msg) throws ValidateException {
 		if (EmptyUtil.isEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -584,7 +781,7 @@ public final class Assert {
 	 */
 	public static <T> void assertNoEmpty(List<T> data, String msg) throws ValidateException {
 		if (EmptyUtil.isEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -598,7 +795,7 @@ public final class Assert {
 	 */
 	public static <T> void assertOnlyOne(Collection<T> data, String msg) throws ValidateException {
 		if (!EmptyUtil.onlyOneElement(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -612,7 +809,7 @@ public final class Assert {
 	 */
 	public static <T> void assertNotOnlyOne(Collection<T> data, String msg) throws ValidateException {
 		if (!EmptyUtil.notOnlyOneElement(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR,msg);
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 

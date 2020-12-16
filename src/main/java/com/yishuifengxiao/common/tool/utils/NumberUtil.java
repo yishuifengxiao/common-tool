@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import java.math.BigDecimal;
+
 import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,140 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class NumberUtil {
+	/**
+	 * 零值
+	 */
+	private static final BigDecimal ZERO = new BigDecimal(0);
+
+	/**
+	 * 判断输入值是否大于或等于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于或等于0返回为true,否则为false
+	 */
+	public static boolean greaterEqualZero(Integer value) {
+		if (null == value) {
+			return false;
+		}
+		return value >= 0;
+	}
+
+	/**
+	 * 判断输入值是否大于或等于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于或等于0返回为true,否则为false
+	 */
+	public static boolean greaterEqualZero(Long value) {
+		if (null == value) {
+			return false;
+		}
+		return value >= 0;
+	}
+
+	/**
+	 * 判断输入值是否大于或等于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于或等于0返回为true,否则为false
+	 */
+	public static boolean greaterEqualZero(Float value) {
+		if (null == value) {
+			return false;
+		}
+		return new BigDecimal(value).compareTo(ZERO) >= 0;
+	}
+
+	/**
+	 * 判断输入值是否大于或等于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于或等于0返回为true,否则为false
+	 */
+	public static boolean greaterEqualZero(Double value) {
+		if (null == value) {
+			return false;
+		}
+		return new BigDecimal(value).compareTo(ZERO) >= 0;
+	}
+
+	/**
+	 * 判断输入值是否大于或等于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于或等于0返回为true,否则为false
+	 */
+	public static boolean greaterEqualZero(BigDecimal value) {
+		if (null == value) {
+			return false;
+		}
+		return value.compareTo(ZERO) >= 0;
+	}
+
+	/**
+	 * 判断输入值是否大于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于0返回为true,否则为false
+	 */
+	public static boolean greaterZero(Integer value) {
+		if (null == value) {
+			return false;
+		}
+		return value > 0;
+	}
+
+	/**
+	 * 判断输入值是否大于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于0返回为true,否则为false
+	 */
+	public static boolean greaterZero(Long value) {
+		if (null == value) {
+			return false;
+		}
+		return value > 0;
+	}
+
+	/**
+	 * 判断输入值是否大于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于0返回为true,否则为false
+	 */
+	public static boolean greaterZero(Float value) {
+		if (null == value) {
+			return false;
+		}
+		return new BigDecimal(value).compareTo(ZERO) > 0;
+	}
+
+	/**
+	 * 判断输入值是否大于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于0返回为true,否则为false
+	 */
+	public static boolean greaterZero(Double value) {
+		if (null == value) {
+			return false;
+		}
+		return new BigDecimal(value).compareTo(ZERO) > 0;
+	}
+
+	/**
+	 * 判断输入值是否大于0
+	 * 
+	 * @param value 需要判断的输入值，若该值为null直接返回false
+	 * @return 输入值是否大于0返回为true,否则为false
+	 */
+	public static boolean greaterZero(BigDecimal value) {
+		if (null == value) {
+			return false;
+		}
+		return value.compareTo(ZERO) > 0;
+	}
 
 	/**
 	 * 判断两个数据是否相等
@@ -153,6 +289,16 @@ public final class NumberUtil {
 			return false;
 		}
 		return true;
+	}
+
+	/**
+	 * 将boolean值转换成数字
+	 * 
+	 * @param value boolean值
+	 * @return value为true时返回1，否则为0
+	 */
+	public static int bool2Int(boolean value) {
+		return value ? 1 : 0;
 	}
 
 	/**
