@@ -8,7 +8,9 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.yishuifengxiao.common.tool.constant.ErrorCode;
@@ -240,6 +242,20 @@ public final class DataUtil {
 			set.add(t);
 		}
 		return set;
+	}
+
+	/**
+	 * 取出Stream中的第一个非空元素,如果Stream为空则返回null
+	 * 
+	 * @param data
+	 * @return
+	 */
+	public synchronized static <T> T first(Stream<T> data) {
+		if (data == null) {
+			return null;
+		}
+
+		return first(data.filter(Objects::nonNull).collect(Collectors.toList()));
 	}
 
 	/**
