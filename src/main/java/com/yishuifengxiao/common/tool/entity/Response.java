@@ -107,6 +107,17 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
+	 * 默认的请求成功时的返回信息(200响应码)
+	 * 
+	 * @param msg  响应的基本信息
+	 * @param data 响应的数据信息
+	 * @return 响应对象
+	 */
+	public static <T> Response<T> suc(String msg, T data) {
+		return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, data);
+	}
+
+	/**
 	 * 默认的参数有误的返回信息(400响应码)
 	 * 
 	 * @return 参数有误时返回信息
@@ -126,6 +137,17 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
+	 * 默认的参数有误的返回信息(400响应码)
+	 * 
+	 * @param msg  响应的基本信息
+	 * @param data 响应的数据信息
+	 * @return 响应对象
+	 */
+	public static <T> Response<T> badParam(String msg, T data) {
+		return new Response<>(HttpStatus.BAD_REQUEST.value(), msg, data);
+	}
+
+	/**
 	 * 资源未授权的返回信息(401响应码)
 	 * 
 	 * @return 资源未授权的返回信息
@@ -142,6 +164,17 @@ public class Response<T> implements Serializable {
 	 */
 	public static Response<Object> unAuth(String msg) {
 		return new Response<Object>(HttpStatus.UNAUTHORIZED.value(), msg);
+	}
+
+	/**
+	 * 资源未授权的返回信息(401响应码)
+	 * 
+	 * @param msg  响应的基本信息
+	 * @param data 响应的数据信息
+	 * @return 响应对象
+	 */
+	public static <T> Response<T> unAuth(String msg, T data) {
+		return new Response<>(HttpStatus.UNAUTHORIZED.value(), msg, data);
 	}
 
 	/**
@@ -190,6 +223,17 @@ public class Response<T> implements Serializable {
 
 	public static Response<Object> error(String msg) {
 		return new Response<Object>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg);
+	}
+
+	/**
+	 * 服务器内部异常时的返回信息(500响应码)
+	 * 
+	 * @param msg  响应的基本信息
+	 * @param data 响应的数据信息
+	 * @return 响应对象
+	 */
+	public static <T> Response<T> error(String msg, T data) {
+		return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, data);
 	}
 
 	/**
