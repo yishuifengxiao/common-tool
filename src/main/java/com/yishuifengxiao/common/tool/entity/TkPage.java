@@ -28,9 +28,9 @@ public class TkPage<S> extends Page<S> {
 	 * @param page mybatis的分页对象
 	 * @return 自定义分页对象
 	 */
-	public static synchronized  <S> Page<S> of(PageInfo<S> page) {
+	public static synchronized <S> Page<S> of(PageInfo<S> page) {
 		page = page == null ? PageInfo.of(new ArrayList<>()) : page;
-		return Page.of(page.getList(), page.getTotal(), page.getSize() + 0L, page.getPageNum() + 0L);
+		return Page.of(page.getList(), page.getTotal(), page.getSize(), page.getPageNum());
 
 	}
 

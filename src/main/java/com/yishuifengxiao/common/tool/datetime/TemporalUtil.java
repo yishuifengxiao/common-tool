@@ -7,13 +7,13 @@ import java.util.Date;
 /**
  * 日期时间偏移工具类<br/>
  * <br/>
- * 基于Date返回的
+ * 基于LocalDateTime返回的
  * 
  * @author yishui
  * @date 2020年10月19日
  * @Version 0.0.1
  */
-public class DateOffsetUtil {
+public class TemporalUtil {
 
 	/**
 	 * 获取今天0时0分0秒这个时间<br/>
@@ -22,8 +22,8 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 今天0时0分0秒这个时间
 	 */
-	public synchronized static Date todayStart() {
-		return getDayStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now()));
+	public synchronized static LocalDateTime todayStart() {
+		return getDayStart(LocalDateTime.now());
 	}
 
 	/**
@@ -32,7 +32,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 昨天0时0分0秒这个时间
 	 */
-	public synchronized static Date yesterdayStart() {
+	public synchronized static LocalDateTime yesterdayStart() {
 		return dayStart(1L);
 	}
 
@@ -42,7 +42,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 昨天0时0分0秒这个时间
 	 */
-	public synchronized static Date yesterdayEnd() {
+	public synchronized static LocalDateTime yesterdayEnd() {
 		return dayEnd(1L);
 	}
 
@@ -52,7 +52,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 前天0时0分0秒这个时间
 	 */
-	public static Date last2DayStart() {
+	public static LocalDateTime last2DayStart() {
 		return dayStart(2L);
 	}
 
@@ -62,7 +62,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static Date last7DayStart() {
+	public static LocalDateTime last7DayStart() {
 		return dayStart(7L);
 	}
 
@@ -72,7 +72,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static Date last14DayStart() {
+	public static LocalDateTime last14DayStart() {
 		return dayStart(14L);
 	}
 
@@ -82,7 +82,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return
 	 */
-	public static Date mondayStart() {
+	public static LocalDateTime mondayStart() {
 		return getMondayStart(new Date());
 	}
 
@@ -92,7 +92,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 上周的周一的开始时间
 	 */
-	public static Date lastMondayStart() {
+	public static LocalDateTime lastMondayStart() {
 		return mondayStart(1);
 	}
 
@@ -102,7 +102,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 上上周的周一的开始时间
 	 */
-	public static Date last2MondayStart() {
+	public static LocalDateTime last2MondayStart() {
 		return mondayStart(1);
 	}
 
@@ -114,11 +114,11 @@ public class DateOffsetUtil {
 	 * @param offsetWeeks 偏移的周数，1表示是上周，2表示是上上周
 	 * @return 上几周的周一的开始时间
 	 */
-	public static Date mondayStart(int offsetWeeks) {
+	public static LocalDateTime mondayStart(int offsetWeeks) {
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(getMondayStart(new Date()));
+		cal.setTime(DateTimeUtil.localDateTime2Date(getMondayStart(new Date())));
 		cal.add(Calendar.DATE, -7 * offsetWeeks);
-		return cal.getTime();
+		return DateTimeUtil.date2LocalDateTime(cal.getTime());
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class DateOffsetUtil {
 	 * @param date
 	 * @return 给定时间所在那一周的周一
 	 */
-	public synchronized static Date getMonday(Date date) {
+	public synchronized static LocalDateTime getMonday(Date date) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(date);
 		// 获得当前日期是一个星期的第几天
@@ -142,7 +142,7 @@ public class DateOffsetUtil {
 		int day = cal.get(Calendar.DAY_OF_WEEK);
 		// 根据日历的规则，给当前日期减去星期几与一个星期第一天的差值
 		cal.add(Calendar.DATE, cal.getFirstDayOfWeek() - day);
-		return cal.getTime();
+		return DateTimeUtil.date2LocalDateTime(cal.getTime());
 	}
 
 	/**
@@ -152,7 +152,7 @@ public class DateOffsetUtil {
 	 * @param date
 	 * @return 给定时间所在那一周的周一
 	 */
-	public synchronized static Date getMondayStart(Date date) {
+	public synchronized static LocalDateTime getMondayStart(Date date) {
 		return getDayStart(getMonday(date));
 	}
 
@@ -163,9 +163,8 @@ public class DateOffsetUtil {
 	 * @param offsetDays 过去的天数，从1开始计数，1表示是昨天
 	 * @return 过去指定天数的0时0分0秒
 	 */
-	public synchronized static Date dayStart(long offsetDays) {
-
-		return getDayStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now().minusDays(offsetDays)));
+	public synchronized static LocalDateTime dayStart(long offsetDays) {
+		return getDayStart(LocalDateTime.now().minusDays(offsetDays));
 	}
 
 	/**
@@ -175,9 +174,8 @@ public class DateOffsetUtil {
 	 * @param offsetDays 过去的天数，从1开始计数，1表示是昨天
 	 * @return 过去指定天数的0时0分0秒
 	 */
-	public synchronized static Date dayEnd(long offsetDays) {
-
-		return getDayEnd(DateTimeUtil.localDateTime2Date(LocalDateTime.now().minusDays(offsetDays)));
+	public synchronized static LocalDateTime dayEnd(long offsetDays) {
+		return getDayEnd(LocalDateTime.now().minusDays(offsetDays));
 	}
 
 	/**
@@ -186,9 +184,8 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 本月1号0时0分0秒这个时间
 	 */
-	public static Date monthStart() {
-
-		return getMonthStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now()));
+	public static LocalDateTime monthStart() {
+		return getMonthStart(LocalDateTime.now());
 	}
 
 	/**
@@ -198,9 +195,8 @@ public class DateOffsetUtil {
 	 * @param offset 与当前月份的偏移量 ,从1开始计数，1表示上个月
 	 * @return 某个月之前的1号0时0分0秒这个时间
 	 */
-	public synchronized static Date monthStart(long offset) {
-
-		return getMonthStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now().minusMonths(offset)));
+	public synchronized static LocalDateTime monthStart(long offset) {
+		return getMonthStart(LocalDateTime.now().minusMonths(offset));
 	}
 
 	/**
@@ -209,9 +205,8 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 本月1号0时0分0秒这个时间
 	 */
-	public static Date lastMonthStart() {
-
-		return getMonthStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now().minusMonths(1L)));
+	public static LocalDateTime lastMonthStart() {
+		return getMonthStart(LocalDateTime.now().minusMonths(1L));
 	}
 
 	/**
@@ -220,9 +215,8 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static Date last2MonthStart() {
-
-		return getDayStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now().minusMonths(2L).withDayOfMonth(1)));
+	public static LocalDateTime last2MonthStart() {
+		return getDayStart(LocalDateTime.now().minusMonths(2L).withDayOfMonth(1));
 	}
 
 	/**
@@ -232,13 +226,11 @@ public class DateOffsetUtil {
 	 * @param dateTime 输入日期
 	 * @return 输入日期的0时0分0秒
 	 */
-	public synchronized static Date getDayStart(Date dateTime) {
+	public synchronized static LocalDateTime getDayStart(LocalDateTime dateTime) {
 		if (null == dateTime) {
 			return null;
 		}
-
-		return DateTimeUtil.localDateTime2Date(
-				DateTimeUtil.date2LocalDateTime(dateTime).withHour(0).withMinute(0).withSecond(0).withNano(0));
+		return dateTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
 	}
 
 	/**
@@ -248,12 +240,11 @@ public class DateOffsetUtil {
 	 * @param dateTime 输入日期
 	 * @return 输入日期的0时0分0秒
 	 */
-	public synchronized static Date getDayEnd(Date dateTime) {
+	public synchronized static LocalDateTime getDayEnd(LocalDateTime dateTime) {
 		if (null == dateTime) {
 			return null;
 		}
-		return DateTimeUtil.localDateTime2Date(
-				DateTimeUtil.date2LocalDateTime(dateTime).withHour(23).withMinute(59).withSecond(59).withNano(0));
+		return dateTime.withHour(23).withMinute(59).withSecond(59).withNano(0);
 	}
 
 	/**
@@ -263,13 +254,11 @@ public class DateOffsetUtil {
 	 * @param dateTime 输入日期
 	 * @return 输入日期的当月1号0时0分0秒
 	 */
-	public synchronized static Date getMonthStart(Date dateTime) {
+	public synchronized static LocalDateTime getMonthStart(LocalDateTime dateTime) {
 		if (null == dateTime) {
 			return null;
 		}
-
-		return getDayStart(
-				DateTimeUtil.localDateTime2Date(DateTimeUtil.date2LocalDateTime(dateTime).withDayOfMonth(1)));
+		return getDayStart(dateTime.withDayOfMonth(1));
 	}
 
 	/**
@@ -279,13 +268,11 @@ public class DateOffsetUtil {
 	 * @param dateTime 输入日期
 	 * @return 输入日期的当月1号0时0分0秒
 	 */
-	public synchronized static Date getYearStart(Date dateTime) {
+	public synchronized static LocalDateTime getYearStart(LocalDateTime dateTime) {
 		if (null == dateTime) {
 			return null;
 		}
-
-		return getDayStart(DateTimeUtil
-				.localDateTime2Date(DateTimeUtil.date2LocalDateTime(dateTime).withDayOfMonth(1).withMonth(1)));
+		return getDayStart(dateTime.withDayOfMonth(1).withMonth(1));
 
 	}
 

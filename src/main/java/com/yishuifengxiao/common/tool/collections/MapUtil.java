@@ -24,7 +24,7 @@ public final class MapUtil {
 	 * 
 	 * @return map工具类实例
 	 */
-	public synchronized static MapUtil getInstance() {
+	public synchronized static MapUtil instance() {
 		return new MapUtil();
 	}
 

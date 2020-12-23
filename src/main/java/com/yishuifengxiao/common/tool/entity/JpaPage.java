@@ -31,7 +31,7 @@ public class JpaPage<S> extends Page<S> {
 	public static synchronized <S> Page<S> of(org.springframework.data.domain.Page<S> page) {
 		page = page == null ? new PageImpl<>(new ArrayList<>()) : page;
 
-		return Page.of(page.getContent(), page.getTotalElements(), page.getSize() + 0L, page.getNumber() + 1L);
+		return Page.of(page.getContent(), page.getTotalElements(), page.getSize() , page.getNumber() + 1);
 	}
 
 	@Override
