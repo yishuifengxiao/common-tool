@@ -154,6 +154,136 @@ public final class Assert {
 	}
 
 	/**
+	 * 判断给定的值是否小于或等于0,如果为null或大于0就抛出异常
+	 *
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessEqualZero(String msg, Integer value) throws ValidateException {
+		if (!NumberUtil.lessEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于或等于0,如果为null或大于0就抛出异常
+	 *
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessEqualZero(String msg, Long value) throws ValidateException {
+		if (!NumberUtil.lessEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于或等于0,如果为null或大于0就抛出异常
+	 *
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessEqualZero(String msg, Float value) throws ValidateException {
+		if (!NumberUtil.lessEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于或等于0,如果为null或大于0就抛出异常
+	 *
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessEqualZero(String msg, Double value) throws ValidateException {
+		if (!NumberUtil.lessEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于或等于0,如果为null或大于0就抛出异常
+	 *
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessEqualZero(String msg, BigDecimal value) throws ValidateException {
+		if (!NumberUtil.lessEqualZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于0,如果为null或大于0或等于0就抛出异常
+	 * 
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessZero(String msg, Integer value) throws ValidateException {
+		if (!NumberUtil.lessZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于0,如果为null或大于0或等于0就抛出异常
+	 * 
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessZero(String msg, Long value) throws ValidateException {
+		if (!NumberUtil.lessZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于0,如果为null或大于0或等于0就抛出异常
+	 * 
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessZero(String msg, Float value) throws ValidateException {
+		if (!NumberUtil.lessZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于0,如果为null或大于0或等于0就抛出异常
+	 * 
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessZero(String msg, Double value) throws ValidateException {
+		if (!NumberUtil.lessZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
+	 * 判断给定的值是否小于0,如果为null或大于0或等于0就抛出异常
+	 * 
+	 * @param msg   异常提示信息
+	 * @param value 需要比较的值
+	 * @throws ValidateException
+	 */
+	public static void assertLessZero(String msg, BigDecimal value) throws ValidateException {
+		if (!NumberUtil.lessZero(value)) {
+			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+		}
+	}
+
+	/**
 	 * 判断两个值是否相等，如果不相等就抛出异常<br/>
 	 * 任何比较值为null则抛出异常
 	 * 
