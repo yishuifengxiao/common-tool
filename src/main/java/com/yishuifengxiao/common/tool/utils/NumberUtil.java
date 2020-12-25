@@ -18,7 +18,7 @@ public final class NumberUtil {
 	/**
 	 * 零值
 	 */
-	private static final BigDecimal ZERO = new BigDecimal(0);
+	private static final BigDecimal ZERO = BigDecimal.ZERO;
 
 	/**
 	 * 判断输入值是否大于或等于0

@@ -1,6 +1,8 @@
 package com.yishuifengxiao.common.tool.utils;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -19,34 +21,36 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class CertNoUtil {
+	/**
+	 * 18位身份证正则表示
+	 */
+	private static final Pattern REGEX_18_CARD = Pattern.compile(
+			"^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$");
 
 	/**
 	 * 每位加权因子
 	 */
 	private static final int[] POWER = { 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 };
-	/**
-	 * 二代身份证号的长度
-	 */
-	private static final int LENGTH_LONG_IDCARD = 18;
 
 	/**
-	 * 校验身份证号的合法性<br/>
-	 * 非完全校验，未校验数据内容是否正确
+	 * 校验18位身份证号的合法性<br/>
+	 * 校验数据内容是否为合法的
 	 * 
 	 * @param idcard 身份证号
 	 * @return true表示合法，false不合法
 	 */
 	public static synchronized boolean isValid(String idcard) { // 非18位为假
 		// 判断出生日期是否正确
-		try {
-			extractBirthday(idcard);
-		} catch (ValidateException e) {
+		if (StringUtils.isBlank(idcard)) {
+			return false;
+		}
+		if (!REGEX_18_CARD.matcher(idcard.trim()).matches()) {
 			return false;
 		}
 		// 获取前17位
-		String idcard17 = idcard.substring(0, 17);
+		String idcard17 = idcard.trim().substring(0, 17);
 		// 获取第18位
-		String idcard18Code = idcard.substring(17, 18);
+		String idcard18Code = idcard.trim().substring(17, 18);
 
 		// 是否都为数字
 		if (!isDigital(idcard17)) {
@@ -75,38 +79,21 @@ public class CertNoUtil {
 	/**
 	 * 从身份证号里提取出出生日期
 	 * 
-	 * @param str 身份证号
+	 * @param idcard 身份证号
 	 * @return 出生日期
 	 * @throws ValidateException
 	 */
-	private static synchronized LocalDate extractBirthday(String str) throws ValidateException {
-		if (StringUtils.length(str) != LENGTH_LONG_IDCARD) {
+	public static synchronized LocalDate extractBirthday(String idcard) throws ValidateException {
+		if (!isValid(idcard)) {
 			throw new ValidateException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号格式不正确");
 		}
 		try {
-			String year = StringUtils.substring(str, 6, 10);
-			String month = StringUtils.substring(str, 10, 12);
-			String day = StringUtils.substring(str, 12, 14);
-			return LocalDate.of(Integer.parseInt(year), Integer.parseInt(month), Integer.parseInt(day));
+			String dateStr = StringUtils.substring(idcard.trim(), 6, 14);
+			return LocalDate.parse(dateStr, DateTimeFormatter.BASIC_ISO_DATE);
 		} catch (Exception e) {
-			log.info("【易水工具】从身份证号{}中提取出生日期时出现异常，出现异常的原因为 {}", str, e.getMessage());
+			log.info("【易水工具】从身份证号{}中提取出生日期时出现异常，出现异常的原因为 {}", idcard.trim(), e.getMessage());
 			throw new ValidateException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号出生日期格式不正确");
 		}
-	}
-
-	/**
-	 * 从身份证号里提取出出生日期
-	 * 
-	 * @param str 身份证号
-	 * @return 出生日期
-	 * @throws ValidateException
-	 */
-	public static synchronized LocalDate getBirthday(String str) throws ValidateException {
-
-		if (!isValid(str)) {
-			throw new ValidateException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号格式不正确");
-		}
-		return extractBirthday(str);
 	}
 
 	/**
