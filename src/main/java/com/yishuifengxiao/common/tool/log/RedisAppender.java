@@ -1,16 +1,17 @@
 package com.yishuifengxiao.common.tool.log;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.StringUtils;
 
-import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import com.alibaba.fastjson.JSONObject;
+
+import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.UnsynchronizedAppenderBase;
-import ch.qos.logback.core.encoder.Encoder;
 import ch.qos.logback.core.spi.DeferredProcessingAware;
 import ch.qos.logback.core.status.ErrorStatus;
 import io.lettuce.core.RedisClient;
@@ -57,12 +58,6 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	private RedisAsyncCommands<String, String> async;
 
 	/**
-	 * It is the encoder which is ultimately responsible for writing the event to an
-	 * {@link OutputStream}.
-	 */
-	protected Encoder<E> encoder;
-
-	/**
 	 * Redis 数据库地址
 	 */
 	private String host;
@@ -87,20 +82,22 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	 */
 	private Integer timeoutInSecond;
 
+	/**
+	 * 应用名称
+	 */
+	private String application;
+
+	/**
+	 * 附加信息
+	 */
+	private String extra;
+
 	@Override
 	protected void append(E eventObject) {
 		if (!isStarted()) {
 			return;
 		}
 		subAppend(eventObject);
-	}
-
-	@SuppressWarnings("unchecked")
-	private synchronized Encoder<E> encoder() {
-		if (null == this.encoder) {
-			this.encoder = (Encoder<E>) new PatternLayoutEncoder();
-		}
-		return this.encoder;
 	}
 
 	/**
@@ -161,10 +158,32 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 			// converter. Converters assume that they are in a synchronized block.
 			// lock.lock();
 
-			byte[] byteArray = this.encoder().encode(event);
-			writeBytes(byteArray);
+			if (event instanceof LoggingEvent) {
+				LoggingEvent e = (LoggingEvent) event;
+				// 提取出需要输出的信息
+				RedisLog redisLog = RedisLog.builder()
+						// 应用名字
+						.application(this.application)
+						// 附加信息
+						.extra(this.extra)
+						// 线程名字
+						.threadName(e.getThreadName())
+						// 时间戳
+						.timeStamp(e.getTimeStamp())
+						// 解析后的时间
+						.date(new Date(e.getTimeStamp()))
+						// logger 名字
+						.loggerName(e.getLoggerName())
+						// 日志级别
+						.level(e.getLevel().toString())
+						// 日志消息
+						.message(e.getFormattedMessage())
+						// 构建
+						.build();
+				writeBytes(redisLog);
+			}
 
-		} catch (IOException ioe) {
+		} catch (Exception ioe) {
 			// as soon as an exception occurs, move to non-started state
 			// and add a single ErrorStatus to the SM.
 			this.started = false;
@@ -172,13 +191,13 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 		}
 	}
 
-	private void writeBytes(byte[] byteArray) throws IOException {
-		if (byteArray == null || byteArray.length == 0)
+	private void writeBytes(RedisLog redisLog) throws IOException {
+		if (null == redisLog)
 			return;
 
 		lock.lock();
 		try {
-			this.async.publish(this.channel(), new String(byteArray, "utf-8"));
+			this.async.publish(this.channel(), JSONObject.toJSONString(redisLog));
 		} finally {
 			lock.unlock();
 		}
@@ -186,21 +205,21 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 
 	@Override
 	public void start() {
+		int errors = 0;
+		if (null == this.host || "".equals(this.host.trim())) {
+			addStatus(new ErrorStatus("The address of redis database cannot be empty", this));
+			errors++;
+		}
 		try {
-			int errors = 0;
-
-			if (null == this.host || "".equals(this.host.trim())) {
-				addStatus(new ErrorStatus("The address of redis database cannot be empty", this));
-				errors++;
-			}
 			this.init();
-			// only error free appenders should be activated
-			if (errors == 0) {
-				super.start();
-			}
 		} catch (Exception e) {
 			addStatus(new ErrorStatus("Failed to initialize log output. The reason for failure is " + e.getMessage(),
 					this));
+			errors++;
+		}
+		// only error free appenders should be activated
+		if (errors == 0) {
+			super.start();
 		}
 
 	}
@@ -247,7 +266,8 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 				redisClient.shutdown(); // <6> 关闭客户端}
 			}
 		} catch (Exception e) {
-			addStatus(new ErrorStatus("Could not close output stream for OutputStreamAppender.", this, e));
+			addStatus(new ErrorStatus(
+					"Failed to close the redis connection. The reason for the failure is " + e.getMessage(), this, e));
 		}
 
 	}
@@ -284,20 +304,28 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 		this.timeoutInSecond = timeoutInSecond;
 	}
 
-	public Encoder<E> getEncoder() {
-		return encoder;
-	}
-
-	public void setEncoder(Encoder<E> encoder) {
-		this.encoder = encoder;
-	}
-
 	public String getChannel() {
 		return channel;
 	}
 
 	public void setChannel(String channel) {
 		this.channel = channel;
+	}
+
+	public String getApplication() {
+		return application;
+	}
+
+	public void setApplication(String application) {
+		this.application = application;
+	}
+
+	public String getExtra() {
+		return extra;
+	}
+
+	public void setExtra(String extra) {
+		this.extra = extra;
 	}
 
 }
