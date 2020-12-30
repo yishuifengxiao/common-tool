@@ -14,8 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 字符串加密解密工具，可逆加密，秘钥很重要，一定要自己改秘钥，打死也不要告诉其他人
  * 
- * @author 夏增明
- * @version 1.0 Date:2013年2月8日15:45:56
+ * @author yishui
+ * @date 2018年7月27日
+ * @Version 0.0.1
  */
 @Slf4j
 public class DES {
@@ -30,13 +31,23 @@ public class DES {
 	private static final String TYPE = "DES";
 
 	/**
+	 * 密钥长度必须为8的倍数
+	 */
+	private static final int LENGTH = 8;
+	
+	/**
+	 * 偶数的标志
+	 */
+	private static final int  EVEN_FLAG=2;
+
+	/**
 	 * 对输入的数据进行加密
 	 * 
 	 * @param key  加密的密钥，如果为空则以默认密码进行加密，如果密钥长度不是8的倍数，系统会自动补0
 	 * @param data 需要加密的数据
 	 * @return 加密后的数据,null表示加密失败
 	 */
-	public static final String encrypt(String key, String data) {
+	public static final synchronized String encrypt(String key, String data) {
 		Assert.notNull(data, "需要加密的数据不能为空");
 		try {
 			return byte2hex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
@@ -63,7 +74,7 @@ public class DES {
 	 * @param data 需要解密的数据
 	 * @return 解密后的数据,null表示解密失败
 	 */
-	public static final String decrypt(String key, String data) {
+	public static final synchronized String decrypt(String key, String data) {
 		Assert.notNull(data, "需要解密的数据不能为空");
 		try {
 			return new String(decrypt(hex2byte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
@@ -157,14 +168,13 @@ public class DES {
 	 * @return
 	 */
 	private static String keyValidate(String key) {
-		StringBuilder sb = new StringBuilder();
 		if (StringUtils.isBlank(key)) {
-			sb = new StringBuilder(PASSWORD_CRYPT_KEY);
-		} else {
-			if (key.length() % 8 != 0) {
-				for (int i = 0; i < key.length() % 8; i++) {
-					sb.append("0");
-				}
+			return PASSWORD_CRYPT_KEY;
+		}
+		StringBuilder sb = new StringBuilder(key.trim());
+		if (key.trim().length() % LENGTH != 0) {
+			for (int i = 0; i < (LENGTH - key.trim().length() % LENGTH); i++) {
+				sb.append("0");
 			}
 		}
 		return sb.toString();
@@ -195,11 +205,11 @@ public class DES {
 
 	private static byte[] hex2byte(byte[] b) {
 
-		if ((b.length % 2) != 0) {
+		if ((b.length % EVEN_FLAG) != 0) {
 			throw new IllegalArgumentException("长度不是偶数");
 		}
 		byte[] b2 = new byte[b.length / 2];
-		for (int n = 0; n < b.length; n += 2) {
+		for (int n = 0; n < b.length; n += EVEN_FLAG) {
 			String item = new String(b, n, 2);
 			b2[n / 2] = (byte) Integer.parseInt(item, 16);
 		}

@@ -192,8 +192,9 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	}
 
 	private void writeBytes(RedisLog redisLog) throws IOException {
-		if (null == redisLog)
+		if (null == redisLog) {
 			return;
+		}
 
 		lock.lock();
 		try {
