@@ -33,7 +33,7 @@ public final class MapUtil {
 	 * 
 	 * @return 最终需要的map数据
 	 */
-	public Map<String, Object> toMap() {
+	public Map<String, Object> build() {
 
 		return this.map;
 	}
