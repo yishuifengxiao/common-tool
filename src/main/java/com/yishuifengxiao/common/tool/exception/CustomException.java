@@ -4,7 +4,7 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * <strong>自定义异常基类 </strong><br/>
+ * <strong>自定义异常基类 </strong>
  * 所有程序中自定义异常的基类
  * 
  * @author yishui

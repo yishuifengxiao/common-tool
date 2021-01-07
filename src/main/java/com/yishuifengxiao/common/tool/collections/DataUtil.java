@@ -27,7 +27,7 @@ import com.yishuifengxiao.common.tool.exception.ValidateException;
 public final class DataUtil {
 
 	/**
-	 * 将数据安全地转换成串行流Stream<br/>
+	 *<p> 将数据安全地转换成串行流Stream
 	 * 该操作不会引起NPE
 	 * 
 	 * @param <T>
@@ -59,7 +59,7 @@ public final class DataUtil {
 	}
 
 	/**
-	 * 将数据安全地转换成串行流Stream<br/>
+	 *<p> 将数据安全地转换成串行流Stream</p>
 	 * 该操作不会引起NPE
 	 * 
 	 * @param <T>
@@ -74,7 +74,7 @@ public final class DataUtil {
 	}
 
 	/**
-	 * 将数据转换成串行流Stream<br/>
+	 * <p>将数据转换成串行流Stream</p>
 	 * 该操作不会引起NPE
 	 * 
 	 * @param <T>
@@ -91,7 +91,7 @@ public final class DataUtil {
 	}
 
 	/**
-	 * 将数据安全地转换成串行流Stream<br/>
+	 *<p> 将数据安全地转换成串行流Stream</p>
 	 * 该操作不会引起NPE
 	 * 
 	 * @param <T>
@@ -119,7 +119,7 @@ public final class DataUtil {
 	}
 
 	/**
-	 * 将数据安全地转换成并行流ParallelStream<br/>
+	 * <p>将数据安全地转换成并行流ParallelStream</p>
 	 * 该操作不会引起NPE
 	 * 
 	 * @param <T>
@@ -151,7 +151,7 @@ public final class DataUtil {
 	}
 
 	/**
-	 * 将数据安全地转换成并行流ParallelStream<br/>
+	 * <p>将数据安全地转换成并行流ParallelStream</p>
 	 * 该操作不会引起NPE
 	 * 
 	 * @param <T>
@@ -182,7 +182,7 @@ public final class DataUtil {
 	}
 
 	/**
-	 * 将数据安全地转换成并行流ParallelStream<br/>
+	 *<p> 将数据安全地转换成并行流ParallelStream</p>
 	 * 该操作不会引起NPE
 	 * 
 	 * @param <T>
@@ -194,7 +194,7 @@ public final class DataUtil {
 	}
 
 	/**
-	 * 将数据安全地转换成并行流ParallelStream<br/>
+	 *<p> 将数据安全地转换成并行流ParallelStream</p>
 	 * 该操作不会引起NPE
 	 * 
 	 * @param <T>

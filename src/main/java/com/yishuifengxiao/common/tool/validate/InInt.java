@@ -16,7 +16,7 @@ import javax.validation.Payload;
 import com.yishuifengxiao.common.tool.validate.validator.InIntValidator;
 
 /**
- * 目标数据必须在指定的数据集合之内<br/>
+ * <p>目标数据必须在指定的数据集合之内</p>
  * 针对整型数据
  * 
  * @author qingteng

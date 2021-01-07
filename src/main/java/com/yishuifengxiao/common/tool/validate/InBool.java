@@ -16,7 +16,7 @@ import javax.validation.Payload;
 import com.yishuifengxiao.common.tool.validate.validator.InBoolValidator;
 
 /**
- * 目标数据必须为0或1<br/>
+ *<p> 目标数据必须为0或1</p>
  * 针对整型数据
  * 
  * @author qingteng

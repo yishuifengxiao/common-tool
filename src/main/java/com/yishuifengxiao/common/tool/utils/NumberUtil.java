@@ -367,10 +367,10 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * 将字符串形式的数字转成Boolean值<br/>
-	 * 1 如果数字为null，返回为false<br/>
-	 * 2 数字小于或等于0返回为false<br/>
-	 * 3 数字大于0返回为true
+	 *<p> 将字符串形式的数字转成Boolean值</p>
+	 *<p> 1 如果数字为null，返回为false</p>
+	 * <p>2 数字小于或等于0返回为false</p>
+	 *<p> 3 数字大于0返回为true
 	 * 
 	 * @param value
 	 * @return boolean值
@@ -384,10 +384,10 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * 将数字转成Boolean值<br/>
-	 * 1 如果数字为null，返回为false<br/>
-	 * 2 数字小于或等于0返回为false<br/>
-	 * 3 数字大于0返回为true
+	 *<p> 将数字转成Boolean值</p>
+	 *<p> 1 如果数字为null，返回为false</p>
+	 *<p> 2 数字小于或等于0返回为false</p>
+	 * <p>3 数字大于0返回为true
 	 * 
 	 * @param value
 	 * @return boolean值
@@ -403,10 +403,10 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * 将数字转成Boolean值<br/>
-	 * 1 如果数字为null，返回为false<br/>
-	 * 2 数字小于或等于0返回为false<br/>
-	 * 3 数字大于0返回为true
+	 *<p> 将数字转成Boolean值</p>
+	 * <p>1 如果数字为null，返回为false</p>
+	 *<p> 2 数字小于或等于0返回为false</p>
+	 * <p>3 数字大于0返回为true
 	 * 
 	 * @param value
 	 * @return boolean值
@@ -432,7 +432,7 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * 数据自动补0<br/>
+	 *<p> 数据自动补0</p>
 	 * 对于null值的装箱后的数据，自动设置为false
 	 * 
 	 * @param value
@@ -443,7 +443,7 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * 数据自动补0<br/>
+	 *<p> 数据自动补0</p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
 	 * @param value
@@ -454,7 +454,7 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * 数据自动补0<br/>
+	 *<p> 数据自动补0</p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
 	 * @param value
@@ -465,7 +465,7 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * 数据自动补0<br/>
+	 *<p> 数据自动补0</p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
 	 * @param value
@@ -476,7 +476,9 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * 数据自动补0<br/>
+	 * <p>
+	 * 数据自动补0
+	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
 	 * @param value

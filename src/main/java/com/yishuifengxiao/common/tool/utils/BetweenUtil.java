@@ -6,7 +6,9 @@ import java.util.Date;
 import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
 
 /**
- * 比较工具工具类<br/>
+ * <p>
+ * 比较工具工具类
+ * </p>
  * 用于比较一个给定的值是否在一个指定的范围内
  * 
  * @author yishui
@@ -16,11 +18,19 @@ import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
 public class BetweenUtil {
 
 	/**
-	 * 判断给定的值是否在边界范围内，如不在边界范围内则返回边界值，若在范围内则返回当前值<br/>
-	 * <br/>
-	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为2<br/>
-	 * 例如 compareValue=9，startValue=2 ，endValue=8时的返回值为8<br/>
-	 * 例如 compareValue=4，startValue=2 ，endValue=8时的返回值为4<br/>
+	 * <p>
+	 * 判断给定的值是否在边界范围内，如不在边界范围内则返回边界值，若在范围内则返回当前值
+	 * </p>
+	 * 
+	 * <p>
+	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为2
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=9，startValue=2 ，endValue=8时的返回值为8
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=4，startValue=2 ，endValue=8时的返回值为4
+	 * </p>
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
@@ -47,11 +57,19 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否在边界范围内，如不在边界范围内则返回边界值，若在范围内则返回当前值<br/>
-	 * <br/>
-	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为2<br/>
-	 * 例如 compareValue=9，startValue=2 ，endValue=8时的返回值为8<br/>
-	 * 例如 compareValue=4，startValue=2 ，endValue=8时的返回值为4<br/>
+	 * <p>
+	 * 判断给定的值是否在边界范围内，如不在边界范围内则返回边界值，若在范围内则返回当前值
+	 * </p>
+	 * 
+	 * <p>
+	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为2
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=9，startValue=2 ，endValue=8时的返回值为8
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=4，startValue=2 ，endValue=8时的返回值为4
+	 * </p>
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
@@ -78,9 +96,13 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
+	 * <p>
+	 * 判断给定的值是否在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
 	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为true
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
@@ -102,11 +124,19 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否不在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
-	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为false<br/>
-	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为true<br/>
+	 * <p>
+	 * 判断给定的值是否不在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为false
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为true
+	 * </p>
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
@@ -118,9 +148,11 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
+	 * 判断给定的值是否在指定的数据范围的区间内
+	 * </p>
+	 * </p>
+	 * 注意：包含边界
+	 * </p>
 	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为true
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
@@ -142,12 +174,19 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否不在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
-	 * 注意：包含边界<br/>
-	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为false<br/>
-	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为true<br/>
+	 * <p>
+	 * 判断给定的值是否不在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为false
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为true
+	 * </p>
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
@@ -159,9 +198,13 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
+	 * <p>
+	 * 判断给定的值是否在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
 	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为true
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
@@ -183,12 +226,20 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
-	 * 注意：包含边界<br/>
-	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为false<br/>
-	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为true<br/>
+	 * <p>
+	 * 判断给定的值是否在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
+	 * 
+	 * <p>
+	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为false
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为true
+	 * </p>
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
@@ -200,9 +251,13 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否不在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
+	 * <p>
+	 * 判断给定的值是否不在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
 	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为true
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
@@ -224,12 +279,20 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
-	 * 注意：包含边界<br/>
-	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为false<br/>
-	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为true<br/>
+	 * <p>
+	 * 判断给定的值是否在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
+	 * 
+	 * <p>
+	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为false
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=1，startValue=2 ，endValue=8时的返回值为true
+	 * </p>
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
@@ -241,16 +304,28 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：<br/>
-	 * 1. 不包含边界<br/>
-	 * 2. 任意一个值为null则返回值为false<br/>
+	 * <p>
+	 * 判断给定的值是否在指定的数据范围的区间内
+	 * </p>
 	 * 
+	 * <p>
+	 * 注意：
+	 * </p>
+	 * <p>
+	 * 1. 不包含边界
+	 * </p>
+	 * <p>
+	 * 2. 任意一个值为null则返回值为false
+	 * </p>
+	 * 
+	 * <p>
 	 * 例如 compareValue=2020-12-12 12:12:12，startValue=2020-12-12 12:12:12
-	 * ，endValue=2021-12-12 12:12:12时的返回值为true<br/>
+	 * ，endValue=2021-12-12 12:12:12时的返回值为true
+	 * </p>
+	 * <p>
 	 * 例如 compareValue=2020-12-11 12:12:12，startValue=2020-12-12 12:12:12
-	 * ，endValue=2021-12-12 12:12:12时的返回值为false<br/>
+	 * ，endValue=2021-12-12 12:12:12时的返回值为false
+	 * </p>
 	 * 
 	 * @param compareValue 给定的值
 	 * @param startValue   比较范围的开始值
@@ -267,9 +342,13 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否不在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 1. 包含边界<br/>
+	 * <p>
+	 * 判断给定的值是否不在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 1. 包含边界
+	 * </p>
 	 * 2. 任意一个值为null则返回值为true
 	 * 
 	 * @param compareValue 给定的值
@@ -282,16 +361,26 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 注意：<br/>
-	 * 1. 包含边界<br/>
+	 * <p>
+	 * 判断给定的值是否在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 注意：
+	 * </p>
+	 * <p>
+	 * 1. 包含边界
+	 * </p>
 	 * 2. 任意一个值为null则返回值为false
 	 * 
+	 * <p>
 	 * 例如 compareValue=2020-12-12 12:12:12，startValue=2020-12-12 12:12:12
-	 * ，endValue=2021-12-12 12:12:12时的返回值为true<br/>
+	 * ，endValue=2021-12-12 12:12:12时的返回值为true
+	 * </p>
+	 * <p>
 	 * 例如 compareValue=2020-12-11 12:12:12，startValue=2020-12-12 12:12:12
-	 * ，endValue=2021-12-12 12:12:12时的返回值为false<br/>
+	 * ，endValue=2021-12-12 12:12:12时的返回值为false
+	 * </p>
 	 * 
 	 * @param compareValue 给定的值
 	 * @param startValue   比较范围的开始值
@@ -306,9 +395,13 @@ public class BetweenUtil {
 	}
 
 	/**
-	 * 判断给定的值是否不在指定的数据范围的区间内<br/>
-	 * <br/>
-	 * 1. 包含边界<br/>
+	 * <p>
+	 * 判断给定的值是否不在指定的数据范围的区间内
+	 * </p>
+	 * 
+	 * <p>
+	 * 1. 包含边界
+	 * </p>
 	 * 2. 任意一个值为null则返回值为false
 	 * 
 	 * @param compareValue 给定的值

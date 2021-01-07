@@ -53,8 +53,8 @@ public class Page<S> implements Serializable {
 	private Integer pageNum;
 
 	/**
-	 * 将一种类型数据的分页对象转换成另一种数据类型的分页对象<br/>
-	 * <br/>
+	 *<p> 将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
+
 	 * 【注意】 如果被转换后的数据为null,在转换后的分页对象的数据集里依然会包含null数据
 	 * 
 	 * @param <T>
@@ -67,8 +67,7 @@ public class Page<S> implements Serializable {
 	}
 
 	/**
-	 * 将一种类型数据的分页对象转换成另一种数据类型的分页对象<br/>
-	 * <br/>
+	 *<p> 将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
 	 * 【注意】 如果进行过滤，转换后的数据里的数据条目可能少于原始的数据条目
 	 * 
 	 * @param <T>
@@ -99,8 +98,8 @@ public class Page<S> implements Serializable {
 	}
 
 	/**
-	 * 构造一个空的分页对象<br/>
-	 * <br/>
+	 *<p> 构造一个空的分页对象</p>
+
 	 * 该分页对象的属性为:
 	 * <ol>
 	 * <li>分页大小:0</li>
@@ -117,8 +116,8 @@ public class Page<S> implements Serializable {
 	}
 
 	/**
-	 * 构造一个空的分页对象<br/>
-	 * <br/>
+	 * <p>构造一个空的分页对象</p>
+
 	 * 该分页对象的属性为:
 	 * <ol>
 	 * <li>分页大小:输入的pageSize的值</li>
@@ -136,8 +135,8 @@ public class Page<S> implements Serializable {
 	}
 
 	/**
-	 * 根据数据构造当前页为1，分页大小为数据大小的分页对象<br/>
-	 * <br/>
+	 *<p> 根据数据构造当前页为1，分页大小为数据大小的分页对象</p>
+
 	 * 该分页对象的属性为:
 	 * <ol>
 	 * <li>分页大小:data.size()</li>
@@ -156,7 +155,7 @@ public class Page<S> implements Serializable {
 	}
 
 	/**
-	 * 从总的数据中根据分页参数获取一个分页对象<br/>
+	 * <p>从总的数据中根据分页参数获取一个分页对象</p>
 	 *
 	 * @param list     总的分页数据数据集
 	 * @param pageSize 分页大小

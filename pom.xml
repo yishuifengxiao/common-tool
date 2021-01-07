@@ -178,6 +178,35 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 		</profile>
+		<profile>
+
+			<id>doc</id>
+			<properties>
+				<javadoc.opts>-Xdoclint:none</javadoc.opts>
+			</properties>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.4</version><!--$NO-MVN-MAN-VER$ -->
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<encoding>UTF-8</encoding>
+									<additionalparam>-Xdoclint:none</additionalparam>
+									<useStandardDocletOptions>false</useStandardDocletOptions>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 		<!-- 发布环境 -->
 		<profile>
 			<id>release</id>

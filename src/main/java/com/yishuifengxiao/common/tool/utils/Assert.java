@@ -284,7 +284,7 @@ public final class Assert {
 	}
 
 	/**
-	 * 判断两个值是否相等，如果不相等就抛出异常<br/>
+	 * <p>判断两个值是否相等，如果不相等就抛出异常</p>
 	 * 任何比较值为null则抛出异常
 	 * 
 	 * @param msg           异常信息
@@ -299,7 +299,7 @@ public final class Assert {
 	}
 
 	/**
-	 * 判断两个值是否相等，如果不相等就抛出异常<br/>
+	 * <p>判断两个值是否相等，如果不相等就抛出异常</p>
 	 * 任何比较值为null则抛出异常
 	 * 
 	 * @param msg           异常信息
@@ -315,7 +315,7 @@ public final class Assert {
 	}
 
 	/**
-	 * 判断两个值是否相等，如果不相等就抛出异常<br/>
+	 *<p> 判断两个值是否相等，如果不相等就抛出异常</p>
 	 * 任何比较值为null则抛出异常
 	 * 
 	 * @param msg           异常信息
@@ -466,11 +466,10 @@ public final class Assert {
 	}
 
 	/**
-	 * 判断给定的值是否不在指定的数据范围的区间内，如果不在指定的范围内疚抛出异常<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
-	 * 例如 compareValue=2，startValue=2 ，endValue=8时是正常情况<br/>
-	 * 例如 compareValue=1，startValue=2 ，endValue=8时会抛出异常<br/>
+	 *<p> 判断给定的值是否不在指定的数据范围的区间内，如果不在指定的范围内疚抛出异常</p>
+	 * <p>注意：包含边界</p>
+	 *<p> 例如 compareValue=2，startValue=2 ，endValue=8时是正常情况</p>
+	 * <p>例如 compareValue=1，startValue=2 ，endValue=8时会抛出异常</p>
 	 * 
 	 * @param msg          提示信息
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
@@ -486,11 +485,10 @@ public final class Assert {
 	}
 
 	/**
-	 * 判断给定的值是否不在指定的数据范围的区间内，如果不在指定的范围内疚抛出异常<br/>
-	 * <br/>
-	 * 注意：包含边界<br/>
-	 * 例如 compareValue=2，startValue=2 ，endValue=8时是正常情况<br/>
-	 * 例如 compareValue=1，startValue=2 ，endValue=8时会抛出异常<br/>
+	 *<p> 判断给定的值是否不在指定的数据范围的区间内，如果不在指定的范围内疚抛出异常</p>
+	 *<p> 注意：包含边界</p>
+	 * <p>例如 compareValue=2，startValue=2 ，endValue=8时是正常情况</p>
+	 *<p> 例如 compareValue=1，startValue=2 ，endValue=8时会抛出异常</p>
 	 * 
 	 * @param msg          提示信息
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0

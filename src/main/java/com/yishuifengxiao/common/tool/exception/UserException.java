@@ -4,11 +4,11 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 用户异常<br/>
- * <br/>
- * 主要使用到的场景有:<br/>
- * 1 获取用户信息失败<br/>
- * 2 根据用户信息进行校验时发生了异常<br/>
+ * <p>
+ * 用户异常
+ * </p>
+ * 
+ * 主要使用到的场景有: 1 获取用户信息失败 2 根据用户信息进行校验时发生了异常
  * 
  * @author yishui
  * @date 2018年12月8日
@@ -36,11 +36,10 @@ public class UserException extends CustomException {
 
 	}
 
-	
 	public UserException(int errorCode, String message) {
 		super(errorCode, message);
 	}
-	
+
 	/**
 	 * @param cause
 	 */

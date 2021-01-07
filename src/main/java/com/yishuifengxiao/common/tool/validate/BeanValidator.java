@@ -21,10 +21,12 @@ public class BeanValidator {
 	private final static Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
 	/**
-	 * 使用默认的分组对数据进行校验<br/>
+	 * <p>
+	 * 使用默认的分组对数据进行校验
+	 * </p>
 	 * 如果数据不符合条件就抛出异常
 	 * 
-	 * @param <T>
+	 * @param <T> 需要校验的数据的类型
 	 * @param t   需要校验的数据
 	 * @throws ValidateException
 	 */
@@ -33,11 +35,13 @@ public class BeanValidator {
 	}
 
 	/**
-	 * 使用指定的分组对数据进行校验<br/>
+	 * <p>
+	 * 使用指定的分组对数据进行校验
+	 * </p>
 	 * 如果数据不符合条件就抛出异常
 	 * 
-	 * @param <T>
-	 * @param <G>
+	 * @param <T>   需要校验的数据的类型
+	 * @param <G>   校验的分组
 	 * @param t     需要校验的数据
 	 * @param clazz 校验的分组，如果为null就是默认的分组
 	 * @throws ValidateException

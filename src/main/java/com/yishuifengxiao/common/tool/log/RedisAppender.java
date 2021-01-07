@@ -21,7 +21,7 @@ import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisAsyncCommands;
 
 /**
- * 自定义日志输出器<br/>
+ *<p> 自定义日志输出器</p>
  * 利用redis的订阅发布功能，将信息发布到redis中
  * 
  * @author qingteng

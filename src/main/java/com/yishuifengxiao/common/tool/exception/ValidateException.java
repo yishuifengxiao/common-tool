@@ -4,9 +4,8 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 验证异常<br/>
- * <br/>
- * 主要使用到的场景有:<br/>
+ * <p>验证异常</p>
+ * 主要使用到的场景有:
  * 1 在进行业务校验逻辑时出现问题
  * 
  * @author yishui

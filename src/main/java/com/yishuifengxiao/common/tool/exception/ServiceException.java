@@ -4,9 +4,8 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 逻辑异常<br/>
- * <br/>
- * 主要使用到的场景有:<br/>
+ *<p> 逻辑异常</p>
+ * 主要使用到的场景有:
  * 1 在处理业务逻辑时出现异常情况
  * 2 一般在逻辑层使用较多
  * 

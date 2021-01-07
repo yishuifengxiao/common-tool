@@ -39,8 +39,7 @@ public final class MapUtil {
 	}
 
 	/**
-	 * 增加一个键值对数据<br/>
-	 * <br/>
+	 * <p>增加一个键值对数据</p>
 	 * 如果增加的键值对的键为空，则不会增加该条记录
 	 * 
 	 * @param key   数据的键

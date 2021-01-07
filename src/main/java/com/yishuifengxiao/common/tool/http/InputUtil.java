@@ -22,7 +22,7 @@ public final class InputUtil {
 	private static final String UNDEFINED_STRING = "undefined";
 
 	/**
-	 * 对传入的参数进行非空处理 <br/>
+	 * <p>对传入的参数进行非空处理 </p>
 	 * 当传入的参数为 null 或 "" 或 "undefined" 直接返回为null,否则返回原始值
 	 * 
 	 * @param t 传入的参数

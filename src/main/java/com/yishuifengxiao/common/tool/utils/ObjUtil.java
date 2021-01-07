@@ -13,7 +13,7 @@ package com.yishuifengxiao.common.tool.utils;
 public final class ObjUtil {
 
 	/**
-	 * 判断输入的数据是否全部不为null，如果所有的数据都不包含null则返回为true,否则返回为false<br/>
+	 *<p> 判断输入的数据是否全部不为null，如果所有的数据都不包含null则返回为true,否则返回为false</p>
 	 * 注意：输入参数个数为0时返回为true
 	 * 
 	 * @param objs 需要判断的数据
@@ -31,7 +31,7 @@ public final class ObjUtil {
 	}
 
 	/**
-	 * 判断输入的数据是否全部为null，如果是则返回为true，否则为false<br/>
+	 * <p>判断输入的数据是否全部为null，如果是则返回为true，否则为false</p>
 	 * 注意：输入参数个数为0时返回为true
 	 * 
 	 * @param objs 需要判断的数据
@@ -49,7 +49,7 @@ public final class ObjUtil {
 	}
 
 	/**
-	 * 检查输入的数据是否包含null值，只要一个值为null就返回true,否则为false<br/>
+	 *<p> 检查输入的数据是否包含null值，只要一个值为null就返回true,否则为false</p>
 	 * 注意：输入参数个数为0时返回为false
 	 * 
 	 * @param objs 需要判断的数据

@@ -7,7 +7,7 @@ import com.yishuifengxiao.common.tool.utils.NumberUtil;
 import com.yishuifengxiao.common.tool.validate.InBool;
 
 /**
- * 目标数据必须在指定的数据集合之内的判断逻辑<br/>
+ * <p>目标数据必须在指定的数据集合之内的判断逻辑</p>
  * 判断数据必须在指定的整型数据里面
  * 
  * @author qingteng

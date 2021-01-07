@@ -3,7 +3,7 @@ package com.yishuifengxiao.common.tool.converter;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 
 /**
- * 分页数据转换器<br/>
+ * <p>分页数据转换器</p>
  * 将分页对象的里元数据转换成目标数据
  * 
  * @author yishui

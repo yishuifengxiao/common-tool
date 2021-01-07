@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
- * Json序列化脱敏注解<br/>
+ * <p>Json序列化脱敏注解</p>
  * 
  * 使用方法如下： 在POJO的需要脱密的属性上加上
  *

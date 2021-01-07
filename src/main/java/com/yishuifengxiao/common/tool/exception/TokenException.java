@@ -4,10 +4,9 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * 凭证异常<br/>
- * <br/>
- * 主要使用到的场景有:<br/>
- * 1 应该携带访问凭证的地方没有携带<br/>
+ *<p> 凭证异常</p>
+ * 主要使用到的场景有:
+ * 1 应该携带访问凭证的地方没有携带
  * 2 携带了一个非法的访问凭证
  * 
  * @author yishui

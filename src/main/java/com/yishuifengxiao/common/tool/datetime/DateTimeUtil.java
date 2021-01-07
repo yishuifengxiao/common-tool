@@ -121,7 +121,7 @@ public final class DateTimeUtil {
 	}
 
 	/**
-	 * 将字符串解析为LocalDateTime 形式的时间<br/>
+	 * <p>将字符串解析为LocalDateTime 形式的时间</p>
 	 * 
 	 * 默认采用yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm 或 yyyy-MM-dd 形式解析
 	 * 

@@ -83,7 +83,7 @@ public class RandomUtil {
 	}
 
 	/**
-	 * 根据当前时间生成形如yyyyMMddhhmmss100的字符串<br/>
+	 * <p>根据当前时间生成形如yyyyMMddhhmmss100的字符串</p>
 	 * 其中yyyyMMddhhmmss部分为根据当前时间格式化生成,数字部分时100-999之间的随机数
 	 * 
 	 * @return 形如yyyyMMddhhmmss100的字符串

@@ -16,8 +16,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * 公有返回信息类<br/>
- * <b>不会序列化null字段</b><br/>
+ * <p>公有返回信息类</p>
  * 后期考虑增加返回参数校验字段
  * 
  * @author yishui
