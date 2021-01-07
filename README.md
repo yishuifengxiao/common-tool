@@ -7,12 +7,24 @@
 		<dependency>
 			<groupId>com.yishuifengxiao.common</groupId>
 			<artifactId>common-tool</artifactId>
-			<version>3.4.0</version>
+			<version>3.6.5</version>
 		</dependency>
 
----
 
-## 代码结构
+---
+最新版的工具参见 [maven中央仓库地址]https://mvnrepository.com/artifact/com.yishuifengxiao.common/common-tool)
+
+# 工具使用文档
+
+工具的api参见 [说明文档](https://apidoc.gitee.com/zhiyubujian/tool/)
+
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0107/223557_5a885e3b_400404.png "屏幕截图.png")
+<br/><hr/><br/>
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0107/223636_393c45be_400404.png "屏幕截图.png")
+<br/><hr/><br/>
+![输入图片说明](https://images.gitee.com/uploads/images/2021/0107/223735_4d615002_400404.png "屏幕截图.png")
+
+# 代码结构
 -com<br/>
 --yishuifengxiao<br/>
 ----common<br/>
@@ -37,12 +49,12 @@
 
 
 
-## 问题反馈
+# 问题反馈
 
 在使用中有任何问题，欢迎反馈给我，可以用以下联系方式跟我交流
 
 * 邮件(zhiyubujian#163.com, 把#换成@)
-* QQ: 979653327
+* QQ群: 624646260
 * 开源中国: [@止于不见](https://gitee.com/zhiyubujian)
 
 <a target="_blank" href="https://www.jetbrains.com/?from=common-tool"><img border="0" src="https://images.gitee.com/uploads/images/2020/0119/090541_0eb1faab_400404.png" alt="IDEA支持" title="IDEA支持" style="zoom:5%;" ></a> 
