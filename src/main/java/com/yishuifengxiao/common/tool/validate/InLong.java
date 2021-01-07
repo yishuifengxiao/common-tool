@@ -18,8 +18,11 @@ import com.yishuifengxiao.common.tool.validate.validator.InLongValidator;
 
 
 /**
- * <p>目标数据必须在指定的数据集合之内</p>
- * 针对长整型数据
+ * <p>
+ * 目标数据必须在指定的数据集合之内
+ * </p>
+ * 针对长整型数据，不适用其他数据类型
+ * 
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0

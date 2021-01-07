@@ -1,7 +1,13 @@
 package com.yishuifengxiao.common.tool.utils;
 
 /**
+ * <p>
  * 下划线与驼峰互转工具
+ * </p>
+ * <p>
+ * 该工具主要是实现字符串在驼峰和下划线形式之间互相转换
+ * </p>
+ * <strong>该工具是一个线程安全类的工具。</strong>
  * 
  * @author yishui
  * @version 1.0.0

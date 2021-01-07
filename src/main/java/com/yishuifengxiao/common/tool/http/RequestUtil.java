@@ -6,7 +6,15 @@ package com.yishuifengxiao.common.tool.http;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * <p>
  * HttpServletRequest处理工具
+ * </p>
+ * 该工具的主要作用是针对HttpServletRequest各种作用域里的数据进行操作,其主要功能如下：
+ * <ol>
+ * <li>根据指定的名字从HttpServletRequest的Attribute里获取指定的值，然后移除该属性</li>
+ * <li>根据指定的名字从HttpServletRequest的session里获取指定的值，然后移除该属性</li>
+ * <li>将session域里面的属性放置到请求域中，并返回对应的值</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0

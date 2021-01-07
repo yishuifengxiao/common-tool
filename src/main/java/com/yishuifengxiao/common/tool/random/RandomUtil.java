@@ -13,7 +13,16 @@ import org.apache.commons.lang3.RandomUtils;
 import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
 
 /**
+ * <p>
  * 随机工具
+ * </p>
+ * 该工具主要生成各种类型的随机字符串以便适应于各种场景。该工具的主要功能如下:
+ * <ol>
+ * <li>生成指定长度的汉字字符串</li>
+ * <li>根据当前时间生成yyyyMMddhhmmss的字符串</li>
+ * <li>根据当前时间生成yyyyMMddhhmmss+随机数 形式的字符串</li>
+ * </ol>
+ * <strong>该工具是一个线程安全类的工具。</strong>
  * 
  * @author yishui
  * @version 1.0.0
@@ -32,7 +41,7 @@ public class RandomUtil {
 	 * @return 一个常见的汉字
 	 * @throws UnsupportedEncodingException 系统不支持GBK编码
 	 */
-	public static final String chinese() throws UnsupportedEncodingException {
+	public static final synchronized String chinese() throws UnsupportedEncodingException {
 		Random random = new Random(System.currentTimeMillis());
 		// B0 + 0~39(16~55)
 		// 一级汉字所占区
@@ -52,7 +61,7 @@ public class RandomUtil {
 	 * @return 指定长度的汉字
 	 * @throws UnsupportedEncodingException 系统不支持GBK编码
 	 */
-	public static final String chinese(int len) throws UnsupportedEncodingException {
+	public static final synchronized String chinese(int len) throws UnsupportedEncodingException {
 		StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < len; i++) {
 			sb.append(chinese());

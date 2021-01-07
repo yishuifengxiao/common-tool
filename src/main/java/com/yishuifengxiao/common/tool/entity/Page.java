@@ -16,7 +16,10 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
+ * <p>
  * 通用分页对象
+ * </p>
+ * 统一分页数据的返回形式
  * 
  * @author yishui
  * @version 1.0.0

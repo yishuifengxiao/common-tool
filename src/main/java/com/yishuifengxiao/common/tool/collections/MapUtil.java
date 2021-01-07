@@ -6,7 +6,10 @@ import java.util.WeakHashMap;
 import org.apache.commons.lang3.StringUtils;
 
 /**
+ * <p>
  * map生成工具
+ * <p>
+ * 该工具的主要目的是采用链式接口快速生成一个map对象
  * 
  * @author yishui
  * @version 1.0.0

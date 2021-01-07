@@ -15,7 +15,13 @@ import com.yishuifengxiao.common.tool.exception.CustomException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
 
 /**
+ * <p>
  * base64与图片转换工具
+ * </p>
+ * <p>
+ * 该工具的主要作用是实现图片与base64字符串之间的互相转换.
+ * </p>
+ * <strong>该工具是一个线程安全类的工具。</strong>
  * 
  * @author yishui
  * @version 1.0.0

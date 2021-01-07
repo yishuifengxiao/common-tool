@@ -4,7 +4,10 @@
 package com.yishuifengxiao.common.tool.utils;
 
 /**
+ * <p>
  * 字符串工具
+ * </p>
+ * 该工具主要用于将字符串的首字母进行大小写转换
  * 
  * @author yishui
  * @version 1.0.0

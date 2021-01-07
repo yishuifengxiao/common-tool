@@ -6,7 +6,7 @@ import com.yishuifengxiao.common.tool.exception.CustomException;
  * <p>
  * 分页数据转换器
  * </p>
- * 将分页对象的里元数据转换成目标数据
+ * 将分页对象里的源数据转换成目标数据
  * 
  * @author yishui
  * @version 1.0.0

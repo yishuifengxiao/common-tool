@@ -19,7 +19,7 @@ import com.yishuifengxiao.common.tool.validate.validator.InIntValidator;
  * <p>
  * 目标数据必须在指定的数据集合之内
  * </p>
- * 针对整型数据
+ * 针对整型数据，不适用其他数据类型
  * 
  * @author yishui
  * @version 1.0.0

@@ -24,7 +24,25 @@ import io.lettuce.core.api.async.RedisAsyncCommands;
  * <p>
  * 自定义日志输出器
  * </p>
- * 利用redis的订阅发布功能，将信息发布到redis中
+ * <p>
+ * 该工具是logback日志里的一个自定义日志输出器，主要是利用redis的订阅发布功能， 将日志信息通过redis发布出来，以便其他终端能够接收到日志信息
+ * </p>
+ * 使用方法如下:
+ * 
+ * <pre>
+ * {@code
+ * <appender name="redis" class=com.yishuifengxiao.common.tool.log.RedisAppender"> 
+ * 	<host>Redis服务器地址</host>
+ * 	<port>Redis服务器端口号</port> 
+ * 	<password>redis连接密码</password>
+ * 	<application>测试项目</application> 
+ * 	<extra>附加数据</extra> 
+ * </appender>
+ * 
+ * }
+ * </pre>
+ * 
+ * 
  * 
  * @author yishui
  * @version 1.0.0

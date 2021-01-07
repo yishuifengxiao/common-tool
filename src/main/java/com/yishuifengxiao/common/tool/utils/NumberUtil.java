@@ -7,7 +7,18 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * <p>
  * 数字转换与操作比较工具
+ * </p>
+ * 该工具主要是将给定的数字与0进行比较和将数字转换成boolean以及将字符串解析成数字。该工具的主要功能如下：
+ * <ol>
+ * <li>判断给定的数字是否小于或等于0</li>
+ * <li>判断给定的数字是否小于0</li>
+ * <li>将数字转换成boolean值</li>
+ * <li>将boolean值转换成数字</li>
+ * <li>获取封装数据类型里的数据，防止出现NPE</li>
+ * <li>将字符串解析为数字</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0
@@ -459,7 +470,7 @@ public final class NumberUtil {
 	 * 对于null值的装箱后的数据，自动设置为false
 	 * 
 	 * @param value 需要转换的数据
-	 * @return  数据自动补0, 对于null值的装箱后的数据，自动设置为false
+	 * @return 数据自动补0, 对于null值的装箱后的数据，自动设置为false
 	 */
 	public static Boolean get(Boolean value) {
 		return null == value ? false : value;
@@ -484,8 +495,8 @@ public final class NumberUtil {
 	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
-	 * @param value  需要转换的数据
-	 * @return  对于null值的装箱后的数据，自动设置为0
+	 * @param value 需要转换的数据
+	 * @return 对于null值的装箱后的数据，自动设置为0
 	 */
 	public static Long get(Long value) {
 		return null == value ? 0L : value;
@@ -497,8 +508,8 @@ public final class NumberUtil {
 	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
-	 * @param value  需要转换的数据
-	 * @return  对于null值的装箱后的数据，自动设置为0
+	 * @param value 需要转换的数据
+	 * @return 对于null值的装箱后的数据，自动设置为0
 	 */
 	public static Float get(Float value) {
 		return null == value ? 0 : value;
@@ -510,8 +521,8 @@ public final class NumberUtil {
 	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
-	 * @param value  需要转换的数据
-	 * @return  对于null值的装箱后的数据，自动设置为0
+	 * @param value 需要转换的数据
+	 * @return 对于null值的装箱后的数据，自动设置为0
 	 */
 	public static Double get(Double value) {
 		return null == value ? 0 : value;
@@ -533,7 +544,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return  如果为null则返回默认值，否则返回为输入值
+	 * @return 如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Integer get(Integer value, int defaultValue) {
 		return null == value ? defaultValue : value;
@@ -544,7 +555,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return  如果为null则返回默认值，否则返回为输入值
+	 * @return 如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Long get(Long value, long defaultValue) {
 		return null == value ? defaultValue : value;
@@ -555,7 +566,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return  如果为null则返回默认值，否则返回为输入值
+	 * @return 如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Float get(Float value, float defaultValue) {
 		return null == value ? defaultValue : value;
@@ -566,7 +577,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return  如果为null则返回默认值，否则返回为输入值
+	 * @return 如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Double get(Double value, double defaultValue) {
 		return null == value ? defaultValue : value;

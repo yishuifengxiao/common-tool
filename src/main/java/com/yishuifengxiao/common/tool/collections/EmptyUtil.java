@@ -10,7 +10,15 @@ import java.util.Set;
 import com.yishuifengxiao.common.tool.entity.Page;
 
 /**
+ * <p>
  * 空集合判断工具
+ * </p>
+ * 
+ * 该工具的主要目标是快速地判断集合是否为空，其具备以下的几项功能
+ * <ol>
+ * <li>判断集合是否为空或者空元素的集合</li>
+ * <li>判断集合是否仅有一个元素</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0

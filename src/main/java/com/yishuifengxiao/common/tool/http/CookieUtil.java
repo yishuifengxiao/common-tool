@@ -15,7 +15,15 @@ import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * <p>
  * cookie 操作工具
+ * </p>
+ * 该工具的主要作用是对cookie进行操作，其主要的功能如下：
+ * <ol>
+ * <li>根据cookie里键的名字获取对应的值</li>
+ * <li>根据cookie里键的名字移除对应的值</li>
+ * <li>在cookie里增加一个键值对数据</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0

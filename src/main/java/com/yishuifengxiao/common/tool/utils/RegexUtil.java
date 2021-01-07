@@ -3,9 +3,16 @@ package com.yishuifengxiao.common.tool.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 /**
+ * <p>
  * 正则工具
+ * </p>
+ * 该工具主要是利用正则对字符串进行判断，主要功能如下：
+ * <ol>
+ * <li>判断给定的字符串是否包含中文</li>
+ * <li>判断给定的字符串是否符合给定的正则表达式</li>
+ * </ol>
+ * 
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -14,7 +21,7 @@ public final class RegexUtil {
 	/**
 	 * 包含中文的正则
 	 */
-	private static final  Pattern CHINESE_PATTERN = Pattern.compile("[\\u4e00-\\u9fa5]+");
+	private static final Pattern CHINESE_PATTERN = Pattern.compile("[\\u4e00-\\u9fa5]+");
 
 	/**
 	 * 如果包含汉字则返回为true

@@ -18,7 +18,15 @@ import com.yishuifengxiao.common.tool.exception.CustomException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * <p>
  * 时间转换解析工具
+ * </p>
+ * 该工具的主要作用是将LocalDateTime和Date形式的时间互相转换以及将字符串格式的时间和日期时间互相转换。该工具是一个线程安全类的工具，其主要的功能如下：
+ * <ol>
+ * <li>将LocalDateTime和Date形式的时间互相转换</li>
+ * <li>将指定格式的字符串按解析为日期时间</li>
+ * <li>将日期时间按照指定的格式转换成字符串</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0
@@ -59,7 +67,7 @@ public final class DateTimeUtil {
 	/**
 	 * 将Date转换为 LocalDateTime
 	 * 
-	 * @param date  给定的时间
+	 * @param date 给定的时间
 	 * @return 转换后的时间
 	 */
 	public static synchronized LocalDateTime date2LocalDateTime(Date date) {
@@ -87,8 +95,8 @@ public final class DateTimeUtil {
 	/**
 	 * 返回自1970年1月1日以来，由此LocalDateTime对应的 Date对象表示的00:00:00 GMT的毫秒 数 。
 	 * 
-	 * @param localDateTime  给定的时间
-	 * @return  由此LocalDateTime对应的 Date对象表示的00:00:00 GMT的毫秒 数 。
+	 * @param localDateTime 给定的时间
+	 * @return 由此LocalDateTime对应的 Date对象表示的00:00:00 GMT的毫秒 数 。
 	 */
 	public static synchronized Long getTime(LocalDateTime localDateTime) {
 		if (null == localDateTime) {
@@ -100,7 +108,7 @@ public final class DateTimeUtil {
 	/**
 	 * 返回自1970年1月1日以来，由此 Date对象表示的00:00:00 GMT的毫秒 数 。
 	 * 
-	 * @param date  给定的时间
+	 * @param date 给定的时间
 	 * @return 由此 Date对象表示的00:00:00 GMT的毫秒 数 。
 	 */
 	public static synchronized Long getTime(Date date) {
@@ -128,7 +136,7 @@ public final class DateTimeUtil {
 	 * 默认采用yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm 或 yyyy-MM-dd 形式解析
 	 * 
 	 * @param timeStr 需要解析的字符串
-
+	 * 
 	 * @return LocalDateTime形式的时间
 	 * @throws CustomException 解析时出现了问题
 	 */
@@ -139,10 +147,10 @@ public final class DateTimeUtil {
 	/**
 	 * 将字符串解析为LocalDateTime 形式的时间
 	 * 
-	 * @param timeStr 需要解析的字符串
+	 * @param timeStr  需要解析的字符串
 	 * @param patterns 解析规则 当未填写解析规则时
 	 * @return LocalDateTime形式的时间
-	 * @throws CustomException  解析时出现了问题
+	 * @throws CustomException 解析时出现了问题
 	 */
 	public static synchronized LocalDateTime parse(String timeStr, String... patterns) throws CustomException {
 
@@ -157,7 +165,7 @@ public final class DateTimeUtil {
 	/**
 	 * 将LocalDateTime形式的时间格式化为yyyy-MM-dd HH:mm:ss格式的字符串
 	 * 
-	 * @param localDateTime  给定的时间
+	 * @param localDateTime 给定的时间
 	 * @return yyyy-MM-dd HH:mm:ss格式的字符串
 	 */
 	public static synchronized String format(LocalDateTime localDateTime) {
@@ -167,7 +175,7 @@ public final class DateTimeUtil {
 	/**
 	 * 将LocalDateTime形式的时间格式化为 格式化为指定形式的字符串
 	 * 
-	 * @param localDateTime  给定的时间
+	 * @param localDateTime 给定的时间
 	 * @param pattern       格式化形式，例如yyyy-MM-dd HH:mm:ss
 	 * @return 指定形式的字符串
 	 */
@@ -182,7 +190,7 @@ public final class DateTimeUtil {
 	/**
 	 * 将Date形式的时间格式化为 格式化为指定形式的字符串
 	 * 
-	 * @param date  给定的时间
+	 * @param date    给定的时间
 	 * @param pattern 格式化形式，例如yyyy-MM-dd HH:mm:ss
 	 * @return 指定形式的字符串
 	 */
@@ -197,7 +205,7 @@ public final class DateTimeUtil {
 	/**
 	 * 将Date形式的时间格式化为yyyy-MM-dd HH:mm:ss格式的字符串
 	 * 
-	 * @param date  给定的时间
+	 * @param date 给定的时间
 	 * @return yyyy-MM-dd HH:mm:ss格式的字符串
 	 */
 	public static synchronized String format(Date date) {
@@ -207,7 +215,7 @@ public final class DateTimeUtil {
 	/**
 	 * 将Date形式的时间格式化为yyyy-MM-dd格式的字符串
 	 * 
-	 * @param date  给定的时间
+	 * @param date 给定的时间
 	 * @return yyyy-MM-dd 格式的字符串
 	 */
 	public static synchronized String formatDate(Date date) {
@@ -216,8 +224,8 @@ public final class DateTimeUtil {
 
 	/**
 	 * 将Date形式的时间格式化为yyyy-MM-dd格式的字符串
-	 *  
-	 * @param localDateTime  给定的时间
+	 * 
+	 * @param localDateTime 给定的时间
 	 * @return yyyy-MM-dd 格式的字符串
 	 */
 	public static synchronized String formatDate(LocalDateTime localDateTime) {

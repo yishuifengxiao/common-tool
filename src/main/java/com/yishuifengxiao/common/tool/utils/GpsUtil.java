@@ -8,7 +8,10 @@ package com.yishuifengxiao.common.tool.utils;
  * <p>
  * 根据两个坐标值计算出两个坐标点之间的距离
  * </p>
+ * <p>
  * 算法来源 https://www.cnblogs.com/zhoug2020/p/8993750.html
+ * </p>
+ * <strong>该工具是一个线程安全类的工具。</strong>
  * 
  * @author yishui
  * @version 1.0.0

@@ -5,7 +5,16 @@ import org.apache.commons.lang3.StringUtils;
 import com.yishuifengxiao.common.tool.utils.CertNoUtil;
 
 /**
+ * <p>
  * 脱敏工具
+ * </p>
+ * 该工具主要是用于对各种类型的数据进行脱密处理，主要功能如下：
+ * <ol>
+ * <li>用户姓名脱密，将形如张三四的名字替换成张**</li>
+ * <li>身份证前三后四脱敏</li>
+ * <li>手机号码前三后四脱敏,将手机号的中间四位替换成****</li>
+ * <li>密码脱敏,将密码直接替换成****</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0

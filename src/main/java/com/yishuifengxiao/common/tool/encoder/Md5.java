@@ -7,9 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
-
 /**
- *  Md5加密工具
+ * <p>
+ * Md5加密工具
+ * </p>
+ * 基于MD5算法实现的加密工具
+ * 
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -84,6 +87,5 @@ public class Md5 {
 			return null;
 		}
 	}
-
 
 }

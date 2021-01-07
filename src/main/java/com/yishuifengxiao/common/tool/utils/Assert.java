@@ -14,9 +14,15 @@ import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.ValidateException;
 
-
 /**
+ * <p>
  * 断言工具
+ * </p>
+ * <p>
+ * 该工具主要判断给定的数据是否符合给定的条件，若数据不符合给定的条件就抛出自定义受检查的异常
+ * </p>
+ * 该主要是为了替换到代码里的各种<code>if</code>判断，从而提升代码的优雅性
+ * 
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -284,7 +290,9 @@ public final class Assert {
 	}
 
 	/**
-	 * <p>判断两个值是否相等，如果不相等就抛出异常</p>
+	 * <p>
+	 * 判断两个值是否相等，如果不相等就抛出异常
+	 * </p>
 	 * 任何比较值为null则抛出异常
 	 * 
 	 * @param msg           异常信息
@@ -299,7 +307,9 @@ public final class Assert {
 	}
 
 	/**
-	 * <p>判断两个值是否相等，如果不相等就抛出异常</p>
+	 * <p>
+	 * 判断两个值是否相等，如果不相等就抛出异常
+	 * </p>
 	 * 任何比较值为null则抛出异常
 	 * 
 	 * @param msg           异常信息
@@ -315,7 +325,9 @@ public final class Assert {
 	}
 
 	/**
-	 *<p> 判断两个值是否相等，如果不相等就抛出异常</p>
+	 * <p>
+	 * 判断两个值是否相等，如果不相等就抛出异常
+	 * </p>
 	 * 任何比较值为null则抛出异常
 	 * 
 	 * @param msg           异常信息
@@ -466,10 +478,18 @@ public final class Assert {
 	}
 
 	/**
-	 *<p> 判断给定的值是否不在指定的数据范围的区间内，如果不在指定的范围内疚抛出异常</p>
-	 * <p>注意：包含边界</p>
-	 *<p> 例如 compareValue=2，startValue=2 ，endValue=8时是正常情况</p>
-	 * <p>例如 compareValue=1，startValue=2 ，endValue=8时会抛出异常</p>
+	 * <p>
+	 * 判断给定的值是否不在指定的数据范围的区间内，如果不在指定的范围内疚抛出异常
+	 * </p>
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=2，startValue=2 ，endValue=8时是正常情况
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=1，startValue=2 ，endValue=8时会抛出异常
+	 * </p>
 	 * 
 	 * @param msg          提示信息
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
@@ -485,10 +505,18 @@ public final class Assert {
 	}
 
 	/**
-	 *<p> 判断给定的值是否不在指定的数据范围的区间内，如果不在指定的范围内疚抛出异常</p>
-	 *<p> 注意：包含边界</p>
-	 * <p>例如 compareValue=2，startValue=2 ，endValue=8时是正常情况</p>
-	 *<p> 例如 compareValue=1，startValue=2 ，endValue=8时会抛出异常</p>
+	 * <p>
+	 * 判断给定的值是否不在指定的数据范围的区间内，如果不在指定的范围内疚抛出异常
+	 * </p>
+	 * <p>
+	 * 注意：包含边界
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=2，startValue=2 ，endValue=8时是正常情况
+	 * </p>
+	 * <p>
+	 * 例如 compareValue=1，startValue=2 ，endValue=8时会抛出异常
+	 * </p>
 	 * 
 	 * @param msg          提示信息
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
@@ -651,7 +679,7 @@ public final class Assert {
 	/**
 	 * 判断Optional里对象是否为空，如果不为空则抛出异常
 	 * 
-	 * @param <T> 给定的数据的类型
+	 * @param <T>      给定的数据的类型
 	 * @param msg      提示信息
 	 * @param optional 需要判断的数据
 	 * 
@@ -668,7 +696,7 @@ public final class Assert {
 	/**
 	 * 判断Optional里对象是否不为空，如果为空则抛出异常
 	 * 
-	 * @param <T>  给定的数据的类型
+	 * @param <T>      给定的数据的类型
 	 * @param msg      提示信息
 	 * @param optional 需要判断的数据
 	 *
@@ -687,7 +715,7 @@ public final class Assert {
 	 * 判断data里对象是否为空，如果不为空则抛出异常
 	 * 
 	 * @param <T>  给定的数据的类型
-	 * @param msg      提示信息
+	 * @param msg  提示信息
 	 * @param data 需要判断的数据
 	 *
 	 * @throws ValidateException 数据不符合给定条件
@@ -708,7 +736,7 @@ public final class Assert {
 	 * 判断data里对象是否不为空，如果为空则抛出异常
 	 * 
 	 * @param <T>  给定的数据的类型
-	 * @param msg      提示信息
+	 * @param msg  提示信息
 	 * @param data 需要判断的数据
 	 *
 	 * @throws ValidateException 数据不符合给定条件
@@ -730,7 +758,7 @@ public final class Assert {
 	 * 判断分页对象是否为空，若不为空则抛出异常
 	 * 
 	 * @param <T>  给定的数据的类型
-	 * @param msg   异常提示信息
+	 * @param msg  异常提示信息
 	 * @param page 分页对象
 	 * 
 	 * @throws ValidateException 数据不符合给定条件
@@ -745,7 +773,7 @@ public final class Assert {
 	 * 判断分页对象是否不为空，若为空则抛出异常
 	 * 
 	 * @param <T>  给定的数据的类型
-	 * @param msg   异常提示信息
+	 * @param msg  异常提示信息
 	 * @param page 分页对象
 	 * 
 	 * @throws ValidateException 数据不符合给定条件
@@ -760,7 +788,7 @@ public final class Assert {
 	 * 判断分页对象是否为空，若不为空则抛出异常
 	 * 
 	 * @param <T>  给定的数据的类型
-	 * @param msg   异常提示信息
+	 * @param msg  异常提示信息
 	 * @param page 分页对象
 	 *
 	 * @throws ValidateException 数据不符合给定条件
@@ -776,7 +804,7 @@ public final class Assert {
 	 * 判断分页对象是否不为空，若为空则抛出异常
 	 * 
 	 * @param <T>  给定的数据的类型
-	 * @param msg   异常提示信息
+	 * @param msg  异常提示信息
 	 * @param page 分页对象
 	 * 
 	 * @throws ValidateException 数据不符合给定条件
@@ -791,7 +819,7 @@ public final class Assert {
 	/**
 	 * 判断数组是否为空，若不为空则抛出异常
 	 * 
-	 * @param <T> 给定的数据的类型
+	 * @param <T>  给定的数据的类型
 	 * @param msg  异常提示信息
 	 * @param data 数组数据
 	 *
@@ -807,7 +835,7 @@ public final class Assert {
 	 * 判断数组是否不为空，若为空则抛出异常
 	 * 
 	 * @param <T>  给定的数据的类型
-	 * @param msg   异常提示信息
+	 * @param msg  异常提示信息
 	 * @param data 数组数据
 	 *
 	 * @throws ValidateException 数据不符合给定条件

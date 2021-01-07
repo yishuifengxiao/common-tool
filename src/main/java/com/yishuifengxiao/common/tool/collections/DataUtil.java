@@ -18,7 +18,16 @@ import com.yishuifengxiao.common.tool.exception.DataException;
 import com.yishuifengxiao.common.tool.exception.ValidateException;
 
 /**
- * 集合元素提取工具类
+ * <p>
+ * 集合元素提取工具
+ * </p>
+ * 
+ * 该工具的主要目标是在不发生NPE的前提下对集合以及集合里的元素进行操作，其具备以下的几项功能
+ * <ol>
+ * <li>将集合转换成java8中的串行流或并行流</li>
+ * <li>将数组转换成List或Set，而从避免Arrays.asList()转换后存在的问题</li>
+ * <li>安全地获取集合里的第一个元素</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0

@@ -16,7 +16,21 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
+ * <p>
  * 通用响应
+ * </p>
+ * <p>
+ * 该工具主要是用于对系统的的响应进行一个形式上的统一， 以便各个接口返回的响应的形式保持一致。在初步设计时主要是借助HttpStatus作为状态标识
+ * （HttpStatus具体的响应值的信息可以参见
+ * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">
+ * https://developer.mozilla.org/en-US/docs/Web/HTTP/Status</a>） 。
+ * </p>
+ * <p>
+ * 简单地说，当code的值为200时表示系统成功处理了用户的请求，当code的值为401时表示用户无权访问请求的资源，
+ * 当code的值为500时表示系统成功接收到了用户的请求，当是未能按照用户的意图进行业务处理。。。。。
+ * </p>
+ * 
+ * 在某些情况下，如果系统内置的响应码不符合已进行的业务的需求但是又需要统一响应格式时可以自定义响应码等信息
  * 
  * @author yishui
  * @version 1.0.0

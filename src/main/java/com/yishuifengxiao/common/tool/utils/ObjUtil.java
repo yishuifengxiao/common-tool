@@ -4,7 +4,10 @@
 package com.yishuifengxiao.common.tool.utils;
 
 /**
+ * <p>
  * 集合对象判断工具
+ * </p>
+ * 该工具主要用于判断集合里元素的数量
  * 
  * @author yishui
  * @version 1.0.0

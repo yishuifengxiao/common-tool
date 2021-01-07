@@ -1,6 +1,10 @@
 package com.yishuifengxiao.common.tool.random;
 
 /**
+ * <p>
+ * 雪花算法id生成器
+ * </p>
+ * 
  * snowflake 算法是 twitter 开源的分布式 id 生成算法，就是把一个 64 位的 long 型的 id，1 个 bit 是不用的，用其中的
  * 41 bit 作为毫秒数，用 10 bit 作为工作机器 id，12 bit 作为序列号。
  * 

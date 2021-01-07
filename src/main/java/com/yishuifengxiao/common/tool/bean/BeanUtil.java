@@ -7,9 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.lang.reflect.Field;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.beans.BeanUtils;
 
 import com.yishuifengxiao.common.tool.constant.ErrorCode;
@@ -17,7 +15,15 @@ import com.yishuifengxiao.common.tool.exception.CustomException;
 import com.yishuifengxiao.common.tool.exception.ValidateException;
 
 /**
+ * <p>
  * 对象转换类
+ * </p>
+ * 该工具的主要目标是对java对象进行操作，其具备以下的几项功能
+ * <ol>
+ * <li>将源对象的属性值根据属性的名字复制到目标对象</li>
+ * <li>将java bean 对象转换成二进制数据</li>
+ * <li>将二进制数据转换成 java bean</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0
@@ -49,34 +55,6 @@ public final class BeanUtil {
 			throw new ValidateException(ErrorCode.DATA_CONVERT_ERROR, e.getMessage());
 		}
 
-	}
-
-	/**
-	 * 去除对象里非空属性之外的属性和制表符
-	 * 
-	 * @param <T>    源对象的类型
-	 * @param source 原始对象
-	 * @return 过滤后的对象
-	 * @throws IllegalAccessException 过滤时发生问题
-	 */
-	public static <T> T setNullValue(T source) throws IllegalAccessException {
-		Field[] fields = source.getClass().getDeclaredFields();
-		for (Field field : fields) {
-			if ("class java.lang.String".equals(field.getGenericType().toString())) {
-				field.setAccessible(true);
-				Object obj = field.get(source);
-				if (obj != null && obj.equals("")) {
-					field.set(source, null);
-				} else if (obj != null) {
-					field.set(source,
-							StringEscapeUtils.escapeJava(obj.toString()).replace("\\", "\\" + "\\").replace("(", "\\(")
-									.replace(")", "\\)").replace("%", "\\%").replace("*", "\\*").replace("[", "\\[")
-									.replace("]", "\\]").replace("|", "\\|").replace(".", "\\.").replace("$", "\\$")
-									.replace("+", "\\+").trim());
-				}
-			}
-		}
-		return source;
 	}
 
 	/**

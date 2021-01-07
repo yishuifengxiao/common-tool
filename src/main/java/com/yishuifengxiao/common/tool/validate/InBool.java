@@ -19,7 +19,7 @@ import com.yishuifengxiao.common.tool.validate.validator.InBoolValidator;
  * <p>
  * 目标数据必须为0或1
  * </p>
- * 针对整型数据
+ * 该注解针对整型数据，不适用其他数据类型
  * 
  * @author yishui
  * @version 1.0.0
@@ -61,6 +61,7 @@ public @interface InBool {
 
 	/**
 	 * 指定多个时使用
+	 * 
 	 * @author yishui
 	 * @version 1.0.0
 	 * @since 1.0.0

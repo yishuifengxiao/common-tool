@@ -9,7 +9,11 @@ import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
  * <p>
  * 比较工具工具类
  * </p>
- * 用于比较一个给定的值是否在一个指定的范围内
+ * 用于比较一个给定的值是否在一个指定的范围内，其主要作用如下：
+ * <ol>
+ * <li>判断给定的数字是否在指定的数字范围之内</li>
+ * <li>判断给定的时间是否在指定的时间范围内</li>
+ * </ol>
  * 
  * @author yishui
  * @version 1.0.0
@@ -148,12 +152,11 @@ public class BetweenUtil {
 	}
 
 	/**
-	 *  <p>
+	 * <p>
 	 * 判断给定的值是否在指定的数据范围的区间内
 	 * </p>
-
-	 * 注意：包含边界
-	 * 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为true
+	 * 
+	 * 注意：包含边界 例如 compareValue=2，startValue=2 ，endValue=8时的返回值为true
 	 * 
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
@@ -191,7 +194,7 @@ public class BetweenUtil {
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
 	 * @param endValue     比较范围的结束值，如果给定的值为null，则默认替换为0
-	 * @return  给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
+	 * @return 给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
 	 */
 	public static boolean isNotBetween(Long compareValue, Long startValue, Long endValue) {
 		return !isBetween(compareValue, startValue, endValue);
@@ -244,7 +247,7 @@ public class BetweenUtil {
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
 	 * @param endValue     比较范围的结束值，如果给定的值为null，则默认替换为0
-	 * @return  给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
+	 * @return 给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
 	 */
 	public static boolean isNotBetween(Float compareValue, Float startValue, Float endValue) {
 		return !isBetween(compareValue, startValue, endValue);
@@ -297,7 +300,7 @@ public class BetweenUtil {
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
 	 * @param endValue     比较范围的结束值，如果给定的值为null，则默认替换为0
-	 * @return  给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
+	 * @return 给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
 	 */
 	public static boolean isNotBetween(Double compareValue, Double startValue, Double endValue) {
 		return !isBetween(compareValue, startValue, endValue);
@@ -354,7 +357,7 @@ public class BetweenUtil {
 	 * @param compareValue 给定的值
 	 * @param startValue   比较范围的开始值
 	 * @param endValue     比较范围的结束值
-	 * @return  给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
+	 * @return 给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
 	 */
 	public static boolean isNotBetween(Date compareValue, Date startValue, Date endValue) {
 		return !isBetween(compareValue, startValue, endValue);
@@ -407,7 +410,7 @@ public class BetweenUtil {
 	 * @param compareValue 给定的值
 	 * @param startValue   比较范围的开始值
 	 * @param endValue     比较范围的结束值
-	 * @return  给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
+	 * @return 给定的值是否不在指定的数据范围的区间内,如果在则返回为true,否则为false
 	 */
 	public static boolean isNotBetween(LocalDateTime compareValue, LocalDateTime startValue, LocalDateTime endValue) {
 		if (null == compareValue || null == startValue || null == endValue) {

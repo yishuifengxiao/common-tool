@@ -6,7 +6,10 @@ package com.yishuifengxiao.common.tool.random;
 import java.util.UUID;
 
 /**
+ * <p>
  * UUID生成工具
+ * </p>
+ * 根据UUID生成一个不包含-的随机字符串
  * 
  * @author yishui
  * @version 1.0.0

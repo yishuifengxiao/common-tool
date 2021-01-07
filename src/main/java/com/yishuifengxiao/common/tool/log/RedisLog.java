@@ -18,7 +18,7 @@ import lombok.experimental.Accessors;
  * <p>
  * 自定义日志的内容
  * </p>
- * 利用redis的订阅发布功能，将信息发布到redis中
+ * 利用redis的订阅发布功能，将信息通过redis发布时的内容的格式
  * 
  * @author yishui
  * @version 1.0.0

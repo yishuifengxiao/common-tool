@@ -9,7 +9,12 @@ import java.io.Writer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * <p>
  * IO流关闭工具
+ * </p>
+ * 该工具主要目的是优雅地关闭掉各种IO流，从而屏蔽掉因为关闭IO时强制异常捕获代码造成代码优雅性的降低
+ * 
+ * 
  * 
  * @author yishui
  * @version 1.0.0
