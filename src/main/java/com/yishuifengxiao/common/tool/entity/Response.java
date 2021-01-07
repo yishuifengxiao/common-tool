@@ -27,10 +27,13 @@ import io.swagger.annotations.ApiModelProperty;
  * </p>
  * <p>
  * 简单地说，当code的值为200时表示系统成功处理了用户的请求，当code的值为401时表示用户无权访问请求的资源，
- * 当code的值为500时表示系统成功接收到了用户的请求，当是未能按照用户的意图进行业务处理。。。。。
+ * 当code的值为500时表示系统成功接收到了用户的请求，但是未能按照用户的意图进行业务处理。。。。。
  * </p>
  * 
+ * <p>
  * 在某些情况下，如果系统内置的响应码不符合已进行的业务的需求但是又需要统一响应格式时可以自定义响应码等信息
+ * </p>
+ * 
  * 
  * @author yishui
  * @version 1.0.0
@@ -95,42 +98,42 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
-	 * 根据响应数据生成一个代表成功的响应对象
+	 * 根据响应数据生成一个表示成功的响应对象
 	 * 
 	 * @param <T>  响应的数据信息的数据类型
 	 * @param data 请求成功时返回的响应的数据信息
-	 * @return 代表请求成功的响应对象
+	 * @return 表示请求成功的响应对象
 	 */
 	public static <T> Response<T> suc(T data) {
 		return new Response<>(HttpStatus.OK.value(), Const.MSG_OK, data);
 	}
 
 	/**
-	 * 生成一个默认的一个代表成功的响应对象
+	 * 生成一个默认的一个表示成功的响应对象
 	 * 
-	 * @return 代表成功的响应对象(响应码200)
+	 * @return 表示成功的响应对象(响应码200)
 	 */
 	public static Response<Object> suc() {
 		return new Response<Object>(HttpStatus.OK.value(), Const.MSG_OK);
 	}
 
 	/**
-	 * 根据响应提示信息生成一个代表成功的响应对象
+	 * 根据响应提示信息生成一个表示成功的响应对象
 	 * 
 	 * @param msg 响应提示信息
-	 * @return 代表成功的响应对象(响应码200)
+	 * @return 表示成功的响应对象(响应码200)
 	 */
 	public static Response<Object> suc(String msg) {
 		return new Response<Object>(HttpStatus.OK.value(), msg);
 	}
 
 	/**
-	 * 根据响应提示信息和响应数据生成一个代表成功的响应对象
+	 * 根据响应提示信息和响应数据生成一个表示成功的响应对象
 	 * 
 	 * @param <T>  响应数据的数据类型
 	 * @param msg  响应提示信息
 	 * @param data 响应数据
-	 * @return 代表成功的响应对象(响应码200)
+	 * @return 表示成功的响应对象(响应码200)
 	 */
 	public static <T> Response<T> suc(String msg, T data) {
 		return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, data);
@@ -139,7 +142,7 @@ public class Response<T> implements Serializable {
 	/**
 	 * 生成一个默认的表示参数有误的响应对象(响应码400)
 	 * 
-	 * @return 代表参数有误的响应对象(响应码400)
+	 * @return 表示参数有误的响应对象(响应码400)
 	 */
 	public static Response<Object> badParam() {
 		return new Response<Object>(HttpStatus.BAD_REQUEST.value(), Const.MSG_BAD_REQUEST);
@@ -149,7 +152,7 @@ public class Response<T> implements Serializable {
 	 * 根据响应提示信息生成一个表示参数有误的响应对象(响应码400)
 	 * 
 	 * @param msg 响应提示信息
-	 * @return 代表参数有误的响应对象(响应码400)
+	 * @return 表示参数有误的响应对象(响应码400)
 	 */
 	public static Response<Object> badParam(String msg) {
 		return new Response<Object>(HttpStatus.BAD_REQUEST.value(), msg);
@@ -161,7 +164,7 @@ public class Response<T> implements Serializable {
 	 * @param <T>  响应数据的数据类型
 	 * @param msg  响应提示信息
 	 * @param data 响应数据
-	 * @return 代表参数有误的响应对象(响应码400)
+	 * @return 表示参数有误的响应对象(响应码400)
 	 */
 	public static <T> Response<T> badParam(String msg, T data) {
 		return new Response<>(HttpStatus.BAD_REQUEST.value(), msg, data);
@@ -246,6 +249,17 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
+	 * 根据响应数据生成表示服务器内部异常500时的返回信息
+	 * 
+	 * @param <T>  响应数据的数据类型
+	 * @param data 响应数据
+	 * @return 表示服务器内部异常500时的返回信息
+	 */
+	public static <T> Response<T> error(T data) {
+		return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR, data);
+	}
+
+	/**
 	 * 根据响应提示信息和响应数据生成表示服务器内部异常500时的返回信息
 	 * 
 	 * @param <T>  响应数据的数据类型
@@ -282,6 +296,8 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
+	 * 构造函数
+	 * 
 	 * @param code 响应码
 	 * @param msg  响应提示信息
 	 * @param data 响应数据
@@ -291,6 +307,8 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
+	 * 构造函数
+	 * 
 	 * @param code 响应码
 	 * @param msg  响应提示信息
 	 */
@@ -298,46 +316,101 @@ public class Response<T> implements Serializable {
 		this(UID.uuid(), code, msg, null, new Date());
 	}
 
+	/**
+	 * 获取请求ID
+	 * 
+	 * @return 请求ID
+	 */
 	public String getId() {
 		return id;
 	}
 
+	/**
+	 * 设置请求ID
+	 * 
+	 * @param id 请求ID
+	 * @return 当前通用响应对象
+	 */
 	public Response<T> setId(String id) {
 		this.id = id;
 		return this;
 	}
 
+	/**
+	 * 获取响应码
+	 * 
+	 * @return 当前响应的响应码
+	 */
 	public int getCode() {
 		return code;
 	}
 
+	/**
+	 * 设置响应码
+	 * 
+	 * @param code 响应码
+	 * @return 当前通用响应对象
+	 */
 	public Response<T> setCode(int code) {
 		this.code = code;
 		return this;
 	}
 
+	/**
+	 * 获取响应提示信息
+	 * 
+	 * @return 响应提示信息
+	 */
 	public String getMsg() {
 		return msg;
 	}
 
+	/**
+	 * 设置响应提示信息
+	 * 
+	 * @param msg 响应提示信息
+	 * @return 当前通用响应对象
+	 */
 	public Response<T> setMsg(String msg) {
 		this.msg = msg;
 		return this;
 	}
 
+	/**
+	 * 获取响应数据
+	 * 
+	 * @return 响应数据
+	 */
 	public T getData() {
 		return data;
 	}
 
+	/**
+	 * 设置响应数据
+	 * 
+	 * @param data 响应数据
+	 * @return 当前通用响应对象
+	 */
 	public Response<T> setData(T data) {
 		this.data = data;
 		return this;
 	}
 
+	/**
+	 * 获取响应的时间
+	 * 
+	 * @return 响应的时间
+	 */
 	public Date getDate() {
 		return date;
 	}
 
+	/**
+	 * 设置响应的时间
+	 * 
+	 * @param date 响应的时间
+	 * @return 当前通用响应对象
+	 */
 	public Response<T> setDate(Date date) {
 		this.date = date;
 		return this;
