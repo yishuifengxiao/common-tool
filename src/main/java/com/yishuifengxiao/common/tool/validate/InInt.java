@@ -16,12 +16,14 @@ import javax.validation.Payload;
 import com.yishuifengxiao.common.tool.validate.validator.InIntValidator;
 
 /**
- * <p>目标数据必须在指定的数据集合之内</p>
+ * <p>
+ * 目标数据必须在指定的数据集合之内
+ * </p>
  * 针对整型数据
  * 
- * @author qingteng
- * @date 2020年12月4日
+ * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 @Target({ FIELD, METHOD, PARAMETER, ANNOTATION_TYPE })
 @Retention(RUNTIME)
@@ -32,35 +34,35 @@ public @interface InInt {
 	/**
 	 * 默认错误消息
 	 * 
-	 * @return
+	 * @return 默认错误消息
 	 */
 	String message() default "非法的数据";
 
 	/**
-	 * 指定的数据集合
+	 * 指定的数据
 	 * 
-	 * @return
+	 * @return 指定的数据
 	 */
 	int[] value() default {};
 
 	/**
 	 * 是否允许目标值为null，默认为true
 	 * 
-	 * @return
+	 * @return 是否允许目标值为null，默认为true
 	 */
 	boolean nullable() default true;
 
 	/**
 	 * 分组
 	 * 
-	 * @return
+	 * @return 校验分组
 	 */
 	Class<?>[] groups() default {};
 
 	/**
 	 * 负载
 	 * 
-	 * @return
+	 * @return 负载
 	 */
 	Class<? extends Payload>[] payload() default {};
 

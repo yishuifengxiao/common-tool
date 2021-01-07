@@ -11,8 +11,8 @@ import org.springframework.format.Formatter;
  * 字符串与LocalDate转化类
  * 
  * @author yishui
- * @date 2018年7月26日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class LocalDateFormatter implements Formatter<LocalDate> {
 	private DateTimeFormatter formatter;

@@ -13,11 +13,11 @@ import org.apache.commons.lang3.RandomUtils;
 import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
 
 /**
- * 随机工具类
+ * 随机工具
  * 
  * @author yishui
- * @date 2018年8月6日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class RandomUtil {
 
@@ -29,8 +29,8 @@ public class RandomUtil {
 	/**
 	 * 随机生成一个常见的汉字
 	 * 
-	 * @return
-	 * @throws UnsupportedEncodingException
+	 * @return 一个常见的汉字
+	 * @throws UnsupportedEncodingException 系统不支持GBK编码
 	 */
 	public static final String chinese() throws UnsupportedEncodingException {
 		Random random = new Random(System.currentTimeMillis());
@@ -49,8 +49,8 @@ public class RandomUtil {
 	 * 生成指定长度的汉字
 	 * 
 	 * @param len 汉字长度
-	 * @return
-	 * @throws UnsupportedEncodingException
+	 * @return 指定长度的汉字
+	 * @throws UnsupportedEncodingException 系统不支持GBK编码
 	 */
 	public static final String chinese(int len) throws UnsupportedEncodingException {
 		StringBuffer sb = new StringBuffer();
@@ -83,7 +83,9 @@ public class RandomUtil {
 	}
 
 	/**
-	 * <p>根据当前时间生成形如yyyyMMddhhmmss100的字符串</p>
+	 * <p>
+	 * 根据当前时间生成形如yyyyMMddhhmmss100的字符串
+	 * </p>
 	 * 其中yyyyMMddhhmmss部分为根据当前时间格式化生成,数字部分时100-999之间的随机数
 	 * 
 	 * @return 形如yyyyMMddhhmmss100的字符串

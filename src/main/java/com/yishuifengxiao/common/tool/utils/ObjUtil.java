@@ -4,16 +4,18 @@
 package com.yishuifengxiao.common.tool.utils;
 
 /**
- * 对象工具类
+ * 集合对象判断工具
  * 
- * @author qingteng
- * @date 2020年11月25日
+ * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 public final class ObjUtil {
 
 	/**
-	 *<p> 判断输入的数据是否全部不为null，如果所有的数据都不包含null则返回为true,否则返回为false</p>
+	 * <p>
+	 * 判断输入的数据是否全部不为null，如果所有的数据都不包含null则返回为true,否则返回为false
+	 * </p>
 	 * 注意：输入参数个数为0时返回为true
 	 * 
 	 * @param objs 需要判断的数据
@@ -31,7 +33,9 @@ public final class ObjUtil {
 	}
 
 	/**
-	 * <p>判断输入的数据是否全部为null，如果是则返回为true，否则为false</p>
+	 * <p>
+	 * 判断输入的数据是否全部为null，如果是则返回为true，否则为false
+	 * </p>
 	 * 注意：输入参数个数为0时返回为true
 	 * 
 	 * @param objs 需要判断的数据
@@ -49,7 +53,9 @@ public final class ObjUtil {
 	}
 
 	/**
-	 *<p> 检查输入的数据是否包含null值，只要一个值为null就返回true,否则为false</p>
+	 * <p>
+	 * 检查输入的数据是否包含null值，只要一个值为null就返回true,否则为false
+	 * </p>
 	 * 注意：输入参数个数为0时返回为false
 	 * 
 	 * @param objs 需要判断的数据

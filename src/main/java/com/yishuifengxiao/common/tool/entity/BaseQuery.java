@@ -6,8 +6,8 @@ import java.io.Serializable;
  * 顶级查询参数类
  * 
  * @author yishui
- * @Date 2019年4月24日
  * @version 1.0.0
+ * @since 1.0.0
  */
 public class BaseQuery implements Serializable {
 
@@ -29,7 +29,7 @@ public class BaseQuery implements Serializable {
 	/**
 	 * 获取分页大小
 	 * 
-	 * @return
+	 * @return 分页大小
 	 */
 	public Integer getPageSize() {
 		return pageSize;
@@ -42,7 +42,7 @@ public class BaseQuery implements Serializable {
 	/**
 	 * 获取当前页页码
 	 * 
-	 * @return
+	 * @return 当前页页码
 	 */
 	public Integer getPageNum() {
 		return pageNum;

@@ -4,20 +4,19 @@
 package com.yishuifengxiao.common.tool.utils;
 
 /**
- * 字符工具类
+ * 字符串工具
  * 
  * @author yishui
- * @Date 2019年3月8日
  * @version 1.0.0
+ * @since 1.0.0
  */
 public class StringUtil {
 
 	/**
 	 * 将字符串的首字母变为小写的
 	 * 
-	 * @param s
-	 *            字符串
-	 * @return
+	 * @param s 字符串
+	 * @return 转换之后的字符串
 	 */
 	public static String toLowerCaseFirstOne(String s) {
 		if (Character.isLowerCase(s.charAt(0))) {
@@ -30,9 +29,8 @@ public class StringUtil {
 	/**
 	 * 将字符串的首字母变为大写的
 	 * 
-	 * @param s
-	 *            字符串
-	 * @return
+	 * @param s 字符串
+	 * @return 转换之后的字符串
 	 */
 	public static String toUpperCaseFirstOne(String s) {
 		if (Character.isUpperCase(s.charAt(0))) {

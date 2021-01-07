@@ -10,12 +10,12 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import java.io.IOException;
 import java.util.Objects;
 
+
 /**
  * Json脱敏序列化
- * 
- * @author qingteng
- * @date 2020年12月13日
+ * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 public class SensitiveSerialize extends JsonSerializer<Object> implements ContextualSerializer {
 

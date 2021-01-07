@@ -4,14 +4,14 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- *<p> 逻辑异常</p>
- * 主要使用到的场景有:
- * 1 在处理业务逻辑时出现异常情况
- * 2 一般在逻辑层使用较多
+ * <p>
+ * 逻辑异常
+ * </p>
+ * 主要使用到的场景有: 1 在处理业务逻辑时出现异常情况 2 一般在逻辑层使用较多
  * 
  * @author yishui
- * @date 2018年12月27日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class ServiceException extends CustomException {
 
@@ -27,9 +27,7 @@ public class ServiceException extends CustomException {
 
 	}
 
-	/**
-	 * @param message
-	 */
+
 	public ServiceException(String message) {
 		super(message);
 
@@ -39,29 +37,19 @@ public class ServiceException extends CustomException {
 		super(errorCode, message);
 	}
 
-	/**
-	 * @param cause
-	 */
+
 	public ServiceException(Throwable cause) {
 		super(cause);
 
 	}
 
-	/**
-	 * @param message
-	 * @param cause
-	 */
+
 	public ServiceException(String message, Throwable cause) {
 		super(message, cause);
 
 	}
 
-	/**
-	 * @param message
-	 * @param cause
-	 * @param enableSuppression
-	 * @param writableStackTrace
-	 */
+
 	public ServiceException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 

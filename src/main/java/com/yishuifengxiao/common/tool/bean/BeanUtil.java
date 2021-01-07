@@ -20,19 +20,20 @@ import com.yishuifengxiao.common.tool.exception.ValidateException;
  * 对象转换类
  * 
  * @author yishui
- * @date 2018年12月6日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public final class BeanUtil {
 
 	/**
 	 * 将源对象里属性值复制给目标对象
 	 * 
-	 * @param source    源对象
-	 * @param target    目标对象
-	 * @param converter 目标对象
-	 * @return
-	 * @throws ValidateException
+	 * @param <S>    源对象的类型
+	 * @param <T>    目标对象的类型
+	 * @param source 源对象
+	 * @param target 目标对象
+	 * @return 复制后的目标对象
+	 * @throws ValidateException 复制时发生问题
 	 */
 	public static synchronized <S, T> T copy(S source, T target) throws ValidateException {
 		if (source == null) {
@@ -53,9 +54,10 @@ public final class BeanUtil {
 	/**
 	 * 去除对象里非空属性之外的属性和制表符
 	 * 
+	 * @param <T>    源对象的类型
 	 * @param source 原始对象
 	 * @return 过滤后的对象
-	 * @throws IllegalAccessException
+	 * @throws IllegalAccessException 过滤时发生问题
 	 */
 	public static <T> T setNullValue(T source) throws IllegalAccessException {
 		Field[] fields = source.getClass().getDeclaredFields();
@@ -82,7 +84,7 @@ public final class BeanUtil {
 	 * 
 	 * @param obj 需要序列化的的对象
 	 * @return 二进制数据
-	 * @throws CustomException
+	 * @throws CustomException 转换时发生的异常
 	 */
 	public static byte[] objectToByte(Object obj) throws CustomException {
 		byte[] bytes = null;
@@ -105,7 +107,7 @@ public final class BeanUtil {
 	 * 
 	 * @param bytes 序列化化后的二进制数据
 	 * @return 对象
-	 * @throws CustomException
+	 * @throws CustomException 转换时发生的异常
 	 */
 	public static Object byteToObject(byte[] bytes) throws CustomException {
 		Object obj = null;
@@ -125,11 +127,11 @@ public final class BeanUtil {
 	/**
 	 * 将序列化化后的二进制数据反序列化为对象
 	 * 
-	 * @param t     希望序列化成的数据类型，不能为空
-	 * 
-	 * @param bytes 序列化化后的二进制数据
-	 * @return 对象
-	 * @throws CustomException
+	 * @param <T>   目标对象的类型
+	 * @param bytes 原始的二进制数据
+	 * @param clazz 目标对象
+	 * @return 反序列化之后的对象
+	 * @throws CustomException 转换时发生的异常
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T byteToObject(byte[] bytes, Class<T> clazz) throws CustomException {

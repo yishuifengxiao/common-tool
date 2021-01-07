@@ -13,38 +13,32 @@ import com.yishuifengxiao.common.tool.exception.ValidateException;
 /**
  * 校验工具类
  * 
- * @author qingteng
- * @date 2020年12月4日
+ * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 public class BeanValidator {
 	private final static Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
 	/**
-	 * <p>
-	 * 使用默认的分组对数据进行校验
-	 * </p>
-	 * 如果数据不符合条件就抛出异常
+	 * 使用默认的分组对数据进行校验，如果数据不符合条件就抛出异常
 	 * 
 	 * @param <T> 需要校验的数据的类型
 	 * @param t   需要校验的数据
-	 * @throws ValidateException
+	 * @throws ValidateException 数据不符合条件
 	 */
 	public static <T> void validate(T t) throws ValidateException {
 		validate(t, null);
 	}
 
 	/**
-	 * <p>
-	 * 使用指定的分组对数据进行校验
-	 * </p>
-	 * 如果数据不符合条件就抛出异常
+	 * 使用指定的分组对数据进行校验,如果数据不符合条件就抛出异常
 	 * 
 	 * @param <T>   需要校验的数据的类型
 	 * @param <G>   校验的分组
 	 * @param t     需要校验的数据
 	 * @param clazz 校验的分组，如果为null就是默认的分组
-	 * @throws ValidateException
+	 * @throws ValidateException 数据不符合条件
 	 */
 	public static <T, G> void validate(T t, Class<G> clazz) throws ValidateException {
 		Set<ConstraintViolation<T>> constraintViolations = VALIDATOR.validate(t, null == clazz ? Default.class : clazz);

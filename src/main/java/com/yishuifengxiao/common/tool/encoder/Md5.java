@@ -7,12 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
+
 /**
- * Md5加密工具类
- * 
+ *  Md5加密工具
  * @author yishui
- * @date 2018年7月27日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class Md5 {
@@ -54,7 +54,7 @@ public class Md5 {
 	/**
 	 * 对字符串md5加密(大写+数字)
 	 * 
-	 * @param str 传入要加密的字符串
+	 * @param s 传入要加密的字符串
 	 * @return MD5加密后的字符串 (32位)
 	 */
 

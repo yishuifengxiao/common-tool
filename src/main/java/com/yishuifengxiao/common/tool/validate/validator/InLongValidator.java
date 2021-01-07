@@ -9,9 +9,9 @@ import com.yishuifengxiao.common.tool.validate.InLong;
 /**
  * 目标数据必须在指定的数据集合之内的判断的验证其
  * 
- * @author qingteng
- * @date 2020年12月4日
+ * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 public class InLongValidator implements ConstraintValidator<InLong, Long> {
 

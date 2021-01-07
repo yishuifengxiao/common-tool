@@ -7,14 +7,14 @@ import org.springframework.data.domain.PageImpl;
 import io.swagger.annotations.ApiModel;
 
 /**
- * jpa分页对象处理
+ * 基于JPA分页对象的分页对象
  * 
  * @author yishui
- * @date 2019年11月13日
  * @version 1.0.0
- * @param <S>
+ * @since 1.0.0
+ * @param <S> 分页里数据的数据类型
  */
-@ApiModel(value = "JPA通用分页实体类", description = "用于所有接口的基于jpa分页对象的通用返回数据")
+@ApiModel(value = "基于JPA分页对象的分页对象", description = "用于所有接口的基于jpa分页对象的通用返回数据")
 public class JpaPage<S> extends Page<S> {
 
 	/**
@@ -25,13 +25,14 @@ public class JpaPage<S> extends Page<S> {
 	/**
 	 * 根据spring data的分页对象构造一个分页对象
 	 * 
+	 * @param <S>  分页里数据的数据类型
 	 * @param page spring data的分页对象
-	 * @return 自定义分页对象
+	 * @return 分页对象
 	 */
 	public static synchronized <S> Page<S> of(org.springframework.data.domain.Page<S> page) {
 		page = page == null ? new PageImpl<>(new ArrayList<>()) : page;
 
-		return Page.of(page.getContent(), page.getTotalElements(), page.getSize() , page.getNumber() + 1);
+		return Page.of(page.getContent(), page.getTotalElements(), page.getSize(), page.getNumber() + 1);
 	}
 
 	@Override

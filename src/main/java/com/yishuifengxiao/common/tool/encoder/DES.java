@@ -12,11 +12,14 @@ import org.springframework.util.Assert;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 字符串加密解密工具，可逆加密，秘钥很重要，一定要自己改秘钥，打死也不要告诉其他人
+ * <p>
+ * DES加密工具
+ * </p>
+ * 可逆加密，秘钥很重要，一定要自己改秘钥，打死也不要告诉其他人
  * 
  * @author yishui
- * @date 2018年7月27日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class DES {
@@ -34,11 +37,11 @@ public class DES {
 	 * 密钥长度必须为8的倍数
 	 */
 	private static final int LENGTH = 8;
-	
+
 	/**
 	 * 偶数的标志
 	 */
-	private static final int  EVEN_FLAG=2;
+	private static final int EVEN_FLAG = 2;
 
 	/**
 	 * 对输入的数据进行加密
@@ -164,8 +167,8 @@ public class DES {
 	/**
 	 * 对key进行校验
 	 * 
-	 * @param key
-	 * @return
+	 * @param key 原始的key
+	 * @return 校验之后的可以
 	 */
 	private static String keyValidate(String key) {
 		if (StringUtils.isBlank(key)) {

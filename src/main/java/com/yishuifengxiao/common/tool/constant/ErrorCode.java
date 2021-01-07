@@ -1,11 +1,11 @@
 package com.yishuifengxiao.common.tool.constant;
 
 /**
- * 错误码常量类
+ * 错误码常量
  * 
  * @author yishui
- * @date 2019年10月29日
  * @version 1.0.0
+ * @since 1.0.0
  */
 public final class ErrorCode {
 
@@ -43,6 +43,5 @@ public final class ErrorCode {
 	 * 对象处理异常
 	 */
 	public final static int BEAN_EXCEPTION = 16;
-
 
 }

@@ -2,12 +2,13 @@ package com.yishuifengxiao.common.tool.http;
 
 import org.apache.commons.lang3.StringUtils;
 
+
+
 /**
- * 输入参数处理工具类
- * 
+ * 输入参数处理工具
  * @author yishui
- * @date 2019年11月13日
  * @version 1.0.0
+ * @since 1.0.0
  */
 public final class InputUtil {
 
@@ -21,10 +22,11 @@ public final class InputUtil {
 	 */
 	private static final String UNDEFINED_STRING = "undefined";
 
+
 	/**
 	 * <p>对传入的参数进行非空处理 </p>
 	 * 当传入的参数为 null 或 "" 或 "undefined" 直接返回为null,否则返回原始值
-	 * 
+	 * @param <T> 传入的参数的数据类型
 	 * @param t 传入的参数
 	 * @return 处理后的参数
 	 */

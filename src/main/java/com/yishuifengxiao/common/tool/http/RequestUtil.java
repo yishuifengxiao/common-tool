@@ -6,11 +6,11 @@ package com.yishuifengxiao.common.tool.http;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * HttpServletRequest 工具类
+ * HttpServletRequest处理工具
  * 
  * @author yishui
- * @Date 2019年3月4日
  * @version 1.0.0
+ * @since 1.0.0
  */
 public class RequestUtil {
 
@@ -23,8 +23,7 @@ public class RequestUtil {
 	/**
 	 * 获取HttpServletRequest的请求域里面的一个属性，并清空该属性
 	 * 
-	 * @param name
-	 *            属性的名字
+	 * @param name 属性的名字
 	 * @return 属性的值
 	 */
 	public Object getAttributeBeforeDelete(String name) {
@@ -38,8 +37,7 @@ public class RequestUtil {
 	/**
 	 * 获取HttpServletRequest的session域里面的一个属性，并清空该属性
 	 * 
-	 * @param name
-	 *            属性的名字
+	 * @param name 属性的名字
 	 * @return 属性的值
 	 */
 	public Object getSessionBeforeDelete(String name) {
@@ -53,8 +51,7 @@ public class RequestUtil {
 	/**
 	 * 将session域里面的属性放置到请求域中，并返回对应的值
 	 * 
-	 * @param name
-	 *            属性的名字
+	 * @param name 属性的名字
 	 * @return 属性的值
 	 */
 	public Object session2Attribute(String name) {

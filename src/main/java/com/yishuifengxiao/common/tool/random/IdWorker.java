@@ -12,8 +12,8 @@ package com.yishuifengxiao.common.tool.random;
  * 4096，也就是说可以用这个 12 bit 代表的数字来区分同一个毫秒内的 4096 个不同的 id。
  * 
  * @author yishui
- * @date 2019年1月14日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class IdWorker {
 	private long workerId;

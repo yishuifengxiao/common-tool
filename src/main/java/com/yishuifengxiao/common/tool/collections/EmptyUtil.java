@@ -10,18 +10,19 @@ import java.util.Set;
 import com.yishuifengxiao.common.tool.entity.Page;
 
 /**
- * 空集合判断类
+ * 空集合判断工具
  * 
  * @author yishui
- * @date 2018年12月11日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public final class EmptyUtil {
 
 	/**
-	 * 判断是否为一个空的分页对象
+	 * 判断分页对象是否为空
 	 * 
-	 * @param pages 分页对象
+	 * @param <T>  分页对象里元素的数据类型
+	 * @param page 分页对象
 	 * @return 如果是空返回为true，否则为false
 	 */
 	public synchronized static <T> boolean isEmpty(Page<T> page) {
@@ -37,19 +38,21 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断是否为一个非空的分页对象
+	 * 判断分页对象是否不为空
 	 * 
-	 * @param pages 分页对象
-	 * @return 如果是空返回为false，否则为true
+	 * @param <T>  分页对象里元素的数据类型
+	 * @param page 分页对象
+	 * @return 如果不是空返回为true，否则为false
 	 */
-	public synchronized static <T> boolean notEmpty(Page<T> pages) {
-		return !isEmpty(pages);
+	public synchronized static <T> boolean notEmpty(Page<T> page) {
+		return !isEmpty(page);
 	}
 
 	/**
-	 * 判断是否为一个空的分页对象
+	 * 判断分页对象是否为空
 	 * 
-	 * @param pages 分页对象
+	 * @param <T>  分页对象里元素的数据类型
+	 * @param page 分页对象
 	 * @return 如果是空返回为true，否则为false
 	 */
 	public synchronized static <T> boolean isEmpty(org.springframework.data.domain.Page<T> page) {
@@ -65,10 +68,11 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断是否为一个非空的分页对象
+	 * 判断分页对象是否不为空
 	 * 
-	 * @param pages 分页对象
-	 * @return 如果是空返回为false，否则为true
+	 * @param <T>  分页对象里元素的数据类型
+	 * @param page 分页对象
+	 * @return 如果不是空返回为true，否则为false
 	 */
 	public synchronized static <T> boolean notEmpty(org.springframework.data.domain.Page<T> page) {
 		return !isEmpty(page);
@@ -77,48 +81,53 @@ public final class EmptyUtil {
 	/**
 	 * 判断数组是否为空
 	 * 
-	 * @param data 需要判断的数组
-	 * @return 如果为空则返回true
+	 * @param <T>  数组里元素的类型
+	 * @param data 数据源
+	 * @return 如果为空则返回true，否则为false
 	 */
 	public synchronized static <T> boolean isEmpty(T[] data) {
 		return data == null || data.length == 0;
 	}
 
 	/**
-	 * 判断数组数组不是空
+	 * 判断数组是否不为空
 	 * 
-	 * @param data 需要判断的数组
-	 * @return 如果不为空则返回true
+	 * @param <T>  数组里元素的类型
+	 * @param data 数据源
+	 * @return 如果不为空则返回true，否则为false
 	 */
 	public synchronized static <T> boolean notEmpty(T[] data) {
 		return !isEmpty(data);
 	}
 
 	/**
-	 * 判断set是否为空
+	 * 判断Set是否为空
 	 * 
-	 * @param data 需要判断的数组
-	 * @return 如果为空则返回为true
+	 * @param <T>  Set里元素的类型
+	 * @param data 数据源
+	 * @return 如果为空则返回true，否则为false
 	 */
 	public synchronized static <T> boolean isEmpty(Set<T> data) {
 		return data == null || data.size() == 0;
 	}
 
 	/**
-	 * 判断set是否不为空
+	 * 判断Set是否不为空
 	 * 
-	 * @param data 需要判断的数组
-	 * @return 如果不为空则返回为true
+	 * @param <T>  Set里元素的类型
+	 * @param data 数据源
+	 * @return 如果不为空则返回true，否则为false
 	 */
 	public synchronized static <T> boolean notEmpty(Set<T> data) {
 		return !isEmpty(data);
 	}
 
 	/**
-	 * 判断是否为空的列表
+	 * 判断List是否为空
 	 * 
-	 * @param list 列表
-	 * @return 如果为空返回为true，否则为false
+	 * @param <T>  List里元素的类型
+	 * @param list 数据源
+	 * @return 如果为空则返回true，否则为false
 	 */
 	public synchronized static <T> boolean isEmpty(List<T> list) {
 		if (list == null) {
@@ -131,20 +140,22 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断是否为空的列表
+	 * 判断List是否不为空
 	 * 
-	 * @param list 列表
-	 * @return 如果为空返回为false，否则为true
+	 * @param <T>  List里元素的类型
+	 * @param list 数据源
+	 * @return 如果不为空则返回true，否则为false
 	 */
 	public synchronized static <T> boolean notEmpty(List<T> list) {
 		return !isEmpty(list);
 	}
 
 	/**
-	 * 判断集合是否为空的列表
+	 * 判断集合是否为空
 	 * 
-	 * @param data 元素集合
-	 * @return 如果为空返回为true，否则为false
+	 * @param <T>  集合里元素的类型
+	 * @param data 数据源
+	 * @return 如果为空则返回true，否则为false
 	 */
 	public synchronized static <T> boolean isEmpty(Collection<T> data) {
 		if (data == null) {
@@ -160,10 +171,11 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断是否为空的列表
+	 * 判断集合是否不为空
 	 * 
-	 * @param list 列表
-	 * @return 如果为空返回为false，否则为true
+	 * @param <T>  集合里元素的类型
+	 * @param data 数据源
+	 * @return 如果不为空则返回true，否则为false
 	 */
 	public synchronized static <T> boolean notEmpty(Collection<T> data) {
 		return !isEmpty(data);
@@ -172,7 +184,8 @@ public final class EmptyUtil {
 	/**
 	 * 判断 集合是否只有一个元素
 	 * 
-	 * @param data 列表
+	 * @param <T>  集合里元素的类型
+	 * @param data 数据源
 	 * @return 如果只有一个元素返回为true，否则为false
 	 */
 	public synchronized static <T> boolean onlyOneElement(Collection<T> data) {
@@ -188,9 +201,9 @@ public final class EmptyUtil {
 	/**
 	 * 判断集合是否不是只有一个元素,若集合为空或不是只有一个元素则返回为true
 	 * 
-	 * @param <T>
-	 * @param data
-	 * @return 集合是否不是只有一个元素
+	 * @param <T>  集合里元素的类型
+	 * @param data 数据源
+	 * @return 如果不是只有一个元素返回为true，否则为false
 	 */
 	public synchronized static <T> boolean notOnlyOneElement(Collection<T> data) {
 		if (null == data) {

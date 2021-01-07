@@ -3,12 +3,12 @@ package com.yishuifengxiao.common.tool.utils;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
 /**
- * 正则表达式工具类
- * 
+ * 正则工具
  * @author yishui
- * @date 2019年8月6日
  * @version 1.0.0
+ * @since 1.0.0
  */
 public final class RegexUtil {
 	/**
@@ -19,8 +19,8 @@ public final class RegexUtil {
 	/**
 	 * 如果包含汉字则返回为true
 	 * 
-	 * @param str
-	 * @return
+	 * @param str 需要判断的字符串
+	 * @return 如果包含汉字则返回为true，否则为false
 	 */
 	public static boolean containChinese(String str) {
 		return CHINESE_PATTERN.matcher(str).matches();
@@ -31,7 +31,7 @@ public final class RegexUtil {
 	 *
 	 * @param regex  正则表达式
 	 * @param source 内容字符串
-	 * @return
+	 * @return 提取出来的字符串
 	 */
 	public static String getMatcher(String regex, String source) {
 		String result = "";

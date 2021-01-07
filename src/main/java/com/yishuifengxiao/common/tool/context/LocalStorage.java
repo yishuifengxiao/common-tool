@@ -8,11 +8,11 @@ import org.springframework.util.Assert;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 全局存储工具类
+ * 全局存储工具
  * 
  * @author yishui
- * @date 2019年10月29日
  * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public final class LocalStorage {
@@ -25,7 +25,7 @@ public final class LocalStorage {
 	 * 根据键获取存储的值
 	 * 
 	 * @param key 存储的键
-	 * @return
+	 * @return 存储的值
 	 */
 	public synchronized static Object get(String key) {
 		Assert.notNull(key, "key值不能为空");
@@ -33,10 +33,11 @@ public final class LocalStorage {
 	}
 
 	/**
-	 * 根据键获取存储的值
+	 * 根据存储的数据的类型获取存储的数据
 	 * 
-	 * @param key 存储的键
-	 * @return
+	 * @param <T>   存储的数据的类型
+	 * @param clazz 存储的数据的类型
+	 * @return 存储的数据
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized static <T> T get(Class<T> clazz) {
@@ -51,10 +52,10 @@ public final class LocalStorage {
 	}
 
 	/**
-	 * 检索出对象并清除当前副本对象
+	 * 根据存储的键获取存储的数据，然后清楚当前存储的数据
 	 * 
 	 * @param key 存储的键
-	 * @return
+	 * @return 存储的数据的类型
 	 */
 	public synchronized static Object pop(String key) {
 		try {
@@ -65,10 +66,11 @@ public final class LocalStorage {
 	}
 
 	/**
-	 * 检索出对象并清除当前副本对象
+	 * 根据存储的数据的类型获取存储的数据，然后清楚当前存储的数据
 	 * 
-	 * @param key 存储的键
-	 * @return
+	 * @param <T>   存储的数据的类型
+	 * @param clazz 存储的数据的类型
+	 * @return 存储的数据
 	 */
 	public synchronized static <T> T pop(Class<T> clazz) {
 		try {
@@ -79,10 +81,10 @@ public final class LocalStorage {
 	}
 
 	/**
-	 * 将数据存储到本地线程副本中
+	 * 存入一个数据，存储的键为当前数据的类型，值为当前数据
 	 * 
-	 * @param <T>
-	 * @param t   要存储的数据，不能为null
+	 * @param <T> 存储的数据的类型
+	 * @param t   存储的数据
 	 */
 	public synchronized static <T> void put(T t) {
 		Assert.notNull(t, "存储的值不能为空");
@@ -121,7 +123,7 @@ public final class LocalStorage {
 	/**
 	 * 获取本地线程副本里的键值对集合
 	 * 
-	 * @return
+	 * @return 本地线程副本里的键值对集合
 	 */
 	public static Map<String, Object> getAll() {
 

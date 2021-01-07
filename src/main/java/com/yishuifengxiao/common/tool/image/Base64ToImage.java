@@ -15,19 +15,19 @@ import com.yishuifengxiao.common.tool.exception.CustomException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
 
 /**
- * base64与图片转换类
+ * base64与图片转换工具
  * 
  * @author yishui
- * @date 2018年7月27日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public final class Base64ToImage {
 	/**
 	 * 将 本地图片转换成base64字符串
 	 * 
 	 * @param imgFile 本地图片的地址
-	 * @return
-	 * @throws CustomException
+	 * @return base64字符串
+	 * @throws CustomException 转换时出现问题
 	 */
 	public static synchronized String imageToBase64ByLocal(String imgFile) throws CustomException {
 
@@ -59,7 +59,7 @@ public final class Base64ToImage {
 	 * 
 	 * @param imgBase64Str 图片 的base64字符串
 	 * @param imagePath    图片存放路径
-	 * @throws CustomException
+	 * @throws CustomException 转换时出现问题
 	 */
 	public static synchronized void base64ToImage(String imgBase64Str, String imagePath) throws CustomException {
 		if (!StringUtils.isNoneBlank(imgBase64Str, imagePath)) {

@@ -6,11 +6,11 @@ import java.util.WeakHashMap;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * map生成工具类
+ * map生成工具
  * 
  * @author yishui
- * @date 2018年12月11日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public final class MapUtil {
 
@@ -39,7 +39,9 @@ public final class MapUtil {
 	}
 
 	/**
-	 * <p>增加一个键值对数据</p>
+	 * <p>
+	 * 增加一个键值对数据
+	 * </p>
 	 * 如果增加的键值对的键为空，则不会增加该条记录
 	 * 
 	 * @param key   数据的键

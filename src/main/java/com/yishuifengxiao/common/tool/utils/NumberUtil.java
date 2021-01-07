@@ -7,11 +7,11 @@ import org.apache.commons.lang3.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 数字工具类
+ * 数字转换与操作比较工具
  * 
- * @author qingteng
- * @date 2020年11月25日
+ * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public final class NumberUtil {
@@ -367,12 +367,19 @@ public final class NumberUtil {
 	}
 
 	/**
-	 *<p> 将字符串形式的数字转成Boolean值</p>
-	 *<p> 1 如果数字为null，返回为false</p>
-	 * <p>2 数字小于或等于0返回为false</p>
-	 *<p> 3 数字大于0返回为true
+	 * <p>
+	 * 将字符串形式的数字转成Boolean值
+	 * </p>
+	 * <p>
+	 * 1 如果数字为null，返回为false
+	 * </p>
+	 * <p>
+	 * 2 数字小于或等于0返回为false
+	 * </p>
+	 * <p>
+	 * 3 数字大于0返回为true
 	 * 
-	 * @param value
+	 * @param value 需要转换的数据
 	 * @return boolean值
 	 */
 	public static Boolean num2Bool(String value) {
@@ -384,12 +391,19 @@ public final class NumberUtil {
 	}
 
 	/**
-	 *<p> 将数字转成Boolean值</p>
-	 *<p> 1 如果数字为null，返回为false</p>
-	 *<p> 2 数字小于或等于0返回为false</p>
-	 * <p>3 数字大于0返回为true
+	 * <p>
+	 * 将数字转成Boolean值
+	 * </p>
+	 * <p>
+	 * 1 如果数字为null，返回为false
+	 * </p>
+	 * <p>
+	 * 2 数字小于或等于0返回为false
+	 * </p>
+	 * <p>
+	 * 3 数字大于0返回为true
 	 * 
-	 * @param value
+	 * @param value 需要转换的数据
 	 * @return boolean值
 	 */
 	public static Boolean num2Bool(Integer value) {
@@ -403,12 +417,19 @@ public final class NumberUtil {
 	}
 
 	/**
-	 *<p> 将数字转成Boolean值</p>
-	 * <p>1 如果数字为null，返回为false</p>
-	 *<p> 2 数字小于或等于0返回为false</p>
-	 * <p>3 数字大于0返回为true
+	 * <p>
+	 * 将数字转成Boolean值
+	 * </p>
+	 * <p>
+	 * 1 如果数字为null，返回为false
+	 * </p>
+	 * <p>
+	 * 2 数字小于或等于0返回为false
+	 * </p>
+	 * <p>
+	 * 3 数字大于0返回为true
 	 * 
-	 * @param value
+	 * @param value 需要转换的数据
 	 * @return boolean值
 	 */
 	public static Boolean num2Bool(Long value) {
@@ -432,44 +453,52 @@ public final class NumberUtil {
 	}
 
 	/**
-	 *<p> 数据自动补0</p>
+	 * <p>
+	 * 数据自动补0
+	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为false
 	 * 
-	 * @param value
-	 * @return
+	 * @param value 需要转换的数据
+	 * @return  数据自动补0, 对于null值的装箱后的数据，自动设置为false
 	 */
 	public static Boolean get(Boolean value) {
 		return null == value ? false : value;
 	}
 
 	/**
-	 *<p> 数据自动补0</p>
+	 * <p>
+	 * 数据自动补0
+	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
-	 * @param value
-	 * @return
+	 * @param value 需要转换的数据
+	 * @return 对于null值的装箱后的数据，自动设置为0
 	 */
 	public static Integer get(Integer value) {
 		return null == value ? 0 : value;
 	}
 
 	/**
-	 *<p> 数据自动补0</p>
+	 * <p>
+	 * 数据自动补0
+	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
-	 * @param value
-	 * @return
+	 * @param value  需要转换的数据
+	 * @return  对于null值的装箱后的数据，自动设置为0
 	 */
 	public static Long get(Long value) {
 		return null == value ? 0L : value;
 	}
 
 	/**
-	 *<p> 数据自动补0</p>
+	 * <p>
+	 * 数据自动补0
+	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
-	 * @param value
-	 * @return
+	 * @param value  需要转换的数据
+	 * @return  对于null值的装箱后的数据，自动设置为0
 	 */
 	public static Float get(Float value) {
 		return null == value ? 0 : value;
@@ -481,8 +510,8 @@ public final class NumberUtil {
 	 * </p>
 	 * 对于null值的装箱后的数据，自动设置为0
 	 * 
-	 * @param value
-	 * @return
+	 * @param value  需要转换的数据
+	 * @return  对于null值的装箱后的数据，自动设置为0
 	 */
 	public static Double get(Double value) {
 		return null == value ? 0 : value;
@@ -493,7 +522,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return
+	 * @return 如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Boolean get(Boolean value, boolean defaultValue) {
 		return null == value ? defaultValue : value;
@@ -504,7 +533,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return
+	 * @return  如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Integer get(Integer value, int defaultValue) {
 		return null == value ? defaultValue : value;
@@ -515,7 +544,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return
+	 * @return  如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Long get(Long value, long defaultValue) {
 		return null == value ? defaultValue : value;
@@ -526,7 +555,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return
+	 * @return  如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Float get(Float value, float defaultValue) {
 		return null == value ? defaultValue : value;
@@ -537,7 +566,7 @@ public final class NumberUtil {
 	 * 
 	 * @param value        输入值
 	 * @param defaultValue 默认值
-	 * @return
+	 * @return  如果为null则返回默认值，否则返回为输入值
 	 */
 	public static Double get(Double value, double defaultValue) {
 		return null == value ? defaultValue : value;

@@ -9,11 +9,12 @@ import org.springframework.util.Assert;
 import com.yishuifengxiao.common.tool.encoder.Encoder;
 import com.yishuifengxiao.common.tool.encoder.Md5;
 
+
 /**
- * 使用md5进行加解密功能
+ * 基于MD5的加密工具
  * @author yishui
- * @date 2018年7月27日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class Md5Encoder implements Encoder {
 

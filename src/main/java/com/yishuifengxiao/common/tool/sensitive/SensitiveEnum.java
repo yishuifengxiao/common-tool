@@ -3,9 +3,9 @@ package com.yishuifengxiao.common.tool.sensitive;
 /**
  * 敏感信息枚举类型
  * 
- * @author qingteng
- * @date 2020年12月13日
+ * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 public enum SensitiveEnum {
 

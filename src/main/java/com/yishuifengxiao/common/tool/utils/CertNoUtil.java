@@ -12,12 +12,14 @@ import com.yishuifengxiao.common.tool.exception.ValidateException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * <p>身份证号校验工具</p>
+ * <p>
+ * 身份证号校验工具
+ * </p>
  * 18位身份证号码：第7、8、9、10位为出生年份(四位数)，第11、第12位为出生月份，第13、14位代表出生日期，第17位代表性别，奇数为男，偶数为女。
  * 
  * @author yishui
- * @date 2018年12月11日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class CertNoUtil {
@@ -33,7 +35,9 @@ public class CertNoUtil {
 	private static final int[] POWER = { 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 };
 
 	/**
-	 * <p>校验18位身份证号的合法性</p>
+	 * <p>
+	 * 校验18位身份证号的合法性
+	 * </p>
 	 * 校验数据内容是否为合法的
 	 * 
 	 * @param idcard 身份证号
@@ -81,7 +85,7 @@ public class CertNoUtil {
 	 * 
 	 * @param idcard 身份证号
 	 * @return 出生日期
-	 * @throws ValidateException
+	 * @throws ValidateException 非法的身份证号
 	 */
 	public static synchronized LocalDate extractBirthday(String idcard) throws ValidateException {
 		if (!isValid(idcard)) {

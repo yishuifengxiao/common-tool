@@ -10,11 +10,11 @@ import com.yishuifengxiao.common.tool.encoder.DES;
 import com.yishuifengxiao.common.tool.encoder.Encoder;
 
 /**
- * 使用DES算法进行加解密功能
+ * 基于DES加密的加密工具
  * 
  * @author yishui
- * @Date 2019年4月3日
  * @version 1.0.0
+ * @since 1.0.0
  */
 public class DesEncoder implements Encoder {
 

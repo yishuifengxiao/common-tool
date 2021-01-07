@@ -4,12 +4,14 @@
 package com.yishuifengxiao.common.tool.exception;
 
 /**
- * <strong>自定义异常基类 </strong>
+ * <p>
+ * 自定义异常基类
+ * </p>
  * 所有程序中自定义异常的基类
  * 
  * @author yishui
- * @date 2018年12月27日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class CustomException extends Exception {
 
@@ -23,16 +25,10 @@ public class CustomException extends Exception {
 	 */
 	protected int errorCode;
 
-	/**
-	 * 
-	 */
 	public CustomException() {
 
 	}
 
-	/**
-	 * @param message
-	 */
 	public CustomException(String message) {
 		this(0, message);
 
@@ -43,27 +39,14 @@ public class CustomException extends Exception {
 		this.errorCode = errorCode;
 	}
 
-	/**
-	 * @param cause
-	 */
 	public CustomException(Throwable cause) {
 		super(cause);
 	}
 
-	/**
-	 * @param message
-	 * @param cause
-	 */
 	public CustomException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	/**
-	 * @param message
-	 * @param cause
-	 * @param enableSuppression
-	 * @param writableStackTrace
-	 */
 	public CustomException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}

@@ -15,11 +15,11 @@ import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * cookie 操作工具类
+ * cookie 操作工具
  * 
  * @author yishui
- * @date 2019年1月26日
- * @version v1.0.0
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class CookieUtil {
@@ -32,11 +32,11 @@ public class CookieUtil {
 	private HttpServletResponse response;
 
 	/**
-	 * 获得一个cookie操作类的示例
+	 * 获得一个cookie操作实例
 	 * 
-	 * @param request
-	 * @param response
-	 * @return
+	 * @param request  HttpServletRequest
+	 * @param response HttpServletResponse
+	 * @return cookie操作实例
 	 */
 	public static CookieUtil getInstance(HttpServletRequest request, HttpServletResponse response) {
 		return new CookieUtil(request, response);
@@ -44,10 +44,9 @@ public class CookieUtil {
 
 	/**
 	 * 根据Cookie名称得到Cookie对象，不存在该对象则返回Null
-	 *
-	 * @param request
-	 * @param name
-	 * @return
+	 * 
+	 * @param name cookie的名字
+	 * @return Cookie对象
 	 */
 	public Cookie getCookie(String name) {
 		Cookie[] cookies = request.getCookies();
@@ -67,9 +66,8 @@ public class CookieUtil {
 	/**
 	 * 根据Cookie名称直接得到Cookie值
 	 *
-	 * @param request
-	 * @param name
-	 * @return
+	 * @param name cookie的名字
+	 * @return Cookie值
 	 */
 	public String getCookieValue(String name) {
 		Cookie cookie = getCookie(name);
@@ -82,9 +80,7 @@ public class CookieUtil {
 	/**
 	 * 移除cookie
 	 * 
-	 * @param request
-	 * @param response
-	 * @param name     这个是名称，不是值
+	 * @param name 这个是名称，不是值
 	 */
 	public void removeCookie(String name) {
 		if (null == name) {
@@ -102,10 +98,9 @@ public class CookieUtil {
 	/**
 	 * 添加一条新的Cookie，可以指定过期时间(单位：秒)
 	 *
-	 * @param response
-	 * @param name
-	 * @param value
-	 * @param maxValue
+	 * @param name     cookie的名字
+	 * @param value    cookie的值
+	 * @param maxValue 过期时间(单位：秒)
 	 */
 	public void setCookie(String name, String value, int maxValue) {
 		if (StringUtils.isBlank(name)) {
@@ -133,9 +128,8 @@ public class CookieUtil {
 	/**
 	 * 添加一条新的Cookie，默认30分钟过期时间
 	 *
-	 * @param response
-	 * @param name
-	 * @param value
+	 * @param name  cookie的名字
+	 * @param value cookie的值
 	 */
 	public void setCookie(String name, String value) {
 		setCookie(name, value, COOKIE_HALF_HOUR);
@@ -144,8 +138,7 @@ public class CookieUtil {
 	/**
 	 * 将cookie封装到Map里面
 	 * 
-	 * @param request
-	 * @return
+	 * @return cookie数据
 	 */
 	public Map<String, Cookie> getCookieMap() {
 

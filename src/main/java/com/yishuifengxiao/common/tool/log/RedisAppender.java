@@ -21,13 +21,15 @@ import io.lettuce.core.api.StatefulRedisConnection;
 import io.lettuce.core.api.async.RedisAsyncCommands;
 
 /**
- *<p> 自定义日志输出器</p>
+ * <p>
+ * 自定义日志输出器
+ * </p>
  * 利用redis的订阅发布功能，将信息发布到redis中
  * 
- * @author qingteng
- * @date 2020年12月27日
+ * @author yishui
  * @version 1.0.0
- * @param <E>
+ * @since 1.0.0
+ * @param <E> 数据类型
  */
 public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 
@@ -103,7 +105,7 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	/**
 	 * 获取连接的端口
 	 * 
-	 * @return
+	 * @return 连接的端口
 	 */
 	protected int port() {
 		if (null == this.port) {
@@ -115,7 +117,7 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	/**
 	 * 获取连接的超时时间，单位为秒
 	 * 
-	 * @return
+	 * @return 连接的超时时间，单位为秒
 	 */
 	protected int timeout() {
 		if (null == this.timeoutInSecond) {
@@ -127,7 +129,7 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	/**
 	 * Redis 订阅通道名字
 	 * 
-	 * @return
+	 * @return Redis 订阅通道名字
 	 */
 	protected String channel() {
 		if (null == this.channel || "".equals(this.channel.trim())) {
@@ -142,7 +144,7 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	 * Most subclasses of <code>WriterAppender</code> will need to override this
 	 * method.
 	 * 
-	 * @since 0.9.0
+	 * @param event 日志事件
 	 */
 	protected void subAppend(E event) {
 		if (!isStarted()) {

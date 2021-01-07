@@ -9,11 +9,11 @@ import java.io.Writer;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * 关闭操作工具类
+ * IO流关闭工具
  * 
- * @author qingteng
- * @date 2020年11月18日
+ * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class CloseUtil {
@@ -23,7 +23,7 @@ public class CloseUtil {
 	 * 
 	 * @param inputStream 输入流
 	 */
-	public static synchronized  void close(InputStream inputStream) {
+	public static synchronized void close(InputStream inputStream) {
 		if (null != inputStream) {
 			try {
 				inputStream.close();
@@ -85,7 +85,7 @@ public class CloseUtil {
 	/**
 	 * 关闭一个可以关闭的数据的源或目的地
 	 * 
-	 * @param writer 可以关闭的数据的源或目的地
+	 * @param closeable 可以关闭的数据的源或目的地
 	 */
 	public synchronized static void close(Closeable closeable) {
 		if (null != closeable) {

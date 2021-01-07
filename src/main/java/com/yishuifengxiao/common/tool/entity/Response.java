@@ -16,14 +16,14 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 /**
- * <p>公有返回信息类</p>
- * 后期考虑增加返回参数校验字段
+ * 通用响应
  * 
  * @author yishui
- * @date 2018年7月26日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
+ * @param <T> 响应数据的数据类型
  */
-@ApiModel(value = "通用返回实体类", description = "用于所有接口的通用返回数据")
+@ApiModel(value = "通用响应", description = "用于所有接口的通用返回数据")
 public class Response<T> implements Serializable {
 
 	/**
@@ -31,7 +31,7 @@ public class Response<T> implements Serializable {
 	 */
 	private static final long serialVersionUID = -1306449295746670286L;
 	/**
-	 * 返回消息的序列号
+	 * 请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机
 	 */
 	@ApiModelProperty("请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
 	@JsonProperty("requtest-id")
@@ -40,26 +40,29 @@ public class Response<T> implements Serializable {
 	/**
 	 * 请求的响应吗,这里借用HttpStatus作为状态标识
 	 * 
-	 * @see 具体的响应值的信息可以参见 https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+	 * 具体的响应值的信息可以参见 <a href=
+	 * "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">https://developer.mozilla.org/en-US/docs/Web/HTTP/Status</a>
 	 */
 	@ApiModelProperty("请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)")
 	private int code;
 
 	/**
-	 * 返回的基本信息
+	 * 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述
 	 */
-	@ApiModelProperty("响应的简单基本信息,一般与响应码的状态对应,对响应结果进行简单地描述")
+	@ApiModelProperty(" 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述")
 	private String msg;
+
 	/**
-	 * 返回的数据信息
+	 * 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息
 	 */
-	@ApiModelProperty("响应的数据信息，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
+	@ApiModelProperty(" 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
 	@JsonProperty("data")
 	private T data;
+
 	/**
-	 * 返回数据的时间
+	 * 响应时间
 	 */
-	@ApiModelProperty("响应的时间")
+	@ApiModelProperty("响应时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	@JsonProperty("response-time")
 	private Date date;
@@ -67,9 +70,10 @@ public class Response<T> implements Serializable {
 	/**
 	 * 构建一个通用的响应对象
 	 * 
+	 * @param <T>  响应的数据信息的数据类型
 	 * @param code 响应码
-	 * @param msg  响应的基本信息
-	 * @param data 响应的数据信息
+	 * @param msg  响应提示信息
+	 * @param data 响应数据
 	 * @return 响应对象
 	 */
 	public static <T> Response<T> of(int code, String msg, T data) {
@@ -77,187 +81,183 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
-	 * 默认的请求成功时的返回信息(200响应码)
+	 * 根据响应数据生成一个代表成功的响应对象
 	 * 
-	 * @param data 请求成功时返回的数据信息
-	 * @return 请求成功的返回信息
+	 * @param <T>  响应的数据信息的数据类型
+	 * @param data 请求成功时返回的响应的数据信息
+	 * @return 代表请求成功的响应对象
 	 */
 	public static <T> Response<T> suc(T data) {
 		return new Response<>(HttpStatus.OK.value(), Const.MSG_OK, data);
 	}
 
 	/**
-	 * 默认的请求成功时的返回信息(200响应码)
+	 * 生成一个默认的一个代表成功的响应对象
 	 * 
-	 * @return 请求成功的返回信息
+	 * @return 代表成功的响应对象(响应码200)
 	 */
 	public static Response<Object> suc() {
 		return new Response<Object>(HttpStatus.OK.value(), Const.MSG_OK);
 	}
 
 	/**
-	 * 默认的请求成功时的返回信息(200响应码)
+	 * 根据响应提示信息生成一个代表成功的响应对象
 	 * 
-	 * @param msg 请求成功时返回的基本信息
-	 * @return 请求成功的返回信息
+	 * @param msg 响应提示信息
+	 * @return 代表成功的响应对象(响应码200)
 	 */
 	public static Response<Object> suc(String msg) {
 		return new Response<Object>(HttpStatus.OK.value(), msg);
 	}
 
 	/**
-	 * 默认的请求成功时的返回信息(200响应码)
+	 * 根据响应提示信息和响应数据生成一个代表成功的响应对象
 	 * 
-	 * @param msg  响应的基本信息
-	 * @param data 响应的数据信息
-	 * @return 响应对象
+	 * @param <T>  响应数据的数据类型
+	 * @param msg  响应提示信息
+	 * @param data 响应数据
+	 * @return 代表成功的响应对象(响应码200)
 	 */
 	public static <T> Response<T> suc(String msg, T data) {
 		return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, data);
 	}
 
 	/**
-	 * 默认的参数有误的返回信息(400响应码)
+	 * 生成一个默认的表示参数有误的响应对象(响应码400)
 	 * 
-	 * @return 参数有误时返回信息
+	 * @return 代表参数有误的响应对象(响应码400)
 	 */
 	public static Response<Object> badParam() {
 		return new Response<Object>(HttpStatus.BAD_REQUEST.value(), Const.MSG_BAD_REQUEST);
 	}
 
 	/**
-	 * 默认的参数有误的返回信息(400响应码)
+	 * 根据响应提示信息生成一个表示参数有误的响应对象(响应码400)
 	 * 
-	 * @param msg 参数有误时返回的基本信息
-	 * @return 参数有误时返回信息
+	 * @param msg 响应提示信息
+	 * @return 代表参数有误的响应对象(响应码400)
 	 */
 	public static Response<Object> badParam(String msg) {
 		return new Response<Object>(HttpStatus.BAD_REQUEST.value(), msg);
 	}
 
 	/**
-	 * 默认的参数有误的返回信息(400响应码)
+	 * 根据响应提示信息和响应数据生成一个表示参数有误的响应对象(响应码400)
 	 * 
-	 * @param msg  响应的基本信息
-	 * @param data 响应的数据信息
-	 * @return 响应对象
+	 * @param <T>  响应数据的数据类型
+	 * @param msg  响应提示信息
+	 * @param data 响应数据
+	 * @return 代表参数有误的响应对象(响应码400)
 	 */
 	public static <T> Response<T> badParam(String msg, T data) {
 		return new Response<>(HttpStatus.BAD_REQUEST.value(), msg, data);
 	}
 
 	/**
-	 * 资源未授权的返回信息(401响应码)
+	 * 生成一个默认的表示资源未授权的响应对象(401响应码)
 	 * 
-	 * @return 资源未授权的返回信息
+	 * @return 表示资源未授权的响应对象(401响应码)
 	 */
 	public static Response<Object> unAuth() {
 		return new Response<Object>(HttpStatus.UNAUTHORIZED.value(), Const.MSG_UNAUTHORIZED);
 	}
 
 	/**
-	 * 资源未授权的返回信息(401响应码)
+	 * 根据响应提示信息生成一个表示资源未授权的响应对象(401响应码)
 	 * 
-	 * @param msg 资源未授权的返回信息的基本信息
-	 * @return 资源未授权的返回信息
+	 * @param msg 响应提示信息
+	 * @return 表示资源未授权的响应对象(401响应码)
 	 */
 	public static Response<Object> unAuth(String msg) {
 		return new Response<Object>(HttpStatus.UNAUTHORIZED.value(), msg);
 	}
 
 	/**
-	 * 资源未授权的返回信息(401响应码)
+	 * 根据响应提示信息和响应数据生成一个表示资源未授权的响应对象(401响应码)
 	 * 
-	 * @param msg  响应的基本信息
-	 * @param data 响应的数据信息
-	 * @return 响应对象
+	 * @param <T>  响应数据的类型
+	 * @param msg  响应提示信息
+	 * @param data 响应数据
+	 * @return 表示资源未授权的响应对象(401响应码)
 	 */
 	public static <T> Response<T> unAuth(String msg, T data) {
 		return new Response<>(HttpStatus.UNAUTHORIZED.value(), msg, data);
 	}
 
 	/**
-	 * 资源不可用时的返回信息(403响应码)
+	 * 生成一个默认的表示资源不可用的响应对象(403响应码)
 	 * 
-	 * @return 无权访问访问时的信息
+	 * @return 表示资源不可用的响应对象(403响应码)
 	 */
 	public static Response<Object> notAllow() {
 		return new Response<Object>(HttpStatus.FORBIDDEN.value(), Const.MSG_FORBIDDEN);
 	}
 
 	/**
-	 * 资源不可用时的返回信息(403响应码)
+	 * 根据响应提示信息生成表示资源不可用的响应对象(403响应码)
 	 * 
-	 * @param msg 参数有误时返回的基本信息
-	 * @return 无权访问访问时的信息
+	 * @param msg 响应提示信息
+	 * @return 表示资源不可用的响应对象(403响应码)
 	 */
 	public static Response<Object> notAllow(String msg) {
 		return new Response<Object>(HttpStatus.FORBIDDEN.value(), msg);
 	}
 
 	/**
-	 * 默认的路径不存在时的返回信息(404响应码)
+	 * 生成一个默认的表示资源不存在的响应对象(404响应码)
 	 * 
-	 * @return 默认的路径不存在时的返回信息
+	 * @return 表示资源不存在的响应对象(404响应码)
 	 */
 	public static Response<Object> notFoundt() {
 		return new Response<Object>(HttpStatus.NOT_FOUND.value(), Const.MSG_NOT_FOUND);
 	}
 
 	/**
-	 * 服务器内部异常时的返回信息(500响应码)
+	 * 生成一个默认表示请求业务未完成的响应对象(500响应码)
 	 * 
-	 * @return 服务器内部异常500时的返回信息
+	 * @return 表示请求业务未完成的响应对象(500响应码)
 	 */
 	public static Response<Object> error() {
 		return new Response<Object>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR);
 	}
 
 	/**
-	 * 服务器内部异常时的返回信息(500响应码)
+	 * 根据响应提示信息生成一个表示服务器内部异常500时的返回信息
 	 * 
-	 * @param msg 服务器内部异常时的返回信息的基本信息
-	 * @return 服务器内部异常500时的返回信息
+	 * @param msg 响应提示信息
+	 * @return 表示服务器内部异常500时的返回信息
 	 */
-
 	public static Response<Object> error(String msg) {
 		return new Response<Object>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg);
 	}
 
 	/**
-	 * 服务器内部异常时的返回信息(500响应码)
+	 * 根据响应提示信息和响应数据生成表示服务器内部异常500时的返回信息
 	 * 
-	 * @param msg  响应的基本信息
-	 * @param data 响应的数据信息
-	 * @return 响应对象
+	 * @param <T>  响应数据的数据类型
+	 * @param msg  响应提示信息
+	 * @param data 响应数据
+	 * @return 表示服务器内部异常500时的返回信息
 	 */
 	public static <T> Response<T> error(String msg, T data) {
 		return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, data);
 	}
 
 	/**
-	 * 默认的路径不存在时的返回信息(404响应码)
-	 * 
-	 * @param msg 路径不存在时返回的基本信息
-	 * @return 默认的路径不存在时的返回信息
-	 */
-	public static Response<Object> notFoundt(String msg) {
-		return new Response<Object>(HttpStatus.NOT_FOUND.value(), msg);
-	}
-
-	/**
-	 * 
+	 * 默认的构造函数
 	 */
 	public Response() {
 
 	}
 
 	/**
-	 * @param id
-	 * @param code
-	 * @param msg
-	 * @param data
-	 * @param date
+	 * 全参构造函数
+	 * 
+	 * @param id   请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机
+	 * @param code 响应码
+	 * @param msg  响应提示信息
+	 * @param data 响应数据
+	 * @param date 响应时间
 	 */
 	public Response(String id, int code, String msg, T data, Date date) {
 		this.id = id;
@@ -268,27 +268,20 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
-	 * @param code
-	 * @param msg
-	 * @param data
+	 * @param code 响应码
+	 * @param msg  响应提示信息
+	 * @param data 响应数据
 	 */
 	public Response(int code, String msg, T data) {
-		this.id = UID.uuid();
-		this.code = code;
-		this.msg = msg;
-		this.data = data;
-		this.date = new Date();
+		this(UID.uuid(), code, msg, data, new Date());
 	}
 
 	/**
-	 * @param code
-	 * @param msg
+	 * @param code 响应码
+	 * @param msg  响应提示信息
 	 */
 	public Response(int code, String msg) {
-		this.id = UID.uuid();
-		this.code = code;
-		this.msg = msg;
-		this.date = new Date();
+		this(UID.uuid(), code, msg, null, new Date());
 	}
 
 	public String getId() {
@@ -340,8 +333,8 @@ public class Response<T> implements Serializable {
 	 * 通用返回响应类的常用属性信息
 	 * 
 	 * @author yishui
-	 * @date 2018年12月19日
-	 * @Version 0.0.1
+	 * @version 1.0.0
+	 * @since 1.0.0
 	 */
 	public static class Const {
 		/**

@@ -1,19 +1,19 @@
 package com.yishuifengxiao.common.tool.utils;
 
 /**
- * 下划线与驼峰互转工具类
+ * 下划线与驼峰互转工具
  * 
  * @author yishui
- * @date 2018年8月3日
- * @Version 0.0.1
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public final class HumpUtil {
 
 	/**
 	 * 转换为下划线
 	 * 
-	 * @param camelCaseName
-	 * @return
+	 * @param camelCaseName 输入的数据
+	 * @return 转换后的数据
 	 */
 	public static synchronized String underscoreName(String camelCaseName) {
 		StringBuilder result = new StringBuilder();
@@ -35,8 +35,8 @@ public final class HumpUtil {
 	/**
 	 * 转换为驼峰
 	 * 
-	 * @param underscoreName
-	 * @return
+	 * @param underscoreName 输入的数据
+	 * @return 转换后的数据
 	 */
 	public static synchronized String camelCaseName(String underscoreName) {
 		StringBuilder result = new StringBuilder();

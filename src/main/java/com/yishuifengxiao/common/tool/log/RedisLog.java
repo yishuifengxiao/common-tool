@@ -15,13 +15,14 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
- * <p>自定义日志的内容</p>
+ * <p>
+ * 自定义日志的内容
+ * </p>
  * 利用redis的订阅发布功能，将信息发布到redis中
  * 
- * @author qingteng
- * @date 2020年12月27日
+ * @author yishui
  * @version 1.0.0
- * @param <E>
+ * @since 1.0.0
  */
 @Data
 @AllArgsConstructor

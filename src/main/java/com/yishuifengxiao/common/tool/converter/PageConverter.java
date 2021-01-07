@@ -3,12 +3,14 @@ package com.yishuifengxiao.common.tool.converter;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 
 /**
- * <p>分页数据转换器</p>
+ * <p>
+ * 分页数据转换器
+ * </p>
  * 将分页对象的里元数据转换成目标数据
  * 
  * @author yishui
- * @date 2019年11月13日
  * @version 1.0.0
+ * @since 1.0.0
  * @param <S> 源数据
  * @param <T> 目标数据
  */
@@ -19,7 +21,7 @@ public interface PageConverter<S, T> {
 	 * 
 	 * @param s 源数据
 	 * @return 目标数据
-	 * @throws CustomException
+	 * @throws CustomException 数据转换时发生异常
 	 */
 	T convert(S s) throws CustomException;
 }
