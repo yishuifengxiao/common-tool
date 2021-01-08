@@ -52,7 +52,7 @@ public class Response<T> implements Serializable {
 	 */
 	@ApiModelProperty("请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
 	@JsonProperty("requtest-id")
-	private String id;
+	protected String id;
 
 	/**
 	 * 请求的响应吗,这里借用HttpStatus作为状态标识
@@ -61,20 +61,20 @@ public class Response<T> implements Serializable {
 	 * "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">https://developer.mozilla.org/en-US/docs/Web/HTTP/Status</a>
 	 */
 	@ApiModelProperty("请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)")
-	private int code;
+	protected int code;
 
 	/**
 	 * 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述
 	 */
 	@ApiModelProperty(" 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述")
-	private String msg;
+	protected String msg;
 
 	/**
 	 * 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息
 	 */
 	@ApiModelProperty(" 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
 	@JsonProperty("data")
-	private T data;
+	protected T data;
 
 	/**
 	 * 响应时间
@@ -82,7 +82,7 @@ public class Response<T> implements Serializable {
 	@ApiModelProperty("响应时间")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	@JsonProperty("response-time")
-	private Date date;
+	protected Date date;
 
 	/**
 	 * 构建一个通用的响应对象

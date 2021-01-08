@@ -178,7 +178,7 @@ public class Page<S> implements Serializable {
 	}
 
 	/**
-	 * * 从总的数据中根据分页参数获取一个分页对象
+	 * 从总的数据中根据分页参数获取一个分页对象
 	 * 
 	 * @param <S>      分页对象里包含的数据的类型
 	 * @param list     传入的总数据
@@ -265,51 +265,108 @@ public class Page<S> implements Serializable {
 		return Page.of(data, source.getTotal(), source.getPageSize(), source.getPageNum());
 	}
 
+	/**
+	 * 获取分页大小
+	 * 
+	 * @return 分页大小
+	 */
 	public Integer getPageSize() {
 		return pageSize;
 	}
 
+	/**
+	 * 设置分页大小
+	 * 
+	 * @param pageSize 分页大小
+	 * @return 当前分页对象
+	 */
 	public Page<S> setPageSize(int pageSize) {
 		this.pageSize = pageSize;
 		return this;
 	}
 
+	/**
+	 * 获取当前页页码
+	 * 
+	 * @return 当前页页码
+	 */
 	public Integer getPageNum() {
 		return pageNum;
 	}
 
+	/**
+	 * 设置当前页页码
+	 * 
+	 * @param pageNum 当前页页码
+	 * @return 当前分页对象
+	 */
 	public Page<S> setPageNum(int pageNum) {
 		this.pageNum = pageNum;
 		return this;
 	}
 
+	/**
+	 * 获取总的记录的数量
+	 * 
+	 * @return 总的记录的数量
+	 */
 	public Long getTotal() {
 		return total;
 	}
 
+	/**
+	 * 设置总的总的记录的数量
+	 * 
+	 * @param total 总的记录的数量
+	 * @return 当前分页对象
+	 */
 	public Page<S> setTotal(long total) {
 		this.total = total;
 		return this;
 	}
 
+	/**
+	 * 获取当前页里包含的数据
+	 * 
+	 * @return 当前页里包含的数据
+	 */
 	public List<S> getData() {
 		return data;
 	}
 
+	/**
+	 * 设置当前页里包含的数据
+	 * 
+	 * @param data 当前页里包含的数据
+	 * @return 当前分页对象
+	 */
 	public Page<S> setData(List<S> data) {
 		this.data = data;
 		return this;
 	}
 
+	/***
+	 * 获取分页的数量
+	 * 
+	 * @return 分页的数量
+	 */
 	public Long getPages() {
 		return pages;
 	}
 
-	public void setPages(long pages) {
+	/**
+	 * 设置分页的数量
+	 * 
+	 * @param pages 分页的数量
+	 * @return 当前分页对象
+	 */
+	public Page<S> setPages(long pages) {
 		this.pages = pages;
+		return this;
 	}
 
 	/**
+	 * 全参构造函数
 	 * 
 	 * @param data     当前页的数据
 	 * @param total    记录总数
@@ -325,6 +382,9 @@ public class Page<S> implements Serializable {
 		this.total = total;
 	}
 
+	/**
+	 * 无参构造函数
+	 */
 	public Page() {
 
 	}

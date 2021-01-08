@@ -35,6 +35,11 @@ public class BaseQuery implements Serializable {
 		return pageSize;
 	}
 
+	/**
+	 * 设置分页发小
+	 * 
+	 * @param pageSize 分页大小
+	 */
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
@@ -48,11 +53,17 @@ public class BaseQuery implements Serializable {
 		return pageNum;
 	}
 
+	/**
+	 * 设置当前页页码
+	 * 
+	 * @param pageNum 当前页页码
+	 */
 	public void setPageNum(Integer pageNum) {
 		this.pageNum = pageNum;
 	}
 
 	/**
+	 * 全参构造函数
 	 * 
 	 * @param pageSize 分页大小
 	 * @param pageNum  当前页页码
@@ -62,6 +73,9 @@ public class BaseQuery implements Serializable {
 		this.pageNum = pageNum;
 	}
 
+	/**
+	 * 无参构造函数
+	 */
 	public BaseQuery() {
 
 	}
