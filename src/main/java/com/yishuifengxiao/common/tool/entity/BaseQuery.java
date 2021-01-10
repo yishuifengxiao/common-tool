@@ -19,12 +19,12 @@ public class BaseQuery implements Serializable {
 	/**
 	 * 分页大小
 	 */
-	protected Integer pageSize;
+	public Integer pageSize;
 
 	/**
 	 * 当前页页码
 	 */
-	protected Integer pageNum;
+	public Integer pageNum;
 
 	/**
 	 * 获取分页大小
