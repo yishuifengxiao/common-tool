@@ -2,6 +2,10 @@ package com.yishuifengxiao.common.tool.entity;
 
 import java.io.Serializable;
 
+import com.yishuifengxiao.common.tool.utils.NumberUtil;
+
+import io.swagger.annotations.ApiModelProperty;
+
 /**
  * 顶级查询参数类
  * 
@@ -17,13 +21,25 @@ public class BaseQuery implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * 默认的分页大小
+	 */
+	public final static int DEFAULT_PAGE_SIZE = 20;
+
+	/**
+	 * 默认的当前页页码
+	 */
+	public final static int DEFAULT_PAGE_NUM = 1;
+
+	/**
 	 * 分页大小
 	 */
+	@ApiModelProperty(value = "分页大小", example = "20")
 	public Integer pageSize;
 
 	/**
 	 * 当前页页码
 	 */
+	@ApiModelProperty(value = "当前页页码,从1开始", example = "1")
 	public Integer pageNum;
 
 	/**
@@ -71,6 +87,30 @@ public class BaseQuery implements Serializable {
 	public BaseQuery(Integer pageSize, Integer pageNum) {
 		this.pageSize = pageSize;
 		this.pageNum = pageNum;
+	}
+
+	/**
+	 * 获取分页分大小
+	 * 
+	 * @return 如果传入了正确的分页大小就使用传入的值，否则返回默认值(默认值为 20)
+	 */
+	public int pageSize() {
+		if (NumberUtil.greaterZero(this.pageSize)) {
+			return this.pageSize;
+		}
+		return DEFAULT_PAGE_SIZE;
+	}
+
+	/**
+	 * 获取当前页页码(从1开始计数)
+	 * 
+	 * @return 如果传入了正确的分页大小就使用传入的值，否则返回默认值(默认值为 1)
+	 */
+	public int pageNum() {
+		if (NumberUtil.greaterZero(this.pageNum)) {
+			return this.pageNum;
+		}
+		return DEFAULT_PAGE_NUM;
 	}
 
 	/**
