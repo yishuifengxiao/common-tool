@@ -35,12 +35,13 @@ import io.lettuce.core.api.async.RedisAsyncCommands;
  * 	<host>Redis服务器地址</host>
  * 	<port>Redis服务器端口号</port> 
  * 	<password>redis连接密码</password>
- * 	<application>测试项目</application> 
- * 	<extra>附加数据</extra> 
+ * 	<application>项目名字，可选，如 测试项目</application> 
+ * 	<extra>附加数据，会被加载在日志中</extra> 
  * </appender>
  * 
  * }
  * </pre>
+ * 
  * 
  * 
  * 
