@@ -34,13 +34,13 @@ public class BaseQuery implements Serializable {
 	 * 分页大小
 	 */
 	@ApiModelProperty(value = "分页大小", example = "20")
-	public Integer pageSize;
+	protected Integer pageSize;
 
 	/**
 	 * 当前页页码
 	 */
 	@ApiModelProperty(value = "当前页页码,从1开始", example = "1")
-	public Integer pageNum;
+	protected Integer pageNum;
 
 	/**
 	 * 获取分页大小
