@@ -1,6 +1,7 @@
 package com.yishuifengxiao.common.tool.log;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -156,6 +157,24 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 		}
 		return this.channel.trim();
 	}
+	
+
+	/**
+	 * 获取应用名字，如果应用名字为空就使用当前的主机名
+	 * 
+	 * @return 应用名字
+	 */
+	protected String application() {
+		if (StringUtils.isBlank(this.application)) {
+			try {
+				return InetAddress.getLocalHost().getHostName();
+			} catch (Exception e) {
+			}
+		}
+
+		return this.application.trim();
+	}
+
 
 	/**
 	 * Actual writing occurs here.
@@ -182,9 +201,9 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 			if (event instanceof LoggingEvent) {
 				LoggingEvent e = (LoggingEvent) event;
 				// 提取出需要输出的信息
-				RedisLog redisLog = RedisLog.builder()
+				LogInfo logInfo = LogInfo.builder()
 						// 应用名字
-						.application(this.application)
+						.application(this.application())
 						// 附加信息
 						.extra(this.extra)
 						// 线程名字
@@ -201,7 +220,7 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 						.message(e.getFormattedMessage())
 						// 构建
 						.build();
-				writeBytes(redisLog);
+				writeBytes(logInfo);
 			}
 
 		} catch (Exception ioe) {
@@ -212,14 +231,14 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 		}
 	}
 
-	private void writeBytes(RedisLog redisLog) throws IOException {
-		if (null == redisLog) {
+	private void writeBytes(LogInfo logInfo) throws IOException {
+		if (null == logInfo) {
 			return;
 		}
 
 		lock.lock();
 		try {
-			this.async.publish(this.channel(), JSONObject.toJSONString(redisLog));
+			this.async.publish(this.channel(), JSONObject.toJSONString(logInfo));
 		} finally {
 			lock.unlock();
 		}

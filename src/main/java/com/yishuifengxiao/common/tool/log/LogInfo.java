@@ -29,7 +29,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 @Builder
-public class RedisLog implements Serializable {
+public class LogInfo implements Serializable {
 
 	/**
 	 * 
@@ -37,7 +37,7 @@ public class RedisLog implements Serializable {
 	private static final long serialVersionUID = 5380449689877786879L;
 
 	/**
-	 * 时间
+	 * 日志的时间
 	 */
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")

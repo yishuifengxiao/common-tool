@@ -78,12 +78,12 @@ public class MulticastSocketAppender<E> extends UnsynchronizedAppenderBase<E> {
 	/**
 	 * 默认的端口 60379
 	 */
-	private static final int DEFAULT_PORT = 60379;
+	public static final int DEFAULT_PORT = 60379;
 
 	/**
 	 * 默认的组播地址
 	 */
-	private static final String DEFAULT_HOST = "228.125.125.125";
+	public static final String DEFAULT_HOST = "228.125.125.125";
 
 	/**
 	 * All synchronization in this class is done via the lock object.
@@ -170,6 +170,22 @@ public class MulticastSocketAppender<E> extends UnsynchronizedAppenderBase<E> {
 	}
 
 	/**
+	 * 获取应用名字，如果应用名字为空就使用当前的主机名
+	 * 
+	 * @return 应用名字
+	 */
+	protected String application() {
+		if (StringUtils.isBlank(this.application)) {
+			try {
+				return InetAddress.getLocalHost().getHostName();
+			} catch (Exception e) {
+			}
+		}
+
+		return this.application.trim();
+	}
+
+	/**
 	 * Actual writing occurs here.
 	 * <p>
 	 * Most subclasses of <code>WriterAppender</code> will need to override this
@@ -194,9 +210,9 @@ public class MulticastSocketAppender<E> extends UnsynchronizedAppenderBase<E> {
 			if (event instanceof LoggingEvent) {
 				LoggingEvent e = (LoggingEvent) event;
 				// 提取出需要输出的信息
-				RedisLog redisLog = RedisLog.builder()
+				LogInfo logInfo = LogInfo.builder()
 						// 应用名字
-						.application(this.application)
+						.application(this.application())
 						// 附加信息
 						.extra(this.extra)
 						// 线程名字
@@ -213,7 +229,7 @@ public class MulticastSocketAppender<E> extends UnsynchronizedAppenderBase<E> {
 						.message(e.getFormattedMessage())
 						// 构建
 						.build();
-				writeBytes(redisLog);
+				writeBytes(logInfo);
 			}
 
 		} catch (Exception ioe) {
@@ -224,16 +240,16 @@ public class MulticastSocketAppender<E> extends UnsynchronizedAppenderBase<E> {
 		}
 	}
 
-	private void writeBytes(RedisLog redisLog) throws IOException {
-		if (null == redisLog) {
+	private void writeBytes(LogInfo logInfo) throws IOException {
+		if (null == logInfo) {
 			return;
 		}
 
 		lock.lock();
 		try {
-			String msg = JSONObject.toJSONString(redisLog);
+			String msg = JSONObject.toJSONString(logInfo);
 			if (this.secure()) {
-				msg = DES.encrypt( this.password,msg);
+				msg = DES.encrypt(this.password, msg);
 			}
 			DatagramPacket dp = new DatagramPacket(msg.getBytes(), msg.length(), this.group, this.port());
 			this.multicastSocket.send(dp);
