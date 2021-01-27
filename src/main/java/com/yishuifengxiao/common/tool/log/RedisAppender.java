@@ -59,11 +59,6 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	private static final int DEFAULT_PORT = 6379;
 
 	/**
-	 * 默认的发布的通道的名字 logback_publish_yishuifengxiao
-	 */
-	private static final String DEFAULT_CHANNEL = "logback_publish_yishuifengxiao";
-
-	/**
 	 * 默认的超时时间，180秒
 	 */
 	private static final int DEFAULT_TIMEOUT_SECOND = 180;
@@ -153,11 +148,10 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	 */
 	protected String channel() {
 		if (null == this.channel || "".equals(this.channel.trim())) {
-			return DEFAULT_CHANNEL;
+			return this.application();
 		}
 		return this.channel.trim();
 	}
-	
 
 	/**
 	 * 获取应用名字，如果应用名字为空就使用当前的主机名
@@ -174,7 +168,6 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 
 		return this.application.trim();
 	}
-
 
 	/**
 	 * Actual writing occurs here.

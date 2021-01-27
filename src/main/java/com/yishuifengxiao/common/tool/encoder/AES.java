@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 1.0.0
  */
 @Slf4j
-public  class AES {
+public class AES {
 
 	/**
 	 * 密钥，是加密解密的凭据，长度为8的倍数
@@ -119,8 +119,5 @@ public  class AES {
 		// 如果有错就返加nulll
 		return null;
 	}
-	
-	public static void main(String[] args) {
-		System.out.println(encrypt("sdfs","sdfs"));
-	}
+
 }
