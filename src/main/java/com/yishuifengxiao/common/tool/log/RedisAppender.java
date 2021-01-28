@@ -37,6 +37,7 @@ import io.lettuce.core.api.async.RedisAsyncCommands;
  * 	<port>Redis服务器端口号</port> 
  * 	<password>redis连接密码</password>
  * 	<application>项目名字，可选，如 测试项目</application> 
+ * 	<channel>发送的订阅通道的名字，选填，默认为application的值</channel> 
  * 	<extra>附加数据，会被加载在日志中</extra> 
  * </appender>
  * 
