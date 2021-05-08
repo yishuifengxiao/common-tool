@@ -447,7 +447,7 @@ public final class DataUtil {
 	 */
 	@SafeVarargs
 	public static <T> List<T> asList(T... a) {
-		if (null == a) {
+		if (null == a || a.length == 0) {
 			return new ArrayList<>();
 		}
 		List<T> list = new ArrayList<>(a.length);

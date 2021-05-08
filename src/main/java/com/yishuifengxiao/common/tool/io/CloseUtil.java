@@ -24,6 +24,28 @@ import lombok.extern.slf4j.Slf4j;
 public class CloseUtil {
 
 	/**
+	 * 批量关闭IO流
+	 * 
+	 * @param closeables 需要关闭的IO流
+	 */
+	public static synchronized void close(Closeable... closeables) {
+		if (null == closeables) {
+			return;
+		}
+		for (Closeable closeable : closeables) {
+			if (null == closeable) {
+				continue;
+			}
+			try {
+				closeable.close();
+				closeable = null;
+			} catch (Exception e) {
+				log.debug("【易水工具】关闭流时出现问题，出现问题的原因为 {}", e.getMessage());
+			}
+		}
+	}
+
+	/**
 	 * 关闭输入流
 	 * 
 	 * @param inputStream 输入流
