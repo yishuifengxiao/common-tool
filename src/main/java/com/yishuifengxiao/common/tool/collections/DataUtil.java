@@ -98,7 +98,7 @@ public final class DataUtil {
 	/**
 	 * 将数据安全地转换成串行流Stream
 	 * 
-	 * @param <T> 集合里数据的类型
+	 * @param <T>  集合里数据的类型
 	 * @param data 需要转换的集合数据
 	 * @return 串行流Stream
 	 */
@@ -109,9 +109,9 @@ public final class DataUtil {
 	/**
 	 * 将数据安全地转换成串行流Stream,并检查输入的数据，若输入的数据源为空就抛出异常
 	 * 
-	 * @param <T> 集合里数据的类型
+	 * @param <T>  集合里数据的类型
 	 * @param data 需要转换的集合数据
-	 * @param msg 异常提示信息
+	 * @param msg  异常提示信息
 	 * @return 串行流Stream
 	 * @throws ValidateException 输入的数据源为空
 	 */
@@ -436,6 +436,25 @@ public final class DataUtil {
 			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
+	}
+
+	/**
+	 * 将指定的数据转换成list
+	 * 
+	 * @param <T> 数据类型
+	 * @param a   需要转换的数据
+	 * @return 转换后的list
+	 */
+	@SafeVarargs
+	public static <T> List<T> asList(T... a) {
+		if (null == a) {
+			return new ArrayList<>();
+		}
+		List<T> list = new ArrayList<>(a.length);
+		for (int i = 0; i < a.length; i++) {
+			list.add(a[i]);
+		}
+		return list;
 	}
 
 }
