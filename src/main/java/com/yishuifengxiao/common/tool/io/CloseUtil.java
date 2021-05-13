@@ -28,7 +28,7 @@ public class CloseUtil {
 	 * 
 	 * @param closeables 需要关闭的IO流
 	 */
-	public static synchronized void close(Closeable... closeables) {
+	public static void close(Closeable... closeables) {
 		if (null == closeables) {
 			return;
 		}
@@ -50,7 +50,7 @@ public class CloseUtil {
 	 * 
 	 * @param inputStream 输入流
 	 */
-	public static synchronized void close(InputStream inputStream) {
+	public static void close(InputStream inputStream) {
 		if (null != inputStream) {
 			try {
 				inputStream.close();
@@ -66,7 +66,7 @@ public class CloseUtil {
 	 * 
 	 * @param outputStream 输出流
 	 */
-	public synchronized static void close(OutputStream outputStream) {
+	public static void close(OutputStream outputStream) {
 		if (null != outputStream) {
 			try {
 				outputStream.close();
@@ -82,7 +82,7 @@ public class CloseUtil {
 	 * 
 	 * @param reader 字符流读取器
 	 */
-	public synchronized static void close(Reader reader) {
+	public static void close(Reader reader) {
 		if (null != reader) {
 			try {
 				reader.close();
@@ -98,7 +98,7 @@ public class CloseUtil {
 	 * 
 	 * @param writer 字符流写入器
 	 */
-	public synchronized static void close(Writer writer) {
+	public static void close(Writer writer) {
 		if (null != writer) {
 			try {
 				writer.close();
@@ -109,19 +109,4 @@ public class CloseUtil {
 		}
 	}
 
-	/**
-	 * 关闭一个可以关闭的数据的源或目的地
-	 * 
-	 * @param closeable 可以关闭的数据的源或目的地
-	 */
-	public synchronized static void close(Closeable closeable) {
-		if (null != closeable) {
-			try {
-				closeable.close();
-				closeable = null;
-			} catch (Exception e) {
-				log.debug("【易水工具】关闭可以关闭的数据的源或目的地时出现问题，出现问题的原因为 {}", e.getMessage());
-			}
-		}
-	}
 }
