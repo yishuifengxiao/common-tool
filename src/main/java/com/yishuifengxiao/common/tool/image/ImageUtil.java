@@ -1,11 +1,16 @@
 package com.yishuifengxiao.common.tool.image;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Base64;
+
+import javax.imageio.ImageIO;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Base64Utils;
@@ -13,6 +18,8 @@ import org.springframework.util.Base64Utils;
 import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -27,7 +34,8 @@ import com.yishuifengxiao.common.tool.io.CloseUtil;
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class Base64ToImage {
+@Slf4j
+public final class ImageUtil {
 	/**
 	 * 将 本地图片转换成base64字符串
 	 * 
@@ -90,6 +98,30 @@ public final class Base64ToImage {
 		} finally {
 			CloseUtil.close(out);
 		}
+	}
+
+	/**
+	 * 将图片转换成base64字符串
+	 * 
+	 * @param image 需要转换的图片
+	 * @return 转换后的字符串
+	 */
+	public static synchronized String image2Base64(BufferedImage image) {
+		if (null == image) {
+			return null;
+		}
+		String base64 = null;
+		try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+			// 输出流
+			ImageIO.write(image, "png", stream);
+			base64 = Base64.getEncoder().encodeToString(stream.toByteArray());
+			stream.flush();
+
+		} catch (Exception e) {
+			log.info("将图片转换成base64时出现问题，出现问题的原因为 {}", e.getMessage());
+		}
+		return base64;
+
 	}
 
 }
