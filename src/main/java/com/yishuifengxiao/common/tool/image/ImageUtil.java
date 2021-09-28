@@ -36,6 +36,12 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class ImageUtil {
+
+	/**
+	 * png格式图片base64编码之后的前缀
+	 */
+	public final static String BASE64_PNG_PREFIX = "data:image/png;base64,";
+
 	/**
 	 * 将 本地图片转换成base64字符串
 	 * 
@@ -121,6 +127,21 @@ public final class ImageUtil {
 			log.info("将图片转换成base64时出现问题，出现问题的原因为 {}", e.getMessage());
 		}
 		return base64;
+
+	}
+
+	/**
+	 * 将图片转换成包含png格式信息的base64字符串
+	 * 
+	 * @param image 需要转换的图片
+	 * @return 转换后的字符串
+	 */
+	public static synchronized String image2Base64Png(BufferedImage image) {
+		if (null == image) {
+			return null;
+		}
+
+		return new StringBuffer(BASE64_PNG_PREFIX).append(image2Base64(image)).toString();
 
 	}
 

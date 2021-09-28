@@ -377,6 +377,17 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
+	 * 设置响应提示信息
+	 * 
+	 * @param msg 响应提示信息
+	 * @return 当前通用响应对象
+	 */
+	public Response<T> msg(String msg) {
+		this.msg = msg;
+		return this;
+	}
+
+	/**
 	 * 获取响应数据
 	 * 
 	 * @return 响应数据
@@ -392,6 +403,17 @@ public class Response<T> implements Serializable {
 	 * @return 当前通用响应对象
 	 */
 	public Response<T> setData(T data) {
+		this.data = data;
+		return this;
+	}
+
+	/**
+	 * 设置响应数据
+	 * 
+	 * @param data 响应数据
+	 * @return 当前通用响应对象
+	 */
+	public Response<T> data(T data) {
 		this.data = data;
 		return this;
 	}
