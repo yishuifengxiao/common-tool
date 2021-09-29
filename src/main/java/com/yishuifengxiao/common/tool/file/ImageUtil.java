@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.image;
+package com.yishuifengxiao.common.tool.file;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -42,27 +42,51 @@ public final class ImageUtil {
 	 */
 	public final static String BASE64_PNG_PREFIX = "data:image/png;base64,";
 
+	private final static String FORMAT_TEMPLATE = "data:image/[a-zA-Z]+;base64,";
+
 	/**
+	 * <p>
 	 * 将 本地图片转换成base64字符串
+	 * </p>
+	 * <p>
+	 * 转换后的base64字符串不抱图片格式信息
+	 * </p>
 	 * 
-	 * @param imgFile 本地图片的地址
+	 * @param imgPath 本地图片的地址
 	 * @return base64字符串
 	 * @throws CustomException 转换时出现问题
 	 */
-	public static synchronized String imageToBase64ByLocal(String imgFile) throws CustomException {
+	public static synchronized String imageToBase64ByLocal(String imgPath) throws CustomException {
 
-		if (StringUtils.isBlank(imgFile)) {
+		if (StringUtils.isBlank(imgPath)) {
 			throw new CustomException(ErrorCode.PARAM_NULL, "本地图片的地址不能为空");
 		}
+		// 返回Base64编码过的字节数组字符串
+		return imageToBase64ByLocal(new File(imgPath));
+	}
 
-		if (!new File(imgFile).exists()) {
+	/**
+	 * <p>
+	 * 将 本地图片转换成base64字符串
+	 * </p>
+	 * <p>
+	 * 转换后的base64字符串不抱图片格式信息
+	 * </p>
+	 * 
+	 * @param image 待转换的图片
+	 * @return base64字符串
+	 * @throws CustomException 转换时出现问题
+	 */
+	public static synchronized String imageToBase64ByLocal(File image) throws CustomException {
+
+		if (null == image || !image.exists()) {
 			throw new CustomException(ErrorCode.PARAM_NULL, "本地图片不存在");
 		}
 		InputStream inputStream = null;
 		byte[] data = null;
 		// 读取图片字节数组
 		try {
-			inputStream = new FileInputStream(imgFile);
+			inputStream = new FileInputStream(image);
 			data = new byte[inputStream.available()];
 			inputStream.read(data);
 		} catch (IOException e) {
@@ -75,18 +99,50 @@ public final class ImageUtil {
 	}
 
 	/**
+	 * <p>
 	 * 将base64字符串转换成图片
+	 * </p>
+	 * <p>
+	 * 该base64字符串里不能包含照片格式信息信息
+	 * </p>
 	 * 
 	 * @param imgBase64Str 图片 的base64字符串
-	 * @param imagePath    图片存放路径
+	 * @param imagePath    输出图片的地址，不能为空
+	 * @return 输出图片
 	 * @throws CustomException 转换时出现问题
 	 */
-	public static synchronized void base64ToImage(String imgBase64Str, String imagePath) throws CustomException {
+	public static synchronized File base64ToImage(String imgBase64Str, String imagePath) throws CustomException {
 		if (!StringUtils.isNoneBlank(imgBase64Str, imagePath)) {
+			throw new CustomException(ErrorCode.PARAM_NULL, "输入参数错误");
+		}
+		File file = new File(imagePath);
+		return base64ToImage(imgBase64Str, file);
+	}
+
+	/**
+	 * <p>
+	 * 将base64字符串转换成图片
+	 * </p>
+	 * <p>
+	 * 该base64字符串里不能包含照片格式信息信息
+	 * </p>
+	 * 
+	 * @param imgBase64Str 图片 的base64字符串
+	 * @param img          输出图片，不能为空
+	 * @return 输出图片
+	 * @throws CustomException 转换时出现问题
+	 */
+	public static synchronized File base64ToImage(String imgBase64Str, File img) throws CustomException {
+		if (!StringUtils.isNoneBlank(imgBase64Str)) {
+			throw new CustomException(ErrorCode.PARAM_NULL, "输入参数错误");
+		}
+
+		if (null == img) {
 			throw new CustomException(ErrorCode.PARAM_NULL, "输入参数错误");
 		}
 		OutputStream out = null;
 		try {
+			imgBase64Str = imgBase64Str.replaceAll(FORMAT_TEMPLATE, "");
 			// Base64解码
 			byte[] b = Base64Utils.decodeFromString(imgBase64Str);
 			for (int i = 0; i < b.length; ++i) {
@@ -95,7 +151,7 @@ public final class ImageUtil {
 					b[i] += 256;
 				}
 			}
-			out = new FileOutputStream(imagePath);
+			out = new FileOutputStream(img);
 			out.write(b);
 			out.flush();
 
@@ -104,10 +160,16 @@ public final class ImageUtil {
 		} finally {
 			CloseUtil.close(out);
 		}
+		return img;
 	}
 
 	/**
+	 * <p>
 	 * 将图片转换成base64字符串
+	 * </p>
+	 * <p>
+	 * 结果不包含base64信息头
+	 * </p>
 	 * 
 	 * @param image 需要转换的图片
 	 * @return 转换后的字符串
@@ -131,7 +193,12 @@ public final class ImageUtil {
 	}
 
 	/**
-	 * 将图片转换成包含png格式信息的base64字符串
+	 * <p>
+	 * 将图片转换成base64字符串
+	 * </p>
+	 * <p>
+	 * 结果包含png格式的base64信息头
+	 * </p>
 	 * 
 	 * @param image 需要转换的图片
 	 * @return 转换后的字符串
