@@ -128,6 +128,17 @@ public class Response<T> implements Serializable {
 	}
 
 	/**
+	 * 根据响应提示信息生成一个表示成功的响应对象
+	 * 
+	 * @param <T>  响应数据的类型
+	 * @param data 响应数据
+	 * @return 表示成功的响应对象(响应码200)
+	 */
+	public static <T> Response<T> sucData(T data) {
+		return new Response<T>(HttpStatus.OK.value(), Const.MSG_OK, data);
+	}
+
+	/**
 	 * 根据响应提示信息和响应数据生成一个表示成功的响应对象
 	 * 
 	 * @param <T>  响应数据的数据类型
@@ -236,6 +247,17 @@ public class Response<T> implements Serializable {
 	 */
 	public static Response<Object> error() {
 		return new Response<Object>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR);
+	}
+
+	/**
+	 * 生成一个默认表示请求业务未完成的响应对象(500响应码)
+	 * 
+	 * @param <T>  响应数据的类型
+	 * @param data 响应数据
+	 * @return 表示请求业务未完成的响应对象(500响应码)
+	 */
+	public static <T> Response<T> errorData(T data) {
+		return new Response<T>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR, data);
 	}
 
 	/**

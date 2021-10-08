@@ -457,4 +457,22 @@ public final class DataUtil {
 		return list;
 	}
 
+	/**
+	 * 将指定的数据转换成Set
+	 * 
+	 * @param <T> 数据类型
+	 * @param a   需要转换的数据
+	 * @return 转换后的Set
+	 */
+	@SafeVarargs
+	public static <T> Set<T> asSet(T... a) {
+		if (null == a || a.length == 0) {
+			return new HashSet<>();
+		}
+		Set<T> list = new HashSet<>(a.length);
+		for (int i = 0; i < a.length; i++) {
+			list.add(a[i]);
+		}
+		return list;
+	}
 }

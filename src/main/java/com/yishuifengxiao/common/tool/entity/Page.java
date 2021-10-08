@@ -39,7 +39,7 @@ public class Page<S> implements Serializable {
 	/**
 	 * 默认的最小页的页码
 	 */
-	public static final int DEFAULT_PAGE_SIZE = 1;
+	public static final int DEFAULT_PAGE_SIZE = 10;
 
 	/**
 	 * 当前分页里的数据
