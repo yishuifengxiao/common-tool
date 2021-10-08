@@ -7,8 +7,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.security.MessageDigest;
 import java.util.Base64;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
 import com.yishuifengxiao.common.tool.exception.CustomException;
@@ -74,6 +76,34 @@ public class FileUtil {
 			throw new CustomException("文件转换失败");
 		}
 
+	}
+
+	/**
+	 * 计算一个文件的MD5值
+	 * 
+	 * @param file 待计算的文件
+	 * @return 文件的MD5值(32位小写)
+	 */
+	public static String getMd5(File file) {
+		if (null == file) {
+			return null;
+		}
+		FileInputStream inputStream = null;
+		try {
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			inputStream = new FileInputStream(file);
+			byte[] buffer = new byte[8192];
+			int length;
+			while ((length = inputStream.read(buffer)) != -1) {
+				md5.update(buffer, 0, length);
+			}
+			return new String(Hex.encodeHex(md5.digest()));
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		} finally {
+			CloseUtil.close(inputStream);
+		}
 	}
 
 }

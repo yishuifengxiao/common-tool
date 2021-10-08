@@ -42,6 +42,9 @@ public final class ImageUtil {
 	 */
 	public final static String BASE64_PNG_PREFIX = "data:image/png;base64,";
 
+	/**
+	 *  图片base64编码之后的前缀正则表达式
+	 */
 	private final static String FORMAT_TEMPLATE = "data:image/[a-zA-Z]+;base64,";
 
 	/**
