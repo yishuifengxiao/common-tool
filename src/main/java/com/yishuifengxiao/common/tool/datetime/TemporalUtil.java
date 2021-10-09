@@ -23,6 +23,10 @@ import java.util.Date;
  * <li>获取过去指定年份的那个时间的1月1号的那个时间的开始时间点(00:00:00)</li>
  * </ol>
  * 
+ * <p>
+ * <strong>该工具是一个线程安全类的工具</strong>
+ * </p>
+ * 
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0

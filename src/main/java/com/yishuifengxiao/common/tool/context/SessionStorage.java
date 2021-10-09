@@ -11,7 +11,11 @@ import lombok.extern.slf4j.Slf4j;
  * <p>
  * 本地线程存储工具类
  * </p>
- * 该工具主要是一个基于内存和ThreadLocal的KV键值对存储工具，该键值对内容与当前线程关联，在使用时需要注意内存溢出问题。<strong>接口均为线程安全的</strong>
+ * 该工具主要是一个基于内存和ThreadLocal的KV键值对存储工具，该键值对内容与当前线程关联，在使用时需要注意内存溢出问题。
+ * 
+ * <p>
+ * <strong>该工具是一个线程安全类的工具</strong>
+ * </p>
  * 
  * @author yishui
  * @version 1.0.0

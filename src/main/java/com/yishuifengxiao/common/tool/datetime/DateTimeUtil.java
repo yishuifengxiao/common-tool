@@ -28,6 +28,10 @@ import lombok.extern.slf4j.Slf4j;
  * <li>将日期时间按照指定的格式转换成字符串</li>
  * </ol>
  * 
+ * <p>
+ * <strong>该工具是一个线程安全类的工具</strong>
+ * </p>
+ * 
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0

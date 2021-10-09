@@ -27,7 +27,9 @@ import lombok.extern.slf4j.Slf4j;
  * <p>
  * 该工具的主要作用是实现图片与base64字符串之间的互相转换.
  * </p>
- * <strong>该工具是一个线程安全类的工具。</strong>
+ * <p>
+ * <strong>该工具是一个线程安全类的工具</strong>
+ * </p>
  * 
  * @author yishui
  * @version 1.0.0
@@ -42,7 +44,7 @@ public final class ImageUtil {
 	public final static String BASE64_PNG_PREFIX = "data:image/png;base64,";
 
 	/**
-	 *  图片base64编码之后的前缀正则表达式
+	 * 图片base64编码之后的前缀正则表达式
 	 */
 	private final static String FORMAT_TEMPLATE = "data:image/[a-zA-Z]+;base64,";
 

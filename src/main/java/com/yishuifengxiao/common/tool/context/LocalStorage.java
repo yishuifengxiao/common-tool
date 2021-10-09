@@ -11,7 +11,11 @@ import lombok.extern.slf4j.Slf4j;
  * <p>
  * 全局存储工具
  * </p>
- * 该工具主要是一个基于内存的KV键值对存储工具。 <strong>接口均为线程安全的</strong>
+ * 该工具主要是一个基于内存的KV键值对存储工具。
+ * 
+ * <p>
+ * <strong>该工具是一个线程安全类的工具</strong>
+ * </p>
  * 
  * @author yishui
  * @version 1.0.0
