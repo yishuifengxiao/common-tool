@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.yishuifengxiao.common.tool.utils;
+package com.yishuifengxiao.common.tool.lang;
 
 /**
  * <p>

@@ -3,7 +3,7 @@ package com.yishuifengxiao.common.tool.validate.validator;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.yishuifengxiao.common.tool.utils.NumberUtil;
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import com.yishuifengxiao.common.tool.validate.InInt;
 
 /**

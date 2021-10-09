@@ -26,7 +26,7 @@ public class Md5 {
 	 * @param str 传入要加密的字符串
 	 * @return MD5加密后的字符串(32位)
 	 */
-	public static String md5(String str) {
+	public synchronized static String md5(String str) {
 		try {
 			// 生成一个MD5加密计算摘要
 			MessageDigest md = MessageDigest.getInstance("MD5");
@@ -47,7 +47,7 @@ public class Md5 {
 	 * @param str 传入要加密的字符串
 	 * @return MD5加密后的字符串(16位)
 	 */
-	public static String md5Short(String str) {
+	public synchronized static String md5Short(String str) {
 		if (StringUtils.isBlank(str)) {
 			return null;
 		}
@@ -61,7 +61,7 @@ public class Md5 {
 	 * @return MD5加密后的字符串 (32位)
 	 */
 
-	public static String md5UpperCase(String s) {
+	public synchronized static String md5UpperCase(String s) {
 		char[] hexDigits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
 		try {

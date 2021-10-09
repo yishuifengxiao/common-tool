@@ -307,58 +307,128 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 
 	}
 
+	/**
+	 * 设置Redis 数据库地址
+	 * 
+	 * @return Redis 数据库地址
+	 */
 	public String getHost() {
 		return host;
 	}
 
+	/**
+	 * 设置 Redis 数据库地址
+	 * 
+	 * @param host Redis 数据库地址
+	 */
 	public void setHost(String host) {
 		this.host = host;
 	}
 
+	/**
+	 * 获取设置的 Redis 数据库密码
+	 * 
+	 * @return Redis 数据库密码
+	 */
 	public String getPassword() {
 		return password;
 	}
 
+	/**
+	 * 设置 Redis 数据库密码，如果redis数据没有连接密码可以不用设置
+	 * 
+	 * @param password Redis 数据库密码
+	 */
 	public void setPassword(String password) {
 		this.password = password;
 	}
 
+	/**
+	 * 获取 Redis 数据库端口
+	 * 
+	 * @return Redis 数据库端口
+	 */
 	public Integer getPort() {
 		return port;
 	}
 
+	/**
+	 * 设置 Redis 数据库端口
+	 * 
+	 * @param port Redis 数据库端口,默认为6379
+	 */
 	public void setPort(Integer port) {
 		this.port = port;
 	}
 
+	/**
+	 * 获取Redis 连接过期时间
+	 * 
+	 * @return Redis 连接过期时间
+	 */
 	public Integer getTimeoutInSecond() {
 		return timeoutInSecond;
 	}
 
+	/**
+	 * 设置Redis 连接过期时间
+	 * 
+	 * @param timeoutInSecond Redis 连接过期时间，单位为秒
+	 */
 	public void setTimeoutInSecond(Integer timeoutInSecond) {
 		this.timeoutInSecond = timeoutInSecond;
 	}
 
+	/**
+	 * 获取Redis 订阅通道名字
+	 * 
+	 * @return Redis 订阅通道名字
+	 */
 	public String getChannel() {
 		return channel;
 	}
 
+	/**
+	 * 设置 Redis 订阅通道
+	 * 
+	 * @param channel Redis 订阅通道
+	 */
 	public void setChannel(String channel) {
 		this.channel = channel;
 	}
 
+	/**
+	 * 获取应用名称
+	 * 
+	 * @return 应用名称
+	 */
 	public String getApplication() {
 		return application;
 	}
 
+	/**
+	 * 设置 应用名称
+	 * 
+	 * @param application 应用名称
+	 */
 	public void setApplication(String application) {
 		this.application = application;
 	}
 
+	/**
+	 * 获取附加信息
+	 * 
+	 * @return 附加信息
+	 */
 	public String getExtra() {
 		return extra;
 	}
 
+	/**
+	 * 设置附加信息
+	 * 
+	 * @param extra 附加信息
+	 */
 	public void setExtra(String extra) {
 		this.extra = extra;
 	}

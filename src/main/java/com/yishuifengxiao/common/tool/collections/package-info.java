@@ -2,7 +2,7 @@
  * 
  */
 /**
- * java 集合 操作工具
+ * java 集合操作工具
  * 
  * @author yishui
  * @version 1.0.0

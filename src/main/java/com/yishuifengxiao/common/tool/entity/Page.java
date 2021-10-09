@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.yishuifengxiao.common.tool.collections.EmptyUtil;
-import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.converter.PageConverter;
 import com.yishuifengxiao.common.tool.exception.CustomException;
+import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

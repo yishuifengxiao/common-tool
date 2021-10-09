@@ -12,8 +12,8 @@ import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
 
-import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.exception.CustomException;
+import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 

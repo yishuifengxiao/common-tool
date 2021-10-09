@@ -24,6 +24,12 @@ public class RequestUtil {
 
 	private HttpServletRequest request;
 
+	/**
+	 * 获取一个请求处理工具实例
+	 * 
+	 * @param request HttpServletRequest
+	 * @return 请求处理工具实例
+	 */
 	public static RequestUtil getInstance(HttpServletRequest request) {
 		return new RequestUtil(request);
 	}
@@ -71,14 +77,29 @@ public class RequestUtil {
 		return value;
 	}
 
+	/**
+	 * 构造函数
+	 * 
+	 * @param request HttpServletRequest
+	 */
 	private RequestUtil(HttpServletRequest request) {
 		this.request = request;
 	}
 
+	/**
+	 * 获取HttpServletRequest
+	 * 
+	 * @return HttpServletRequest
+	 */
 	public HttpServletRequest getRequest() {
 		return request;
 	}
 
+	/**
+	 * 设置HttpServletRequest
+	 * 
+	 * @param request HttpServletRequest
+	 */
 	public void setRequest(HttpServletRequest request) {
 		this.request = request;
 	}

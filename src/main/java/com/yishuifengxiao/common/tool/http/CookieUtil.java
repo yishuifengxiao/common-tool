@@ -160,27 +160,56 @@ public class CookieUtil {
 		return null;
 	}
 
+	/**
+	 * 获取HttpServletRequest
+	 * 
+	 * @return HttpServletRequest
+	 */
 	public HttpServletRequest getRequest() {
 		return request;
 	}
 
+	/**
+	 * 设置 HttpServletRequest
+	 * 
+	 * @param request HttpServletRequest
+	 */
 	public void setRequest(HttpServletRequest request) {
 		this.request = request;
 	}
 
+	/**
+	 * 获取HttpServletResponse
+	 * 
+	 * @return HttpServletResponse
+	 */
 	public HttpServletResponse getResponse() {
 		return response;
 	}
 
+	/**
+	 * 设置HttpServletResponse
+	 * 
+	 * @param response HttpServletResponse
+	 */
 	public void setResponse(HttpServletResponse response) {
 		this.response = response;
 	}
 
+	/**
+	 * 全参构造函数
+	 * 
+	 * @param request  HttpServletRequest
+	 * @param response HttpServletResponse
+	 */
 	public CookieUtil(HttpServletRequest request, HttpServletResponse response) {
 		this.request = request;
 		this.response = response;
 	}
 
+	/**
+	 * 无参构造函数
+	 */
 	public CookieUtil() {
 
 	}

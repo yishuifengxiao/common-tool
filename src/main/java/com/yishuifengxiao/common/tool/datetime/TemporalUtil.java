@@ -74,7 +74,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 前天0时0分0秒这个时间
 	 */
-	public static LocalDateTime last2DayStart() {
+	public synchronized static LocalDateTime last2DayStart() {
 		return dayStart(2L);
 	}
 
@@ -86,7 +86,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static LocalDateTime last7DayStart() {
+	public synchronized static LocalDateTime last7DayStart() {
 		return dayStart(7L);
 	}
 
@@ -98,7 +98,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static LocalDateTime last14DayStart() {
+	public synchronized static LocalDateTime last14DayStart() {
 		return dayStart(14L);
 	}
 
@@ -110,7 +110,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 本周一周一的开始时间
 	 */
-	public static LocalDateTime mondayStart() {
+	public synchronized static LocalDateTime mondayStart() {
 		return getMondayStart(new Date());
 	}
 
@@ -122,7 +122,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 上周的周一的开始时间
 	 */
-	public static LocalDateTime lastMondayStart() {
+	public synchronized static LocalDateTime lastMondayStart() {
 		return mondayStart(1);
 	}
 
@@ -134,7 +134,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 上上周的周一的开始时间
 	 */
-	public static LocalDateTime last2MondayStart() {
+	public synchronized static LocalDateTime last2MondayStart() {
 		return mondayStart(1);
 	}
 
@@ -148,7 +148,7 @@ public class TemporalUtil {
 	 * @param offsetWeeks 偏移的周数，1表示是上周，2表示是上上周
 	 * @return 上几周的周一的开始时间
 	 */
-	public static LocalDateTime mondayStart(int offsetWeeks) {
+	public synchronized static LocalDateTime mondayStart(int offsetWeeks) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(DateTimeUtil.localDateTime2Date(getMondayStart(new Date())));
 		cal.add(Calendar.DATE, -7 * offsetWeeks);
@@ -228,7 +228,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 本月1号0时0分0秒这个时间
 	 */
-	public static LocalDateTime monthStart() {
+	public synchronized static LocalDateTime monthStart() {
 		return getMonthStart(LocalDateTime.now());
 	}
 
@@ -253,7 +253,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 本月1号0时0分0秒这个时间
 	 */
-	public static LocalDateTime lastMonthStart() {
+	public synchronized static LocalDateTime lastMonthStart() {
 		return getMonthStart(LocalDateTime.now().minusMonths(1L));
 	}
 
@@ -265,7 +265,7 @@ public class TemporalUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static LocalDateTime last2MonthStart() {
+	public synchronized static LocalDateTime last2MonthStart() {
 		return getDayStart(LocalDateTime.now().minusMonths(2L).withDayOfMonth(1));
 	}
 

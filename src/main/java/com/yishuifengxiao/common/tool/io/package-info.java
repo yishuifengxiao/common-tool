@@ -2,7 +2,7 @@
  * 
  */
 /**
- * IO流操作工具
+ * IO流和文件操作工具
  * 
  * @author yishui
  * @version 1.0.0

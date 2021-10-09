@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.constant;
+package com.yishuifengxiao.common.tool.exception.constant;
 
 /**
  * 错误码常量

@@ -33,7 +33,7 @@ public final class EmptyUtil {
 	 * @param page 分页对象
 	 * @return 如果是空返回为true，否则为false
 	 */
-	public synchronized static <T> boolean isEmpty(Page<T> page) {
+	public static <T> boolean isEmpty(Page<T> page) {
 
 		if (page == null) {
 			return true;
@@ -52,7 +52,7 @@ public final class EmptyUtil {
 	 * @param page 分页对象
 	 * @return 如果不是空返回为true，否则为false
 	 */
-	public synchronized static <T> boolean notEmpty(Page<T> page) {
+	public static <T> boolean notEmpty(Page<T> page) {
 		return !isEmpty(page);
 	}
 
@@ -63,7 +63,7 @@ public final class EmptyUtil {
 	 * @param page 分页对象
 	 * @return 如果是空返回为true，否则为false
 	 */
-	public synchronized static <T> boolean isEmpty(org.springframework.data.domain.Page<T> page) {
+	public static <T> boolean isEmpty(org.springframework.data.domain.Page<T> page) {
 
 		if (page == null) {
 			return true;
@@ -82,7 +82,7 @@ public final class EmptyUtil {
 	 * @param page 分页对象
 	 * @return 如果不是空返回为true，否则为false
 	 */
-	public synchronized static <T> boolean notEmpty(org.springframework.data.domain.Page<T> page) {
+	public static <T> boolean notEmpty(org.springframework.data.domain.Page<T> page) {
 		return !isEmpty(page);
 	}
 
@@ -93,7 +93,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果为空则返回true，否则为false
 	 */
-	public synchronized static <T> boolean isEmpty(T[] data) {
+	public static <T> boolean isEmpty(T[] data) {
 		return data == null || data.length == 0;
 	}
 
@@ -104,7 +104,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果不为空则返回true，否则为false
 	 */
-	public synchronized static <T> boolean notEmpty(T[] data) {
+	public static <T> boolean notEmpty(T[] data) {
 		return !isEmpty(data);
 	}
 
@@ -115,7 +115,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果为空则返回true，否则为false
 	 */
-	public synchronized static <T> boolean isEmpty(Set<T> data) {
+	public static <T> boolean isEmpty(Set<T> data) {
 		return data == null || data.size() == 0;
 	}
 
@@ -126,7 +126,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果不为空则返回true，否则为false
 	 */
-	public synchronized static <T> boolean notEmpty(Set<T> data) {
+	public static <T> boolean notEmpty(Set<T> data) {
 		return !isEmpty(data);
 	}
 
@@ -137,7 +137,7 @@ public final class EmptyUtil {
 	 * @param list 数据源
 	 * @return 如果为空则返回true，否则为false
 	 */
-	public synchronized static <T> boolean isEmpty(List<T> list) {
+	public static <T> boolean isEmpty(List<T> list) {
 		if (list == null) {
 			return true;
 		}
@@ -154,7 +154,7 @@ public final class EmptyUtil {
 	 * @param list 数据源
 	 * @return 如果不为空则返回true，否则为false
 	 */
-	public synchronized static <T> boolean notEmpty(List<T> list) {
+	public static <T> boolean notEmpty(List<T> list) {
 		return !isEmpty(list);
 	}
 
@@ -165,7 +165,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果为空则返回true，否则为false
 	 */
-	public synchronized static <T> boolean isEmpty(Collection<T> data) {
+	public static <T> boolean isEmpty(Collection<T> data) {
 		if (data == null) {
 			return true;
 		}
@@ -185,7 +185,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果不为空则返回true，否则为false
 	 */
-	public synchronized static <T> boolean notEmpty(Collection<T> data) {
+	public static <T> boolean notEmpty(Collection<T> data) {
 		return !isEmpty(data);
 	}
 
@@ -196,7 +196,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果只有一个元素返回为true，否则为false
 	 */
-	public synchronized static <T> boolean onlyOneElement(Collection<T> data) {
+	public static <T> boolean onlyOneElement(Collection<T> data) {
 		if (null == data) {
 			return false;
 		}
@@ -213,7 +213,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果不是只有一个元素返回为true，否则为false
 	 */
-	public synchronized static <T> boolean notOnlyOneElement(Collection<T> data) {
+	public static <T> boolean notOnlyOneElement(Collection<T> data) {
 		if (null == data) {
 			return true;
 		}

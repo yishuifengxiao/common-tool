@@ -51,7 +51,7 @@ public final class MapUtil {
 	 * @param value 数据的值
 	 * @return 当前map工具类实例
 	 */
-	public synchronized MapUtil put(String key, Object value) {
+	public MapUtil put(String key, Object value) {
 		if (StringUtils.isNoneBlank(key)) {
 			this.map.put(key, value);
 		}
@@ -64,7 +64,7 @@ public final class MapUtil {
 	 * @param map 键值对
 	 * @return 当前map工具类实例
 	 */
-	public synchronized MapUtil putAll(Map<String, Object> map) {
+	public MapUtil putAll(Map<String, Object> map) {
 		if (null != map) {
 			this.map.putAll(map);
 		}

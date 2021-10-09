@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.file;
+package com.yishuifengxiao.common.tool.io;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -15,9 +15,8 @@ import javax.imageio.ImageIO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Base64Utils;
 
-import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.exception.CustomException;
-import com.yishuifengxiao.common.tool.io.CloseUtil;
+import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 

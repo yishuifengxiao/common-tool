@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class InputUtil {
+public final class ParamUtil {
 
 	/**
 	 * 空字符串

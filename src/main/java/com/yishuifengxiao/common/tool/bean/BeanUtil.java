@@ -10,9 +10,9 @@ import java.io.ObjectOutputStream;
 
 import org.springframework.beans.BeanUtils;
 
-import com.yishuifengxiao.common.tool.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 import com.yishuifengxiao.common.tool.exception.ValidateException;
+import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 
 /**
  * <p>
@@ -32,7 +32,7 @@ import com.yishuifengxiao.common.tool.exception.ValidateException;
 public final class BeanUtil {
 
 	/**
-	 * 将源对象里属性值复制给目标对象
+	 * 将源对象里属性值复制给目标对象(当前方法是一个线程安全类的方法)
 	 * 
 	 * @param <S>    源对象的类型
 	 * @param <T>    目标对象的类型

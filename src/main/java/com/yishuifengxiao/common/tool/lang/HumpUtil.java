@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.utils;
+package com.yishuifengxiao.common.tool.lang;
 
 /**
  * <p>
@@ -16,7 +16,7 @@ package com.yishuifengxiao.common.tool.utils;
 public final class HumpUtil {
 
 	/**
-	 * 转换为下划线
+	 * 转换为下划线,例如:将CallBack转换成 call_back
 	 * 
 	 * @param camelCaseName 输入的数据
 	 * @return 转换后的数据
@@ -39,7 +39,7 @@ public final class HumpUtil {
 	}
 
 	/**
-	 * 转换为驼峰
+	 * 转换为驼峰,例如:将call_back转换成 CallBack
 	 * 
 	 * @param underscoreName 输入的数据
 	 * @return 转换后的数据

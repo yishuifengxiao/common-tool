@@ -2,7 +2,7 @@ package com.yishuifengxiao.common.tool.entity;
 
 import java.io.Serializable;
 
-import com.yishuifengxiao.common.tool.utils.NumberUtil;
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
 
 import io.swagger.annotations.ApiModelProperty;
 

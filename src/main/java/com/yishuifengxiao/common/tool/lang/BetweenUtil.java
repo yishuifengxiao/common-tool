@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.utils;
+package com.yishuifengxiao.common.tool.lang;
 
 import java.time.LocalDateTime;
 import java.util.Date;

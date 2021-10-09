@@ -74,7 +74,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 前天0时0分0秒这个时间
 	 */
-	public static Date last2DayStart() {
+	public synchronized static Date last2DayStart() {
 		return dayStart(2L);
 	}
 
@@ -86,7 +86,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static Date last7DayStart() {
+	public synchronized static Date last7DayStart() {
 		return dayStart(7L);
 	}
 
@@ -98,7 +98,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static Date last14DayStart() {
+	public synchronized static Date last14DayStart() {
 		return dayStart(14L);
 	}
 
@@ -110,7 +110,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 本周一周一的开始时间
 	 */
-	public static Date mondayStart() {
+	public synchronized static Date mondayStart() {
 		return getMondayStart(new Date());
 	}
 
@@ -122,7 +122,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 上周的周一的开始时间
 	 */
-	public static Date lastMondayStart() {
+	public synchronized static Date lastMondayStart() {
 		return mondayStart(1);
 	}
 
@@ -134,7 +134,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 上上周的周一的开始时间
 	 */
-	public static Date last2MondayStart() {
+	public synchronized static Date last2MondayStart() {
 		return mondayStart(1);
 	}
 
@@ -148,7 +148,7 @@ public class DateOffsetUtil {
 	 * @param offsetWeeks 偏移的周数，1表示是上周，2表示是上上周
 	 * @return 上几周的周一的开始时间
 	 */
-	public static Date mondayStart(int offsetWeeks) {
+	public synchronized static Date mondayStart(int offsetWeeks) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(getMondayStart(new Date()));
 		cal.add(Calendar.DATE, -7 * offsetWeeks);
@@ -230,7 +230,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 本月1号0时0分0秒这个时间
 	 */
-	public static Date monthStart() {
+	public synchronized static Date monthStart() {
 
 		return getMonthStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now()));
 	}
@@ -257,7 +257,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 本月1号0时0分0秒这个时间
 	 */
-	public static Date lastMonthStart() {
+	public synchronized static Date lastMonthStart() {
 
 		return getMonthStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now().minusMonths(1L)));
 	}
@@ -270,7 +270,7 @@ public class DateOffsetUtil {
 	 * 
 	 * @return 7天前0时0分0秒这个时间
 	 */
-	public static Date last2MonthStart() {
+	public synchronized static Date last2MonthStart() {
 
 		return getDayStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now().minusMonths(2L).withDayOfMonth(1)));
 	}

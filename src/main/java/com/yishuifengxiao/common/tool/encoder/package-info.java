@@ -2,7 +2,7 @@
  * 
  */
 /**
- * 加密工具
+ * 加解密工具
  * 
  * @author yishui
  * @version 1.0.0
