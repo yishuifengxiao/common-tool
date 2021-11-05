@@ -13,8 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.yishuifengxiao.common.tool.exception.DataException;
-import com.yishuifengxiao.common.tool.exception.ValidateException;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 
 /**
@@ -60,11 +59,10 @@ public final class DataUtil {
 	 * @param list 需要转换的集合数据
 	 * @param msg  异常提示信息
 	 * @return 串行流Stream
-	 * @throws ValidateException 输入的数据源为空
 	 */
-	public synchronized static <T> Stream<T> stream(List<T> list, String msg) throws ValidateException {
+	public synchronized static <T> Stream<T> stream(List<T> list, String msg) {
 		if (EmptyUtil.isEmpty(list)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 		return list.stream();
 	}
@@ -90,11 +88,10 @@ public final class DataUtil {
 	 * @param set 需要转换的集合数据
 	 * @param msg 异常提示信息
 	 * @return 串行流Stream
-	 * @throws ValidateException 输入的数据源为空
 	 */
-	public synchronized static <T> Stream<T> stream(Set<T> set, String msg) throws ValidateException {
+	public synchronized static <T> Stream<T> stream(Set<T> set, String msg) {
 		if (EmptyUtil.isEmpty(set)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 		return set.stream();
 	}
@@ -117,11 +114,10 @@ public final class DataUtil {
 	 * @param data 需要转换的集合数据
 	 * @param msg  异常提示信息
 	 * @return 串行流Stream
-	 * @throws ValidateException 输入的数据源为空
 	 */
-	public synchronized static <T> Stream<T> stream(T[] data, String msg) throws ValidateException {
+	public synchronized static <T> Stream<T> stream(T[] data, String msg) {
 		if (null == data) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 		return stream(toList(data));
 	}
@@ -147,11 +143,10 @@ public final class DataUtil {
 	 * @param list 需要转换的集合数据
 	 * @param msg  异常提示信息
 	 * @return 并行流Stream
-	 * @throws ValidateException 输入的数据源为空
 	 */
-	public synchronized static <T> Stream<T> parallelStream(List<T> list, String msg) throws ValidateException {
+	public synchronized static <T> Stream<T> parallelStream(List<T> list, String msg) {
 		if (EmptyUtil.isEmpty(list)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 		return list.parallelStream();
 	}
@@ -177,11 +172,10 @@ public final class DataUtil {
 	 * @param set 需要转换的集合数据
 	 * @param msg 异常提示信息
 	 * @return 并行流Stream
-	 * @throws ValidateException 输入的数据源为空
 	 */
-	public synchronized static <T> Stream<T> parallelStream(Set<T> set, String msg) throws ValidateException {
+	public synchronized static <T> Stream<T> parallelStream(Set<T> set, String msg) {
 		if (EmptyUtil.isEmpty(set)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 		return set.parallelStream();
 	}
@@ -204,11 +198,10 @@ public final class DataUtil {
 	 * @param data 需要转换的集合数据
 	 * @param msg  异常提示信息
 	 * @return 并行流Stream
-	 * @throws ValidateException 输入的数据源为空
 	 */
-	public synchronized static <T> Stream<T> parallelStream(T[] data, String msg) throws ValidateException {
+	public synchronized static <T> Stream<T> parallelStream(T[] data, String msg) {
 		if (null == data) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 		return parallelStream(toList(data));
 	}
@@ -298,12 +291,11 @@ public final class DataUtil {
 	 * @param data     链表数据
 	 * @param errorMsg 异常提示信息
 	 * @return 链表的第一个元素
-	 * @throws DataException 链表为空
 	 */
-	public synchronized static <T> T first(List<T> data, String errorMsg) throws DataException {
+	public synchronized static <T> T first(List<T> data, String errorMsg) {
 		T t = first(data);
 		if (null == t) {
-			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
 	}
@@ -343,12 +335,11 @@ public final class DataUtil {
 	 * @param data     数据源
 	 * @param errorMsg 异常提示信息
 	 * @return Set的第一个元素
-	 * @throws DataException Set为空
 	 */
-	public synchronized static <T> T first(Set<T> data, String errorMsg) throws DataException {
+	public synchronized static <T> T first(Set<T> data, String errorMsg) {
 		T t = first(data);
 		if (null == t) {
-			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
 	}
@@ -387,12 +378,11 @@ public final class DataUtil {
 	 * @param data     数据源
 	 * @param errorMsg 异常提示信息
 	 * @return 数组的第一个元素
-	 * @throws DataException 数组为空
 	 */
-	public synchronized static <T> T first(T[] data, String errorMsg) throws DataException {
+	public synchronized static <T> T first(T[] data, String errorMsg) {
 		T t = first(data);
 		if (null == t) {
-			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
 	}
@@ -431,13 +421,12 @@ public final class DataUtil {
 	 * @param <T>      集合里的数据的类型
 	 * @param data     数据源
 	 * @param errorMsg 异常提示信息
-	 * @return 集合的第一个元素
-	 * @throws DataException 集合为空
+	 * @return 集合里的第一个元素
 	 */
-	public synchronized static <T> T first(Collection<T> data, String errorMsg) throws DataException {
+	public synchronized static <T> T first(Collection<T> data, String errorMsg) {
 		T t = first(data);
 		if (null == t) {
-			throw new DataException(ErrorCode.DATA_ERROR, errorMsg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
 	}

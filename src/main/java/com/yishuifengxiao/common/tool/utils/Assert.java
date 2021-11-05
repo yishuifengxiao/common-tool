@@ -11,20 +11,24 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 import com.yishuifengxiao.common.tool.entity.Page;
-import com.yishuifengxiao.common.tool.exception.ValidateException;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.lang.BetweenUtil;
 import com.yishuifengxiao.common.tool.lang.NumberUtil;
 
 /**
- * <p>
- * 断言工具
- * </p>
+ * <h3>断言工具</h3>
  * <p>
  * 该工具主要判断给定的数据是否符合给定的条件，若数据不符合给定的条件就抛出自定义受检查的异常
  * </p>
+ * <p>
  * 该主要是为了替换到代码里的各种<code>if</code>判断，从而提升代码的优雅性
+ * </p>
  * 
+ * <strong>注意：本工具中抛出的异常全部为运行时异常
+ * <code>UncheckedException</code>,注意在使用时带来的处理问题</strong>
+ * 
+ * @see UncheckedException
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -36,11 +40,10 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertGreaterEqualZero(String msg, Integer value) throws ValidateException {
+	public static void assertGreaterEqualZero(String msg, Integer value) {
 		if (!NumberUtil.greaterEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -49,11 +52,10 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertGreaterEqualZero(String msg, Long value) throws ValidateException {
+	public static void assertGreaterEqualZero(String msg, Long value) {
 		if (!NumberUtil.greaterEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -62,11 +64,10 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertGreaterEqualZero(String msg, Float value) throws ValidateException {
+	public static void assertGreaterEqualZero(String msg, Float value) {
 		if (!NumberUtil.greaterEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -75,11 +76,10 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertGreaterEqualZero(String msg, Double value) throws ValidateException {
+	public static void assertGreaterEqualZero(String msg, Double value) {
 		if (!NumberUtil.greaterEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -88,11 +88,10 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertGreaterEqualZero(String msg, BigDecimal value) throws ValidateException {
+	public static void assertGreaterEqualZero(String msg, BigDecimal value) {
 		if (!NumberUtil.greaterEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -101,11 +100,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertGreaterZero(String msg, Integer value) throws ValidateException {
+	public static void assertGreaterZero(String msg, Integer value) {
 		if (!NumberUtil.greaterZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -114,11 +113,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertGreaterZero(String msg, Long value) throws ValidateException {
+	public static void assertGreaterZero(String msg, Long value) {
 		if (!NumberUtil.greaterZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -127,11 +126,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertGreaterZero(String msg, Float value) throws ValidateException {
+	public static void assertGreaterZero(String msg, Float value) {
 		if (!NumberUtil.greaterZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -140,11 +139,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertGreaterZero(String msg, Double value) throws ValidateException {
+	public static void assertGreaterZero(String msg, Double value) {
 		if (!NumberUtil.greaterZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -153,11 +152,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertGreaterZero(String msg, BigDecimal value) throws ValidateException {
+	public static void assertGreaterZero(String msg, BigDecimal value) {
 		if (!NumberUtil.greaterZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -166,11 +165,11 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessEqualZero(String msg, Integer value) throws ValidateException {
+	public static void assertLessEqualZero(String msg, Integer value) {
 		if (!NumberUtil.lessEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -179,11 +178,11 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessEqualZero(String msg, Long value) throws ValidateException {
+	public static void assertLessEqualZero(String msg, Long value) {
 		if (!NumberUtil.lessEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -192,11 +191,11 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessEqualZero(String msg, Float value) throws ValidateException {
+	public static void assertLessEqualZero(String msg, Float value) {
 		if (!NumberUtil.lessEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -205,11 +204,11 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessEqualZero(String msg, Double value) throws ValidateException {
+	public static void assertLessEqualZero(String msg, Double value) {
 		if (!NumberUtil.lessEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -218,11 +217,11 @@ public final class Assert {
 	 *
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessEqualZero(String msg, BigDecimal value) throws ValidateException {
+	public static void assertLessEqualZero(String msg, BigDecimal value) {
 		if (!NumberUtil.lessEqualZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -231,11 +230,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessZero(String msg, Integer value) throws ValidateException {
+	public static void assertLessZero(String msg, Integer value) {
 		if (!NumberUtil.lessZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -244,11 +243,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessZero(String msg, Long value) throws ValidateException {
+	public static void assertLessZero(String msg, Long value) {
 		if (!NumberUtil.lessZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -257,11 +256,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessZero(String msg, Float value) throws ValidateException {
+	public static void assertLessZero(String msg, Float value) {
 		if (!NumberUtil.lessZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -270,11 +269,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessZero(String msg, Double value) throws ValidateException {
+	public static void assertLessZero(String msg, Double value) {
 		if (!NumberUtil.lessZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -283,11 +282,11 @@ public final class Assert {
 	 * 
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertLessZero(String msg, BigDecimal value) throws ValidateException {
+	public static void assertLessZero(String msg, BigDecimal value) {
 		if (!NumberUtil.lessZero(value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -300,11 +299,11 @@ public final class Assert {
 	 * @param msg           异常信息
 	 * @param originalValue 原始值
 	 * @param value         比较值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertEquals(String msg, Integer originalValue, Integer value) throws ValidateException {
+	public static void assertEquals(String msg, Integer originalValue, Integer value) {
 		if (!NumberUtil.equals(originalValue, value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -318,11 +317,11 @@ public final class Assert {
 	 * @param originalValue 原始值
 	 * @param value         比较值
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertEquals(String msg, Long originalValue, Long value) throws ValidateException {
+	public static void assertEquals(String msg, Long originalValue, Long value) {
 		if (!NumberUtil.equals(originalValue, value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -336,11 +335,11 @@ public final class Assert {
 	 * @param originalValue 原始值
 	 * @param value         比较值
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertEquals(String msg, String originalValue, String value) throws ValidateException {
+	public static void assertEquals(String msg, String originalValue, String value) {
 		if (!StringUtils.equals(originalValue, value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -350,11 +349,11 @@ public final class Assert {
 	 * @param msg           异常提示信息
 	 * @param originalValue 需要比较的值
 	 * @param value         需要被比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertNotEquals(String msg, Integer originalValue, Integer value) throws ValidateException {
+	public static void assertNotEquals(String msg, Integer originalValue, Integer value) {
 		if (NumberUtil.equals(originalValue, value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -364,11 +363,11 @@ public final class Assert {
 	 * @param msg           异常提示信息
 	 * @param originalValue 需要比较的值
 	 * @param value         需要被比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertNotEquals(String msg, Long originalValue, Long value) throws ValidateException {
+	public static void assertNotEquals(String msg, Long originalValue, Long value) {
 		if (NumberUtil.equals(originalValue, value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -378,11 +377,11 @@ public final class Assert {
 	 * @param msg           异常提示信息
 	 * @param originalValue 需要比较的值
 	 * @param value         需要被比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertNotEquals(String msg, String originalValue, String value) throws ValidateException {
+	public static void assertNotEquals(String msg, String originalValue, String value) {
 		if (StringUtils.equals(originalValue, value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -392,11 +391,11 @@ public final class Assert {
 	 * @param msg           异常提示信息
 	 * @param originalValue 需要比较的值
 	 * @param value         需要被比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertEqualsIgnoreCase(String msg, String originalValue, String value) throws ValidateException {
+	public static void assertEqualsIgnoreCase(String msg, String originalValue, String value) {
 		if (!StringUtils.equalsIgnoreCase(originalValue, value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -406,12 +405,11 @@ public final class Assert {
 	 * @param msg           异常提示信息
 	 * @param originalValue 需要比较的值
 	 * @param value         需要被比较的值
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertNotEqualsIgnoreCase(String msg, String originalValue, String value)
-			throws ValidateException {
+	public static void assertNotEqualsIgnoreCase(String msg, String originalValue, String value) {
 		if (StringUtils.equalsIgnoreCase(originalValue, value)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -421,11 +419,10 @@ public final class Assert {
 	 * @param msg  提示信息
 	 * @param bool 需要判断的数据
 	 *
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertTrue(String msg, Boolean bool) throws ValidateException {
+	public static void assertTrue(String msg, Boolean bool) {
 		if (!BooleanUtils.isTrue(bool)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -434,13 +431,12 @@ public final class Assert {
 	 * 
 	 * @param msg    异常提示信息
 	 * @param values 需要判断的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertTrue(String msg, boolean... values) throws ValidateException {
+	public static void assertTrue(String msg, boolean... values) {
 		if (null != values) {
 			for (boolean value : values) {
 				if (!value) {
-					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+					throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 				}
 			}
 		}
@@ -453,11 +449,11 @@ public final class Assert {
 	 * @param msg  提示信息
 	 * @param bool 需要判断的数据
 	 *
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertFalse(String msg, Boolean bool) throws ValidateException {
+	public static void assertFalse(String msg, Boolean bool) {
 		if (!BooleanUtils.isFalse(bool)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -466,13 +462,12 @@ public final class Assert {
 	 * 
 	 * @param msg    异常提示信息
 	 * @param values 需要判断的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertFalse(String msg, boolean... values) throws ValidateException {
+	public static void assertFalse(String msg, boolean... values) {
 		if (null != values) {
 			for (boolean value : values) {
 				if (value) {
-					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+					throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 				}
 			}
 		}
@@ -497,12 +492,11 @@ public final class Assert {
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
 	 * @param endValue     比较范围的结束值，如果给定的值为null，则默认替换为0
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertBetween(String msg, Integer compareValue, Integer startValue, Integer endValue)
-			throws ValidateException {
+	public static void assertBetween(String msg, Integer compareValue, Integer startValue, Integer endValue) {
 		if (!BetweenUtil.isBetween(compareValue, startValue, endValue)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -524,12 +518,10 @@ public final class Assert {
 	 * @param compareValue 给定的值，如果给定的值为null，则默认替换为0
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
 	 * @param endValue     比较范围的结束值，如果给定的值为null，则默认替换为0
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertBetween(String msg, Long compareValue, Long startValue, Long endValue)
-			throws ValidateException {
+	public static void assertBetween(String msg, Long compareValue, Long startValue, Long endValue) {
 		if (!BetweenUtil.isBetween(compareValue, startValue, endValue)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -539,11 +531,10 @@ public final class Assert {
 	 * @param msg    异常提示信息
 	 * @param value1 需要比较的值
 	 * @param value2 需要被比较的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertObjectEquals(String msg, Object value1, Object value2) throws ValidateException {
+	public static void assertObjectEquals(String msg, Object value1, Object value2) {
 		if (!equals(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -553,11 +544,10 @@ public final class Assert {
 	 * @param msg    异常提示信息
 	 * @param value1 需要比较的值
 	 * @param value2 需要被比较的值
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertObjectNotEquals(String msg, Object value1, Object value2) throws ValidateException {
+	public static void assertObjectNotEquals(String msg, Object value1, Object value2) {
 		if (equals(value1, value2)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -584,18 +574,18 @@ public final class Assert {
 	 * 
 	 * @param msg    提示信息
 	 * @param values 需要判断的数据
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertBlank(String msg, Object... values) throws ValidateException {
+	public static void assertBlank(String msg, Object... values) {
 		if (EmptyUtil.notEmpty(values)) {
 			for (Object value : values) {
 				if (null != value) {
 					if (value instanceof String) {
 						if (StringUtils.isNotBlank(value.toString())) {
-							throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+							throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 						}
 					} else {
-						throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+						throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 					}
 				}
 			}
@@ -607,16 +597,16 @@ public final class Assert {
 	 * 
 	 * @param msg    提示信息
 	 * @param values 需要判断的数据
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertNotBlank(String msg, Object... values) throws ValidateException {
+	public static void assertNotBlank(String msg, Object... values) {
 		if (EmptyUtil.notEmpty(values)) {
 			for (Object value : values) {
 				if (null == value) {
-					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+					throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 				} else {
 					if (StringUtils.isBlank(value.toString())) {
-						throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+						throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 					}
 
 				}
@@ -629,9 +619,8 @@ public final class Assert {
 	 * 
 	 * @param msg    提示信息
 	 * @param values 需要判断的数据
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static void assertHasBlank(String msg, Object... values) throws ValidateException {
+	public static void assertHasBlank(String msg, Object... values) {
 		if (EmptyUtil.notEmpty(values)) {
 			// 包含空值判断标志
 			boolean contain = false;
@@ -646,7 +635,7 @@ public final class Assert {
 				}
 			}
 			if (!contain) {
-				throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+				throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 			}
 		}
 	}
@@ -656,9 +645,9 @@ public final class Assert {
 	 * 
 	 * @param msg    提示信息
 	 * @param values 需要判断的数据
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static void assertHasNoBlank(String msg, Object... values) throws ValidateException {
+	public static void assertHasNoBlank(String msg, Object... values) {
 		if (EmptyUtil.notEmpty(values)) {
 			// 包含空值判断标志
 			boolean contain = false;
@@ -673,7 +662,7 @@ public final class Assert {
 				}
 			}
 			if (contain) {
-				throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+				throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 			}
 		}
 	}
@@ -685,12 +674,12 @@ public final class Assert {
 	 * @param msg      提示信息
 	 * @param optional 需要判断的数据
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertOptionalNull(String msg, Optional<T> optional) throws ValidateException {
+	public static <T> void assertOptionalNull(String msg, Optional<T> optional) {
 		if (null != optional) {
 			if (optional.isPresent()) {
-				throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+				throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 			}
 		}
 	}
@@ -702,14 +691,14 @@ public final class Assert {
 	 * @param msg      提示信息
 	 * @param optional 需要判断的数据
 	 *
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertOptionalNotNull(String msg, Optional<T> optional) throws ValidateException {
+	public static <T> void assertOptionalNotNull(String msg, Optional<T> optional) {
 		if (null == optional) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 		if (!optional.isPresent()) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -720,16 +709,16 @@ public final class Assert {
 	 * @param msg  提示信息
 	 * @param data 需要判断的数据
 	 *
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertNull(String msg, Object data) throws ValidateException {
+	public static <T> void assertNull(String msg, Object data) {
 		if (null != data) {
 			if (data instanceof String) {
 				if (StringUtils.isNotBlank(data.toString())) {
-					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+					throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 				}
 			} else {
-				throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+				throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 			}
 		}
 	}
@@ -741,16 +730,16 @@ public final class Assert {
 	 * @param msg  提示信息
 	 * @param data 需要判断的数据
 	 *
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertNotNull(String msg, Object data) throws ValidateException {
+	public static <T> void assertNotNull(String msg, Object data) {
 		if (null == data) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 
 		} else {
 			if (data instanceof String) {
 				if (StringUtils.isBlank(data.toString())) {
-					throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+					throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 				}
 			}
 		}
@@ -763,11 +752,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param page 分页对象
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertEmpty(String msg, Page<T> page) throws ValidateException {
+	public static <T> void assertEmpty(String msg, Page<T> page) {
 		if (EmptyUtil.notEmpty(page)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -778,11 +767,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param page 分页对象
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, Page<T> page) throws ValidateException {
+	public static <T> void assertNoEmpty(String msg, Page<T> page) {
 		if (EmptyUtil.isEmpty(page)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -792,13 +781,11 @@ public final class Assert {
 	 * @param <T>  给定的数据的类型
 	 * @param msg  异常提示信息
 	 * @param page 分页对象
-	 *
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertEmpty(String msg, org.springframework.data.domain.Page<T> page)
-			throws ValidateException {
+	public static <T> void assertEmpty(String msg, org.springframework.data.domain.Page<T> page) {
 		if (EmptyUtil.notEmpty(page)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -809,12 +796,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param page 分页对象
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, org.springframework.data.domain.Page<T> page)
-			throws ValidateException {
+	public static <T> void assertNoEmpty(String msg, org.springframework.data.domain.Page<T> page) {
 		if (EmptyUtil.isEmpty(page)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -825,11 +811,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param data 数组数据
 	 *
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertEmpty(String msg, T[] data) throws ValidateException {
+	public static <T> void assertEmpty(String msg, T[] data) {
 		if (EmptyUtil.notEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -840,11 +826,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param data 数组数据
 	 *
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, T[] data) throws ValidateException {
+	public static <T> void assertNoEmpty(String msg, T[] data) {
 		if (EmptyUtil.isEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -855,11 +841,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param list list数据
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public synchronized static <T> void assertEmpty(String msg, List<T> list) throws ValidateException {
+	public synchronized static <T> void assertEmpty(String msg, List<T> list) {
 		if (EmptyUtil.notEmpty(list)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -870,11 +856,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param data set数据
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertEmpty(String msg, Set<T> data) throws ValidateException {
+	public static <T> void assertEmpty(String msg, Set<T> data) {
 		if (EmptyUtil.notEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -885,11 +871,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param data Set数据
 	 *
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, Set<T> data) throws ValidateException {
+	public static <T> void assertNoEmpty(String msg, Set<T> data) {
 		if (EmptyUtil.isEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -900,11 +886,10 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param data List数据
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static <T> void assertNoEmpty(String msg, List<T> data) throws ValidateException {
+	public static <T> void assertNoEmpty(String msg, List<T> data) {
 		if (EmptyUtil.isEmpty(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -915,11 +900,10 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param data 集合
 	 *
-	 * @throws ValidateException 数据不符合给定条件
 	 */
-	public static <T> void assertOnlyOne(String msg, Collection<T> data) throws ValidateException {
+	public static <T> void assertOnlyOne(String msg, Collection<T> data) {
 		if (!EmptyUtil.onlyOneElement(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 
@@ -930,11 +914,11 @@ public final class Assert {
 	 * @param msg  异常提示信息
 	 * @param data 集合
 	 * 
-	 * @throws ValidateException 数据不符合给定条件
+	 * 
 	 */
-	public static <T> void assertNotOnlyOne(String msg, Collection<T> data) throws ValidateException {
+	public static <T> void assertNotOnlyOne(String msg, Collection<T> data) {
 		if (!EmptyUtil.notOnlyOneElement(data)) {
-			throw new ValidateException(ErrorCode.DATA_ERROR, msg);
+			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
 

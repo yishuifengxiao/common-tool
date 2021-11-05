@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yishuifengxiao.common.tool.exception.ValidateException;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
@@ -94,18 +94,17 @@ public class CertNoUtil {
 	 * 
 	 * @param idcard 身份证号
 	 * @return 出生日期
-	 * @throws ValidateException 非法的身份证号
 	 */
-	public static synchronized LocalDate extractBirthday(String idcard) throws ValidateException {
+	public static synchronized LocalDate extractBirthday(String idcard) {
 		if (!isValid(idcard)) {
-			throw new ValidateException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号格式不正确");
+			throw new UncheckedException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号格式不正确");
 		}
 		try {
 			String dateStr = StringUtils.substring(idcard.trim(), 6, 14);
 			return LocalDate.parse(dateStr, DateTimeFormatter.BASIC_ISO_DATE);
 		} catch (Exception e) {
 			log.info("【易水工具】从身份证号{}中提取出生日期时出现异常，出现异常的原因为 {}", idcard.trim(), e.getMessage());
-			throw new ValidateException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号出生日期格式不正确");
+			throw new UncheckedException(ErrorCode.PARAM_FORMAT_ERROR, "身份证号出生日期格式不正确");
 		}
 	}
 

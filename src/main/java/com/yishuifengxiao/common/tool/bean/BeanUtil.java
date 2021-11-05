@@ -11,7 +11,7 @@ import java.io.ObjectOutputStream;
 import org.springframework.beans.BeanUtils;
 
 import com.yishuifengxiao.common.tool.exception.CustomException;
-import com.yishuifengxiao.common.tool.exception.ValidateException;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 
 /**
@@ -39,20 +39,19 @@ public final class BeanUtil {
 	 * @param source 源对象
 	 * @param target 目标对象
 	 * @return 复制后的目标对象
-	 * @throws ValidateException 复制时发生问题
 	 */
-	public static synchronized <S, T> T copy(S source, T target) throws ValidateException {
+	public static synchronized <S, T> T copy(S source, T target) {
 		if (source == null) {
-			throw new ValidateException(ErrorCode.PARAM_NULL, "源数据不能为空");
+			throw new UncheckedException(ErrorCode.PARAM_NULL, "源数据不能为空");
 		}
 		if (target == null) {
-			throw new ValidateException(ErrorCode.PARAM_NULL, "目标填充不能为空");
+			throw new UncheckedException(ErrorCode.PARAM_NULL, "目标填充不能为空");
 		}
 		try {
 			BeanUtils.copyProperties(source, target);
 			return target;
 		} catch (Exception e) {
-			throw new ValidateException(ErrorCode.DATA_CONVERT_ERROR, e.getMessage());
+			throw new UncheckedException(ErrorCode.DATA_CONVERT_ERROR, e.getMessage());
 		}
 
 	}
