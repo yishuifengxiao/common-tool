@@ -23,7 +23,7 @@ public class BaseQuery implements Serializable {
 	/**
 	 * 默认的分页大小
 	 */
-	public final static int DEFAULT_PAGE_SIZE = 20;
+	public final static int DEFAULT_PAGE_SIZE = 10;
 
 	/**
 	 * 默认的当前页页码
@@ -33,7 +33,7 @@ public class BaseQuery implements Serializable {
 	/**
 	 * 分页大小
 	 */
-	@ApiModelProperty(value = "分页大小", example = "20")
+	@ApiModelProperty(value = "分页大小", example = "10")
 	protected Integer pageSize;
 
 	/**
@@ -92,7 +92,7 @@ public class BaseQuery implements Serializable {
 	/**
 	 * 获取分页分大小
 	 * 
-	 * @return 如果传入了正确的分页大小就使用传入的值，否则返回默认值(默认值为 20)
+	 * @return 如果传入了正确的分页大小就使用传入的值，否则返回默认值(默认值为 10)
 	 */
 	public int pageSize() {
 		if (NumberUtil.greaterZero(this.pageSize)) {
