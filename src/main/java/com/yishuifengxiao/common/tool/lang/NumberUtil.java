@@ -699,7 +699,7 @@ public final class NumberUtil {
 	 * @return 解析成功则返回Long的数据，否则为defaultValue
 	 */
 	public static Long parseLong(String str, long defaultValue) {
-		Integer value = parseInt(str);
+		Long value = parseLong(str);
 		return null == value ? defaultValue : value;
 	}
 }
