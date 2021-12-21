@@ -917,7 +917,7 @@ public final class Assert {
 	 * 
 	 */
 	public static <T> void assertNotOnlyOne(String msg, Collection<T> data) {
-		if (!EmptyUtil.notOnlyOneElement(data)) {
+		if (EmptyUtil.onlyOneElement(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
