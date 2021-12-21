@@ -52,7 +52,7 @@ public final class MapUtil {
 	 * @return 当前map工具类实例
 	 */
 	public MapUtil put(String key, Object value) {
-		if (StringUtils.isNoneBlank(key)) {
+		if (StringUtils.isNotBlank(key)) {
 			this.map.put(key, value);
 		}
 		return this;

@@ -593,7 +593,7 @@ public final class NumberUtil {
 
 		try {
 			if (StringUtils.isNotBlank(str)) {
-				return Double.parseDouble(str.trim());
+				return Double.valueOf(new BigDecimal(str.trim()).doubleValue());
 			}
 		} catch (Exception e) {
 			log.debug("【易水工具】将字符串 {} 解析为 Double 时出现问题，出现问题的原因为 {}", str, e.getMessage());
@@ -623,7 +623,7 @@ public final class NumberUtil {
 
 		try {
 			if (StringUtils.isNotBlank(str)) {
-				return Float.parseFloat(str.trim());
+				return Float.valueOf(new BigDecimal(str.trim()).floatValue());
 			}
 		} catch (Exception e) {
 			log.debug("【易水工具】将字符串 {} 解析为 Float 时出现问题，出现问题的原因为 {}", str, e.getMessage());
@@ -653,7 +653,7 @@ public final class NumberUtil {
 
 		try {
 			if (StringUtils.isNotBlank(str)) {
-				return Integer.parseInt(str.trim());
+				return Integer.valueOf(new BigDecimal(str.trim()).intValue());
 			}
 		} catch (Exception e) {
 			log.debug("【易水工具】将字符串 {} 解析为 Integer 时出现问题，出现问题的原因为 {}", str, e.getMessage());
@@ -683,7 +683,7 @@ public final class NumberUtil {
 
 		try {
 			if (StringUtils.isNotBlank(str)) {
-				return Long.parseLong(str.trim());
+				return Long.valueOf(new BigDecimal(str.trim()).longValue());
 			}
 		} catch (Exception e) {
 			log.debug("【易水工具】将字符串 {} 解析为 Integer 时出现问题，出现问题的原因为 {}", str, e.getMessage());

@@ -109,56 +109,6 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断Set是否为空
-	 * 
-	 * @param <T>  Set里元素的类型
-	 * @param data 数据源
-	 * @return 如果为空则返回true，否则为false
-	 */
-	public static <T> boolean isEmpty(Set<T> data) {
-		return data == null || data.size() == 0;
-	}
-
-	/**
-	 * 判断Set是否不为空
-	 * 
-	 * @param <T>  Set里元素的类型
-	 * @param data 数据源
-	 * @return 如果不为空则返回true，否则为false
-	 */
-	public static <T> boolean notEmpty(Set<T> data) {
-		return !isEmpty(data);
-	}
-
-	/**
-	 * 判断List是否为空
-	 * 
-	 * @param <T>  List里元素的类型
-	 * @param list 数据源
-	 * @return 如果为空则返回true，否则为false
-	 */
-	public static <T> boolean isEmpty(List<T> list) {
-		if (list == null) {
-			return true;
-		}
-		if (list.size() == 0) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * 判断List是否不为空
-	 * 
-	 * @param <T>  List里元素的类型
-	 * @param list 数据源
-	 * @return 如果不为空则返回true，否则为false
-	 */
-	public static <T> boolean notEmpty(List<T> list) {
-		return !isEmpty(list);
-	}
-
-	/**
 	 * 判断集合是否为空
 	 * 
 	 * @param <T>  集合里元素的类型
@@ -207,20 +157,30 @@ public final class EmptyUtil {
 	}
 
 	/**
-	 * 判断集合是否不是只有一个元素,若集合为空或不是只有一个元素则返回为true
+	 * 判断集合里的元素的数量是否大于或等于一个
 	 * 
 	 * @param <T>  集合里元素的类型
 	 * @param data 数据源
-	 * @return 如果不是只有一个元素返回为true，否则为false
+	 * @return 如果元素的数量是否大于或等于一个返回为true，否则为false
 	 */
-	public static <T> boolean notOnlyOneElement(Collection<T> data) {
+	public static <T> boolean greaterThanOneElement(Collection<T> data) {
 		if (null == data) {
-			return true;
+			return false;
 		}
-		if (data.isEmpty()) {
-			return true;
-		}
-		return data.size() != 1;
+		return data.size() >= 1;
 	}
 
+	/**
+	 * 判断集合里元素数量是否大于一个
+	 * 
+	 * @param <T>  集合里元素的类型
+	 * @param data 数据源
+	 * @return 若集合里元素数量大于1则返回为true,否则为false
+	 */
+	public static <T> boolean moreThanOneElement(Collection<T> data) {
+		if (null == data) {
+			return false;
+		}
+		return data.size() > 1;
+	}
 }

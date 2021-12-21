@@ -29,9 +29,18 @@ public class CallbackUtil {
 	/**
 	 * 线程池初始化
 	 */
-	private final static ExecutorService POOL = new ThreadPoolExecutor(1, Runtime.getRuntime().availableProcessors(),
-			0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(1024), SIMPLE_THREAD_FACTORY,
+	private final static ExecutorService POOL = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
+			Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), SIMPLE_THREAD_FACTORY,
 			new ThreadPoolExecutor.AbortPolicy());
+
+	/**
+	 * 获取线程池
+	 * 
+	 * @return 内置线程池
+	 */
+	public static ExecutorService getPool() {
+		return POOL;
+	}
 
 	/**
 	 * 执行任务
@@ -39,10 +48,73 @@ public class CallbackUtil {
 	 * @param runnable 待执行的任务
 	 */
 	public static void execute(Runnable runnable) {
+		Assert.assertNotNull("待执行的任务不能为空", runnable);
 		try {
 			POOL.execute(runnable);
 		} catch (Exception e) {
-			log.info("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
+			log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
+		}
+	}
+
+	/**
+	 * 执行任务
+	 * 
+	 * @param runnable 待执行的任务
+	 * @param complete 执行完成后的回调(不论成功还是失败都会触发)
+	 */
+	public static void execute(Runnable runnable, ExcuteComplete complete) {
+		Assert.assertNotNull("待执行的任务不能为空", runnable);
+		try {
+			POOL.execute(runnable);
+		} catch (Exception e) {
+			log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
+		} finally {
+			if (null != complete) {
+				complete.onComplete();
+			}
+
+		}
+	}
+
+	/**
+	 * 执行任务
+	 * 
+	 * @param runnable 待执行的任务
+	 * @param error    执行失败后触发的动作
+	 */
+	public static void execute(Runnable runnable, ExcuteError error) {
+		Assert.assertNotNull("待执行的任务不能为空", runnable);
+		try {
+			POOL.execute(runnable);
+		} catch (Exception e) {
+			log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
+			if (null != error) {
+				error.onError(e);
+			}
+		}
+	}
+
+	/**
+	 * 执行任务
+	 * 
+	 * @param runnable 待执行的任务
+	 * @param complete 执行完成后的回调(不论成功还是失败都会触发)
+	 * @param error    执行失败后触发的动作
+	 */
+	public static void execute(Runnable runnable, ExcuteComplete complete, ExcuteError error) {
+		Assert.assertNotNull("待执行的任务不能为空", runnable);
+		try {
+			POOL.execute(runnable);
+		} catch (Exception e) {
+			log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
+			if (null != error) {
+				error.onError(e);
+			}
+		} finally {
+			if (null != complete) {
+				complete.onComplete();
+			}
+
 		}
 	}
 
@@ -61,6 +133,48 @@ public class CallbackUtil {
 			thread.setName(new StringBuilder("callback-").append(System.currentTimeMillis()).toString());
 			return thread;
 		}
+
+	}
+
+	/**
+	 * 执行失败时的回调
+	 * <p>
+	 * 仅仅在执行失败时会触发
+	 * </p>
+	 * 
+	 * @author yishui
+	 * @version 1.0.0
+	 * @since 1.0.0
+	 */
+	@FunctionalInterface
+	public static interface ExcuteError {
+
+		/**
+		 * 在执行失败时调用
+		 * 
+		 * @param e 执行失败时触发的错误
+		 */
+		void onError(Exception e);
+
+	}
+
+	/**
+	 * 执行完成时的回调
+	 * <p>
+	 * 无论是否执行成功均会触发
+	 * </p>
+	 * 
+	 * @author yishui
+	 * @version 1.0.0
+	 * @since 1.0.0
+	 */
+	@FunctionalInterface
+	public static interface ExcuteComplete {
+
+		/**
+		 * 在执行完成时触发
+		 */
+		void onComplete();
 
 	}
 

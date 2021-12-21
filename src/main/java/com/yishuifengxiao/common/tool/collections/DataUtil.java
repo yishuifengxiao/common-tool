@@ -29,7 +29,7 @@ import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
  * </ol>
  * 
  * <p>
- * <strong>该工具是一个线程安全类的工具</strong>
+ * <strong>该工具是一个非线程安全类的工具</strong>
  * </p>
  * 
  * @author yishui
@@ -42,58 +42,29 @@ public final class DataUtil {
 	 * 将数据安全地转换成串行流Stream
 	 * 
 	 * @param <T>  集合里数据的类型
-	 * @param list 需要转换的集合数据
+	 * @param data 需要转换的集合数据
 	 * @return 串行流Stream
 	 */
-	public synchronized static <T> Stream<T> stream(List<T> list) {
-		if (EmptyUtil.isEmpty(list)) {
-			list = new ArrayList<>();
+	public static <T> Stream<T> stream(Collection<T> data) {
+		if (null == data) {
+			data = new ArrayList<>();
 		}
-		return list.stream();
+		return data.stream();
 	}
 
 	/**
 	 * 将数据安全地转换成串行流Stream,并检查输入的数据，若输入的数据源为空就抛出异常
 	 * 
 	 * @param <T>  集合里数据的类型
-	 * @param list 需要转换的集合数据
+	 * @param data 需要转换的集合数据
 	 * @param msg  异常提示信息
 	 * @return 串行流Stream
 	 */
-	public synchronized static <T> Stream<T> stream(List<T> list, String msg) {
-		if (EmptyUtil.isEmpty(list)) {
+	public static <T> Stream<T> stream(Collection<T> data, String msg) {
+		if (null == data) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
-		return list.stream();
-	}
-
-	/**
-	 * 将数据安全地转换成串行流Stream
-	 * 
-	 * @param <T> 集合里数据的类型
-	 * @param set 需要转换的集合数据
-	 * @return 串行流Stream
-	 */
-	public synchronized static <T> Stream<T> stream(Set<T> set) {
-		if (EmptyUtil.isEmpty(set)) {
-			set = new HashSet<>();
-		}
-		return set.stream();
-	}
-
-	/**
-	 * 将数据安全地转换成串行流Stream,并检查输入的数据，若输入的数据源为空就抛出异常
-	 * 
-	 * @param <T> 集合里数据的类型
-	 * @param set 需要转换的集合数据
-	 * @param msg 异常提示信息
-	 * @return 串行流Stream
-	 */
-	public synchronized static <T> Stream<T> stream(Set<T> set, String msg) {
-		if (EmptyUtil.isEmpty(set)) {
-			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
-		}
-		return set.stream();
+		return data.stream();
 	}
 
 	/**
@@ -103,7 +74,7 @@ public final class DataUtil {
 	 * @param data 需要转换的集合数据
 	 * @return 串行流Stream
 	 */
-	public synchronized static <T> Stream<T> stream(T[] data) {
+	public static <T> Stream<T> stream(T[] data) {
 		return stream(toList(data));
 	}
 
@@ -115,7 +86,7 @@ public final class DataUtil {
 	 * @param msg  异常提示信息
 	 * @return 串行流Stream
 	 */
-	public synchronized static <T> Stream<T> stream(T[] data, String msg) {
+	public static <T> Stream<T> stream(T[] data, String msg) {
 		if (null == data) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -126,58 +97,29 @@ public final class DataUtil {
 	 * 将数据安全地转换成并行流Stream
 	 * 
 	 * @param <T>  集合里数据的类型
-	 * @param list 需要转换的集合数据
+	 * @param data 需要转换的集合数据
 	 * @return 并行流Stream
 	 */
-	public synchronized static <T> Stream<T> parallelStream(List<T> list) {
-		if (EmptyUtil.isEmpty(list)) {
-			list = new ArrayList<>();
+	public static <T> Stream<T> parallelStream(Collection<T> data) {
+		if (null == data) {
+			data = new ArrayList<>();
 		}
-		return list.parallelStream();
+		return data.parallelStream();
 	}
 
 	/**
 	 * 将数据安全地转换成并行流Stream,并检查输入的数据，若输入的数据源为空就抛出异常
 	 * 
 	 * @param <T>  集合里数据的类型
-	 * @param list 需要转换的集合数据
+	 * @param data 需要转换的集合数据
 	 * @param msg  异常提示信息
 	 * @return 并行流Stream
 	 */
-	public synchronized static <T> Stream<T> parallelStream(List<T> list, String msg) {
-		if (EmptyUtil.isEmpty(list)) {
+	public static <T> Stream<T> parallelStream(Collection<T> data, String msg) {
+		if (null == data) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
-		return list.parallelStream();
-	}
-
-	/**
-	 * 将数据安全地转换成并行流Stream
-	 * 
-	 * @param <T> 集合里数据的类型
-	 * @param set 需要转换的集合数据
-	 * @return 并行流Stream
-	 */
-	public synchronized static <T> Stream<T> parallelStream(Set<T> set) {
-		if (EmptyUtil.isEmpty(set)) {
-			set = new HashSet<>();
-		}
-		return set.parallelStream();
-	}
-
-	/**
-	 * 将数据安全地转换成并行流Stream,并检查输入的数据，若输入的数据源为空就抛出异常
-	 * 
-	 * @param <T> 集合里数据的类型
-	 * @param set 需要转换的集合数据
-	 * @param msg 异常提示信息
-	 * @return 并行流Stream
-	 */
-	public synchronized static <T> Stream<T> parallelStream(Set<T> set, String msg) {
-		if (EmptyUtil.isEmpty(set)) {
-			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
-		}
-		return set.parallelStream();
+		return data.parallelStream();
 	}
 
 	/**
@@ -187,7 +129,7 @@ public final class DataUtil {
 	 * @param data 需要转换的集合数据
 	 * @return 并行流Stream
 	 */
-	public synchronized static <T> Stream<T> parallelStream(T[] data) {
+	public static <T> Stream<T> parallelStream(T[] data) {
 		return parallelStream(toList(data));
 	}
 
@@ -199,7 +141,7 @@ public final class DataUtil {
 	 * @param msg  异常提示信息
 	 * @return 并行流Stream
 	 */
-	public synchronized static <T> Stream<T> parallelStream(T[] data, String msg) {
+	public static <T> Stream<T> parallelStream(T[] data, String msg) {
 		if (null == data) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -213,11 +155,11 @@ public final class DataUtil {
 	 * @param objs 需要转换的数据
 	 * @return 转换后的List数据
 	 */
-	public synchronized static <T> List<T> toList(T[] objs) {
-		if (EmptyUtil.isEmpty(objs)) {
+	public static <T> List<T> toList(T[] objs) {
+		if (null == objs) {
 			return new ArrayList<>();
 		}
-		List<T> list = new ArrayList<>();
+		List<T> list = new ArrayList<>(objs.length);
 		for (T t : objs) {
 			list.add(t);
 		}
@@ -231,11 +173,11 @@ public final class DataUtil {
 	 * @param objs 需要转换的数据
 	 * @return 转换后的Set数据
 	 */
-	public synchronized static <T> Set<T> toSet(T[] objs) {
-		if (EmptyUtil.isEmpty(objs)) {
+	public static <T> Set<T> toSet(T[] objs) {
+		if (null == objs) {
 			return new HashSet<>();
 		}
-		Set<T> set = new HashSet<>();
+		Set<T> set = new HashSet<>(objs.length);
 		for (T t : objs) {
 			set.add(t);
 		}
@@ -249,99 +191,28 @@ public final class DataUtil {
 	 * @param data 数据流
 	 * @return Stream中的第一个非空元素
 	 */
-	public synchronized static <T> T first(Stream<T> data) {
+	public static <T> T first(Stream<T> data) {
 		if (data == null) {
 			return null;
 		}
 
-		return first(data.filter(Objects::nonNull).collect(Collectors.toList()));
+		return data.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
 	/**
-	 * 取出List中的第一个非空元素,如果Stream为空则返回null
+	 * 取出Stream中的第一个非空元素,如果Stream为空则返回 缺省值
 	 * 
-	 * @param <T>  List里的数据的类型
-	 * @param data 链表
-	 * @return List中的第一个非空元素
+	 * @param <T>          数据流里的数据的类型
+	 * @param data         数据流
+	 * @param defaultValue 缺省值
+	 * @return Stream中的第一个非空元素
 	 */
-	public synchronized static <T> T first(List<T> data) {
-		if (data == null || data.size() == 0) {
+	public static <T> T first(Stream<T> data, T defaultValue) {
+		if (data == null) {
 			return null;
 		}
-		return data.get(0);
-	}
 
-	/**
-	 * 取出链表的第一个元素, 若链表为空则返回给定的缺省值
-	 * 
-	 * @param <T>          List里的数据的类型
-	 * @param data         链表
-	 * @param defaultValue 缺省值
-	 * @return 链表的第一个元素
-	 */
-	public synchronized static <T> T first(List<T> data, T defaultValue) {
-		T t = first(data);
-		return null == t ? defaultValue : t;
-	}
-
-	/**
-	 * 取出链表的第一个元素，若链表为空则抛出异常
-	 * 
-	 * @param <T>      List里的数据的类型
-	 * @param data     链表数据
-	 * @param errorMsg 异常提示信息
-	 * @return 链表的第一个元素
-	 */
-	public synchronized static <T> T first(List<T> data, String errorMsg) {
-		T t = first(data);
-		if (null == t) {
-			throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
-		}
-		return t;
-	}
-
-	/**
-	 * 取出Set中的第一个非空元素,如果Stream为空则返回null
-	 * 
-	 * @param <T>  Set里的数据的类型
-	 * @param data 输入的数据
-	 * @return Set中的第一个非空元素
-	 */
-	public synchronized static <T> T first(Set<T> data) {
-		if (data == null || data.size() == 0) {
-			return null;
-		}
-		Iterator<T> it = data.iterator();
-		return it.next();
-	}
-
-	/**
-	 * 取出Set的第一个元素, 若Set为空则返回给定的缺省值
-	 * 
-	 * @param <T>          List里的数据的类型
-	 * @param data         数据源
-	 * @param defaultValue 缺省值
-	 * @return Set里的第一个元素
-	 */
-	public synchronized static <T> T first(Set<T> data, T defaultValue) {
-		T t = first(data);
-		return null == t ? defaultValue : t;
-	}
-
-	/**
-	 * 取出Set的第一个元素，若Set为空则抛出异常
-	 * 
-	 * @param <T>      Set里的数据的类型
-	 * @param data     数据源
-	 * @param errorMsg 异常提示信息
-	 * @return Set的第一个元素
-	 */
-	public synchronized static <T> T first(Set<T> data, String errorMsg) {
-		T t = first(data);
-		if (null == t) {
-			throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
-		}
-		return t;
+		return data.filter(Objects::nonNull).findFirst().orElse(defaultValue);
 	}
 
 	/**
@@ -351,7 +222,7 @@ public final class DataUtil {
 	 * @param data 数据源
 	 * @return 数组的第一个元素
 	 */
-	public synchronized static <T> T first(T[] data) {
+	public static <T> T first(T[] data) {
 		if (data == null || data.length == 0) {
 			return null;
 		}
@@ -366,7 +237,7 @@ public final class DataUtil {
 	 * @param defaultValue 缺省值
 	 * @return 数组里的第一个元素
 	 */
-	public synchronized static <T> T first(T[] data, T defaultValue) {
+	public static <T> T first(T[] data, T defaultValue) {
 		T t = first(data);
 		return null == t ? defaultValue : t;
 	}
@@ -379,7 +250,7 @@ public final class DataUtil {
 	 * @param errorMsg 异常提示信息
 	 * @return 数组的第一个元素
 	 */
-	public synchronized static <T> T first(T[] data, String errorMsg) {
+	public static <T> T first(T[] data, String errorMsg) {
 		T t = first(data);
 		if (null == t) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
@@ -394,7 +265,7 @@ public final class DataUtil {
 	 * @param data 数据源
 	 * @return 集合里的第一个元素
 	 */
-	public synchronized static <T> T first(Collection<T> data) {
+	public static <T> T first(Collection<T> data) {
 		if (data == null || data.size() == 0) {
 			return null;
 		}
@@ -410,7 +281,7 @@ public final class DataUtil {
 	 * @param defaultValue 缺省值
 	 * @return 集合里的第一个元素
 	 */
-	public synchronized static <T> T first(Collection<T> data, T defaultValue) {
+	public static <T> T first(Collection<T> data, T defaultValue) {
 		T t = first(data);
 		return null == t ? defaultValue : t;
 	}
@@ -423,12 +294,41 @@ public final class DataUtil {
 	 * @param errorMsg 异常提示信息
 	 * @return 集合里的第一个元素
 	 */
-	public synchronized static <T> T first(Collection<T> data, String errorMsg) {
+	public static <T> T first(Collection<T> data, String errorMsg) {
 		T t = first(data);
 		if (null == t) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
 		}
 		return t;
+	}
+
+	/**
+	 * 取出List中的最后一个非空元素,如果Stream为空则返回null
+	 * 
+	 * @param <T>  List里的数据的类型
+	 * @param data 链表
+	 * @return List中的第一个非空元素
+	 */
+	public static <T> T last(List<T> data) {
+		if (data == null || data.size() == 0) {
+			return null;
+		}
+		return data.get(data.size() - 1);
+	}
+
+	/**
+	 * 取出Stream中的最后一个非空元素,如果Stream为空则返回null
+	 * 
+	 * @param <T>  数据流里的数据的类型
+	 * @param data 数据流
+	 * @return Stream中的第一个非空元素
+	 */
+	public static <T> T last(Stream<T> data) {
+		if (data == null) {
+			return null;
+		}
+
+		return last(data.filter(Objects::nonNull).collect(Collectors.toList()));
 	}
 
 	/**
@@ -439,7 +339,7 @@ public final class DataUtil {
 	 * @return 转换后的list
 	 */
 	@SafeVarargs
-	public synchronized static <T> List<T> asList(T... a) {
+	public static <T> List<T> asList(T... a) {
 		if (null == a || a.length == 0) {
 			return new ArrayList<>();
 		}
@@ -458,7 +358,7 @@ public final class DataUtil {
 	 * @return 转换后的Set
 	 */
 	@SafeVarargs
-	public synchronized static <T> Set<T> asSet(T... a) {
+	public static <T> Set<T> asSet(T... a) {
 		if (null == a || a.length == 0) {
 			return new HashSet<>();
 		}

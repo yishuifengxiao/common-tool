@@ -14,6 +14,7 @@ import com.yishuifengxiao.common.tool.exception.CustomException;
  * @param <S> 源数据
  * @param <T> 目标数据
  */
+@FunctionalInterface
 public interface PageConverter<S, T> {
 
 	/**

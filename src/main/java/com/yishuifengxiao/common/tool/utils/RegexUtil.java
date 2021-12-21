@@ -19,6 +19,10 @@ import org.apache.commons.lang3.StringUtils;
  * <li>判断给定的字符串是否符合给定的正则表达式</li>
  * </ol>
  * 
+ * <p>
+ * <strong>该工具是一个线程安全类的工具</strong>
+ * </p>
+ * 
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -40,7 +44,7 @@ public final class RegexUtil {
 	 * @param regex 正则表达式
 	 * @return Pattern对象
 	 */
-	public static Pattern pattern(String regex) {
+	public synchronized static Pattern pattern(String regex) {
 		if (StringUtils.isBlank(regex)) {
 			throw new RuntimeException("正则表达式不能为空");
 		}
@@ -56,11 +60,11 @@ public final class RegexUtil {
 	/**
 	 * 判断内容是否符合正则表达式
 	 * 
-	 * @param regex   正则表达式
-	 * @param str 待判断的内容
+	 * @param regex 正则表达式
+	 * @param str   待判断的内容
 	 * @return 若匹配则返回为true,否则为false
 	 */
-	public static boolean match(String regex, String str) {
+	public synchronized static boolean match(String regex, String str) {
 		Pattern pattern = pattern(regex);
 		Matcher matcher = pattern.matcher(str);
 		return matcher.matches();
@@ -69,25 +73,25 @@ public final class RegexUtil {
 	/**
 	 * 判断内容是否包正则表达式标识的内容
 	 * 
-	 * @param regex   正则表达式
-	 * @param str 待判断的内容
+	 * @param regex 正则表达式
+	 * @param str   待判断的内容
 	 * @return 若匹配则返回为true,否则为false
 	 */
-	public static boolean find(String regex, String str) {
+	public synchronized static boolean find(String regex, String str) {
 		Pattern pattern = pattern(regex);
 		Matcher matcher = pattern.matcher(str);
 		return matcher.find();
 	}
 
 	/**
-	 * 根据正则表达式从内容中提取出一组匹配的内容<br/>
+	 * <p>根据正则表达式从内容中提取出一组匹配的内容</p>
 	 * <b>只要匹配到第一组数据就会返回</b>
 	 * 
-	 * @param regex   正则表达式
-	 * @param str 目标内容
+	 * @param regex 正则表达式
+	 * @param str   目标内容
 	 * @return 提取出一组匹配的内容
 	 */
-	public static String extract(String regex, String str) {
+	public synchronized static String extract(String regex, String str) {
 		if (StringUtils.isBlank(str)) {
 			return null;
 		}
@@ -101,14 +105,14 @@ public final class RegexUtil {
 	}
 
 	/**
-	 * 根据正则表达式从内容中提取出所有匹配的内容<br/>
+	 * <p>根据正则表达式从内容中提取出所有匹配的内容</p>
 	 * <b>返回所有匹配的数据</b>
 	 * 
-	 * @param regex   正则表达式
-	 * @param str 目标内容
+	 * @param regex 正则表达式
+	 * @param str   目标内容
 	 * @return 取出所有匹配的内容
 	 */
-	public static List<String> extractAll(String regex, String str) {
+	public synchronized static List<String> extractAll(String regex, String str) {
 		if (StringUtils.isBlank(str)) {
 			return new ArrayList<>();
 		}
@@ -127,7 +131,7 @@ public final class RegexUtil {
 	 * @param str 需要判断的字符串
 	 * @return 如果包含汉字则返回为true，否则为false
 	 */
-	public static boolean containChinese(String str) {
+	public synchronized static boolean containChinese(String str) {
 		return CHINESE_PATTERN.matcher(str).matches();
 	}
 }
