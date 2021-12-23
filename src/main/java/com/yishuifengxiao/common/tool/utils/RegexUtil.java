@@ -132,6 +132,6 @@ public final class RegexUtil {
 	 * @return 如果包含汉字则返回为true，否则为false
 	 */
 	public synchronized static boolean containChinese(String str) {
-		return CHINESE_PATTERN.matcher(str).matches();
+		return CHINESE_PATTERN.matcher(str).find();
 	}
 }
