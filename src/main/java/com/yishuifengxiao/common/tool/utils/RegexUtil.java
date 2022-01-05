@@ -134,4 +134,14 @@ public final class RegexUtil {
 	public synchronized static boolean containChinese(String str) {
 		return CHINESE_PATTERN.matcher(str).find();
 	}
+	
+	/**
+	 * 如果都是汉字则返回为true
+	 * 
+	 * @param str 需要判断的字符串
+	 * @return 如果都是汉字则返回为true，否则为false
+	 */
+	public synchronized static boolean isChinese(String str) {
+		return CHINESE_PATTERN.matcher(str).matches();
+	}
 }

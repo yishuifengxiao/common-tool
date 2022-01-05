@@ -368,4 +368,26 @@ public final class DataUtil {
 		}
 		return list;
 	}
+
+	/**
+	 * 获取集合里的元素的数量
+	 * 
+	 * @param <T>  数据类型
+	 * @param data 待判断的集合
+	 * @return 集合里的元素的数量
+	 */
+	public static <T> long size(Collection<T> data) {
+		return null == data ? 0L : data.size();
+	}
+
+	/**
+	 * 获取数组里的元素的数量
+	 * 
+	 * @param <T>  数据类型
+	 * @param data 待判断的数组
+	 * @return 数组里的元素的数量
+	 */
+	public static <T> long size(T[] data) {
+		return null == data ? 0L : data.length;
+	}
 }

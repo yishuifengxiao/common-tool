@@ -27,7 +27,7 @@ public final class MapUtil {
 	 * 
 	 * @return map工具类实例
 	 */
-	public synchronized static MapUtil instance() {
+	public synchronized static MapUtil map() {
 		return new MapUtil();
 	}
 
@@ -66,7 +66,7 @@ public final class MapUtil {
 	 */
 	public MapUtil putAll(Map<String, Object> map) {
 		if (null != map) {
-			this.map.putAll(map);
+			map.forEach((k, v) -> put(k, v));
 		}
 		return this;
 	}

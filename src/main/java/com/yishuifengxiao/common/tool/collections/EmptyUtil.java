@@ -161,7 +161,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 如果元素的数量是否大于或等于一个返回为true，否则为false
 	 */
-	public static <T> boolean greaterThanOneElement(Collection<T> data) {
+	public static <T> boolean gteOneElement(Collection<T> data) {
 		if (null == data) {
 			return false;
 		}
@@ -175,7 +175,7 @@ public final class EmptyUtil {
 	 * @param data 数据源
 	 * @return 若集合里元素数量大于1则返回为true,否则为false
 	 */
-	public static <T> boolean moreThanOneElement(Collection<T> data) {
+	public static <T> boolean gtOneElement(Collection<T> data) {
 		if (null == data) {
 			return false;
 		}
