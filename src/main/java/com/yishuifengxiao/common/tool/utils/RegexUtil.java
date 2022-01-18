@@ -144,4 +144,6 @@ public final class RegexUtil {
 	public synchronized static boolean isChinese(String str) {
 		return CHINESE_PATTERN.matcher(str).matches();
 	}
+	
+
 }

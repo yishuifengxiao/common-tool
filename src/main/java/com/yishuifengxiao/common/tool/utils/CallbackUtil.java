@@ -47,7 +47,7 @@ public class CallbackUtil {
 	 * 
 	 * @param runnable 待执行的任务
 	 */
-	public static void execute(Runnable runnable) {
+	public static synchronized void execute(Runnable runnable) {
 		Assert.assertNotNull("待执行的任务不能为空", runnable);
 		try {
 			POOL.execute(runnable);
@@ -62,7 +62,7 @@ public class CallbackUtil {
 	 * @param runnable 待执行的任务
 	 * @param complete 执行完成后的回调(不论成功还是失败都会触发)
 	 */
-	public static void execute(Runnable runnable, ExcuteComplete complete) {
+	public static synchronized void execute(Runnable runnable, ExcuteComplete complete) {
 		Assert.assertNotNull("待执行的任务不能为空", runnable);
 		try {
 			POOL.execute(runnable);
@@ -82,7 +82,7 @@ public class CallbackUtil {
 	 * @param runnable 待执行的任务
 	 * @param error    执行失败后触发的动作
 	 */
-	public static void execute(Runnable runnable, ExcuteError error) {
+	public static synchronized void execute(Runnable runnable, ExcuteError error) {
 		Assert.assertNotNull("待执行的任务不能为空", runnable);
 		try {
 			POOL.execute(runnable);
@@ -101,7 +101,7 @@ public class CallbackUtil {
 	 * @param complete 执行完成后的回调(不论成功还是失败都会触发)
 	 * @param error    执行失败后触发的动作
 	 */
-	public static void execute(Runnable runnable, ExcuteComplete complete, ExcuteError error) {
+	public static synchronized void execute(Runnable runnable, ExcuteComplete complete, ExcuteError error) {
 		Assert.assertNotNull("待执行的任务不能为空", runnable);
 		try {
 			POOL.execute(runnable);
