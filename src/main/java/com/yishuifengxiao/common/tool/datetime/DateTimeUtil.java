@@ -42,22 +42,22 @@ public final class DateTimeUtil {
 	/**
 	 * 默认的时区,上海
 	 */
-	private final static String DEFAULT_ZONE = "Asia/Shanghai";
+	public final static String DEFAULT_ZONE = "Asia/Shanghai";
 
 	/**
 	 * 默认的日期时间的字符串形式 yyyy-MM-dd HH:mm:ss形式
 	 */
-	private final static String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+	public final static String DEFAULT_DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 	/**
 	 * 默认的日期时间的字符串形式 yyyy-MM-dd HH:mm
 	 */
-	private final static String SIMPLE_DATETIME_FORMAT = "yyyy-MM-dd HH:mm";
+	public final static String SIMPLE_DATETIME_FORMAT = "yyyy-MM-dd HH:mm";
 
 	/**
 	 * 默认的日期字符串形式 yyyy-MM-dd
 	 */
-	private final static String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+	public final static String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 
 	/**
 	 * 获取北京时间的ZoneId
