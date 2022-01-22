@@ -1,6 +1,7 @@
 package com.yishuifengxiao.common.tool.io;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -214,6 +215,35 @@ public final class ImageUtil {
 
 		return new StringBuffer(BASE64_PNG_PREFIX).append(image2Base64(image)).toString();
 
+	}
+
+	/**
+	 * 将base64字符串转换成BufferedImage
+	 * 
+	 * @param base64 待转换的base64字符串
+	 * @return 转换后的BufferedImage
+	 */
+	public static BufferedImage base64ToBufferedImage(String base64) {
+		if (StringUtils.isBlank(base64)) {
+			return null;
+		}
+		ByteArrayInputStream byteArrayInputStream = null;
+		try {
+			byte[] b = Base64Utils.decodeFromString(base64);
+			for (int i = 0; i < b.length; ++i) {
+				if (b[i] < 0) {
+					// 调整异常数据
+					b[i] += 256;
+				}
+			}
+			byteArrayInputStream = new ByteArrayInputStream(b);
+			return ImageIO.read(byteArrayInputStream);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			CloseUtil.close(byteArrayInputStream);
+		}
+		return null;
 	}
 
 }
