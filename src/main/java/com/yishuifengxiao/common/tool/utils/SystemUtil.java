@@ -21,7 +21,6 @@ public class SystemUtil {
 		} catch (Exception e) {
 			return false;
 		}
-
 		return true;
 	}
 }
