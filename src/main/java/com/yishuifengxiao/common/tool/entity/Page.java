@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 import com.yishuifengxiao.common.tool.converter.PageConverter;
-import com.yishuifengxiao.common.tool.exception.CustomException;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 
 import io.swagger.annotations.ApiModel;
@@ -77,9 +77,8 @@ public class Page<S> implements Serializable {
 	 * @param <T>       分页元素转换工具的类型
 	 * @param converter 分页元素转换工具
 	 * @return 另一种数据类型的分页对象
-	 * @throws CustomException 数据类型转换时出现问题
 	 */
-	public <T> Page<T> convert(PageConverter<S, T> converter) throws CustomException {
+	public <T> Page<T> convert(PageConverter<S, T> converter) {
 		return this.convert(converter, false);
 	}
 
@@ -90,11 +89,10 @@ public class Page<S> implements Serializable {
 	 * @param converter    分页元素转换工具
 	 * @param isFilterNull 是否过滤掉转换后为null的数据
 	 * @return 另一种数据类型的分页对象
-	 * @throws CustomException 数据类型转换时出现问题
 	 */
-	public <T> Page<T> convert(PageConverter<S, T> converter, boolean isFilterNull) throws CustomException {
+	public <T> Page<T> convert(PageConverter<S, T> converter, boolean isFilterNull) {
 		if (null == converter) {
-			throw new CustomException(ErrorCode.PARAM_NULL, "转换器不能为空");
+			throw new UncheckedException(ErrorCode.PARAM_NULL, "转换器不能为空");
 		}
 		if (null == this.data) {
 			this.data = new ArrayList<>();

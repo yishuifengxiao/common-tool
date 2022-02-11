@@ -1,7 +1,5 @@
 package com.yishuifengxiao.common.tool.converter;
 
-import com.yishuifengxiao.common.tool.exception.CustomException;
-
 /**
  * <p>
  * 分页数据转换器
@@ -22,7 +20,6 @@ public interface PageConverter<S, T> {
 	 * 
 	 * @param s 源数据
 	 * @return 目标数据
-	 * @throws CustomException 数据转换时发生异常
 	 */
-	T convert(S s) throws CustomException;
+	T convert(S s);
 }
