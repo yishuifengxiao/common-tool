@@ -41,8 +41,8 @@ public final class Assert {
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
 	 */
-	public static void assertGreaterEqualZero(String msg, Integer value) {
-		if (!NumberUtil.greaterEqualZero(value)) {
+	public static void gteZero(String msg, Integer value) {
+		if (!NumberUtil.gteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -53,8 +53,8 @@ public final class Assert {
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
 	 */
-	public static void assertGreaterEqualZero(String msg, Long value) {
-		if (!NumberUtil.greaterEqualZero(value)) {
+	public static void gteZero(String msg, Long value) {
+		if (!NumberUtil.gteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -65,8 +65,8 @@ public final class Assert {
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
 	 */
-	public static void assertGreaterEqualZero(String msg, Float value) {
-		if (!NumberUtil.greaterEqualZero(value)) {
+	public static void gteZero(String msg, Float value) {
+		if (!NumberUtil.gteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -77,8 +77,8 @@ public final class Assert {
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
 	 */
-	public static void assertGreaterEqualZero(String msg, Double value) {
-		if (!NumberUtil.greaterEqualZero(value)) {
+	public static void gteZero(String msg, Double value) {
+		if (!NumberUtil.gteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -89,8 +89,8 @@ public final class Assert {
 	 * @param msg   异常提示信息
 	 * @param value 需要比较的值
 	 */
-	public static void assertGreaterEqualZero(String msg, BigDecimal value) {
-		if (!NumberUtil.greaterEqualZero(value)) {
+	public static void gteZero(String msg, BigDecimal value) {
+		if (!NumberUtil.gteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -102,8 +102,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertGreaterZero(String msg, Integer value) {
-		if (!NumberUtil.greaterZero(value)) {
+	public static void gtZero(String msg, Integer value) {
+		if (!NumberUtil.gtZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -115,8 +115,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertGreaterZero(String msg, Long value) {
-		if (!NumberUtil.greaterZero(value)) {
+	public static void gtZero(String msg, Long value) {
+		if (!NumberUtil.gtZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -128,8 +128,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertGreaterZero(String msg, Float value) {
-		if (!NumberUtil.greaterZero(value)) {
+	public static void gtZero(String msg, Float value) {
+		if (!NumberUtil.gtZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -141,8 +141,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertGreaterZero(String msg, Double value) {
-		if (!NumberUtil.greaterZero(value)) {
+	public static void gtZero(String msg, Double value) {
+		if (!NumberUtil.gtZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -154,8 +154,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertGreaterZero(String msg, BigDecimal value) {
-		if (!NumberUtil.greaterZero(value)) {
+	public static void gtZero(String msg, BigDecimal value) {
+		if (!NumberUtil.gtZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -167,8 +167,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessEqualZero(String msg, Integer value) {
-		if (!NumberUtil.lessEqualZero(value)) {
+	public static void lteZero(String msg, Integer value) {
+		if (!NumberUtil.lteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -180,8 +180,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessEqualZero(String msg, Long value) {
-		if (!NumberUtil.lessEqualZero(value)) {
+	public static void lteZero(String msg, Long value) {
+		if (!NumberUtil.lteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -193,8 +193,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessEqualZero(String msg, Float value) {
-		if (!NumberUtil.lessEqualZero(value)) {
+	public static void lteZero(String msg, Float value) {
+		if (!NumberUtil.lteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -206,8 +206,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessEqualZero(String msg, Double value) {
-		if (!NumberUtil.lessEqualZero(value)) {
+	public static void lteZero(String msg, Double value) {
+		if (!NumberUtil.lteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -219,8 +219,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessEqualZero(String msg, BigDecimal value) {
-		if (!NumberUtil.lessEqualZero(value)) {
+	public static void lteZero(String msg, BigDecimal value) {
+		if (!NumberUtil.lteZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -232,8 +232,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessZero(String msg, Integer value) {
-		if (!NumberUtil.lessZero(value)) {
+	public static void ltZero(String msg, Integer value) {
+		if (!NumberUtil.ltZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -245,8 +245,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessZero(String msg, Long value) {
-		if (!NumberUtil.lessZero(value)) {
+	public static void ltZero(String msg, Long value) {
+		if (!NumberUtil.ltZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -258,8 +258,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessZero(String msg, Float value) {
-		if (!NumberUtil.lessZero(value)) {
+	public static void ltZero(String msg, Float value) {
+		if (!NumberUtil.ltZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -271,8 +271,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessZero(String msg, Double value) {
-		if (!NumberUtil.lessZero(value)) {
+	public static void ltZero(String msg, Double value) {
+		if (!NumberUtil.ltZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -284,8 +284,8 @@ public final class Assert {
 	 * @param value 需要比较的值
 	 * 
 	 */
-	public static void assertLessZero(String msg, BigDecimal value) {
-		if (!NumberUtil.lessZero(value)) {
+	public static void ltZero(String msg, BigDecimal value) {
+		if (!NumberUtil.ltZero(value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -301,7 +301,7 @@ public final class Assert {
 	 * @param value         比较值
 	 * 
 	 */
-	public static void assertEquals(String msg, Integer originalValue, Integer value) {
+	public static void equal(String msg, Integer originalValue, Integer value) {
 		if (!NumberUtil.equals(originalValue, value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -319,7 +319,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static void assertEquals(String msg, Long originalValue, Long value) {
+	public static void equal(String msg, Long originalValue, Long value) {
 		if (!NumberUtil.equals(originalValue, value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -337,7 +337,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static void assertEquals(String msg, String originalValue, String value) {
+	public static void equal(String msg, String originalValue, String value) {
 		if (!StringUtils.equals(originalValue, value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -351,7 +351,7 @@ public final class Assert {
 	 * @param value         需要被比较的值
 	 * 
 	 */
-	public static void assertNotEquals(String msg, Integer originalValue, Integer value) {
+	public static void notEquals(String msg, Integer originalValue, Integer value) {
 		if (NumberUtil.equals(originalValue, value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -365,7 +365,7 @@ public final class Assert {
 	 * @param value         需要被比较的值
 	 * 
 	 */
-	public static void assertNotEquals(String msg, Long originalValue, Long value) {
+	public static void notEquals(String msg, Long originalValue, Long value) {
 		if (NumberUtil.equals(originalValue, value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -379,7 +379,7 @@ public final class Assert {
 	 * @param value         需要被比较的值
 	 * 
 	 */
-	public static void assertNotEquals(String msg, String originalValue, String value) {
+	public static void notEquals(String msg, String originalValue, String value) {
 		if (StringUtils.equals(originalValue, value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -393,7 +393,7 @@ public final class Assert {
 	 * @param value         需要被比较的值
 	 * 
 	 */
-	public static void assertEqualsIgnoreCase(String msg, String originalValue, String value) {
+	public static void equalIgnoreCase(String msg, String originalValue, String value) {
 		if (!StringUtils.equalsIgnoreCase(originalValue, value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -407,7 +407,7 @@ public final class Assert {
 	 * @param value         需要被比较的值
 	 * 
 	 */
-	public static void assertNotEqualsIgnoreCase(String msg, String originalValue, String value) {
+	public static void notEqualsIgnoreCase(String msg, String originalValue, String value) {
 		if (StringUtils.equalsIgnoreCase(originalValue, value)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -420,7 +420,7 @@ public final class Assert {
 	 * @param bool 需要判断的数据
 	 *
 	 */
-	public static void assertTrue(String msg, Boolean bool) {
+	public static void isTrue(String msg, Boolean bool) {
 		if (!BooleanUtils.isTrue(bool)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -432,7 +432,7 @@ public final class Assert {
 	 * @param msg    异常提示信息
 	 * @param values 需要判断的值
 	 */
-	public static void assertTrue(String msg, boolean... values) {
+	public static void isTrue(String msg, boolean... values) {
 		if (null != values) {
 			for (boolean value : values) {
 				if (!value) {
@@ -451,7 +451,7 @@ public final class Assert {
 	 *
 	 * 
 	 */
-	public static void assertFalse(String msg, Boolean bool) {
+	public static void isFalse(String msg, Boolean bool) {
 		if (!BooleanUtils.isFalse(bool)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -463,7 +463,7 @@ public final class Assert {
 	 * @param msg    异常提示信息
 	 * @param values 需要判断的值
 	 */
-	public static void assertFalse(String msg, boolean... values) {
+	public static void isFalse(String msg, boolean... values) {
 		if (null != values) {
 			for (boolean value : values) {
 				if (value) {
@@ -494,7 +494,7 @@ public final class Assert {
 	 * @param endValue     比较范围的结束值，如果给定的值为null，则默认替换为0
 	 * 
 	 */
-	public static void assertBetween(String msg, Integer compareValue, Integer startValue, Integer endValue) {
+	public static void between(String msg, Integer compareValue, Integer startValue, Integer endValue) {
 		if (!BetweenUtil.isBetween(compareValue, startValue, endValue)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -519,7 +519,7 @@ public final class Assert {
 	 * @param startValue   比较范围的开始值，如果给定的值为null，则默认替换为0
 	 * @param endValue     比较范围的结束值，如果给定的值为null，则默认替换为0
 	 */
-	public static void assertBetween(String msg, Long compareValue, Long startValue, Long endValue) {
+	public static void between(String msg, Long compareValue, Long startValue, Long endValue) {
 		if (!BetweenUtil.isBetween(compareValue, startValue, endValue)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -532,7 +532,7 @@ public final class Assert {
 	 * @param value1 需要比较的值
 	 * @param value2 需要被比较的值
 	 */
-	public static void assertObjectEquals(String msg, Object value1, Object value2) {
+	public static void objectEquals(String msg, Object value1, Object value2) {
 		if (!equals(value1, value2)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -545,7 +545,7 @@ public final class Assert {
 	 * @param value1 需要比较的值
 	 * @param value2 需要被比较的值
 	 */
-	public static void assertObjectNotEquals(String msg, Object value1, Object value2) {
+	public static void objectNotEquals(String msg, Object value1, Object value2) {
 		if (equals(value1, value2)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -599,7 +599,7 @@ public final class Assert {
 	 * @param values 需要判断的数据
 	 * 
 	 */
-	public static void assertNotBlank(String msg, Object... values) {
+	public static void notBlank(String msg, Object... values) {
 		if (EmptyUtil.notEmpty(values)) {
 			for (Object value : values) {
 				if (null == value) {
@@ -620,7 +620,7 @@ public final class Assert {
 	 * @param msg    提示信息
 	 * @param values 需要判断的数据
 	 */
-	public static void assertHasBlank(String msg, Object... values) {
+	public static void hasBlank(String msg, Object... values) {
 		if (EmptyUtil.notEmpty(values)) {
 			// 包含空值判断标志
 			boolean contain = false;
@@ -647,7 +647,7 @@ public final class Assert {
 	 * @param values 需要判断的数据
 	 * 
 	 */
-	public static void assertHasNoBlank(String msg, Object... values) {
+	public static void hasNoBlank(String msg, Object... values) {
 		if (EmptyUtil.notEmpty(values)) {
 			// 包含空值判断标志
 			boolean contain = false;
@@ -676,7 +676,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static <T> void assertOptionalNull(String msg, Optional<T> optional) {
+	public static <T> void optionalNull(String msg, Optional<T> optional) {
 		if (null != optional) {
 			if (optional.isPresent()) {
 				throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
@@ -693,7 +693,7 @@ public final class Assert {
 	 *
 	 * 
 	 */
-	public static <T> void assertOptionalNotNull(String msg, Optional<T> optional) {
+	public static <T> void optionalNotNull(String msg, Optional<T> optional) {
 		if (null == optional) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -732,7 +732,7 @@ public final class Assert {
 	 *
 	 * 
 	 */
-	public static <T> void assertNotNull(String msg, Object data) {
+	public static <T> void notNull(String msg, Object data) {
 		if (null == data) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 
@@ -754,7 +754,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static <T> void assertEmpty(String msg, Page<T> page) {
+	public static <T> void empty(String msg, Page<T> page) {
 		if (EmptyUtil.notEmpty(page)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -769,7 +769,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, Page<T> page) {
+	public static <T> void notEmpty(String msg, Page<T> page) {
 		if (EmptyUtil.isEmpty(page)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -783,7 +783,7 @@ public final class Assert {
 	 * @param page 分页对象
 	 * 
 	 */
-	public static <T> void assertEmpty(String msg, org.springframework.data.domain.Page<T> page) {
+	public static <T> void empty(String msg, org.springframework.data.domain.Page<T> page) {
 		if (EmptyUtil.notEmpty(page)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -798,7 +798,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, org.springframework.data.domain.Page<T> page) {
+	public static <T> void notEmpty(String msg, org.springframework.data.domain.Page<T> page) {
 		if (EmptyUtil.isEmpty(page)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -813,7 +813,7 @@ public final class Assert {
 	 *
 	 * 
 	 */
-	public static <T> void assertEmpty(String msg, T[] data) {
+	public static <T> void empty(String msg, T[] data) {
 		if (EmptyUtil.notEmpty(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -828,7 +828,7 @@ public final class Assert {
 	 *
 	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, T[] data) {
+	public static <T> void notEmpty(String msg, T[] data) {
 		if (EmptyUtil.isEmpty(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -843,7 +843,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public synchronized static <T> void assertEmpty(String msg, List<T> list) {
+	public synchronized static <T> void empty(String msg, List<T> list) {
 		if (EmptyUtil.notEmpty(list)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -858,7 +858,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static <T> void assertEmpty(String msg, Set<T> data) {
+	public static <T> void empty(String msg, Set<T> data) {
 		if (EmptyUtil.notEmpty(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -873,7 +873,7 @@ public final class Assert {
 	 *
 	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, Set<T> data) {
+	public static <T> void notEmpty(String msg, Set<T> data) {
 		if (EmptyUtil.isEmpty(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -887,7 +887,7 @@ public final class Assert {
 	 * @param data List数据
 	 * 
 	 */
-	public static <T> void assertNoEmpty(String msg, List<T> data) {
+	public static <T> void notEmpty(String msg, List<T> data) {
 		if (EmptyUtil.isEmpty(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -901,7 +901,7 @@ public final class Assert {
 	 * @param data 集合
 	 *
 	 */
-	public static <T> void assertOnlyOne(String msg, Collection<T> data) {
+	public static <T> void onlyOne(String msg, Collection<T> data) {
 		if (!EmptyUtil.onlyOneElement(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -916,7 +916,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static <T> void assertNotOnlyOne(String msg, Collection<T> data) {
+	public static <T> void notOnlyOne(String msg, Collection<T> data) {
 		if (EmptyUtil.onlyOneElement(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}

@@ -71,7 +71,7 @@ public class FileUtil {
 	 * @throws CustomException 转换出错
 	 */
 	public synchronized static String file2Base64(File file) throws CustomException {
-		Assert.assertNotNull("待转换的文件不能为空", file);
+		Assert.notNull("待转换的文件不能为空", file);
 
 		try (FileInputStream inputFile = new FileInputStream(file)) {
 			byte[] buffer = new byte[(int) file.length()];

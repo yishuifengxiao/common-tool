@@ -95,7 +95,7 @@ public class BaseQuery implements Serializable {
 	 * @return 如果传入了正确的分页大小就使用传入的值，否则返回默认值(默认值为 10)
 	 */
 	public int pageSize() {
-		if (NumberUtil.greaterZero(this.pageSize)) {
+		if (NumberUtil.gtZero(this.pageSize)) {
 			return this.pageSize;
 		}
 		return DEFAULT_PAGE_SIZE;
@@ -107,7 +107,7 @@ public class BaseQuery implements Serializable {
 	 * @return 如果传入了正确的分页大小就使用传入的值，否则返回默认值(默认值为 1)
 	 */
 	public int pageNum() {
-		if (NumberUtil.greaterZero(this.pageNum)) {
+		if (NumberUtil.gtZero(this.pageNum)) {
 			return this.pageNum;
 		}
 		return DEFAULT_PAGE_NUM;

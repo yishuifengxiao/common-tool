@@ -37,7 +37,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于或等于0返回为true,否则为false
 	 */
-	public static boolean greaterEqualZero(Integer value) {
+	public static boolean gteZero(Integer value) {
 		if (null == value) {
 			return false;
 		}
@@ -50,7 +50,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于或等于0返回为true,否则为false
 	 */
-	public static boolean greaterEqualZero(Long value) {
+	public static boolean gteZero(Long value) {
 		if (null == value) {
 			return false;
 		}
@@ -63,7 +63,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于或等于0返回为true,否则为false
 	 */
-	public static boolean greaterEqualZero(Float value) {
+	public static boolean gteZero(Float value) {
 		if (null == value) {
 			return false;
 		}
@@ -76,7 +76,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于或等于0返回为true,否则为false
 	 */
-	public static boolean greaterEqualZero(Double value) {
+	public static boolean gteZero(Double value) {
 		if (null == value) {
 			return false;
 		}
@@ -89,7 +89,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于或等于0返回为true,否则为false
 	 */
-	public static boolean greaterEqualZero(BigDecimal value) {
+	public static boolean gteZero(BigDecimal value) {
 		if (null == value) {
 			return false;
 		}
@@ -102,7 +102,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于0返回为true,否则为false
 	 */
-	public static boolean greaterZero(Integer value) {
+	public static boolean gtZero(Integer value) {
 		if (null == value) {
 			return false;
 		}
@@ -115,7 +115,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于0返回为true,否则为false
 	 */
-	public static boolean greaterZero(Long value) {
+	public static boolean gtZero(Long value) {
 		if (null == value) {
 			return false;
 		}
@@ -128,7 +128,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于0返回为true,否则为false
 	 */
-	public static boolean greaterZero(Float value) {
+	public static boolean gtZero(Float value) {
 		if (null == value) {
 			return false;
 		}
@@ -141,7 +141,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于0返回为true,否则为false
 	 */
-	public static boolean greaterZero(Double value) {
+	public static boolean gtZero(Double value) {
 		if (null == value) {
 			return false;
 		}
@@ -154,7 +154,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值大于0返回为true,否则为false
 	 */
-	public static boolean greaterZero(BigDecimal value) {
+	public static boolean gtZero(BigDecimal value) {
 		if (null == value) {
 			return false;
 		}
@@ -167,7 +167,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于或等于0返回为true,否则为false
 	 */
-	public static boolean lessEqualZero(Integer value) {
+	public static boolean lteZero(Integer value) {
 		if (null == value) {
 			return false;
 		}
@@ -180,7 +180,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于或等于0返回为true,否则为false
 	 */
-	public static boolean lessEqualZero(Long value) {
+	public static boolean lteZero(Long value) {
 		if (null == value) {
 			return false;
 		}
@@ -193,7 +193,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于或等于0返回为true,否则为false
 	 */
-	public static boolean lessEqualZero(Float value) {
+	public static boolean lteZero(Float value) {
 		if (null == value) {
 			return false;
 		}
@@ -206,7 +206,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于或等于0返回为true,否则为false
 	 */
-	public static boolean lessEqualZero(Double value) {
+	public static boolean lteZero(Double value) {
 		if (null == value) {
 			return false;
 		}
@@ -219,7 +219,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于或等于0返回为true,否则为false
 	 */
-	public static boolean lessEqualZero(BigDecimal value) {
+	public static boolean lteZero(BigDecimal value) {
 		if (null == value) {
 			return false;
 		}
@@ -232,7 +232,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于0返回为true,否则为false
 	 */
-	public static boolean lessZero(Integer value) {
+	public static boolean ltZero(Integer value) {
 		if (null == value) {
 			return false;
 		}
@@ -245,7 +245,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于0返回为true,否则为false
 	 */
-	public static boolean lessZero(Long value) {
+	public static boolean ltZero(Long value) {
 		if (null == value) {
 			return false;
 		}
@@ -258,7 +258,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于0返回为true,否则为false
 	 */
-	public static boolean lessZero(Float value) {
+	public static boolean ltZero(Float value) {
 		if (null == value) {
 			return false;
 		}
@@ -271,7 +271,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于0返回为true,否则为false
 	 */
-	public static boolean lessZero(Double value) {
+	public static boolean ltZero(Double value) {
 		if (null == value) {
 			return false;
 		}
@@ -284,7 +284,7 @@ public final class NumberUtil {
 	 * @param value 需要判断的输入值，若该值为null直接返回false
 	 * @return 输入值小于0返回为true,否则为false
 	 */
-	public static boolean lessZero(BigDecimal value) {
+	public static boolean ltZero(BigDecimal value) {
 		if (null == value) {
 			return false;
 		}
