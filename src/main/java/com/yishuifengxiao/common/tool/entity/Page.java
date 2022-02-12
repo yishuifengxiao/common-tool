@@ -100,11 +100,7 @@ public class Page<S> implements Serializable {
 		List<T> list = new ArrayList<>();
 		for (S s : this.data) {
 			T t = converter.convert(s);
-			if (isFilterNull) {
-				if (null != t) {
-					list.add(t);
-				}
-			} else {
+			if (!isFilterNull || null != t) {
 				list.add(t);
 			}
 		}
