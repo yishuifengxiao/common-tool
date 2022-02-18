@@ -576,7 +576,7 @@ public final class Assert {
 	 * @param values 需要判断的数据
 	 * 
 	 */
-	public static void assertBlank(String msg, Object... values) {
+	public static void isBlank(String msg, Object... values) {
 		if (EmptyUtil.notEmpty(values)) {
 			for (Object value : values) {
 				if (null != value) {
@@ -711,7 +711,7 @@ public final class Assert {
 	 *
 	 * 
 	 */
-	public static <T> void assertNull(String msg, Object data) {
+	public static <T> void isNull(String msg, Object data) {
 		if (null != data) {
 			if (data instanceof String) {
 				if (StringUtils.isNotBlank(data.toString())) {
@@ -754,7 +754,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static <T> void empty(String msg, Page<T> page) {
+	public static <T> void isEmpty(String msg, Page<T> page) {
 		if (EmptyUtil.notEmpty(page)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -783,7 +783,7 @@ public final class Assert {
 	 * @param page 分页对象
 	 * 
 	 */
-	public static <T> void empty(String msg, org.springframework.data.domain.Page<T> page) {
+	public static <T> void isEmpty(String msg, org.springframework.data.domain.Page<T> page) {
 		if (EmptyUtil.notEmpty(page)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -813,7 +813,7 @@ public final class Assert {
 	 *
 	 * 
 	 */
-	public static <T> void empty(String msg, T[] data) {
+	public static <T> void isEmpty(String msg, T[] data) {
 		if (EmptyUtil.notEmpty(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -843,7 +843,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public synchronized static <T> void empty(String msg, List<T> list) {
+	public synchronized static <T> void isEmpty(String msg, List<T> list) {
 		if (EmptyUtil.notEmpty(list)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
@@ -858,7 +858,7 @@ public final class Assert {
 	 * 
 	 * 
 	 */
-	public static <T> void empty(String msg, Set<T> data) {
+	public static <T> void isEmpty(String msg, Set<T> data) {
 		if (EmptyUtil.notEmpty(data)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
