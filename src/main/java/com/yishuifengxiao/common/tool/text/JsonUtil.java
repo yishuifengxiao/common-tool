@@ -79,10 +79,10 @@ public final class JsonUtil {
 	/**
 	 * 将json格式的字符串转换为map对象
 	 * 
-	 * @param jsonStr 待转换的数据
+	 * @param text 待转换的数据
 	 * @return 转换后的map对象，若转换失败则返回null
 	 */
-	public final static Map<String, Object> str2Map(String text) {
+	public final static Map<String, Object> json2Map(String text) {
 		if (StringUtils.isBlank(text)) {
 			return null;
 		}

@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author yishui
  * @version 1.0.0
- * @date 2022/2/27
+ * @since 1.0.0
  */
 public class HttpUtil {
 
@@ -24,7 +24,9 @@ public class HttpUtil {
 	 * 将查询字符串转为map结构
 	 * </p>
 	 * <p>
-	 * 字符串形式为 timeOption=0&page=1&pageSize=10&keyPlace=1&sort=dateDesc&qt=*
+	 * 字符串形式为
+	 * 
+	 * timeOption=0&#38;page=1&#38;pageSize=10&#38;keyPlace=1&#38;sort=dateDesc&#38;qt=*
 	 * </p>
 	 *
 	 * @param queryString 待转换的查询参数字符串

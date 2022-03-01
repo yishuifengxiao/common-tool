@@ -29,7 +29,7 @@ public final class LinkUtils {
 	/**
 	 * 从url中提取出来协议和域名
 	 * 
-	 * @param url
+	 * @param url 待处理的url
 	 * @return 返回协议和域名，形如 http://www.yishuifengxiao.com
 	 */
 	public static String extractProtocolAndHost(String url) {
@@ -58,7 +58,7 @@ public final class LinkUtils {
 	/**
 	 * 从url中提取出来完整的域名
 	 * 
-	 * @param url
+	 * @param url 待处理的url
 	 * @return 返回完整的域名，形如 www.yishuifengxiao.com
 	 */
 	public static String extractDomain(String url) {
@@ -70,10 +70,10 @@ public final class LinkUtils {
 	}
 
 	/**
-	 * 从url里提取出简短域名信息<br/>
-	 * 例如www.yishuifengxiao.com 的提取值为 yishuifengxiao
+	 * <p>从url里提取出简短域名信息</p>
+	 *  <p>例如www.yishuifengxiao.com 的提取值为 yishuifengxiao</p>
 	 * 
-	 * @param url url
+	 * @param url url 待处理的url
 	 * @return url里提取出简短域名信息
 	 */
 	public static String keyword(String url) {
