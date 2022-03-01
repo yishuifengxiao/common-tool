@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.utils;
+package com.yishuifengxiao.common.tool.text;
 
 import java.util.regex.Matcher;
 
@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author yishui
  * @version 1.0.0
  */
-public class LinkUtils {
+public final class LinkUtils {
 
 	/**
 	 * com.cn域名表达式

@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.utils;
+package com.yishuifengxiao.common.tool.text;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  *
  * @author Chen Xin(xchen@ir.hit.edu.cn)
  */
-public class HtmlExtract {
+public final class TextExtract {
 
 	private static int FREQUENT_URL = 30;
 	private static Pattern links = Pattern.compile(
@@ -39,7 +39,7 @@ public class HtmlExtract {
 
 	private int end;
 
-	public HtmlExtract() {
+	public TextExtract() {
 
 		this(-1);
 	}
@@ -49,7 +49,7 @@ public class HtmlExtract {
 	 * 
 	 * @param threshold 当待抽取的网页正文中遇到成块的新闻标题未剔除时，只要增大此阈值即可。阈值增大，准确率提升，召回率下降；值变小，噪声会大，但可以保证抽到只有一句话的正文
 	 */
-	public HtmlExtract(int threshold) {
+	public TextExtract(int threshold) {
 		this.threshold = threshold;
 	}
 

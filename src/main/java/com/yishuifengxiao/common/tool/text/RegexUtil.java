@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.utils;
+package com.yishuifengxiao.common.tool.text;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,24 +40,24 @@ public final class RegexUtil {
 	private final static String REGEX_DOMAIN = "[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?";
 
 	/**
-	 * 域名的正则表达式
+	 * 中文的正则表达式
 	 */
 	private final static String REGEX_CHINESE = "[\\u4e00-\\u9fa5]+";
-	
+
 	/**
 	 * 日期正则表达式
 	 */
-	private final static String REGEX_DATE="\\d{4}-\\d{1,2}-\\d{1,2}";
-	
+	private final static String REGEX_DATE = "\\d{4}-\\d{1,2}-\\d{1,2}";
+
 	/**
 	 * URL正则表达式
 	 */
-	private final static String REGEX_URL="http://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?";
-	
+	private final static String REGEX_URL = "http://([\\w-]+\\.)+[\\w-]+(/[\\w-./?%&=]*)?";
+
 	/**
 	 * IPv4地址正则表达式
 	 */
-	private final static String REGEX_IPV4="((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}";
+	private final static String REGEX_IPV4 = "((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}";
 
 	/**
 	 * 判断是否符合形如 http://www.yishuifengxiao.com 的正则表达式
@@ -73,12 +73,12 @@ public final class RegexUtil {
 	 * 包含中文的正则
 	 */
 	public static final Pattern PATTERN_CHINESE = Pattern.compile(REGEX_CHINESE);
-	
+
 	/**
 	 * 日期的正则
 	 */
 	public static final Pattern PATTERN_DATE = Pattern.compile(REGEX_DATE);
-	
+
 	/**
 	 * IPv4地址的正则
 	 */
@@ -180,6 +180,16 @@ public final class RegexUtil {
 	}
 
 	/**
+	 * 提取处字符串里所有的中文
+	 * 
+	 * @param text 待提取的字符串
+	 * @return 提取出来的中文
+	 */
+	public static List<String> extractAllChinese(String text) {
+		return extractAll(REGEX_CHINESE, text);
+	}
+
+	/**
 	 * 如果包含汉字则返回为true
 	 * 
 	 * @param str 需要判断的字符串
@@ -208,7 +218,7 @@ public final class RegexUtil {
 	public static List<String> extractChinese(String str) {
 		return extractAll(REGEX_CHINESE, str);
 	}
-	
+
 	/**
 	 * 从给定的字符串中提取出所有的yyyy-MM-dd格式的日期
 	 * 
@@ -218,7 +228,7 @@ public final class RegexUtil {
 	public static List<String> extractDate(String str) {
 		return extractAll(REGEX_DATE, str);
 	}
-	
+
 	/**
 	 * 从给定的字符串中提取出所有的IPv4地址
 	 * 
@@ -228,7 +238,7 @@ public final class RegexUtil {
 	public static List<String> extractIpv4(String str) {
 		return extractAll(REGEX_IPV4, str);
 	}
-	
+
 	/**
 	 * 从给定的字符串中提取出所有的url地址
 	 * 
