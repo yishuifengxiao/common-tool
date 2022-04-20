@@ -92,8 +92,7 @@ public final class DateTimeUtil {
 		if (null == localDateTime) {
 			return null;
 		}
-		Instant instant = localDateTime.atZone(zoneIdOfChina()).toInstant();
-		return Date.from(instant);
+		return  Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
 	}
 
 	/**
@@ -106,6 +105,7 @@ public final class DateTimeUtil {
 		if (null == localDateTime) {
 			return null;
 		}
+
 		return localDateTime2Date(localDateTime).getTime();
 	}
 

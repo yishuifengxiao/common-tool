@@ -7,12 +7,18 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Collections;
+import java.util.Map;
 
 import org.springframework.beans.BeanUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
+import com.yishuifengxiao.common.tool.text.JsonUtil;
+
+
 
 /**
  * <p>
@@ -124,6 +130,36 @@ public final class BeanUtil {
 			throw new CustomException(ErrorCode.BEAN_EXCEPTION, e.getMessage());
 		}
 		return t;
+	}
+
+	/**
+	 * 将Map转成指定的JavaBean对象
+	 * 
+	 * @param <T>   目标对象的类型
+	 * @param map   原始的map对象数据
+	 * @param clazz 目标对象
+	 * @return 转换后的java对象
+	 */
+	@SuppressWarnings({ "rawtypes" })
+	public static <T> T mapToBean(Map map, Class<T> clazz) {
+		if (null == map) {
+			return null;
+		}
+		return JsonUtil.str2Bean(JSONObject.toJSONString(map), clazz);
+	}
+
+	/**
+	 * 将java对象转换为Map
+	 * 
+	 * @param data java对象
+	 * @return 转换后的map数据
+	 */
+	@SuppressWarnings("rawtypes")
+	public static Map beanToMap(Object data) {
+		if(null==data) {
+			return Collections.EMPTY_MAP;
+		}
+		return JsonUtil.json2Map(JSONObject.toJSONString(data));
 	}
 
 }

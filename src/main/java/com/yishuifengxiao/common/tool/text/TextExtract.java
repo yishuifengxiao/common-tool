@@ -53,13 +53,22 @@ public final class TextExtract {
 		this.threshold = threshold;
 	}
 
+	public String extract(String html) {
+		try {
+			return this.parse(html);
+		} catch (Exception e) {
+
+		}
+		return null;
+	}
+
 	/**
 	 * 判断传入HTML，若是主题类网页，则抽取正文；否则输出<b>"unkown"</b>。
 	 *
 	 * @param html 网页HTML字符串
 	 * @return 网页正文string
 	 */
-	public String parse(String html) {
+	private String parse(String html) {
 		// 预处理，去掉非法字符
 		html = this.preProcess(html);
 		this.lines = Arrays.asList(html.split("\n"));
@@ -85,9 +94,13 @@ public final class TextExtract {
 			sum += this.indexDistribution.get(i);
 		}
 
-		this.threshold = Math.min(100,
-				(sum / this.indexDistribution.size()) << (empty / (this.lines.size() - empty) >>> 1));
-		this.threshold = Math.max(50, this.threshold);
+		try {
+			this.threshold = Math.min(100,
+					(sum / this.indexDistribution.size()) << (empty / (this.lines.size() - empty) >>> 1));
+			this.threshold = Math.max(50, this.threshold);
+		} catch (Exception e) {
+
+		}
 
 		this.start = -1;
 		this.end = -1;
