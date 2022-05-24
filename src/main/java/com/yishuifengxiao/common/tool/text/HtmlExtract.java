@@ -3,14 +3,16 @@
  */
 package com.yishuifengxiao.common.tool.text;
 
+import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.dom4j.io.SAXReader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.seimicrawler.xpath.JXDocument;
 
 import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 
@@ -135,16 +137,15 @@ public final class HtmlExtract {
 		if (!StringUtils.isNoneBlank(xpath, html)) {
 			return list;
 		}
-		try {
-			JXDocument jxDocument = JXDocument.create(html);
-			List<Object> nodes = jxDocument.sel(xpath.trim());
-			if (null == nodes) {
-				return list;
-			}
-		} catch (Exception e) {
-			log.info("使用【xpath规则】 提取 {} 时出现问题，提取参数为 xpath= {} ,问题为 {}", html, xpath, e.getMessage());
+		org.dom4j.Element element = element(html);
+		if (null == element) {
+			return list;
 		}
-		return list;
+		List<org.dom4j.Node> nodes = element.selectNodes(xpath);
+		if (null == nodes) {
+			return list;
+		}
+		return nodes.stream().map(v -> v.getText()).collect(Collectors.toList());
 	}
 
 	/**
@@ -154,9 +155,30 @@ public final class HtmlExtract {
 	 * @param html  待提取的html,必填
 	 * @return 提取之后的数据，若必填参数为空则返回null
 	 */
-	public static String extracttByXpath(String xpath, String html) {
-		List<String> list = extractAllTextByCss(xpath, html);
+	public static String extractByXpath(String xpath, String html) {
+		List<String> list = extractAllByXpath(xpath, html);
 		return EmptyUtil.isEmpty(list) ? null : list.get(0);
+	}
+
+	/**
+	 * 解析xml片段为Element
+	 * 
+	 * @param xml 待处理的xml片段
+	 * @return 解析后的元素
+	 */
+	public static org.dom4j.Element element(String xml) {
+		if (StringUtils.isBlank(xml)) {
+			return null;
+		}
+		try {
+			SAXReader reader = new SAXReader();
+			org.dom4j.Document doc = reader.read((new ByteArrayInputStream(xml.trim().getBytes("UTF-8"))));
+			org.dom4j.Element root = doc.getRootElement();
+			return root;
+		} catch (Exception e) {
+			log.info("解析xml [ {} ] 时出现问题 {}", xml, e.getMessage());
+		}
+		return null;
 	}
 
 }
