@@ -22,7 +22,7 @@ import com.yishuifengxiao.common.tool.text.JsonUtil;
 
 /**
  * <p>
- * 对象转换类
+ * 对象转换工具
  * </p>
  * 该工具的主要目标是对java对象进行操作，其具备以下的几项功能
  * <ol>

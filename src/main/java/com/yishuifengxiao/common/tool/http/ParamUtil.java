@@ -35,15 +35,6 @@ public final class ParamUtil {
 		return t == null || EMPTY_STRING.equals(t) || UNDEFINED_STRING.equals(t) ? null : t;
 	}
 
-	/**
-	 * 对字符串进行非空和空格处理
-	 * 
-	 * @param str 传入的参数
-	 * @return 处理后的参数
-	 */
-	public static String trim(String str) {
-		return StringUtils.isNotBlank(str) ? str.trim() : null;
-	}
 
 	/**
 	 * 对参数进行非空和空格处理，并对undefined值的数据进行过滤
@@ -52,7 +43,7 @@ public final class ParamUtil {
 	 * @return 处理后的参数
 	 */
 	public static String undefined(String str) {
-		str = trim(str);
+		str = StringUtils.trim(str);
 		return StringUtils.equalsIgnoreCase(str, UNDEFINED_STRING) ? null : str;
 	}
 
