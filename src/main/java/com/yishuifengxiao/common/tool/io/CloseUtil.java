@@ -1,9 +1,7 @@
 package com.yishuifengxiao.common.tool.io;
 
 import java.io.Closeable;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.Writer;
 import java.util.Arrays;
 
