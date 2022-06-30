@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.yishuifengxiao.common.tool.text;
 
@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * <h3>json转换提取工具</h3>
- * 
+ *
  * <p>
  * JSONPath语法元素和对应XPath元素的对比语法如下：
  * </p>
@@ -240,14 +240,14 @@ import lombok.extern.slf4j.Slf4j;
  * </tr>
  * </tbody>
  * </table>
- * 
+ *
  * <h3>注意点如下：</h3>
  * <ul>
  * <li>[]在xpath表达式总是从前面的路径来操作数组，索引是从1开始。</li>
  * <li>使用JOSNPath的[]操作符操作一个对象或者数组，索引是从0开始。</li>
- * 
+ *
  * </ul>
- * 
+ *
  * <h3>语法示例如下</h3>
  * <table style="border-spacing: 0; width: 834px; border: 1px solid rgba(0, 0,
  * 0, 1); font-size: 16px">
@@ -389,8 +389,8 @@ import lombok.extern.slf4j.Slf4j;
  * </tr>
  * </tbody>
  * </table>
- * 
- * 
+ *
+ *
  * @author qingteng
  * @version 1.0.0
  * @since 1.0.0
@@ -398,211 +398,211 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class JsonUtil {
 
-	/**
-	 * 将json格式的字符串转为JAVA对象
-	 * 
-	 * @param <T>   JAVA对象类型
-	 * @param json  json格式的字符串
-	 * @param clazz JAVA对象
-	 * @return 转换后的JAVA对象
-	 */
-	public static <T> T str2Bean(String json, Class<T> clazz) {
-		if (StringUtils.isBlank(json)) {
-			return null;
-		}
-		try {
-			return JSONObject.parseObject(json.trim(), clazz);
-		} catch (Exception e) {
-			if (log.isInfoEnabled()) {
-				log.info("将字符串 {} 转换成 java对象 {} 时出现问题 {}", json, clazz, e.getMessage());
-			}
-		}
-		return null;
-	}
+    /**
+     * 将json格式的字符串转为JAVA对象
+     *
+     * @param <T>   JAVA对象类型
+     * @param json  json格式的字符串
+     * @param clazz JAVA对象
+     * @return 转换后的JAVA对象
+     */
+    public static <T> T str2Bean(String json, Class<T> clazz) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        }
+        try {
+            return JSONObject.parseObject(json.trim(), clazz);
+        } catch (Exception e) {
+            if (log.isInfoEnabled()) {
+                log.info("将字符串 {} 转换成 java对象 {} 时出现问题 {}", json, clazz, e.getMessage());
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * 将json格式的字符串转换为对象集合
-	 * 
-	 * @param <T>   对象类型
-	 * @param json  json格式的字符串
-	 * @param clazz JAVA对象
-	 * @return 转换后对象集合
-	 */
-	public static <T> List<T> str2List(String json, Class<T> clazz) {
-		List<T> t = null;
-		try {
-			t = JSONObject.parseArray(json.trim(), clazz);
-		} catch (Exception e) {
-			t = Collections.emptyList();
-			if (log.isInfoEnabled()) {
-				log.info("将字符串 {} 转换成 {} 集合 时出现问题 {}", json, clazz, e.getMessage());
-			}
-		}
-		return t;
-	}
+    /**
+     * 将json格式的字符串转换为对象集合
+     *
+     * @param <T>   对象类型
+     * @param json  json格式的字符串
+     * @param clazz JAVA对象
+     * @return 转换后对象集合
+     */
+    public static <T> List<T> str2List(String json, Class<T> clazz) {
+        List<T> t = null;
+        try {
+            t = JSONObject.parseArray(json.trim(), clazz);
+        } catch (Exception e) {
+            t = Collections.emptyList();
+            if (log.isInfoEnabled()) {
+                log.info("将字符串 {} 转换成 {} 集合 时出现问题 {}", json, clazz, e.getMessage());
+            }
+        }
+        return t;
+    }
 
-	/**
-	 * <p>
-	 * 根据json提取表达式从字符串里提取出内容
-	 * </p>
-	 * 
-	 * @param <T>      java对象类型
-	 * @param json     json格式的字符串
-	 * @param jsonPath 提取表达式
-	 * @return 提取出来的字符串
-	 */
-	public static <T> T extract(String json, String jsonPath) {
-		if (StringUtils.isBlank(json)) {
-			return null;
-		}
-		try {
-			return JsonPath.read(json.trim(), jsonPath);
-		} catch (Exception e) {
-			if (log.isInfoEnabled()) {
-				log.info("根据表达式 {} 从字符串 {} 提取数据 时出现问题 {}", jsonPath, json, e.getMessage());
-			}
-		}
-		return null;
-	}
+    /**
+     * <p>
+     * 根据json提取表达式从字符串里提取出内容
+     * </p>
+     *
+     * @param <T>      java对象类型
+     * @param json     json格式的字符串
+     * @param jsonPath 提取表达式
+     * @return 提取出来的字符串
+     */
+    public static <T> T extract(String json, String jsonPath) {
+        if (StringUtils.isBlank(json)) {
+            return null;
+        }
+        try {
+            return JsonPath.read(json.trim(), jsonPath);
+        } catch (Exception e) {
+            if (log.isInfoEnabled()) {
+                log.info("根据表达式 {} 从字符串 {} 提取数据 时出现问题 {}", jsonPath, json, e.getMessage());
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JAVA对象
-	 * 
-	 * 
-	 * @param <T>      java对象类型
-	 * @param json     json格式的字符串
-	 * @param jsonPath json表达式
-	 * @param clazz    待转换的java对象
-	 * @return 转换后的java对象
-	 */
-	public static <T> T extract(String json, String jsonPath, Class<T> clazz) {
-		Object data = extract(json, jsonPath);
-		if (null == data) {
-			return null;
-		}
-		return str2Bean(data.toString(), clazz);
-	}
+    /**
+     * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JAVA对象
+     *
+     *
+     * @param <T>      java对象类型
+     * @param json     json格式的字符串
+     * @param jsonPath json表达式
+     * @param clazz    待转换的java对象
+     * @return 转换后的java对象
+     */
+    public static <T> T extract(String json, String jsonPath, Class<T> clazz) {
+        Object data = extract(json, jsonPath);
+        if (null == data) {
+            return null;
+        }
+        return str2Bean(data.toString(), clazz);
+    }
 
-	/**
-	 * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JSONObject对象
-	 * 
-	 * 
-	 * @param json     json格式的字符串
-	 * @param jsonPath json表达式
-	 * @return 转换后的java对象
-	 */
-	public static JSONObject extractJSON(String json, String jsonPath) {
-		Object data = extract(json, jsonPath);
-		if (null == data) {
-			return null;
-		}
-		try {
-			return JSONObject.parseObject(data.toString().trim());
-		} catch (Exception e) {
-			if (log.isInfoEnabled()) {
-				log.info("根据表达式 {} 从字符串 {} 提取JSONObject数据 时出现问题 {}", jsonPath, json, e.getMessage());
-			}
-		}
-		return new JSONObject();
-	}
+    /**
+     * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JSONObject对象
+     *
+     *
+     * @param json     json格式的字符串
+     * @param jsonPath json表达式
+     * @return 转换后的java对象
+     */
+    public static JSONObject extractJSON(String json, String jsonPath) {
+        Object data = extract(json, jsonPath);
+        if (null == data) {
+            return null;
+        }
+        try {
+            return JSONObject.parseObject(data.toString().trim());
+        } catch (Exception e) {
+            if (log.isInfoEnabled()) {
+                log.info("根据表达式 {} 从字符串 {} 提取JSONObject数据 时出现问题 {}", jsonPath, json, e.getMessage());
+            }
+        }
+        return new JSONObject();
+    }
 
-	/**
-	 * <p>
-	 * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JAVA对象集合
-	 * </p>
-	 * 
-	 * @param <T>      java对象类型
-	 * @param json     json格式的字符串
-	 * @param jsonPath json表达式
-	 * @param clazz    待转换的java对象
-	 * @return 转换后的java对象集合
-	 */
-	public static <T> List<T> extractList(String json, String jsonPath, Class<T> clazz) {
-		Object data = extract(json, jsonPath);
-		if (null == data) {
-			return null;
-		}
-		return str2List(data.toString(), clazz);
-	}
+    /**
+     * <p>
+     * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JAVA对象集合
+     * </p>
+     *
+     * @param <T>      java对象类型
+     * @param json     json格式的字符串
+     * @param jsonPath json表达式
+     * @param clazz    待转换的java对象
+     * @return 转换后的java对象集合
+     */
+    public static <T> List<T> extractList(String json, String jsonPath, Class<T> clazz) {
+        Object data = extract(json, jsonPath);
+        if (null == data) {
+            return null;
+        }
+        return str2List(data.toString(), clazz);
+    }
 
-	/**
-	 * 将java对象转换成json对象
-	 * 
-	 * @param data 待转换的数据
-	 * @return 转换后的json对象，若转换失败则返回null
-	 */
-	public final static JSONObject toJSON(Object data) {
-		if (null == data) {
-			return null;
-		}
-		try {
-			return JSONObject.parseObject(JSONObject.toJSONString(data));
-		} catch (Exception e) {
-			if (log.isInfoEnabled()) {
-				log.info("将对象 {} 转换成json对象时出现问题 {} ", data, e.getMessage());
-			}
-		}
-		return null;
-	}
+    /**
+     * 将java对象转换成json对象
+     *
+     * @param data 待转换的数据
+     * @return 转换后的json对象，若转换失败则返回null
+     */
+    public static JSONObject toJSON(Object data) {
+        if (null == data) {
+            return null;
+        }
+        try {
+            return JSONObject.parseObject(JSONObject.toJSONString(data));
+        } catch (Exception e) {
+            if (log.isInfoEnabled()) {
+                log.info("将对象 {} 转换成json对象时出现问题 {} ", data, e.getMessage());
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * 将json格式的字符串转换为json对象
-	 * 
-	 * @param jsonStr 待转换的数据
-	 * @return 转换后的json对象，若转换失败则返回null
-	 */
-	public final static JSONObject str2JSONObject(String jsonStr) {
-		if (StringUtils.isBlank(jsonStr)) {
-			return null;
-		}
-		try {
-			return JSONObject.parseObject(jsonStr.trim());
-		} catch (Exception e) {
-			if (log.isInfoEnabled()) {
-				log.info("将字符串 {} 转换成json对象时出现问题 {} ", jsonStr, e.getMessage());
-			}
-		}
-		return null;
-	}
+    /**
+     * 将json格式的字符串转换为json对象
+     *
+     * @param jsonStr 待转换的数据
+     * @return 转换后的json对象，若转换失败则返回null
+     */
+    public static JSONObject str2JSONObject(String jsonStr) {
+        if (StringUtils.isBlank(jsonStr)) {
+            return null;
+        }
+        try {
+            return JSONObject.parseObject(jsonStr.trim());
+        } catch (Exception e) {
+            if (log.isInfoEnabled()) {
+                log.info("将字符串 {} 转换成json对象时出现问题 {} ", jsonStr, e.getMessage());
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * 将json格式的字符串转换为json数组
-	 * 
-	 * @param jsonStr 待转换的数据
-	 * @return 转换后的json数组，若转换失败则返回null
-	 */
-	public final static JSONArray str2JSONArray(String jsonStr) {
-		if (StringUtils.isBlank(jsonStr)) {
-			return null;
-		}
-		try {
-			return JSONArray.parseArray(jsonStr.trim());
-		} catch (Exception e) {
-			if (log.isInfoEnabled()) {
-				log.info("将字符串 {} 转换成json数组时出现问题 {} ", jsonStr, e.getMessage());
-			}
-		}
-		return null;
-	}
+    /**
+     * 将json格式的字符串转换为json数组
+     *
+     * @param jsonStr 待转换的数据
+     * @return 转换后的json数组，若转换失败则返回null
+     */
+    public static JSONArray str2JSONArray(String jsonStr) {
+        if (StringUtils.isBlank(jsonStr)) {
+            return null;
+        }
+        try {
+            return JSONArray.parseArray(jsonStr.trim());
+        } catch (Exception e) {
+            if (log.isInfoEnabled()) {
+                log.info("将字符串 {} 转换成json数组时出现问题 {} ", jsonStr, e.getMessage());
+            }
+        }
+        return null;
+    }
 
-	/**
-	 * 将json格式的字符串转换为map对象
-	 * 
-	 * @param text 待转换的数据
-	 * @return 转换后的map对象，若转换失败则返回null
-	 */
-	public final static Map<String, Object> json2Map(String text) {
-		if (StringUtils.isBlank(text)) {
-			return null;
-		}
-		try {
-			return JSONObject.parseObject(text.trim()).getInnerMap();
-		} catch (Exception e) {
-			if (log.isInfoEnabled()) {
-				log.info("将字符串 {} 转换成 map 时出现问题 {} ", text, e.getMessage());
-			}
-		}
-		return null;
-	}
+    /**
+     * 将json格式的字符串转换为map对象
+     *
+     * @param text 待转换的数据
+     * @return 转换后的map对象，若转换失败则返回null
+     */
+    public static Map<String, Object> json2Map(String text) {
+        if (StringUtils.isBlank(text)) {
+            return null;
+        }
+        try {
+            return JSONObject.parseObject(text.trim()).getInnerMap();
+        } catch (Exception e) {
+            if (log.isInfoEnabled()) {
+                log.info("将字符串 {} 转换成 map 时出现问题 {} ", text, e.getMessage());
+            }
+        }
+        return null;
+    }
 
 }

@@ -1,14 +1,9 @@
 package com.yishuifengxiao.common.tool.http;
 
-import java.io.File;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
-
-import com.yishuifengxiao.common.tool.text.RegexUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.print.DocFlavor;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * http数据工具
@@ -23,17 +18,6 @@ public final class HttpUtil {
      * 分隔符
      */
     private final static String SEPARATOR = "&";
-
-
-    /**
-     * 左斜杠
-     */
-    private final static String LEFT_SLASH = "/";
-
-    /**
-     * 相对地址
-     */
-    private final static String RELATIVE_ADDR = "../";
 
 
     /**
@@ -71,37 +55,5 @@ public final class HttpUtil {
         return map;
     }
 
-    /**
-     * 根据url的来源地址将此url补全为网络地址
-     *
-     * @param referrer 来源地址
-     * @param url      待补全的url
-     * @return 补全后网络地址形式的url
-     */
-    public static String urlComplete(String referrer, String url) {
-        if (!StringUtils.isNoneBlank(referrer, url)) {
-            return null;
-        }
-        url = url.trim();
-        referrer = referrer.trim();
-        if (RegexUtil.isUrl(url)) {
-            // 已经是网络地址
-            return url;
-        }
-        if (StringUtils.startsWith(url, LEFT_SLASH)) {
-            // 左斜杠开头，绝对地址
-            return StringUtils.substringBeforeLast(referrer, LEFT_SLASH) + url;
-        }
-        if (StringUtils.startsWith(url, RELATIVE_ADDR)) {
-            // 以../开头的地址
-            long count = StringUtils.countMatches(url, RELATIVE_ADDR);
-            for (int i = 0; i <= count; i++) {
-                referrer = StringUtils.substringBeforeLast(referrer, LEFT_SLASH);
-            }
-            url = url.replaceAll("\\.\\./", "");
-            return referrer + LEFT_SLASH + url;
-        }
-        // 相对地址
-        return StringUtils.substringBeforeLast(referrer, LEFT_SLASH) + LEFT_SLASH + url;
-    }
+
 }
