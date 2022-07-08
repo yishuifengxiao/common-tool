@@ -29,12 +29,12 @@ public class HttpClient {
     /**
      * Content-Type:application/x-www-form-urlencoded; charset=UTF-8
      */
-    public final static String Content_Type_FORM = "application/x-www-form-urlencoded; charset=UTF-8";
+    public final static String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded; charset=UTF-8";
 
     /**
      * Content-Type:application/json;charset=UTF-8
      */
-    public final static String Content_Type_JSON = "application/json;charset=UTF-8";
+    public final static String CONTENT_TYPE_JSON = "application/json;charset=UTF-8";
 
     /**
      * 请求客户端实例
@@ -102,7 +102,7 @@ public class HttpClient {
      */
     public Connection.Response postForm(String url, Map<String, String> headers, Map<String, String> data) {
 
-        return post(url, Content_Type_FORM, headers, data);
+        return post(url, CONTENT_TYPE_FORM, headers, data);
     }
 
     /**
@@ -114,7 +114,7 @@ public class HttpClient {
      * @return 请求的响应体的响应文本
      */
     public String postFormAsString(String url, Map<String, String> headers, Map<String, String> data) {
-        Connection.Response response = post(url, Content_Type_FORM, headers, data);
+        Connection.Response response = post(url, CONTENT_TYPE_FORM, headers, data);
         return null == response ? null : response.body();
     }
 
@@ -127,7 +127,7 @@ public class HttpClient {
      */
     public Connection.Response postForm(String url, Map<String, String> data) {
 
-        return post(url, Content_Type_FORM, null, data);
+        return post(url, CONTENT_TYPE_FORM, null, data);
     }
 
     /**
@@ -139,7 +139,7 @@ public class HttpClient {
      */
     public String postFormAsString(String url, Map<String, String> data) {
 
-        Connection.Response response = post(url, Content_Type_FORM, null, data);
+        Connection.Response response = post(url, CONTENT_TYPE_FORM, null, data);
         return null == response ? null : response.body();
     }
 
@@ -152,7 +152,7 @@ public class HttpClient {
      * @return 请求的响应
      */
     public Connection.Response postJson(String url, Map<String, String> headers, Map<String, String> data) {
-        return post(url, Content_Type_JSON, headers, data);
+        return post(url, CONTENT_TYPE_JSON, headers, data);
     }
 
     /**
@@ -164,7 +164,7 @@ public class HttpClient {
      * @return 请求的响应体的响应文本
      */
     public String postJsonAsString(String url, Map<String, String> headers, Map<String, String> data) {
-        Connection.Response response = post(url, Content_Type_JSON, headers, data);
+        Connection.Response response = post(url, CONTENT_TYPE_JSON, headers, data);
         return null == response ? null : response.body();
     }
 
@@ -176,7 +176,7 @@ public class HttpClient {
      * @return 请求的响应体的响应文本
      */
     public Connection.Response postJson(String url, Map<String, String> data) {
-        return post(url, Content_Type_JSON, null, data);
+        return post(url, CONTENT_TYPE_JSON, null, data);
     }
 
     /**
@@ -187,7 +187,7 @@ public class HttpClient {
      * @return 请求的响应体的响应文本
      */
     public String postJsonAsString(String url, Map<String, String> data) {
-        Connection.Response response = post(url, Content_Type_JSON, null, data);
+        Connection.Response response = post(url, CONTENT_TYPE_JSON, null, data);
         return null == response ? null : response.body();
     }
 
