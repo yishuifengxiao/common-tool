@@ -46,12 +46,7 @@ public final class CallbackUtil {
      * @param runnable 待执行的任务
      */
     public static synchronized void execute(Runnable runnable) {
-        Assert.notNull("待执行的任务不能为空", runnable);
-        try {
-            POOL.execute(runnable);
-        } catch (Throwable e) {
-            log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
-        }
+        execute(runnable, null, null);
     }
 
     /**
@@ -61,17 +56,7 @@ public final class CallbackUtil {
      * @param complete 执行完成后的回调(不论成功还是失败都会触发)
      */
     public static synchronized void execute(Runnable runnable, ExcuteComplete complete) {
-        Assert.notNull("待执行的任务不能为空", runnable);
-        try {
-            POOL.execute(runnable);
-        } catch (Throwable e) {
-            log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
-        } finally {
-            if (null != complete) {
-                complete.onComplete();
-            }
-
-        }
+        execute(runnable, complete, null);
     }
 
     /**
@@ -81,15 +66,7 @@ public final class CallbackUtil {
      * @param error    执行失败后触发的动作
      */
     public static synchronized void execute(Runnable runnable, ExcuteError error) {
-        Assert.notNull("待执行的任务不能为空", runnable);
-        try {
-            POOL.execute(runnable);
-        } catch (Throwable e) {
-            log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
-            if (null != error) {
-                error.onError(e);
-            }
-        }
+        execute(runnable, null, error);
     }
 
     /**
@@ -101,19 +78,21 @@ public final class CallbackUtil {
      */
     public static synchronized void execute(Runnable runnable, ExcuteComplete complete, ExcuteError error) {
         Assert.notNull("待执行的任务不能为空", runnable);
-        try {
-            POOL.execute(runnable);
-        } catch (Throwable e) {
-            log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
-            if (null != error) {
-                error.onError(e);
+        POOL.execute(() -> {
+            try {
+                runnable.run();
+            } catch (Throwable e) {
+                log.warn("执行回调任务 {} 时出现问题，出现的问题为{}", runnable, e.getMessage());
+                if (null != error) {
+                    error.onError(e);
+                }
+            } finally {
+                if (null != complete) {
+                    complete.onComplete();
+                }
             }
-        } finally {
-            if (null != complete) {
-                complete.onComplete();
-            }
+        });
 
-        }
     }
 
     /**
