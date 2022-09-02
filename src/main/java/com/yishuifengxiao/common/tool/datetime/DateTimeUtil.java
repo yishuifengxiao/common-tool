@@ -223,6 +223,27 @@ public final class DateTimeUtil {
     }
 
     /**
+     * 将时间戳形式的时间格式化为yyyy-MM-dd HH:mm:ss格式的字符串
+     *
+     * @param currentTimeMillis 时间戳
+     * @return yyyy-MM-dd HH:mm:ss 格式化后的字符串
+     */
+    public static synchronized String formatDate(long currentTimeMillis) {
+        return format(currentTimeMillis, DEFAULT_DATETIME_FORMAT);
+    }
+
+    /**
+     * 将Date形式的时间格式化为 格式化为指定形式的字符串
+     *
+     * @param currentTimeMillis 时间戳
+     * @param pattern 格式化形式，例如yyyy-MM-dd HH:mm:ss
+     * @return 指定形式的字符串
+     */
+    public static synchronized String format(long currentTimeMillis, String pattern) {
+        return format(new Date(currentTimeMillis), pattern);
+    }
+
+    /**
      * 将Date形式的时间格式化为yyyy-MM-dd格式的字符串
      *
      * @param localDateTime 给定的时间

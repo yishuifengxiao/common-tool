@@ -148,7 +148,7 @@ public final class FlowTool {
     /**
      * 工作对象
      *
-     * @param <T>
+     * @param <T> 数据类型
      */
     public interface Worker<T> {
 

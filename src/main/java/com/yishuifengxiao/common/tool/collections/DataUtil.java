@@ -407,4 +407,32 @@ public final class DataUtil {
         }
         return list;
     }
+
+    /**
+     * 获取链表里的第index个元素
+     * @param data 链表
+     * @param index 序号
+     * @param <T> 数据类型
+     * @return 链表为空或index超过容量时返回为null
+     */
+    public static <T> T get(List<T> data, int index) {
+        if (null == data || data.size() <= index) {
+            return null;
+        }
+        return data.get(index);
+    }
+
+    /**
+     * 获取数组里的第index个元素
+     * @param data 链表
+     * @param index 序号
+     * @param <T> 数据类型
+     * @return 数组为空或index超过容量时返回为null
+     */
+    public static <T> T get(T[] data, int index) {
+        if (null == data || data.length <= index) {
+            return null;
+        }
+        return data[index];
+    }
 }
