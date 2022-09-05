@@ -20,7 +20,8 @@ public final class FlowTool {
     /**
      * 工作队列
      */
-    private final List<List<Worker>> workers = new ArrayList<>();
+    @SuppressWarnings("rawtypes")
+	private final List<List<Worker>> workers = new ArrayList<>();
 
     /**
      * 默认的异常处理函数
@@ -45,7 +46,8 @@ public final class FlowTool {
      * @param workers 工作队列
      * @return 并行处理工具实例
      */
-    public static FlowTool init(Worker... workers) {
+    @SuppressWarnings("rawtypes")
+	public static FlowTool init(Worker... workers) {
         FlowTool tool = new FlowTool();
         tool.workers.clear();
         addWorkers(tool, workers);
@@ -58,7 +60,8 @@ public final class FlowTool {
      * @param tool    工具实例
      * @param workers 工作队列
      */
-    private static void addWorkers(FlowTool tool, Worker[] workers) {
+    @SuppressWarnings("rawtypes")
+	private static void addWorkers(FlowTool tool, Worker[] workers) {
         if (null != workers) {
             List<Worker> queues = DataUtil.parallelStream(workers).filter(Objects::nonNull).collect(Collectors.toList());
             if (EmptyUtil.notEmpty(queues)) {
@@ -101,7 +104,8 @@ public final class FlowTool {
      * @param workers 工作队列
      * @return 当前处理工具实例
      */
-    public FlowTool then(Worker... workers) {
+    @SuppressWarnings("rawtypes")
+	public FlowTool then(Worker... workers) {
         addWorkers(this, workers);
         return this;
     }
@@ -176,9 +180,11 @@ public final class FlowTool {
     public class Context {
 
         private Map<String, Object> cache = new HashMap<>();
-        private List<Worker> list = new ArrayList<>();
+        @SuppressWarnings("rawtypes")
+		private List<Worker> list = new ArrayList<>();
 
-        private synchronized void put(Worker v, Object data) {
+        @SuppressWarnings("rawtypes")
+		private synchronized void put(Worker v, Object data) {
             cache.put(v.getName(), data);
             list.add(v);
         }
@@ -189,7 +195,8 @@ public final class FlowTool {
          * @param v 当前任务对象
          * @return 当前任务对象的输出数据
          */
-        public synchronized Object get(Worker v) {
+        @SuppressWarnings("rawtypes")
+		public synchronized Object get(Worker v) {
             return cache.get(v.getName());
         }
 
@@ -198,7 +205,8 @@ public final class FlowTool {
          *
          * @return 全部的任务对象
          */
-        public List<Worker> workers() {
+        @SuppressWarnings("rawtypes")
+		public List<Worker> workers() {
             return list;
         }
 
@@ -224,7 +232,8 @@ public final class FlowTool {
          * @param data   该工作对象的生产数据
          * @return 是否执行下游任务，true表示执行，false不执行
          */
-        boolean doWork(Worker worker, Object data);
+        @SuppressWarnings("rawtypes")
+		boolean doWork(Worker worker, Object data);
     }
 
     /**
@@ -237,7 +246,8 @@ public final class FlowTool {
          * @param e      出现的问题
          * @param worker 工作对象
          */
-        void catchError(Throwable e, Worker worker);
+        @SuppressWarnings("rawtypes")
+		void catchError(Throwable e, Worker worker);
     }
 
     /**

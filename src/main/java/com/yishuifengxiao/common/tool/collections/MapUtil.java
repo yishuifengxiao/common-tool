@@ -80,7 +80,8 @@ public final class MapUtil {
      * @param converter 数据转换器
      * @return 转换后的目标map
      */
-    public static Map convert(@NotNull Map map, @NotNull Converter converter) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public static Map convert(@NotNull Map map, @NotNull Converter converter) {
         Map result = new HashMap(map.size());
         map.forEach((k, v) -> result.put(k, converter.convert(v)));
         return result;

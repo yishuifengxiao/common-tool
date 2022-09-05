@@ -350,7 +350,8 @@ public final class DataUtil {
      * @param <T> 数据类型
      * @return 合并后的链表
      */
-    public static <T> List<T> merge(List<T>... list) {
+    @SuppressWarnings("unchecked")
+	public static <T> List<T> merge(List<T>... list) {
         if (null == list) {
             return Collections.emptyList();
         }
@@ -370,7 +371,8 @@ public final class DataUtil {
      * @param <T> 数据类型
      * @return 合并后的Set
      */
-    public static <T> Set<T> merge(Set<T>... sets) {
+    @SuppressWarnings({ "unchecked" })
+	public static <T> Set<T> merge(Set<T>... sets) {
         if (null == sets) {
             return Collections.emptySet();
         }

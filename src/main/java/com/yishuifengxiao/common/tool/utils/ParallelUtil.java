@@ -18,7 +18,8 @@ public class ParallelUtil {
 
     private CountDownLatch cdl;
 
-    private ParallelUtil() {
+    @SuppressWarnings("unused")
+	private ParallelUtil() {
     }
 
     /**
