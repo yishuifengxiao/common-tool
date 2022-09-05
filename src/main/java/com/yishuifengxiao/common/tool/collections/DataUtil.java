@@ -345,6 +345,47 @@ public final class DataUtil {
     }
 
     /**
+     * 将多个链表合并成一个链表
+     * @param list 待合并的链表
+     * @param <T> 数据类型
+     * @return 合并后的链表
+     */
+    public static <T> List<T> merge(List<T>... list) {
+        if (null == list) {
+            return Collections.emptyList();
+        }
+        List<T> result = new ArrayList<>();
+        for (List<T> data : list) {
+            if (null == data) {
+                continue;
+            }
+            result.addAll(data);
+        }
+        return result;
+    }
+
+    /**
+     * 将多个Set合并成一个Set
+     * @param sets 待合并的Set
+     * @param <T> 数据类型
+     * @return 合并后的Set
+     */
+    public static <T> Set<T> merge(Set<T>... sets) {
+        if (null == sets) {
+            return Collections.emptySet();
+        }
+        Set<T> result = new HashSet<>();
+        for (Set<T> data : sets) {
+            if (null == data) {
+                continue;
+            }
+            result.addAll(data);
+        }
+        return result;
+    }
+
+
+    /**
      * 将指定的数据转换成Set
      *
      * @param <T> 数据类型

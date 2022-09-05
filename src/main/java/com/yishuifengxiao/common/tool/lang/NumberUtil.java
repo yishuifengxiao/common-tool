@@ -30,6 +30,10 @@ public final class NumberUtil {
      */
     public static final BigDecimal ZERO = BigDecimal.ZERO;
     /**
+     * 一值(1)
+     */
+    public static final BigDecimal ONE = BigDecimal.valueOf(1);
+    /**
      * 十值(10)
      */
     public static final BigDecimal TEN = BigDecimal.valueOf(10);
@@ -60,7 +64,7 @@ public final class NumberUtil {
      * <li>1GB（Gigabyte，吉字节，十亿字节，又称“千兆”）=1024MB= 2^30 B；</li>
      * </ul>
      */
-    public static final BigDecimal RATE = BigDecimal.valueOf(1024);
+    public static final BigDecimal RATE_1024 = BigDecimal.valueOf(1024);
 
 
     /**
@@ -385,7 +389,7 @@ public final class NumberUtil {
             return defaultVal;
         }
         try {
-            return new BigDecimal(val.toString());
+            return new BigDecimal(val.toString().trim());
         } catch (Throwable e) {
             log.debug("将数据【{}】转换为数值时出现问题 {}", val, e);
             return defaultVal;

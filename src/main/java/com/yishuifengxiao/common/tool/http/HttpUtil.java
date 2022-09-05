@@ -34,7 +34,7 @@ public final class HttpUtil {
      * @return 转换后的map数据
      */
     public static Map<String, String> queryString2Map(String queryString) {
-        Map<String, String> map = new HashMap<>();
+
         if (StringUtils.isBlank(queryString)) {
             return null;
         }
@@ -42,6 +42,7 @@ public final class HttpUtil {
         if (null == tokens) {
             return null;
         }
+        Map<String, String> map = new HashMap<>(tokens.length);
         for (String token : tokens) {
             String[] strings = token.split("=");
             if (null == strings || strings.length < 2) {

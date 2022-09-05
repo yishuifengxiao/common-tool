@@ -99,7 +99,7 @@ public class FileUtil {
      * @param file 待保存的目标文件
      * @return 保存后的文件
      */
-    public static File inputStream2File(@NotNull InputStream inputStream, @NotNull File file) {
+    public static File stream2File(@NotNull InputStream inputStream, @NotNull File file) {
         try {
             copy(inputStream, new FileOutputStream(file));
         } catch (Exception e) {
