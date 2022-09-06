@@ -46,7 +46,7 @@ public class FileUtil {
      * @return 文件后缀名
      */
     public static String suffix(String fileName) {
-        if (StringUtils.isNotBlank(fileName)) {
+        if (StringUtils.isBlank(fileName)) {
             return null;
         }
         String suffix = StringUtils.substringAfterLast(fileName, ".");
