@@ -31,176 +31,202 @@ import java.util.Base64;
 @Slf4j
 public class FileUtil {
 
-    /**
-     * 获取文件的后缀名
-     * @param file 文件
-     * @return 文件后缀名
-     */
-    public static String suffix(File file) {
-        return null == file ? null : suffix(file.getName());
-    }
+	/**
+	 * 获取文件的后缀名
+	 * 
+	 * @param file 文件
+	 * @return 文件后缀名
+	 */
+	public static String suffix(File file) {
+		return null == file ? null : suffix(file.getName());
+	}
 
-    /**
-     * 根据文件名获取文件的后缀名
-     * @param fileName 文件名
-     * @return 文件后缀名
-     */
-    public static String suffix(String fileName) {
-        if (StringUtils.isBlank(fileName)) {
-            return null;
-        }
-        String suffix = StringUtils.substringAfterLast(fileName, ".");
-        return StringUtils.isNotBlank(suffix) ? suffix.toLowerCase().trim() : null;
-    }
+	/**
+	 * 根据文件名获取文件的后缀名
+	 * 
+	 * @param fileName 文件名
+	 * @return 文件后缀名
+	 */
+	public static String suffix(String fileName) {
+		if (StringUtils.isBlank(fileName)) {
+			return null;
+		}
+		String suffix = StringUtils.substringAfterLast(fileName, ".");
+		return StringUtils.isNotBlank(suffix) ? suffix.toLowerCase().trim() : null;
+	}
 
-    /**
-     * 将输入流转换为字节数组
-     * @param inputStream 输入流
-     * @return 转换后的字节数组
-     */
-    public static byte[] copyToByteArray(InputStream inputStream) {
-        if (inputStream == null) {
-            return new byte[0];
-        }
-        ByteArrayOutputStream out = new ByteArrayOutputStream(StreamUtils.BUFFER_SIZE);
-        copy(inputStream, out);
-        return out.toByteArray();
-    }
+	/**
+	 * <p>
+	 * 将输入流转换为字节数组
+	 * </p>
+	 * <strong>线程安全</strong>
+	 * 
+	 * @param inputStream 输入流
+	 * @return 转换后的字节数组
+	 */
+	public synchronized static byte[] copyToByteArray(InputStream inputStream) {
+		if (inputStream == null) {
+			return new byte[0];
+		}
+		ByteArrayOutputStream out = new ByteArrayOutputStream(StreamUtils.BUFFER_SIZE);
+		copy(inputStream, out);
+		return out.toByteArray();
+	}
 
-    /**
-     * Copy the contents of the given InputStream to the given OutputStream.
-     * Closes both streams when done.
-     * @param in the stream to copy from
-     * @param out the stream to copy to
-     * @return the number of bytes copied
-     */
-    public static int copy(InputStream in, OutputStream out) {
-        try {
-            int byteCount = 0;
-            byte[] buffer = new byte[4096];
-            int bytesRead = -1;
-            while ((bytesRead = in.read(buffer)) != -1) {
-                out.write(buffer, 0, bytesRead);
-                byteCount += bytesRead;
-            }
-            out.flush();
-            return byteCount;
-        } catch (Throwable e) {
-            throw new UncheckedException("复制文件流时出现问题 " + e);
-        } finally {
-            CloseUtil.close(out, in);
-        }
-    }
+	/**
+	 * <p>
+	 * Copy the contents of the given InputStream to the given OutputStream. Closes
+	 * both streams when done.
+	 * </p>
+	 * <strong>线程安全</strong>
+	 * 
+	 * @param in  the stream to copy from
+	 * @param out the stream to copy to
+	 * @return the number of bytes copied
+	 */
+	public synchronized static int copy(InputStream in, OutputStream out) {
+		try {
+			int byteCount = 0;
+			byte[] buffer = new byte[4096];
+			int bytesRead = -1;
+			while ((bytesRead = in.read(buffer)) != -1) {
+				out.write(buffer, 0, bytesRead);
+				byteCount += bytesRead;
+			}
+			out.flush();
+			return byteCount;
+		} catch (Throwable e) {
+			throw new UncheckedException("复制文件流时出现问题 " + e);
+		} finally {
+			CloseUtil.close(out, in);
+		}
+	}
 
-    /**
-     * 将文件输入流保存为文件
-     *
-     * @param inputStream 文件输入流
-     * @param file 待保存的目标文件
-     * @return 保存后的文件
-     */
-    public static File stream2File(@NotNull InputStream inputStream, @NotNull File file) {
-        try {
-            copy(inputStream, new FileOutputStream(file));
-        } catch (Exception e) {
-            throw new UncheckedException("文件转换失败，失败的原因为 " + e);
-        }
-        return file;
-    }
+	/**
+	 * <p>
+	 * 将文件输入流保存为文件
+	 * </p>
+	 * <strong>线程安全</strong>
+	 * 
+	 * @param inputStream 文件输入流
+	 * @param file        待保存的目标文件
+	 * @return 保存后的文件
+	 */
+	public synchronized static File stream2File(@NotNull InputStream inputStream, @NotNull File file) {
+		try {
+			copy(inputStream, new FileOutputStream(file));
+		} catch (Exception e) {
+			throw new UncheckedException("文件转换失败，失败的原因为 " + e);
+		}
+		return file;
+	}
 
-    /**
-     * 将字符串复制到指定的文件中
-     * @param text 待输入的字符串
-     * @param file 目标文件
-     * @return 目标文件
-     */
-    public static File string2File(String text, @NotNull File file) {
-        if (StringUtils.isBlank(text) || null == file) {
-            return file;
-        }
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
-            bw.write(text);
-            bw.flush();
-        } catch (Exception e) {
-            throw new UncheckedException("文件转换失败，失败的原因为 " + e);
-        }
-        return file;
-    }
+	/**
+	 * <p>
+	 * 将字符串复制到指定的文件中
+	 * </p>
+	 * <strong>线程安全</strong>
+	 * 
+	 * @param text 待输入的字符串
+	 * @param file 目标文件
+	 * @return 目标文件
+	 */
+	public synchronized static File string2File(String text, @NotNull File file) {
+		if (StringUtils.isBlank(text) || null == file) {
+			return file;
+		}
+		try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+			bw.write(text);
+			bw.flush();
+		} catch (Exception e) {
+			throw new UncheckedException("文件转换失败，失败的原因为 " + e);
+		}
+		return file;
+	}
 
-    /**
-     * 将base64字符串转换成文件
-     *
-     * @param base64File base64格式的文件
-     * @return 转换后的文件
-     */
-    public synchronized static File base64ToFile(String base64File) {
-        if (StringUtils.isBlank(base64File)) {
-            throw new UncheckedException(ErrorCode.PARAM_NULL, "上传的文件内容不能为空");
-        }
-        File file = new File(UID.uuid());
-        // 创建文件目录
-        BufferedOutputStream bos = null;
-        FileOutputStream fos = null;
-        try {
-            byte[] bytes = Base64.getDecoder().decode(base64File);
-            fos = new FileOutputStream(file);
-            bos = new BufferedOutputStream(fos);
-            bos.write(bytes);
-            bos.flush();
-        } catch (Exception e) {
-            throw new UncheckedException("文件转换失败，失败的原因为 " + e);
-        } finally {
-            CloseUtil.close(bos, fos);
-        }
-        return file;
-    }
+	/**
+	 * <p>
+	 * 将base64字符串转换成文件
+	 * </p>
+	 * <strong>线程安全</strong>
+	 * 
+	 * @param base64File base64格式的文件
+	 * @return 转换后的文件
+	 */
+	public synchronized static File base64ToFile(String base64File) {
+		if (StringUtils.isBlank(base64File)) {
+			throw new UncheckedException(ErrorCode.PARAM_NULL, "上传的文件内容不能为空");
+		}
+		File file = new File(UID.uuid());
+		// 创建文件目录
+		BufferedOutputStream bos = null;
+		FileOutputStream fos = null;
+		try {
+			byte[] bytes = Base64.getDecoder().decode(base64File);
+			fos = new FileOutputStream(file);
+			bos = new BufferedOutputStream(fos);
+			bos.write(bytes);
+			bos.flush();
+		} catch (Exception e) {
+			throw new UncheckedException("文件转换失败，失败的原因为 " + e);
+		} finally {
+			CloseUtil.close(bos, fos);
+		}
+		return file;
+	}
 
-    /**
-     * 将文件转换成base64字符串
-     *
-     * @param file 待转换的文件
-     * @return 转换后的base64字符串
-     */
-    public synchronized static String file2Base64(File file) {
-        Assert.notNull("待转换的文件不能为空", file);
+	/**
+	 * <p>
+	 * 将文件转换成base64字符串
+	 * </p>
+	 * <strong>线程安全</strong>
+	 * 
+	 * @param file 待转换的文件
+	 * @return 转换后的base64字符串
+	 */
+	public synchronized static String file2Base64(File file) {
+		Assert.notNull("待转换的文件不能为空", file);
 
-        try (FileInputStream inputFile = new FileInputStream(file)) {
-            byte[] buffer = new byte[(int) file.length()];
-            inputFile.read(buffer);
-            inputFile.close();
-            return Base64.getEncoder().encodeToString(buffer);
-        } catch (Exception e) {
-            throw new UncheckedException(ErrorCode.DATA_CONVERT_ERROR, "文件转换失败");
-        }
+		try (FileInputStream inputFile = new FileInputStream(file)) {
+			byte[] buffer = new byte[(int) file.length()];
+			inputFile.read(buffer);
+			inputFile.close();
+			return Base64.getEncoder().encodeToString(buffer);
+		} catch (Exception e) {
+			throw new UncheckedException(ErrorCode.DATA_CONVERT_ERROR, "文件转换失败");
+		}
 
-    }
+	}
 
-    /**
-     * 计算一个文件的MD5值
-     *
-     * @param file 待计算的文件
-     * @return 文件的MD5值(32位小写)
-     */
-    public synchronized static String getMd5(File file) {
-        if (null == file) {
-            return null;
-        }
-        FileInputStream inputStream = null;
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            inputStream = new FileInputStream(file);
-            byte[] buffer = new byte[8192];
-            int length;
-            while ((length = inputStream.read(buffer)) != -1) {
-                md5.update(buffer, 0, length);
-            }
-            return new String(Hex.encodeHex(md5.digest()));
-        } catch (Exception e) {
-            log.info("计算文件{}的md5值时出现问题{}", file, e.getMessage());
-            return null;
-        } finally {
-            CloseUtil.close(inputStream);
-        }
-    }
+	/**
+	 * <p>
+	 * 计算一个文件的MD5值
+	 * </p>
+	 * <strong>线程安全</strong>
+	 * 
+	 * @param file 待计算的文件
+	 * @return 文件的MD5值(32位小写)
+	 */
+	public synchronized static String getMd5(File file) {
+		if (null == file) {
+			return null;
+		}
+		FileInputStream inputStream = null;
+		try {
+			MessageDigest md5 = MessageDigest.getInstance("MD5");
+			inputStream = new FileInputStream(file);
+			byte[] buffer = new byte[8192];
+			int length;
+			while ((length = inputStream.read(buffer)) != -1) {
+				md5.update(buffer, 0, length);
+			}
+			return new String(Hex.encodeHex(md5.digest()));
+		} catch (Exception e) {
+			log.info("计算文件{}的md5值时出现问题{}", file, e.getMessage());
+			return null;
+		} finally {
+			CloseUtil.close(inputStream);
+		}
+	}
 
 }
