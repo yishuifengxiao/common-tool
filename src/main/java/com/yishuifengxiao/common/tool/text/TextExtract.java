@@ -53,6 +53,12 @@ public final class TextExtract {
 		this.threshold = threshold;
 	}
 
+	/**
+	 * 提取html中的正文
+	 * 
+	 * @param html 待提取的html内容
+	 * @return 提取后的内容
+	 */
 	public String extract(String html) {
 		try {
 			return this.parse(html);

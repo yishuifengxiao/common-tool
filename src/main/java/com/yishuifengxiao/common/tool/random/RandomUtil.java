@@ -22,7 +22,9 @@ import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
  * <li>根据当前时间生成yyyyMMddhhmmss的字符串</li>
  * <li>根据当前时间生成yyyyMMddhhmmss+随机数 形式的字符串</li>
  * </ol>
+ * <p>
  * <strong>该工具是一个线程安全类的工具。</strong>
+ * </p>
  * 
  * @author yishui
  * @version 1.0.0

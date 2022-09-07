@@ -100,7 +100,12 @@ public class IdWorker {
 
 	// ==============================Methods==========================================
 	/**
+	 * <p>
 	 * 获得下一个ID (该方法是线程安全的)
+	 * </p>
+	 * <p>
+	 * <strong>线程安全</strong>
+	 * </p>
 	 * 
 	 * @return SnowflakeId
 	 */
@@ -142,6 +147,9 @@ public class IdWorker {
 	 * <p>
 	 * 生成的雪花id的形式为 922847180031385619
 	 * </p>
+	 * <p>
+	 * <strong>线程安全</strong>
+	 * </p>
 	 * 
 	 * @return 雪花id
 	 */
@@ -155,6 +163,9 @@ public class IdWorker {
 	 * </p>
 	 * <p>
 	 * 生成的雪花id的形式为 922847180031385619
+	 * </p>
+	 * <p>
+	 * <strong>线程安全</strong>
 	 * </p>
 	 * 
 	 * @return 雪花id

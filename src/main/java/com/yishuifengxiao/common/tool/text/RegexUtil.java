@@ -190,7 +190,7 @@ public final class RegexUtil {
 	 * @param text 待提取的字符串
 	 * @return 提取出来的中文
 	 */
-	public static List<String> extractAllChinese(String text) {
+	public  static List<String> extractAllChinese(String text) {
 		return extractAll(REGEX_CHINESE, text);
 	}
 

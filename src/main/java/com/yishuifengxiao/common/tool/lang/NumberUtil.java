@@ -385,7 +385,9 @@ public final class NumberUtil {
 	 * <p>
 	 * 将输入值转换为 BigDecimal
 	 * </p>
+	 * <p>
 	 * <strong>线程安全</strong>
+	 * </p>
 	 * 
 	 * @param val        输入值
 	 * @param defaultVal 默认值

@@ -9,7 +9,12 @@ import java.util.UUID;
  * <p>
  * UUID生成工具
  * </p>
+ * <p>
  * 根据UUID生成一个不包含-的随机字符串
+ * </p>
+ * <p>
+ * <strong>该工具是一个线程安全类的工具。</strong>
+ * </p>
  * 
  * @author yishui
  * @version 1.0.0

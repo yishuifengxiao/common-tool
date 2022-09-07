@@ -3,19 +3,30 @@
  */
 package com.yishuifengxiao.common.tool.io;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
-import com.yishuifengxiao.common.tool.random.UID;
-import com.yishuifengxiao.common.tool.utils.Assert;
-import lombok.extern.slf4j.Slf4j;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.security.MessageDigest;
+import java.util.Base64;
+
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StreamUtils;
 
-import javax.validation.constraints.NotNull;
-import java.io.*;
-import java.security.MessageDigest;
-import java.util.Base64;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
+import com.yishuifengxiao.common.tool.random.UID;
+import com.yishuifengxiao.common.tool.utils.Assert;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 文件处理工具
@@ -45,7 +56,7 @@ public class FileUtil {
 	 * 根据文件名获取文件的后缀名
 	 * 
 	 * @param fileName 文件名
-	 * @return 文件后缀名
+	 * @return 文件后缀名 (小写格式)
 	 */
 	public static String suffix(String fileName) {
 		if (StringUtils.isBlank(fileName)) {
@@ -207,7 +218,7 @@ public class FileUtil {
 	 * @param file 待计算的文件
 	 * @return 文件的MD5值(32位小写)
 	 */
-	public synchronized static String getMd5(File file) {
+	public synchronized static String md5(File file) {
 		if (null == file) {
 			return null;
 		}
