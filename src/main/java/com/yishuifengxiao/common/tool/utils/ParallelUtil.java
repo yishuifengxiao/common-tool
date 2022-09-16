@@ -19,7 +19,7 @@ public class ParallelUtil {
     private CountDownLatch cdl;
 
     @SuppressWarnings("unused")
-	private ParallelUtil() {
+    private ParallelUtil() {
     }
 
     /**
@@ -32,12 +32,23 @@ public class ParallelUtil {
     }
 
     /**
+     * 创建一个实例
+     *
+     * @param taskNum 并行任务的数量
+     * @return 实例
+     */
+    public static ParallelUtil instance(int taskNum) {
+        return new ParallelUtil(taskNum);
+    }
+
+    /**
      * 执行一个任务
      *
      * @param runnable 待执行的任务
      */
-    public void execute(Runnable runnable) {
-        new Thread(() -> {
+    public ParallelUtil execute(Runnable runnable) {
+
+        CallbackUtil.execute(() -> {
             try {
                 runnable.run();
             } catch (Throwable e) {
@@ -45,7 +56,8 @@ public class ParallelUtil {
             } finally {
                 cdl.countDown();
             }
-        }).start();
+        });
+        return this;
     }
 
     /**
