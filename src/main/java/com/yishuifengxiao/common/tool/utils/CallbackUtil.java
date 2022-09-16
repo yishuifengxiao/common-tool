@@ -26,7 +26,7 @@ public final class CallbackUtil {
 	/**
 	 * 简单线程工程
 	 */
-	private final static ThreadFactory SIMPLE_THREAD_FACTORY = new SimpleThreadFactory();
+	public final static ThreadFactory SIMPLE_THREAD_FACTORY = new SimpleThreadFactory();
 
 	/**
 	 * 线程池初始化
@@ -106,7 +106,7 @@ public final class CallbackUtil {
 	 * @version 1.0.0
 	 * @since 1.0.0
 	 */
-	private static class SimpleThreadFactory implements ThreadFactory {
+	public static class SimpleThreadFactory implements ThreadFactory {
 
 		@Override
 		public Thread newThread(Runnable r) {

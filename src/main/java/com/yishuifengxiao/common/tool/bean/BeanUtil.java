@@ -3,18 +3,19 @@
  */
 package com.yishuifengxiao.common.tool.bean;
 
-import com.alibaba.fastjson.JSONObject;
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
-import com.yishuifengxiao.common.tool.text.JsonUtil;
-import org.springframework.beans.BeanUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.Map;
+
+import org.springframework.beans.BeanUtils;
+
+import com.alibaba.fastjson.JSONObject;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
+import com.yishuifengxiao.common.tool.text.JsonUtil;
 
 /**
  * <p>
@@ -43,11 +44,8 @@ public final class BeanUtil {
 	 * @return 复制后的目标对象
 	 */
 	public synchronized static <S, T> T copy(S source, T target) {
-		if (source == null) {
-			throw new UncheckedException(ErrorCode.PARAM_NULL, "源数据不能为空");
-		}
-		if (target == null) {
-			throw new UncheckedException(ErrorCode.PARAM_NULL, "目标填充不能为空");
+		if (null == source || null == target) {
+			return null;
 		}
 		try {
 			BeanUtils.copyProperties(source, target);
