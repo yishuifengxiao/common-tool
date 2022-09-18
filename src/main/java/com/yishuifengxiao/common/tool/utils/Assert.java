@@ -13,7 +13,7 @@ import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
-import com.yishuifengxiao.common.tool.lang.BetweenUtil;
+import com.yishuifengxiao.common.tool.lang.CompareUtil;
 import com.yishuifengxiao.common.tool.lang.NumberUtil;
 
 /**
@@ -495,7 +495,7 @@ public final class Assert {
 	 * 
 	 */
 	public static void between(String msg, Integer compareValue, Integer startValue, Integer endValue) {
-		if (!BetweenUtil.isBetween(compareValue, startValue, endValue)) {
+		if (!CompareUtil.isBetween(compareValue, startValue, endValue)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
@@ -520,7 +520,7 @@ public final class Assert {
 	 * @param endValue     比较范围的结束值，如果给定的值为null，则默认替换为0
 	 */
 	public static void between(String msg, Long compareValue, Long startValue, Long endValue) {
-		if (!BetweenUtil.isBetween(compareValue, startValue, endValue)) {
+		if (!CompareUtil.isBetween(compareValue, startValue, endValue)) {
 			throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
 		}
 	}
