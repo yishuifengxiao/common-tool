@@ -16,7 +16,7 @@ import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * <h3>json转换提取工具</h3>
+ * <p>json转换提取工具</p>
  *
  * <p>
  * JSONPath语法元素和对应XPath元素的对比语法如下：
@@ -241,14 +241,14 @@ import lombok.extern.slf4j.Slf4j;
  * </tbody>
  * </table>
  *
- * <h3>注意点如下：</h3>
+ * <p>注意点如下：</p>
  * <ul>
  * <li>[]在xpath表达式总是从前面的路径来操作数组，索引是从1开始。</li>
  * <li>使用JOSNPath的[]操作符操作一个对象或者数组，索引是从0开始。</li>
  *
  * </ul>
  *
- * <h3>语法示例如下</h3>
+ * <p>语法示例如下</p>
  * <table style="border-spacing: 0; width: 834px; border: 1px solid rgba(0, 0,
  * 0, 1); font-size: 16px">
  * <caption>jsonpath语法示例</caption> <tbody>

@@ -69,7 +69,7 @@ public final class NumberUtil {
 	public static final BigDecimal RATE_1024 = BigDecimal.valueOf(1024);
 
 	/**
-	 * <h3>判断输入值是否大于或等于0</h3>
+	 * <p>判断输入值是否大于或等于0</p>
 	 * <p style="color:yellow">
 	 * 若输入的值为null或非数字类型直接返回为false
 	 * </p>
@@ -85,7 +85,7 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * <h3>判断输入值是否大于0</h3>
+	 * <p>判断输入值是否大于0</p>
 	 * <p style="color:yellow">
 	 * 若输入的值为null或非数字类型直接返回为false
 	 * </p>
@@ -101,7 +101,7 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * <h3>判断输入值是否小于或等于0</h3>
+	 * <p>判断输入值是否小于或等于0</p>
 	 * <p style="color:yellow">
 	 * 若输入的值为null或非数字类型直接返回为false
 	 * </p>
@@ -117,7 +117,7 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * <h3>判断输入值是否小于0</h3>
+	 * <p>判断输入值是否小于0</p>
 	 * <p style="color:yellow">
 	 * 若输入的值为null或非数字类型直接返回为false
 	 * </p>
@@ -133,7 +133,7 @@ public final class NumberUtil {
 	}
 
 	/**
-	 * <h3>判断两个数据是否相等</h3>
+	 * <p>判断两个数据是否相等</p>
 	 * <p style="color:yellow">
 	 * 若输入的值为null或非数字类型直接返回为false
 	 * </p>
