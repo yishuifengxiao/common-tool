@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.validate;
 
-import com.yishuifengxiao.common.tool.collections.EmptyUtil;
+import com.yishuifengxiao.common.tool.collections.SizeUtil;
 import com.yishuifengxiao.common.tool.exception.CustomException;
 
 import javax.validation.ConstraintViolation;
@@ -41,7 +41,7 @@ public class BeanValidator {
      */
     public static <T, G> void validate(T t, Class<G> clazz) throws CustomException {
         Set<ConstraintViolation<T>> constraintViolations = VALIDATOR.validate(t, null == clazz ? Default.class : clazz);
-        if (EmptyUtil.isEmpty(constraintViolations)) {
+        if (SizeUtil.isEmpty(constraintViolations)) {
             return;
         }
 

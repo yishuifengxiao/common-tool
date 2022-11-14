@@ -8,13 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.yishuifengxiao.common.tool.collections.SizeUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.io.SAXReader;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-
-import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -78,7 +77,7 @@ public final class HtmlExtract {
 	 */
 	public static String extractByCss(String cssSelector, String attrName, String html) {
 		List<String> list = extractAllByCss(cssSelector, attrName, html);
-		return EmptyUtil.isEmpty(list) ? null : list.get(0);
+		return SizeUtil.isEmpty(list) ? null : list.get(0);
 	}
 
 	/**
@@ -122,7 +121,7 @@ public final class HtmlExtract {
 	 */
 	public static String extractTextByCss(String cssSelector, String html) {
 		List<String> list = extractAllTextByCss(cssSelector, html);
-		return EmptyUtil.isEmpty(list) ? null : list.get(0);
+		return SizeUtil.isEmpty(list) ? null : list.get(0);
 	}
 
 	/**
@@ -157,7 +156,7 @@ public final class HtmlExtract {
 	 */
 	public static String extractByXpath(String xpath, String html) {
 		List<String> list = extractAllByXpath(xpath, html);
-		return EmptyUtil.isEmpty(list) ? null : list.get(0);
+		return SizeUtil.isEmpty(list) ? null : list.get(0);
 	}
 
 	/**

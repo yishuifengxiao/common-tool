@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.yishuifengxiao.common.tool.collections.SizeUtil;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.yishuifengxiao.common.tool.collections.EmptyUtil;
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
@@ -547,7 +547,7 @@ public final class Assert {
      * @param values 需要判断的数据
      */
     public static void isBlank(String msg, Object... values) {
-        if (EmptyUtil.notEmpty(values)) {
+        if (SizeUtil.notEmpty(values)) {
             for (Object value : values) {
                 if (null != value) {
                     if (value instanceof String) {
@@ -569,7 +569,7 @@ public final class Assert {
      * @param values 需要判断的数据
      */
     public static void notBlank(String msg, Object... values) {
-        if (EmptyUtil.notEmpty(values)) {
+        if (SizeUtil.notEmpty(values)) {
             for (Object value : values) {
                 if (null == value) {
                     throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
@@ -590,7 +590,7 @@ public final class Assert {
      * @param values 需要判断的数据
      */
     public static void hasBlank(String msg, Object... values) {
-        if (EmptyUtil.notEmpty(values)) {
+        if (SizeUtil.notEmpty(values)) {
             // 包含空值判断标志
             boolean contain = false;
             for (Object value : values) {
@@ -616,7 +616,7 @@ public final class Assert {
      * @param values 需要判断的数据
      */
     public static void hasNoBlank(String msg, Object... values) {
-        if (EmptyUtil.notEmpty(values)) {
+        if (SizeUtil.notEmpty(values)) {
             // 包含空值判断标志
             boolean contain = false;
             for (Object value : values) {
@@ -713,7 +713,7 @@ public final class Assert {
      * @param page 分页对象
      */
     public static <T> void isEmpty(String msg, Page<T> page) {
-        if (EmptyUtil.notEmpty(page)) {
+        if (SizeUtil.notEmpty(page)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -726,7 +726,7 @@ public final class Assert {
      * @param page 分页对象
      */
     public static <T> void notEmpty(String msg, Page<T> page) {
-        if (EmptyUtil.isEmpty(page)) {
+        if (SizeUtil.isEmpty(page)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -739,7 +739,7 @@ public final class Assert {
      * @param page 分页对象
      */
     public static <T> void isEmpty(String msg, org.springframework.data.domain.Page<T> page) {
-        if (EmptyUtil.notEmpty(page)) {
+        if (SizeUtil.notEmpty(page)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -752,7 +752,7 @@ public final class Assert {
      * @param page 分页对象
      */
     public static <T> void notEmpty(String msg, org.springframework.data.domain.Page<T> page) {
-        if (EmptyUtil.isEmpty(page)) {
+        if (SizeUtil.isEmpty(page)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -765,7 +765,7 @@ public final class Assert {
      * @param data 数组数据
      */
     public static <T> void isEmpty(String msg, T[] data) {
-        if (EmptyUtil.notEmpty(data)) {
+        if (SizeUtil.notEmpty(data)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -778,7 +778,7 @@ public final class Assert {
      * @param data 数组数据
      */
     public static <T> void notEmpty(String msg, T[] data) {
-        if (EmptyUtil.isEmpty(data)) {
+        if (SizeUtil.isEmpty(data)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -791,7 +791,7 @@ public final class Assert {
      * @param list list数据
      */
     public synchronized static <T> void isEmpty(String msg, List<T> list) {
-        if (EmptyUtil.notEmpty(list)) {
+        if (SizeUtil.notEmpty(list)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -804,7 +804,7 @@ public final class Assert {
      * @param data set数据
      */
     public static <T> void isEmpty(String msg, Set<T> data) {
-        if (EmptyUtil.notEmpty(data)) {
+        if (SizeUtil.notEmpty(data)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -817,7 +817,7 @@ public final class Assert {
      * @param data Set数据
      */
     public static <T> void notEmpty(String msg, Set<T> data) {
-        if (EmptyUtil.isEmpty(data)) {
+        if (SizeUtil.isEmpty(data)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -830,7 +830,7 @@ public final class Assert {
      * @param data List数据
      */
     public static <T> void notEmpty(String msg, List<T> data) {
-        if (EmptyUtil.isEmpty(data)) {
+        if (SizeUtil.isEmpty(data)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -843,7 +843,7 @@ public final class Assert {
      * @param data 集合
      */
     public static <T> void onlyOne(String msg, Collection<T> data) {
-        if (!EmptyUtil.onlyOneElement(data)) {
+        if (!SizeUtil.onlyOneElement(data)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -856,7 +856,7 @@ public final class Assert {
      * @param data 集合
      */
     public static <T> void notOnlyOne(String msg, Collection<T> data) {
-        if (EmptyUtil.onlyOneElement(data)) {
+        if (SizeUtil.onlyOneElement(data)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }

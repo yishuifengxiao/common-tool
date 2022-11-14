@@ -124,7 +124,7 @@ List<String> asList = DataUtil.asList(strs);
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.collections.EmptyUtil
+com.yishuifengxiao.common.tool.collections.SizeUtil
 ```
 
   使用示例:

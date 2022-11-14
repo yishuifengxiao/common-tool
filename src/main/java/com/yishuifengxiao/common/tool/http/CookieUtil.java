@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yishuifengxiao.common.tool.collections.EmptyUtil;
+import com.yishuifengxiao.common.tool.collections.SizeUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -159,7 +159,7 @@ public class CookieUtil {
     public Map<String, Cookie> getCookieMap() {
 
         Cookie[] cookies = request.getCookies();
-        if (EmptyUtil.notEmpty(cookies)) {
+        if (SizeUtil.notEmpty(cookies)) {
             Map<String, Cookie> cookieMap = new HashMap<>(cookies.length);
             for (Cookie cookie : cookies) {
                 cookieMap.put(cookie.getName(), cookie);

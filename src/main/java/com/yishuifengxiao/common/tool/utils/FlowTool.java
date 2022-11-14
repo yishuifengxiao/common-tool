@@ -1,7 +1,7 @@
 package com.yishuifengxiao.common.tool.utils;
 
 import com.yishuifengxiao.common.tool.collections.DataUtil;
-import com.yishuifengxiao.common.tool.collections.EmptyUtil;
+import com.yishuifengxiao.common.tool.collections.SizeUtil;
 import com.yishuifengxiao.common.tool.random.IdWorker;
 
 import java.util.*;
@@ -65,7 +65,7 @@ public final class FlowTool {
 		if (null != workers) {
 			List<Worker> queues = DataUtil.parallelStream(workers).filter(Objects::nonNull)
 					.collect(Collectors.toList());
-			if (EmptyUtil.notEmpty(queues)) {
+			if (SizeUtil.notEmpty(queues)) {
 				tool.workers.add(queues);
 			}
 		}

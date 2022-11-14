@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.yishuifengxiao.common.tool.collections.EmptyUtil;
+import com.yishuifengxiao.common.tool.collections.SizeUtil;
 import com.yishuifengxiao.common.tool.converter.PageConverter;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
@@ -181,7 +181,7 @@ public class Page<S> implements Serializable {
 	 * @return 分页对象
 	 */
 	public static <S> Page<S> toPage(List<S> list, int pageSize, int pageNum) {
-		if (EmptyUtil.isEmpty(list)) {
+		if (SizeUtil.isEmpty(list)) {
 			return Page.ofEmpty(pageSize);
 		}
 		if (pageSize <= 0) {
