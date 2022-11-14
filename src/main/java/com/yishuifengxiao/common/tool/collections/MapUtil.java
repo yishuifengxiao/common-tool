@@ -1,10 +1,9 @@
 package com.yishuifengxiao.common.tool.collections;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * <p>
@@ -16,12 +15,12 @@ import java.util.Map;
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class MapUtil {
+public final class MapUtil<K, V> {
 
     /**
      * 数据存储对象
      */
-    private final Map<String, Object> map = new HashMap<>();
+    private final Map<K, V> map = new TreeMap<>();
 
     /**
      * 获取一个map工具类实例
@@ -37,8 +36,7 @@ public final class MapUtil {
      *
      * @return 最终需要的map数据
      */
-    public Map<String, Object> build() {
-
+    public <K1 extends K, V1 extends V> Map build() {
         return this.map;
     }
 
@@ -52,8 +50,8 @@ public final class MapUtil {
      * @param value 数据的值
      * @return 当前map工具类实例
      */
-    public MapUtil put(String key, Object value) {
-        if (StringUtils.isNotBlank(key)) {
+    public MapUtil<K, V> put(K key, V value) {
+        if (null != key && null != value) {
             this.map.put(key, value);
         }
         return this;
@@ -65,7 +63,7 @@ public final class MapUtil {
      * @param map 键值对
      * @return 当前map工具类实例
      */
-    public MapUtil putAll(Map<String, Object> map) {
+    public MapUtil<K, V> putAll(Map<K, V> map) {
         if (null != map) {
             map.forEach((k, v) -> put(k, v));
         }
