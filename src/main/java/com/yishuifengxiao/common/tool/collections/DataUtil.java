@@ -39,7 +39,7 @@ public final class DataUtil {
      * @param data 需要转换的集合数据
      * @return 串行流Stream
      */
-    public static <T> Stream<T> stream(Collection<T> data) {
+    public synchronized static <T> Stream<T> stream(Collection<T> data) {
         if (null == data) {
             data = new ArrayList<>();
         }
@@ -54,7 +54,7 @@ public final class DataUtil {
      * @param msg  异常提示信息
      * @return 串行流Stream
      */
-    public static <T> Stream<T> stream(Collection<T> data, String msg) {
+    public synchronized static <T> Stream<T> stream(Collection<T> data, String msg) {
         if (null == data) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
@@ -68,7 +68,7 @@ public final class DataUtil {
      * @param data 需要转换的集合数据
      * @return 串行流Stream
      */
-    public static <T> Stream<T> stream(T[] data) {
+    public synchronized static <T> Stream<T> stream(T[] data) {
         return stream(toList(data));
     }
 
@@ -80,7 +80,7 @@ public final class DataUtil {
      * @param msg  异常提示信息
      * @return 串行流Stream
      */
-    public static <T> Stream<T> stream(T[] data, String msg) {
+    public synchronized static <T> Stream<T> stream(T[] data, String msg) {
         if (null == data) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
@@ -94,7 +94,7 @@ public final class DataUtil {
      * @param data 需要转换的集合数据
      * @return 并行流Stream
      */
-    public static <T> Stream<T> parallelStream(Collection<T> data) {
+    public synchronized static <T> Stream<T> parallelStream(Collection<T> data) {
         if (null == data) {
             data = new ArrayList<>();
         }
@@ -109,7 +109,7 @@ public final class DataUtil {
      * @param msg  异常提示信息
      * @return 并行流Stream
      */
-    public static <T> Stream<T> parallelStream(Collection<T> data, String msg) {
+    public synchronized static <T> Stream<T> parallelStream(Collection<T> data, String msg) {
         if (null == data) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
@@ -123,7 +123,7 @@ public final class DataUtil {
      * @param data 需要转换的集合数据
      * @return 并行流Stream
      */
-    public static <T> Stream<T> parallelStream(T[] data) {
+    public synchronized static <T> Stream<T> parallelStream(T[] data) {
         return parallelStream(toList(data));
     }
 
@@ -135,7 +135,7 @@ public final class DataUtil {
      * @param msg  异常提示信息
      * @return 并行流Stream
      */
-    public static <T> Stream<T> parallelStream(T[] data, String msg) {
+    public synchronized static <T> Stream<T> parallelStream(T[] data, String msg) {
         if (null == data) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
@@ -149,7 +149,7 @@ public final class DataUtil {
      * @param objs 需要转换的数据
      * @return 转换后的List数据
      */
-    public static <T> List<T> toList(T[] objs) {
+    public synchronized static <T> List<T> toList(T[] objs) {
         if (null == objs) {
             return new ArrayList<>();
         }
@@ -167,7 +167,7 @@ public final class DataUtil {
      * @param objs 需要转换的数据
      * @return 转换后的Set数据
      */
-    public static <T> Set<T> toSet(T[] objs) {
+    public synchronized static <T> Set<T> toSet(T[] objs) {
         if (null == objs) {
             return new HashSet<>();
         }
@@ -185,7 +185,7 @@ public final class DataUtil {
      * @param data 数据流
      * @return Stream中的第一个非空元素
      */
-    public static <T> T first(Stream<T> data) {
+    public synchronized static <T> T first(Stream<T> data) {
         if (data == null) {
             return null;
         }
@@ -201,7 +201,7 @@ public final class DataUtil {
      * @param defaultValue 缺省值
      * @return Stream中的第一个非空元素
      */
-    public static <T> T first(Stream<T> data, T defaultValue) {
+    public synchronized static <T> T first(Stream<T> data, T defaultValue) {
         if (data == null) {
             return null;
         }
@@ -216,7 +216,7 @@ public final class DataUtil {
      * @param data 数据源
      * @return 数组的第一个元素
      */
-    public static <T> T first(T[] data) {
+    public synchronized static <T> T first(T[] data) {
         if (data == null || data.length == 0) {
             return null;
         }
@@ -231,7 +231,7 @@ public final class DataUtil {
      * @param defaultValue 缺省值
      * @return 数组里的第一个元素
      */
-    public static <T> T first(T[] data, T defaultValue) {
+    public synchronized static <T> T first(T[] data, T defaultValue) {
         T t = first(data);
         return null == t ? defaultValue : t;
     }
@@ -244,7 +244,7 @@ public final class DataUtil {
      * @param errorMsg 异常提示信息
      * @return 数组的第一个元素
      */
-    public static <T> T first(T[] data, String errorMsg) {
+    public synchronized static <T> T first(T[] data, String errorMsg) {
         T t = first(data);
         if (null == t) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
@@ -259,7 +259,7 @@ public final class DataUtil {
      * @param data 数据源
      * @return 集合里的第一个元素
      */
-    public static <T> T first(Collection<T> data) {
+    public synchronized static <T> T first(Collection<T> data) {
         if (data == null || data.size() == 0) {
             return null;
         }
@@ -275,7 +275,7 @@ public final class DataUtil {
      * @param defaultValue 缺省值
      * @return 集合里的第一个元素
      */
-    public static <T> T first(Collection<T> data, T defaultValue) {
+    public  synchronized static <T> T first(Collection<T> data, T defaultValue) {
         T t = first(data);
         return null == t ? defaultValue : t;
     }
@@ -288,7 +288,7 @@ public final class DataUtil {
      * @param errorMsg 异常提示信息
      * @return 集合里的第一个元素
      */
-    public static <T> T first(Collection<T> data, String errorMsg) {
+    public synchronized static <T> T first(Collection<T> data, String errorMsg) {
         T t = first(data);
         if (null == t) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, errorMsg);
@@ -303,7 +303,7 @@ public final class DataUtil {
      * @param data 链表
      * @return List中的第一个非空元素
      */
-    public static <T> T last(List<T> data) {
+    public synchronized static <T> T last(List<T> data) {
         if (data == null || data.size() == 0) {
             return null;
         }
@@ -317,7 +317,7 @@ public final class DataUtil {
      * @param data 数据流
      * @return Stream中的第一个非空元素
      */
-    public static <T> T last(Stream<T> data) {
+    public synchronized static <T> T last(Stream<T> data) {
         if (data == null) {
             return null;
         }
@@ -333,7 +333,7 @@ public final class DataUtil {
      * @return 转换后的list
      */
     @SafeVarargs
-    public static <T> List<T> asList(T... a) {
+    public synchronized static <T> List<T> asList(T... a) {
         if (null == a || a.length == 0) {
             return new ArrayList<>();
         }
@@ -352,7 +352,7 @@ public final class DataUtil {
      * @return 合并后的链表
      */
     @SuppressWarnings("unchecked")
-    public static <T> List<T> merge(List<T>... list) {
+    public synchronized static <T> List<T> merge(List<T>... list) {
         if (null == list) {
             return Collections.emptyList();
         }
@@ -374,7 +374,7 @@ public final class DataUtil {
      * @return 合并后的Set
      */
     @SuppressWarnings({"unchecked"})
-    public static <T> Set<T> merge(Set<T>... sets) {
+    public synchronized static <T> Set<T> merge(Set<T>... sets) {
         if (null == sets) {
             return Collections.emptySet();
         }
@@ -396,7 +396,7 @@ public final class DataUtil {
      * @return 转换后的Set
      */
     @SafeVarargs
-    public static <T> Set<T> asSet(T... a) {
+    public synchronized static <T> Set<T> asSet(T... a) {
         if (null == a || a.length == 0) {
             return new HashSet<>();
         }
@@ -414,7 +414,7 @@ public final class DataUtil {
      * @param end 截止数值(不包含该值)
      * @return 0开始到指定数值的链表
      */
-    public static List<Integer> intList(int end) {
+    public synchronized static List<Integer> intList(int end) {
         return intList(0, end);
     }
 
@@ -425,7 +425,7 @@ public final class DataUtil {
      * @param end   截止数值(不包含该值)
      * @return 0开始到指定数值的链表
      */
-    public static List<Integer> intList(int start, int end) {
+    public synchronized static List<Integer> intList(int start, int end) {
         List<Integer> list = new ArrayList<>(end - start);
         for (int i = 0; i < end; i++) {
             list.add(i);
@@ -441,7 +441,7 @@ public final class DataUtil {
      * @param <T>   数据类型
      * @return 链表为空或index超过容量时返回为null
      */
-    public static <T> T get(List<T> data, int index) {
+    public synchronized static <T> T get(List<T> data, int index) {
         if (null == data || data.size() <= index) {
             return null;
         }
@@ -456,7 +456,7 @@ public final class DataUtil {
      * @param <T>   数据类型
      * @return 数组为空或index超过容量时返回为null
      */
-    public static <T> T get(T[] data, int index) {
+    public synchronized static <T> T get(T[] data, int index) {
         if (null == data || data.length <= index) {
             return null;
         }

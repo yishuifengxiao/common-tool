@@ -1,6 +1,7 @@
 package com.yishuifengxiao.common.tool.collections;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -84,6 +85,9 @@ public final class MapUtil<K, V> {
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public synchronized static Map convert(@NotNull Map map, @NotNull Converter converter) {
+        if (null == map) {
+            return Collections.emptyMap();
+        }
         Map result = new HashMap(map.size());
         map.forEach((k, v) -> result.put(k, converter.convert(v)));
         return result;

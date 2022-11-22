@@ -44,11 +44,11 @@ public final class NumberUtil {
 	/**
 	 * 千值(1000)
 	 */
-	public static final BigDecimal THOUNSAND = BigDecimal.valueOf(1000);
+	public static final BigDecimal THOUSAND = BigDecimal.valueOf(1000);
 	/**
 	 * 万值(10000)
 	 */
-	public static final BigDecimal TEN_HUNDRED = BigDecimal.valueOf(10000);
+	public static final BigDecimal TEN_THOUSAND = BigDecimal.valueOf(10000);
 	/**
 	 * 亿值(100000000)
 	 */
