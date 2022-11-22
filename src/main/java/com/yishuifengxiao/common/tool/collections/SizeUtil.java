@@ -131,7 +131,8 @@ public final class SizeUtil {
      * @param collections 待判断的集合
      * @return 若全部为空集合或者null则返回为true, 否则为false
      */
-    public static boolean isAllEmpty(Collection... collections) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public static boolean isAllEmpty(Collection... collections) {
         if (null == collections) {
             return true;
         }

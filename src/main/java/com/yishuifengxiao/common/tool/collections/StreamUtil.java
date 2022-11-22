@@ -110,7 +110,8 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 替换元素之后的集合
      */
-    public synchronized static <T> List<T> replace(List<T> list, T t, Predicate<? super T> predicate) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public synchronized static <T> List<T> replace(List<T> list, T t, Predicate<? super T> predicate) {
         if (null == list) {
             list = new ArrayList<>();
         }
@@ -128,7 +129,8 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 替换元素之后的集合
      */
-    public synchronized static <T> Set<T> replace(Set<T> set, T t, Predicate<? super T> predicate) {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public synchronized static <T> Set<T> replace(Set<T> set, T t, Predicate<? super T> predicate) {
         if (null == set) {
             set = new HashSet<>();
         }

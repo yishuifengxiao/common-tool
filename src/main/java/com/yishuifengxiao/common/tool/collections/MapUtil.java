@@ -28,7 +28,8 @@ public final class MapUtil<K, V> {
      *
      * @return map工具类实例
      */
-    public synchronized static MapUtil map() {
+    @SuppressWarnings("rawtypes")
+	public synchronized static MapUtil map() {
         return new MapUtil();
     }
 
@@ -37,7 +38,8 @@ public final class MapUtil<K, V> {
      *
      * @return 最终需要的map数据
      */
-    public <K1 extends K, V1 extends V> Map build() {
+    @SuppressWarnings("rawtypes")
+	public <K1 extends K, V1 extends V> Map build() {
         return this.map;
     }
 
