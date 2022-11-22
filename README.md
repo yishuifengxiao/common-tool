@@ -27,7 +27,7 @@
 <dependency>
 	<groupId>com.yishuifengxiao.common</groupId>
 	<artifactId>common-tool</artifactId>
-	<version>3.15.2</version>
+	<version>3.16.0</version>
 </dependency>
 ```
 
