@@ -40,7 +40,7 @@ public final class CallbackUtil {
 	 *
 	 * @return 内置线程池
 	 */
-	public static ExecutorService getPool() {
+	public static ExecutorService pool() {
 		return POOL;
 	}
 
@@ -59,7 +59,7 @@ public final class CallbackUtil {
 	 * @param runnable 待执行的任务
 	 * @param complete 执行完成后的回调(不论成功还是失败都会触发)
 	 */
-	public static synchronized void execute(Runnable runnable, ExcuteComplete complete) {
+	public static synchronized void execute(Runnable runnable, ExecuteComplete complete) {
 		execute(runnable, complete, null);
 	}
 
@@ -69,7 +69,7 @@ public final class CallbackUtil {
 	 * @param runnable 待执行的任务
 	 * @param error    执行失败后触发的动作
 	 */
-	public static synchronized void execute(Runnable runnable, ExcuteError error) {
+	public static synchronized void execute(Runnable runnable, ExecuteError error) {
 		execute(runnable, null, error);
 	}
 
@@ -80,7 +80,7 @@ public final class CallbackUtil {
 	 * @param complete 执行完成后的回调(不论成功还是失败都会触发)
 	 * @param error    执行失败后触发的动作
 	 */
-	public static synchronized void execute(Runnable runnable, ExcuteComplete complete, ExcuteError error) {
+	public static synchronized void execute(Runnable runnable, ExecuteComplete complete, ExecuteError error) {
 		Assert.notNull("待执行的任务不能为空", runnable);
 		POOL.execute(() -> {
 			try {
@@ -128,7 +128,7 @@ public final class CallbackUtil {
 	 * @since 1.0.0
 	 */
 	@FunctionalInterface
-	public static interface ExcuteError {
+	public interface ExecuteError {
 
 		/**
 		 * 在执行失败时调用
@@ -150,7 +150,7 @@ public final class CallbackUtil {
 	 * @since 1.0.0
 	 */
 	@FunctionalInterface
-	public static interface ExcuteComplete {
+	public interface ExecuteComplete {
 
 		/**
 		 * 在执行完成时触发
