@@ -3,30 +3,21 @@
  */
 package com.yishuifengxiao.common.tool.io;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.MessageDigest;
-import java.util.Base64;
-
-import javax.validation.constraints.NotNull;
-
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.StreamUtils;
-
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.random.UID;
 import com.yishuifengxiao.common.tool.utils.Assert;
-
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StreamUtils;
+
+import javax.validation.constraints.NotNull;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.util.Base64;
+import java.util.stream.Collectors;
 
 /**
  * 文件处理工具
@@ -40,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * @since 1.0.0
  */
 @Slf4j
-public class FileUtil {
+public class IoUtil {
 
     /**
      * 获取文件的后缀名
@@ -111,6 +102,33 @@ public class FileUtil {
         } finally {
             CloseUtil.close(out, in);
         }
+    }
+
+    /**
+     * <p>使用默认的编码将输入流转为字符串</p>
+     * <p>默认的编码格式由<code>Charset.defaultCharset()</code>确定</p>
+     * @param in 输入流
+     * @param charsetName 编码格式
+     * @return 转换后的字符串
+     * @throws IOException 转换中发生异常
+     */
+    public synchronized static String inputStream2String(InputStream in, String charsetName) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(in, charsetName)) {
+            String result = new BufferedReader(reader).lines().collect(Collectors.joining(System.lineSeparator()));
+            return result;
+        }
+
+    }
+
+    /**
+     * <p>使用默认的编码将输入流转为字符串</p>
+     * <p>默认的编码格式由<code>Charset.defaultCharset()</code>确定</p>
+     * @param in 输入流
+     * @return 转换后的字符串
+     * @throws IOException 转换中发生异常
+     */
+    public synchronized static String inputStream2String(InputStream in) throws IOException {
+        return inputStream2String(in, Charset.defaultCharset().name());
     }
 
     /**

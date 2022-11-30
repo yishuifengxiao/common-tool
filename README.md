@@ -510,7 +510,7 @@ CloseUtil.close(inputStream, outputStream);
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.io.FileUtil
+com.yishuifengxiao.common.tool.io.IoUtil
 ```
 示例代码:
 ```java
@@ -535,7 +535,7 @@ String md5 = FileUtil.getMd5(file);
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.io.FileUtil
+com.yishuifengxiao.common.tool.io.IoUtil
 ```
 
 代码示例:
