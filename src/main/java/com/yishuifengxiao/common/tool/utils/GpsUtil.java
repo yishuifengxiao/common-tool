@@ -99,6 +99,7 @@ public final class GpsUtil {
 	 * @param lat2 B点纬度
 	 * @return 通过经纬度获取的距离(单位 ： 米)
 	 */
+	@SuppressWarnings("removal")
 	private static long getDistance(double lng1, double lat1, double lng2, double lat2, double earthRadius) {
 		double radLat1 = rad(lat1);
 		double radLat2 = rad(lat2);

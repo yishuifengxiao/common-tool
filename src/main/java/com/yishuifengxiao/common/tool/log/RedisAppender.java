@@ -262,6 +262,7 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 	/**
 	 * 初始化
 	 */
+	@SuppressWarnings("deprecation")
 	private void init() {
 		// <1> 创建单机连接的连接信息
 		Builder builder = RedisURI.builder().withHost(this.host.trim()).withPort(this.port())
