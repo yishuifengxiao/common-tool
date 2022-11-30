@@ -25,12 +25,16 @@
         </developer>
     </developers>
     <scm>
+        <!--需要打包项目的git地址-->
         <connection>
             scm:git:https://gitee.com/zhiyubujian/tool.git
         </connection>
+        <!--connection, developerConnection: 都是连接字符串，其中后者是具有write权限的scm连接 -->
+        <!--需要打包项目的git地址-->
         <developerConnection>
             scm:git:https://gitee.com/zhiyubujian/tool.git
         </developerConnection>
+        <!--release包需要放入的nexus或者其他maven release包的仓库url地址-->
         <url>https://gitee.com/zhiyubujian/tool/tree/master</url>
         <tag>v1.0.0</tag>
     </scm>
@@ -86,12 +90,6 @@
             <artifactId>commons-codec</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -105,6 +103,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -116,6 +115,7 @@
             <artifactId>hibernate-validator</artifactId>
             <optional>true</optional>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -147,11 +147,13 @@
             <artifactId>jsoup</artifactId>
             <version>${jsoup.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.dom4j</groupId>
             <artifactId>dom4j</artifactId>
             <version>${dom4j.version}</version>
         </dependency>
+
         <dependency>
             <groupId>jaxen</groupId>
             <artifactId>jaxen</artifactId>
@@ -244,6 +246,7 @@
                             <autoReleaseAfterClose>true</autoReleaseAfterClose>
                         </configuration>
                     </plugin>
+                    <!-- 发布插件 -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
