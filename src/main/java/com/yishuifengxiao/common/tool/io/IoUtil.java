@@ -66,13 +66,78 @@ public class IoUtil {
      * @param inputStream 输入流
      * @return 转换后的字节数组
      */
-    public synchronized static byte[] copyToByteArray(InputStream inputStream) {
+    public synchronized static byte[] inputStream2ByteArray(InputStream inputStream) {
         if (inputStream == null) {
             return new byte[0];
         }
         ByteArrayOutputStream out = new ByteArrayOutputStream(StreamUtils.BUFFER_SIZE);
         copy(inputStream, out);
         return out.toByteArray();
+    }
+
+
+    /**
+     * <p>使用默认的编码将输入流转为字符串</p>
+     * <p>默认的编码格式由<code>Charset.defaultCharset()</code>确定</p>
+     * @param in 输入流
+     * @param charsetName 编码格式
+     * @return 转换后的字符串
+     * @throws IOException 转换中发生异常
+     */
+    public synchronized static String inputStream2String(InputStream in, String charsetName) throws IOException {
+        try (InputStreamReader reader = new InputStreamReader(in, charsetName)) {
+            String result = new BufferedReader(reader).lines().collect(Collectors.joining(System.lineSeparator()));
+            return result;
+        }
+
+    }
+
+    /**
+     * <p>使用默认的编码将输入流转为字符串</p>
+     * <p>默认的编码格式由<code>Charset.defaultCharset()</code>确定</p>
+     * @param in 输入流
+     * @return 转换后的字符串
+     * @throws IOException 转换中发生异常
+     */
+    public synchronized static String inputStream2String(InputStream in) throws IOException {
+        return inputStream2String(in, Charset.defaultCharset().name());
+    }
+
+    /**
+     * <p>
+     * 将文件输入流保存为文件
+     * </p>
+     * <strong>线程安全</strong>
+     *
+     * @param inputStream 文件输入流
+     * @param file        待保存的目标文件
+     * @return 保存后的文件
+     */
+    public synchronized static File inputStream2File(@NotNull InputStream inputStream, @NotNull File file) {
+        try {
+            copy(inputStream, new FileOutputStream(file));
+        } catch (Exception e) {
+            throw new UncheckedException("文件转换失败，失败的原因为 " + e);
+        }
+        return file;
+    }
+
+    /**
+     * 将文件复制到输出流中
+     * @param file 待复制的文件
+     * @param out 输出流
+     * @return 复制失败返回为-1
+     */
+    public synchronized static int copy(File file, OutputStream out) {
+        if (null == file || null == out) {
+            return -1;
+        }
+        try {
+            return copy(new FileInputStream(file), out);
+        } catch (Throwable e) {
+            return -1;
+        }
+
     }
 
     /**
@@ -104,69 +169,6 @@ public class IoUtil {
         }
     }
 
-    /**
-     * <p>使用默认的编码将输入流转为字符串</p>
-     * <p>默认的编码格式由<code>Charset.defaultCharset()</code>确定</p>
-     * @param in 输入流
-     * @param charsetName 编码格式
-     * @return 转换后的字符串
-     * @throws IOException 转换中发生异常
-     */
-    public synchronized static String inputStream2String(InputStream in, String charsetName) throws IOException {
-        try (InputStreamReader reader = new InputStreamReader(in, charsetName)) {
-            String result = new BufferedReader(reader).lines().collect(Collectors.joining(System.lineSeparator()));
-            return result;
-        }
-
-    }
-
-    /**
-     * <p>使用默认的编码将输入流转为字符串</p>
-     * <p>默认的编码格式由<code>Charset.defaultCharset()</code>确定</p>
-     * @param in 输入流
-     * @return 转换后的字符串
-     * @throws IOException 转换中发生异常
-     */
-    public synchronized static String inputStream2String(InputStream in) throws IOException {
-        return inputStream2String(in, Charset.defaultCharset().name());
-    }
-
-    /**
-     * 将文件复制到输出流中
-     * @param file 待复制的文件
-     * @param out 输出流
-     * @return 复制失败返回为-1
-     */
-    public synchronized static int copy(File file, OutputStream out) {
-        if (null == file || null == out) {
-            return -1;
-        }
-        try {
-            return copy(new FileInputStream(file), out);
-        } catch (Throwable e) {
-            return -1;
-        }
-
-    }
-
-    /**
-     * <p>
-     * 将文件输入流保存为文件
-     * </p>
-     * <strong>线程安全</strong>
-     *
-     * @param inputStream 文件输入流
-     * @param file        待保存的目标文件
-     * @return 保存后的文件
-     */
-    public synchronized static File stream2File(@NotNull InputStream inputStream, @NotNull File file) {
-        try {
-            copy(inputStream, new FileOutputStream(file));
-        } catch (Exception e) {
-            throw new UncheckedException("文件转换失败，失败的原因为 " + e);
-        }
-        return file;
-    }
 
     /**
      * <p>
