@@ -29,7 +29,7 @@ public final class MapUtil<K, V> {
      * @return map工具类实例
      */
     @SuppressWarnings("rawtypes")
-	public synchronized static MapUtil map() {
+    public synchronized static MapUtil map() {
         return new MapUtil();
     }
 
@@ -39,7 +39,7 @@ public final class MapUtil<K, V> {
      * @return 最终需要的map数据
      */
     @SuppressWarnings("rawtypes")
-	public <K1 extends K, V1 extends V> Map build() {
+    public <K1 extends K, V1 extends V> Map build() {
         return this.map;
     }
 
@@ -73,42 +73,5 @@ public final class MapUtil<K, V> {
         return this;
     }
 
-    /**
-     * <p>
-     * 将源map转换为目标map
-     * </p>
-     * <p>
-     * 在转换时map的key保持不变，但是key对应的值发生变化(或者不变)
-     * </p>
-     *
-     * @param map       待转换的map
-     * @param converter 数据转换器
-     * @return 转换后的目标map
-     */
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public synchronized static Map convert(@NotNull Map map, @NotNull Converter converter) {
-        if (null == map) {
-            return Collections.emptyMap();
-        }
-        Map result = new HashMap(map.size());
-        map.forEach((k, v) -> result.put(k, converter.convert(v)));
-        return result;
-    }
-
-    /**
-     * 数据转换器
-     *
-     * @param <S> 输入数据类型
-     * @param <R> 输出数据类型
-     */
-    public interface Converter<S, R> {
-        /**
-         * 将输入数据转换为输出数据
-         *
-         * @param s 输入数据
-         * @return 转换后的输出数据
-         */
-        R convert(S s);
-    }
 
 }

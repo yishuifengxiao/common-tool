@@ -57,6 +57,22 @@ public class IoUtil {
         return StringUtils.isNotBlank(suffix) ? suffix.toLowerCase().trim() : null;
     }
 
+
+    /**
+     * <p>
+     * 将文件转换为字节数组
+     * </p>
+     * <strong>线程安全</strong>
+     *
+     * @param file 待转换的文件
+     * @return 转换后的字节数组
+     */
+    public synchronized static byte[] file2ByteArray(File file) throws IOException {
+        try (FileInputStream inputStream = new FileInputStream(file)) {
+            return inputStream2ByteArray(inputStream);
+        }
+    }
+
     /**
      * <p>
      * 将输入流转换为字节数组
