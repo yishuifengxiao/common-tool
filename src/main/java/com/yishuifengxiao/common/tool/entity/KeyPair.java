@@ -12,6 +12,10 @@ import java.io.Serializable;
 public class KeyPair<K, V> implements Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = 6141567080605609052L;
+	/**
      * 数据的键
      */
     private K key;
@@ -52,7 +56,7 @@ public class KeyPair<K, V> implements Serializable {
      * @param key 键值对数据的key
      * @return 当前实例
      */
-    public KeyPair setKey(K key) {
+    public KeyPair<K, V> setKey(K key) {
         this.key = key;
         return this;
     }
@@ -72,7 +76,7 @@ public class KeyPair<K, V> implements Serializable {
      * @param val 键值对数据的值
      * @return 当前实例
      */
-    public KeyPair setVal(V val) {
+    public KeyPair<K, V> setVal(V val) {
         this.val = val;
         return this;
     }

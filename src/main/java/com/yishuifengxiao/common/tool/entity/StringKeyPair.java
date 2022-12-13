@@ -11,15 +11,22 @@ import java.io.Serializable;
  * @version 1.0.0
  * @since 1.0.0
  */
+@SuppressWarnings("rawtypes")
 public class StringKeyPair<T> extends KeyPair implements Serializable {
 
     /**
+	 * 
+	 */
+	private static final long serialVersionUID = -5795495851726526435L;
+
+	/**
      * 全参构造函数
      *
      * @param key 键值对的key
      * @param val 键值对的值
      */
-    public StringKeyPair(String key, T val) {
+    @SuppressWarnings("unchecked")
+	public StringKeyPair(String key, T val) {
         super(key, val);
     }
 
@@ -34,7 +41,8 @@ public class StringKeyPair<T> extends KeyPair implements Serializable {
         return null != super.getKey() ? super.getKey().toString() : null;
     }
 
-    public StringKeyPair<T> setKey(String key) {
+    @SuppressWarnings("unchecked")
+	public StringKeyPair<T> setKey(String key) {
         super.setKey(key);
         return this;
     }
