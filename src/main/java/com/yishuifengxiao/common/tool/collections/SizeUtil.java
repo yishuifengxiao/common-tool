@@ -73,6 +73,7 @@ public final class SizeUtil {
 
     }
 
+
     /**
      * 判断分页对象是否不为空
      *
@@ -131,8 +132,8 @@ public final class SizeUtil {
      * @param collections 待判断的集合
      * @return 若全部为空集合或者null则返回为true, 否则为false
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-	public static boolean isAllEmpty(Collection... collections) {
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static boolean isAllEmpty(Collection... collections) {
         if (null == collections) {
             return true;
         }
@@ -144,6 +145,37 @@ public final class SizeUtil {
 
         return true;
     }
+
+    /**
+     * 是否有一个集合为空或null
+     * @param collections 待判断的集合
+     * @return 只要有一个集合为空或者null则返回为true, 否则为false
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static boolean isAnyEmpty(Collection... collections) {
+        for (Collection collection : collections) {
+            if (isEmpty(collection)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 是否所有的集合均不为空或者null
+     * @param collections 待判断的集合
+     * @return 只要有一个集合为空或者null则返回为true, 否则为false
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static boolean isNoneEmpty(Collection... collections) {
+        for (Collection collection : collections) {
+            if (isEmpty(collection)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     /**
      * 判断集合是否不为空
