@@ -6,6 +6,12 @@ import io.swagger.annotations.ApiModelProperty;
 /**
  * <p>布尔类型替代枚举</p>
  * <p>用于替换<code>Boolean</code>的使用，方便在灵活业务场景下进行功能扩展</p>
+ * <p>在简明意义上的对应关系如下</p>
+ * <ul>
+ *     <li>数字1  ======= 布尔true </li>
+ *     <li>数字0  ======= 布尔false </li>
+ *     <li>数字-1 ======= 布尔null </li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -139,6 +145,26 @@ public enum BoolStat {
             return BoolStat.Null;
         }
         return bool ? BoolStat.True : BoolStat.False;
+    }
+
+    /**
+     * 是否为true值对应的编码
+     *
+     * @param code 编码
+     * @return 若为true值对应的编码则返回为true, 否则为false
+     */
+    public static boolean isTrue(Integer code) {
+        return null != code && code == 1;
+    }
+
+    /**
+     * 是否为false值对应的编码
+     *
+     * @param code 编码
+     * @return 若为false值对应的编码则返回为true, 否则为false
+     */
+    public static boolean isFalse(Integer code) {
+        return null != code && code == 0;
     }
 
 

@@ -139,6 +139,34 @@ public class IoUtil {
     }
 
     /**
+     * <p>读取classpath目录下的资源文本</p>
+     * <p style="color:yellow">这里使用了系统默认的编码</p>
+     * <p>返回用于读取指定资源的输入流文本,getResource（String）文档中描述了搜索顺序。
+     * 命名模块中的资源受Module.getResourceAsStream指定的封装规则约束。此外，除了资源的名称以“.class”结尾的特殊情况外，此方法仅在无条件打开包时在命名模块的包中查找资源。</p>
+     * @param clazz 命名模块中的资源所在的类
+     * @param name  The resource name
+     * @return 对应的编码文本
+     * @throws IOException
+     */
+    public synchronized static <T> String readResourceAsString(Class<T> clazz, String name) throws IOException {
+        return readResourceAsString(clazz, name, Charset.defaultCharset().name());
+    }
+
+    /**
+     * <p>读取classpath目录下的资源文本</p>
+     * <p>返回用于读取指定资源的输入流文本,getResource（String）文档中描述了搜索顺序。
+     * 命名模块中的资源受Module.getResourceAsStream指定的封装规则约束。此外，除了资源的名称以“.class”结尾的特殊情况外，此方法仅在无条件打开包时在命名模块的包中查找资源。</p>
+     * @param clazz 命名模块中的资源所在的类
+     * @param name  The resource name
+     * @param charsetName 字符串编码
+     * @return 对应的编码文本
+     * @throws IOException
+     */
+    public synchronized static <T> String readResourceAsString(Class<T> clazz, String name, String charsetName) throws IOException {
+        return inputStream2String(clazz.getClassLoader().getResourceAsStream(name), charsetName);
+    }
+
+    /**
      * 将文件复制到输出流中
      * @param file 待复制的文件
      * @param out 输出流
