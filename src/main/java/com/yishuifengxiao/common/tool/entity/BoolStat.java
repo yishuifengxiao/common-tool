@@ -72,10 +72,12 @@ public enum BoolStat {
 
     /**
      * <p>将数字值转换为枚举值</p>
-     * <ul>转换规则如下</ul>
+     * <p>转换规则如下</p>
+     * <ul>
      * <li> code为0时转换为枚举值False</li>
      * <li> code为1时转换为枚举值True</li>
      * <li>  code为其他值时转换为枚举值Null</li>
+     * </ul>
      *
      * @param code 数字值
      * @return 转换后的值
@@ -94,11 +96,13 @@ public enum BoolStat {
 
     /**
      * <p>将数字值转换为枚举值</p>
-     * <ul>转换规则如下</ul>
+     * <p>转换规则如下</p>
+     * <ul>
      * <li> code为0时转换为枚举值False</li>
      * <li> code为1时转换为枚举值True</li>
      * <li> code为-1时转换为枚举值Null</li>
      * <li> code为其他值时转换为枚举值Null</li>
+     * </ul>
      *
      * @param code 数字值
      * @return 转换后的值
@@ -119,9 +123,11 @@ public enum BoolStat {
 
     /**
      * <p><span style="color:yellow">使用两极法</span><span>将数字值转换为Boolean值</span></p>
-     * <ul>转换规则如下</ul>
+     * <p>转换规则如下</p>
+     * <ul>
      * <li> code大于1时转换为枚举值True</li>
      * <li> code为其他值时转换为枚举值False</li>
+     * </ul>
      *
      * @param code 数字值
      * @return 转换后的值
@@ -132,10 +138,13 @@ public enum BoolStat {
 
     /**
      * <p>将布尔值值转换为枚举值</p>
-     * <ul>转换规则如下</ul>
+     * <p>转换规则如下
+     * </p>
+     * <ul>
      * <li> bool为false时转换为枚举值False</li>
      * <li> code为true时转换为枚举值True</li>
      * <li> code为其他值时转换为枚举值Null</li>
+     * </ul>
      *
      * @param bool 布尔值
      * @return 转换后的值

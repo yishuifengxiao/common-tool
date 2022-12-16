@@ -8,14 +8,12 @@ import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.random.UID;
 import com.yishuifengxiao.common.tool.utils.Assert;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StreamUtils;
 
 import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
@@ -291,35 +289,5 @@ public class IoUtil {
 
     }
 
-    /**
-     * <p>
-     * 计算一个文件的MD5值
-     * </p>
-     * <strong>线程安全</strong>
-     *
-     * @param file 待计算的文件
-     * @return 文件的MD5值(32位小写)
-     */
-    public synchronized static String md5(File file) {
-        if (null == file) {
-            return null;
-        }
-        FileInputStream inputStream = null;
-        try {
-            MessageDigest md5 = MessageDigest.getInstance("MD5");
-            inputStream = new FileInputStream(file);
-            byte[] buffer = new byte[8192];
-            int length;
-            while ((length = inputStream.read(buffer)) != -1) {
-                md5.update(buffer, 0, length);
-            }
-            return new String(Hex.encodeHex(md5.digest()));
-        } catch (Exception e) {
-            log.info("计算文件{}的md5值时出现问题{}", file, e.getMessage());
-            return null;
-        } finally {
-            CloseUtil.close(inputStream);
-        }
-    }
 
 }
