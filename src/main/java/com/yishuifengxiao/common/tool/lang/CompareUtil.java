@@ -1,10 +1,10 @@
 package com.yishuifengxiao.common.tool.lang;
 
+import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
-
-import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
 
 /**
  * <p>
@@ -125,7 +125,7 @@ public class CompareUtil {
         if (null == endValue) {
             endValue = 0;
         }
-        return compareValue >= startValue && compareValue <= endValue;
+        return lte(compareValue, startValue) && lte(compareValue, endValue);
     }
 
     /**

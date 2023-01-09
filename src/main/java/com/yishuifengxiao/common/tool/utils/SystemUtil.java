@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+
 /**
  * 系统工具类
  *
@@ -378,5 +380,35 @@ public final class SystemUtil {
         }
 
 
+    }
+
+    /**
+     * 抛出一个运行时异常
+     *
+     * @param msg 异常信息
+     */
+    public static void throwException(String msg) {
+        throw new UncheckedException(msg);
+    }
+
+    /**
+     * 抛出一个运行时异常
+     *
+     * @param msg 异常信息
+     * @param e   异常原因
+     */
+    public static void throwException(String msg, Throwable e) {
+        throw new UncheckedException(msg, e);
+    }
+
+    /**
+     * 抛出一个运行时异常
+     *
+     * @param msg     异常信息
+     * @param e       异常原因
+     * @param context 异常原因
+     */
+    public static void throwException(String msg, Throwable e, Object context) {
+        throw new UncheckedException(msg, e).setContext(context);
     }
 }
