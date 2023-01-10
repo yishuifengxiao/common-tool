@@ -1,20 +1,19 @@
 package com.yishuifengxiao.common.tool.utils;
 
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import com.yishuifengxiao.common.tool.collections.SizeUtil;
-import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.lang.CompareUtil;
 import com.yishuifengxiao.common.tool.lang.NumberUtil;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * <p>断言工具</p>
@@ -859,6 +858,37 @@ public final class Assert {
         if (SizeUtil.onlyOneElement(data)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
+    }
+
+
+    /**
+     * 抛出一个运行时异常
+     *
+     * @param msg 异常信息
+     */
+    public static void throwException(String msg) {
+        throw new UncheckedException(msg);
+    }
+
+    /**
+     * 抛出一个运行时异常
+     *
+     * @param msg 异常信息
+     * @param e   异常原因
+     */
+    public static void throwException(String msg, Throwable e) {
+        throw new UncheckedException(msg, e);
+    }
+
+    /**
+     * 抛出一个运行时异常
+     *
+     * @param msg     异常信息
+     * @param e       异常原因
+     * @param context 异常原因
+     */
+    public static void throwException(String msg, Throwable e, Object context) {
+        throw new UncheckedException(msg, e).setContext(context);
     }
 
 }

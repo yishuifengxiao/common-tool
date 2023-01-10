@@ -33,6 +33,8 @@ public class SensitiveSerialize extends JsonSerializer<Object> implements Contex
 
     /**
      * 构造函数
+     *
+     * @param type 敏感信息枚举类型
      */
     public SensitiveSerialize(final SensitiveEnum type) {
         this.type = type;

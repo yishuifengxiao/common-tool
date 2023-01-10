@@ -2,7 +2,6 @@ package com.yishuifengxiao.common.tool.entity;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * <p>布尔类型替代枚举</p>
@@ -179,27 +178,6 @@ public enum BoolStat {
      */
     public static boolean isFalse(Integer code) {
         return null != code && code == 0;
-    }
-
-
-    /**
-     * <p>是否为true值对应的文本值</p>
-     *
-     * @param text 编码
-     * @return 若传入的数据为字符串true(不区分大小写)返回为true, 否则返回false
-     */
-    public static boolean isTrue(String text) {
-        return StringUtils.equalsIgnoreCase("true", text);
-    }
-
-    /**
-     * <p>是否为false值对应的文本值</p>
-     *
-     * @param text 编码
-     * @return 若传入的数据为字符串false(不区分大小写)返回为true, 否则返回false
-     */
-    public static boolean isFalse(String text) {
-        return StringUtils.equalsIgnoreCase("false", text);
     }
 
 

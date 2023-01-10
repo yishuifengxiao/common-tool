@@ -30,9 +30,12 @@ public final class MapUtil<K, V> {
         return new MapUtil();
     }
 
+
     /**
      * 输出最终需要的map数据
      *
+     * @param <K1> Key的数据类型
+     * @param <V1> 值得数据类型
      * @return 最终需要的map数据
      */
     @SuppressWarnings("rawtypes")

@@ -3,31 +3,18 @@
  */
 package com.yishuifengxiao.common.tool.io;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.util.Base64;
-import java.util.stream.Collectors;
-
-import javax.validation.constraints.NotNull;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.StreamUtils;
-
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.random.UID;
 import com.yishuifengxiao.common.tool.utils.Assert;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StreamUtils;
+
+import javax.validation.constraints.NotNull;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Base64;
+import java.util.stream.Collectors;
 
 /**
  * 文件处理工具
@@ -75,6 +62,7 @@ public class IoUtil {
      *
      * @param file 待转换的文件
      * @return 转换后的字节数组
+     * @throws IOException 转换时出现问题
      */
     public synchronized static byte[] file2ByteArray(File file) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(file)) {
@@ -154,8 +142,9 @@ public class IoUtil {
      * 命名模块中的资源受Module.getResourceAsStream指定的封装规则约束。此外，除了资源的名称以“.class”结尾的特殊情况外，此方法仅在无条件打开包时在命名模块的包中查找资源。</p>
      * @param clazz 命名模块中的资源所在的类
      * @param name  The resource name
+     * @param <T>       元素类型
      * @return 对应的编码文本
-     * @throws IOException
+     * @throws IOException 读取时出现问题
      */
     public synchronized static <T> String readResourceAsString(Class<T> clazz, String name) throws IOException {
         return readResourceAsString(clazz, name, Charset.defaultCharset().name());
@@ -168,8 +157,9 @@ public class IoUtil {
      * @param clazz 命名模块中的资源所在的类
      * @param name  The resource name
      * @param charsetName 字符串编码
+     * @param <T>       元素类型
      * @return 对应的编码文本
-     * @throws IOException
+     * @throws IOException 读取时出现问题
      */
     public synchronized static <T> String readResourceAsString(Class<T> clazz, String name, String charsetName) throws IOException {
         return inputStream2String(clazz.getClassLoader().getResourceAsStream(name), charsetName);
