@@ -153,8 +153,8 @@ public class BoolUtil {
      *     <li>其他值时返回为null</li>
      * </ul>
      *
-     * @param number
-     * @return
+     * @param number 待转换的数字
+     * @return 转换后的布尔值
      */
     public static BoolStat bool(Number number) {
         if (null == number) {
