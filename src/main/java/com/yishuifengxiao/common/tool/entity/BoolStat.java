@@ -1,7 +1,10 @@
 package com.yishuifengxiao.common.tool.entity;
 
+import com.yishuifengxiao.common.tool.lang.BoolUtil;
+import com.yishuifengxiao.common.tool.lang.CompareUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.BooleanUtils;
 
 /**
  * <p>布尔类型替代枚举</p>
@@ -54,14 +57,43 @@ public enum BoolStat {
         return this.code;
     }
 
+
     /**
-     * 获取枚举值对应的布尔值
+     * 枚举状态值是否对应的布尔值true
      *
-     * @return 枚举值对应的布尔值
+     * @return 若枚举状态值对应的布尔值true则返回为true, 否则为false
      */
-    public Boolean bool() {
-        return this.bool;
+    public boolean isTrue() {
+        return BooleanUtils.isTrue(this.bool);
     }
+
+    /**
+     * 枚举状态值是否不对应的布尔值true
+     *
+     * @return 若枚举状态值不对应的布尔值true则返回为true, 否则为false
+     */
+    public boolean isNotTrue() {
+        return BooleanUtils.isNotTrue(this.bool);
+    }
+
+    /**
+     * 枚举状态值是否对应的布尔值false
+     *
+     * @return 若枚举状态值对应的布尔值false则返回为true, 否则为false
+     */
+    public boolean isFalse() {
+        return BooleanUtils.isFalse(this.bool);
+    }
+
+    /**
+     * 枚举状态值是否不对应的布尔值false
+     *
+     * @return 若枚举状态值不对应的布尔值false则返回为true, 否则为false
+     */
+    public boolean isNotFalse() {
+        return BooleanUtils.isNotFalse(this.bool);
+    }
+
 
     /**
      * 构造函数
@@ -74,91 +106,6 @@ public enum BoolStat {
         this.bool = bool;
     }
 
-    /**
-     * <p>将数字值转换为枚举值</p>
-     * <p>转换规则如下</p>
-     * <ul>
-     * <li> code为0时转换为枚举值False</li>
-     * <li> code为1时转换为枚举值True</li>
-     * <li>  code为其他值时转换为枚举值Null</li>
-     * </ul>
-     *
-     * @param code 数字值
-     * @return 转换后的值
-     */
-    public static BoolStat code(Integer code) {
-        if (null == code) {
-            return BoolStat.Null;
-        } else if (1 == code) {
-            return BoolStat.True;
-        } else if (0 == code) {
-            return BoolStat.True;
-        } else {
-            return BoolStat.Null;
-        }
-    }
-
-    /**
-     * <p>将数字值转换为枚举值</p>
-     * <p>转换规则如下</p>
-     * <ul>
-     * <li> code为0时转换为枚举值False</li>
-     * <li> code为1时转换为枚举值True</li>
-     * <li> code为-1时转换为枚举值Null</li>
-     * <li> code为其他值时转换为枚举值Null</li>
-     * </ul>
-     *
-     * @param code 数字值
-     * @return 转换后的值
-     */
-    public static BoolStat of(Integer code) {
-        if (null == code) {
-            return null;
-        } else if (1 == code) {
-            return BoolStat.True;
-        } else if (0 == code) {
-            return BoolStat.True;
-        } else if (-1 == code) {
-            return BoolStat.Null;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * <p><span style="color:yellow">使用两极法</span><span>将数字值转换为Boolean值</span></p>
-     * <p>转换规则如下</p>
-     * <ul>
-     * <li> code大于1时转换为枚举值True</li>
-     * <li> code为其他值时转换为枚举值False</li>
-     * </ul>
-     *
-     * @param code 数字值
-     * @return 转换后的值
-     */
-    public static BoolStat twoBipolar(Integer code) {
-        return null != code && code > 0 ? BoolStat.True : BoolStat.False;
-    }
-
-    /**
-     * <p>将布尔值值转换为枚举值</p>
-     * <p>转换规则如下
-     * </p>
-     * <ul>
-     * <li> bool为false时转换为枚举值False</li>
-     * <li> code为true时转换为枚举值True</li>
-     * <li> code为其他值时转换为枚举值Null</li>
-     * </ul>
-     *
-     * @param bool 布尔值
-     * @return 转换后的值
-     */
-    public static BoolStat bool(Boolean bool) {
-        if (null == bool) {
-            return BoolStat.Null;
-        }
-        return bool ? BoolStat.True : BoolStat.False;
-    }
 
     /**
      * 是否为true值对应的编码
@@ -181,4 +128,165 @@ public enum BoolStat {
     }
 
 
+    /**
+     * <p>是否为true值</p>
+     *
+     * @param stat 布尔对象值
+     * @return 若传入的是布尔对象值对应的true则返回为true, 否则为false
+     */
+    public static boolean isTrue(BoolStat stat) {
+        return null != stat && BoolStat.True == stat;
+    }
+
+    /**
+     * <p>是否不为true值</p>
+     *
+     * @param stat 布尔对象值
+     * @return 若传入的不是布尔对象值对应的true则返回为true, 否则为false
+     */
+    public static boolean isNotTrue(BoolStat stat) {
+        return !isTrue(stat);
+    }
+
+    /**
+     * <p>是否为false值</p>
+     *
+     * @param stat 布尔对象值
+     * @return 若传入的是布尔对象值对应的false则返回为true, 否则为false
+     */
+    public static boolean isFalse(BoolStat stat) {
+        return null != stat && BoolStat.False == stat;
+    }
+
+    /**
+     * <p>是否为false值</p>
+     *
+     * @param stat 布尔对象值
+     * @return 若传入的不是布尔对象值对应的false则返回为true, 否则为false
+     */
+    public static boolean isNotFalse(BoolStat stat) {
+        return !isFalse(stat);
+    }
+
+    /**
+     * <p>将数字转换为布尔值</p>
+     * <p>转换规则如下：</p>
+     * <ul>
+     *     <li>数据大于0时返回为True</li>
+     *     <li>数据小于或等于0时返回为False</li>
+     *     <li>其他值时返回为null</li>
+     * </ul>
+     *
+     * @param number 待转换的数字
+     * @return 转换后的布尔值
+     */
+    public static BoolStat of(Number number) {
+        if (null == number) {
+            return BoolStat.Null;
+        }
+        return CompareUtil.gt(number, 0) ? BoolStat.True : BoolStat.False;
+    }
+
+    /**
+     * <p>将布尔值值转换为枚举值</p>
+     * <p>转换规则如下
+     * </p>
+     * <ul>
+     * <li> bool为false时转换为枚举值False</li>
+     * <li> bool为true时转换为枚举值True</li>
+     * <li> bool为其他值时转换为枚举值Null</li>
+     * </ul>
+     *
+     * @param bool 布尔值
+     * @return 转换后的值
+     */
+    public static BoolStat of(Boolean bool) {
+        if (null == bool) {
+            return BoolStat.Null;
+        }
+        return bool ? BoolStat.True : BoolStat.False;
+    }
+
+
+    /**
+     * <p>将数字转换为布尔值</p>
+     * <p>转换规则如下：</p>
+     * <ul>
+     *     <li>数据大于0时返回为True</li>
+     *     <li>其他值时返回为False</li>
+     * </ul>
+     *
+     * @param number 待转换的数字
+     * @return 转换后的布尔值
+     */
+    public static BoolStat twoState(Number number) {
+        if (null == number || CompareUtil.lte(number, 0)) {
+            return BoolStat.False;
+        }
+        return BoolStat.True;
+    }
+
+    /**
+     * <p>将数字转换为布尔值</p>
+     * <p>转换规则如下：</p>
+     * <ul>
+     *     <li>数据大于0时返回为True</li>
+     *     <li>数据等于0时返回为False</li>
+     *     <li>其他值时返回为False</li>
+     * </ul>
+     *
+     * @param number 待转换的数字
+     * @return 转换后的布尔值
+     */
+    public static BoolStat tristate(Number number) {
+        if (null == number) {
+            return BoolStat.Null;
+        }
+        if (CompareUtil.gt(number, 0)) {
+            return BoolStat.True;
+        } else if (CompareUtil.lt(number, 0)) {
+            return BoolStat.Null;
+        } else {
+            return BoolStat.False;
+        }
+
+    }
+
+
+    /**
+     * <p>将数据转换为布尔类型替代枚举</p>
+     * <p>转换规则如下</p>
+     * <ul>
+     *     <li>当内容为文本 true(忽略大小写和空格)时返回为枚举值True</li>
+     *     <li>当内容为文本 false(忽略大小写和空格)时返回为枚举值False</li>
+     *     <li>文本可以转换为数字，且数字大于0时返回为枚举值True</li>
+     *     <li>文本可以转换为数字，且数字小于0或等于时返回为枚举值False</li>
+     *     <li>其他情况下返回为枚举值NUll</li>
+     * </ul>
+     *
+     * @param value 待判断的内容
+     * @return 转换后的值
+     */
+    public static BoolStat parse(Object value) {
+        if (null == value) {
+            return BoolStat.Null;
+        }
+        Boolean val = BoolUtil.parse(value);
+        if (null == val) {
+            return BoolStat.Null;
+        }
+        return val ? BoolStat.True : BoolStat.False;
+    }
+
+    /**
+     * 将状态值转换成数字
+     *
+     * @param bool     待判断的状态值
+     * @param trueVal  状态值为true时返回的值
+     * @param falseVal 状态值不为true时返回的值
+     * @return 转换后的值
+     */
+    public static Number bool2Int(BoolStat bool, Number trueVal, Number falseVal) {
+        return isTrue(bool) ? trueVal : falseVal;
+    }
 }
