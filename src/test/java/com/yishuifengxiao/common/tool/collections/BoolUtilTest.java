@@ -1,6 +1,8 @@
 package com.yishuifengxiao.common.tool.collections;
 
 import com.yishuifengxiao.common.tool.entity.BoolStat;
+import com.yishuifengxiao.common.tool.lang.CompareUtil;
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -19,7 +21,10 @@ public class BoolUtilTest {
         System.out.println(bool);
     }
 
-    public void test02(){
-        System.out.println(BoolStat.False.toString());
+    @Test
+    public void test03() {
+        System.out.println(CompareUtil.equals(0.1F, 0.1D));
+        System.out.println(CompareUtil.equals(0.1F, 0.1F));
+        System.out.println(CompareUtil.equals(NumberUtil.parse("0.1"), NumberUtil.parse("0.1")));
     }
 }

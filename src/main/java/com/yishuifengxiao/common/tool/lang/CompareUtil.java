@@ -433,7 +433,7 @@ public class CompareUtil {
         if (null == v2) {
             return true;
         }
-        return new BigDecimal(v1.doubleValue()).compareTo(new BigDecimal(v2.doubleValue())) > 0;
+        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) > 0;
     }
 
     /**
@@ -450,7 +450,7 @@ public class CompareUtil {
         if (null == v2) {
             return true;
         }
-        return new BigDecimal(v1.doubleValue()).compareTo(new BigDecimal(v2.doubleValue())) >= 0;
+        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) >= 0;
     }
 
     /**
@@ -467,7 +467,7 @@ public class CompareUtil {
         if (null == v2) {
             return false;
         }
-        return new BigDecimal(v1.doubleValue()).compareTo(new BigDecimal(v2.doubleValue())) < 0;
+        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) < 0;
     }
 
     /**
@@ -484,8 +484,25 @@ public class CompareUtil {
         if (null == v2) {
             return false;
         }
-        return new BigDecimal(v1.doubleValue()).compareTo(new BigDecimal(v2.doubleValue())) <= 0;
+        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) <= 0;
     }
 
+    /**
+     * <p>判断两个数据是否相等</p>
+     * <p style="color:yellow">
+     * 若输入的值为null或非数字类型直接返回为false
+     * </p>
+     *
+     * @param originalValue 原始值，如果原始值为null直接返回为 false
+     * @param value         被比较值
+     * @return 如果两个值相等返回为true, 否则为false
+     */
+    public static boolean equals(Number originalValue, Number value) {
+        if (null == originalValue || null == value) {
+            return false;
+        }
+
+        return new BigDecimal(originalValue.toString()).compareTo(new BigDecimal(value.toString())) == 0;
+    }
 
 }

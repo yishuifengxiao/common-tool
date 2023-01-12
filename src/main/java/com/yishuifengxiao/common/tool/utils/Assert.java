@@ -285,7 +285,7 @@ public final class Assert {
      * @param value         比较值
      */
     public static void equal(String msg, Integer originalValue, Integer value) {
-        if (!NumberUtil.equals(originalValue, value)) {
+        if (!CompareUtil.equals(originalValue, value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -301,7 +301,7 @@ public final class Assert {
      * @param value         比较值
      */
     public static void equal(String msg, Long originalValue, Long value) {
-        if (!NumberUtil.equals(originalValue, value)) {
+        if (!CompareUtil.equals(originalValue, value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -330,7 +330,7 @@ public final class Assert {
      * @param value         需要被比较的值
      */
     public static void notEquals(String msg, Integer originalValue, Integer value) {
-        if (NumberUtil.equals(originalValue, value)) {
+        if (CompareUtil.equals(originalValue, value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -343,7 +343,7 @@ public final class Assert {
      * @param value         需要被比较的值
      */
     public static void notEquals(String msg, Long originalValue, Long value) {
-        if (NumberUtil.equals(originalValue, value)) {
+        if (CompareUtil.equals(originalValue, value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }

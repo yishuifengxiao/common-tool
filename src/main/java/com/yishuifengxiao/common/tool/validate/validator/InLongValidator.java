@@ -1,10 +1,10 @@
 package com.yishuifengxiao.common.tool.validate.validator;
 
+import com.yishuifengxiao.common.tool.lang.CompareUtil;
+import com.yishuifengxiao.common.tool.validate.InLong;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
-import com.yishuifengxiao.common.tool.lang.NumberUtil;
-import com.yishuifengxiao.common.tool.validate.InLong;
 
 /**
  * <p>
@@ -35,7 +35,7 @@ public class InLongValidator implements ConstraintValidator<InLong, Long> {
 		boolean contain = false;
 		if (null != values) {
 			for (long val : values) {
-				if (NumberUtil.equals(value, val)) {
+				if (CompareUtil.equals(value, val)) {
 					contain = true;
 					break;
 				}

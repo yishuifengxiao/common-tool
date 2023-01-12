@@ -1,10 +1,10 @@
 package com.yishuifengxiao.common.tool.validate.validator;
 
+import com.yishuifengxiao.common.tool.lang.CompareUtil;
+import com.yishuifengxiao.common.tool.validate.InBool;
+
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-
-import com.yishuifengxiao.common.tool.lang.NumberUtil;
-import com.yishuifengxiao.common.tool.validate.InBool;
 
 /**
  * <p>
@@ -31,7 +31,7 @@ public class InBoolValidator implements ConstraintValidator<InBool, Integer> {
 			return false;
 		}
 
-		return NumberUtil.equals(value, 1) || NumberUtil.equals(value, 0);
+		return CompareUtil.equals(value, 1) || CompareUtil.equals(value, 0);
 	}
 
 }

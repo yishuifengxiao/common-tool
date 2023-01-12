@@ -81,7 +81,7 @@ public final class NumberUtil {
         if (null == value) {
             return false;
         }
-        return BigDecimal.valueOf(value.doubleValue()).compareTo(ZERO) >= 0;
+        return new BigDecimal(value.toString()).compareTo(ZERO) >= 0;
     }
 
     /**
@@ -97,7 +97,7 @@ public final class NumberUtil {
         if (null == value) {
             return false;
         }
-        return BigDecimal.valueOf(value.doubleValue()).compareTo(ZERO) > 0;
+        return new BigDecimal(value.toString()).compareTo(ZERO) > 0;
     }
 
     /**
@@ -113,7 +113,7 @@ public final class NumberUtil {
         if (null == value) {
             return false;
         }
-        return BigDecimal.valueOf(value.doubleValue()).compareTo(ZERO) <= 0;
+        return new BigDecimal(value.toString()).compareTo(ZERO) <= 0;
     }
 
     /**
@@ -129,26 +129,25 @@ public final class NumberUtil {
         if (null == value) {
             return false;
         }
-        return BigDecimal.valueOf(value.doubleValue()).compareTo(ZERO) < 0;
+        return new BigDecimal(value.toString()).compareTo(ZERO) < 0;
     }
 
     /**
-     * <p>判断两个数据是否相等</p>
+     * <p>判断输入值是否等于0</p>
      * <p style="color:yellow">
      * 若输入的值为null或非数字类型直接返回为false
      * </p>
      *
-     * @param originalValue 原始值，如果原始值为null直接返回为 false
-     * @param value         被比较值
-     * @return 如果两个值相等返回为true, 否则为false
+     * @param value 需要判断的输入值，若该值为0直接返回true
+     * @return 输入值等于0返回为true, 否则为false
      */
-    public static boolean equals(Number originalValue, Number value) {
-        if (null == originalValue || null == value) {
+    public static boolean eqZero(Number value) {
+        if (null == value) {
             return false;
         }
-
-        return BigDecimal.valueOf(originalValue.doubleValue()).compareTo(BigDecimal.valueOf(value.doubleValue())) == 0;
+        return new BigDecimal(value.toString()).compareTo(ZERO) == 0;
     }
+
 
     /**
      * 判断数据里是否有等于目标数据的数字
@@ -168,7 +167,7 @@ public final class NumberUtil {
             if (null == value) {
                 continue;
             }
-            if (equals(originalValue, value)) {
+            if (CompareUtil.equals(originalValue, value)) {
                 return true;
             }
         }
