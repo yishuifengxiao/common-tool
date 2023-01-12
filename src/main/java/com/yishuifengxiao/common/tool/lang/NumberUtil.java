@@ -68,149 +68,6 @@ public final class NumberUtil {
      */
     public static final BigDecimal RATE_1024 = BigDecimal.valueOf(1024);
 
-    /**
-     * <p>判断输入值是否大于或等于0</p>
-     * <p style="color:yellow">
-     * 若输入的值为null或非数字类型直接返回为false
-     * </p>
-     *
-     * @param value 需要判断的输入值，若该值为null直接返回false
-     * @return 输入值大于或等于0返回为true, 否则为false
-     */
-    public static boolean gteZero(Number value) {
-        if (null == value) {
-            return false;
-        }
-        return new BigDecimal(value.toString()).compareTo(ZERO) >= 0;
-    }
-
-    /**
-     * <p>判断输入值是否大于0</p>
-     * <p style="color:yellow">
-     * 若输入的值为null或非数字类型直接返回为false
-     * </p>
-     *
-     * @param value 需要判断的输入值，若该值为null直接返回false
-     * @return 输入值大于0返回为true, 否则为false
-     */
-    public static boolean gtZero(Number value) {
-        if (null == value) {
-            return false;
-        }
-        return new BigDecimal(value.toString()).compareTo(ZERO) > 0;
-    }
-
-    /**
-     * <p>判断输入值是否小于或等于0</p>
-     * <p style="color:yellow">
-     * 若输入的值为null或非数字类型直接返回为false
-     * </p>
-     *
-     * @param value 需要判断的输入值，若该值为null直接返回false
-     * @return 输入值小于或等于0返回为true, 否则为false
-     */
-    public static boolean lteZero(Number value) {
-        if (null == value) {
-            return false;
-        }
-        return new BigDecimal(value.toString()).compareTo(ZERO) <= 0;
-    }
-
-    /**
-     * <p>判断输入值是否小于0</p>
-     * <p style="color:yellow">
-     * 若输入的值为null或非数字类型直接返回为false
-     * </p>
-     *
-     * @param value 需要判断的输入值，若该值为null直接返回false
-     * @return 输入值小于0返回为true, 否则为false
-     */
-    public static boolean ltZero(Number value) {
-        if (null == value) {
-            return false;
-        }
-        return new BigDecimal(value.toString()).compareTo(ZERO) < 0;
-    }
-
-    /**
-     * <p>判断输入值是否等于0</p>
-     * <p style="color:yellow">
-     * 若输入的值为null或非数字类型直接返回为false
-     * </p>
-     *
-     * @param value 需要判断的输入值，若该值为0直接返回true
-     * @return 输入值等于0返回为true, 否则为false
-     */
-    public static boolean eqZero(Number value) {
-        if (null == value) {
-            return false;
-        }
-        return new BigDecimal(value.toString()).compareTo(ZERO) == 0;
-    }
-
-
-    /**
-     * 判断数据里是否有等于目标数据的数字
-     *
-     * @param originalValue 目标数据，如果为null直接返回为false
-     * @param values        待比较的数据，如果为null直接返回为false
-     * @return 待比较的数据里包含了目标数据就返回为true，否则为false
-     */
-    public static boolean contains(Number originalValue, Number... values) {
-        if (null == originalValue) {
-            return false;
-        }
-        if (null == values) {
-            return false;
-        }
-        for (Number value : values) {
-            if (null == value) {
-                continue;
-            }
-            if (CompareUtil.equals(originalValue, value)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    /**
-     * <p>
-     * 数据自动补0
-     * </p>
-     * 对于null值的装箱后的数据，自动设置为false
-     *
-     * @param value 需要转换的数据
-     * @return 数据自动补0, 对于null值的装箱后的数据，自动设置为false
-     */
-    public static Boolean get(Boolean value) {
-        return null == value ? false : value;
-    }
-
-    /**
-     * <p>
-     * 数据自动补0
-     * </p>
-     * 对于null值的装箱后的数据，自动设置为0
-     *
-     * @param value 需要转换的数据
-     * @return 对于null值的装箱后的数据，自动设置为0
-     */
-    public static Number get(Number value) {
-        return get(value, 0);
-    }
-
-    /**
-     * 判断数据是否为null，如果为null则返回默认值，否则返回为输入值
-     *
-     * @param value        输入值
-     * @param defaultValue 默认值
-     * @return 如果为null则返回默认值，否则返回为输入值
-     */
-    public static Number get(Number value, Number defaultValue) {
-        return null == value ? defaultValue : value;
-    }
 
     /**
      * 将字符串转为Double
@@ -219,14 +76,8 @@ public final class NumberUtil {
      * @return 解析成功则返回Double的数据，否则为null
      */
     public static Double parseDouble(String str) {
-
-        try {
-            if (StringUtils.isNotBlank(str)) {
-                return parse(str).doubleValue();
-            }
-        } catch (Exception e) {
-        }
-        return null;
+        BigDecimal decimal = parse(str);
+        return null == decimal ? null : decimal.doubleValue();
     }
 
     /**
@@ -237,8 +88,8 @@ public final class NumberUtil {
      * @return 解析成功则返回Double的数据，否则为defaultValue
      */
     public static Double parseDouble(String str, double defaultValue) {
-        Double value = parseDouble(str);
-        return null == value ? defaultValue : value;
+        Double val = parseDouble(str);
+        return null == val ? defaultValue : val;
     }
 
     /**
@@ -248,14 +99,8 @@ public final class NumberUtil {
      * @return 解析成功则返回Float的数据，否则为null
      */
     public static Float parseFloat(String str) {
-
-        try {
-            if (StringUtils.isNotBlank(str)) {
-                return parse(str).floatValue();
-            }
-        } catch (Exception e) {
-        }
-        return null;
+        BigDecimal decimal = parse(str);
+        return null == decimal ? null : decimal.floatValue();
     }
 
     /**
@@ -267,7 +112,7 @@ public final class NumberUtil {
      */
     public static Float parseFloat(String str, float defaultValue) {
         Float value = parseFloat(str);
-        return null == value ? defaultValue : value;
+        return null == value ? defaultValue : value.floatValue();
     }
 
     /**
@@ -277,14 +122,8 @@ public final class NumberUtil {
      * @return 解析成功则返回Integer的数据，否则为null
      */
     public static Integer parseInt(String str) {
-
-        try {
-            if (StringUtils.isNotBlank(str)) {
-                return parse(str).intValue();
-            }
-        } catch (Exception e) {
-        }
-        return null;
+        BigDecimal decimal = parse(str);
+        return null == decimal ? null : decimal.intValue();
     }
 
     /**
@@ -306,14 +145,8 @@ public final class NumberUtil {
      * @return 解析成功则返回Long的数据，否则为null
      */
     public static Long parseLong(String str) {
-
-        try {
-            if (StringUtils.isNotBlank(str)) {
-                return parse(str).longValue();
-            }
-        } catch (Exception e) {
-        }
-        return null;
+        BigDecimal decimal = parse(str);
+        return null == decimal ? null : decimal.longValue();
     }
 
     /**
@@ -334,8 +167,16 @@ public final class NumberUtil {
      * @param val 输入值
      * @return 转换后的 BigDecimal ，若转换失败则返回为null
      */
-    public static BigDecimal parse(Object val) {
-        return parse(val, null);
+    public synchronized static BigDecimal parse(Object val) {
+        try {
+            if (null == val || StringUtils.isBlank(val.toString())) {
+                return null;
+            }
+            return new BigDecimal(val.toString().trim());
+        } catch (Throwable e) {
+            log.debug("将数据【{}】转换为数值时出现问题 {}", val, e);
+        }
+        return null;
     }
 
     /**
@@ -350,15 +191,11 @@ public final class NumberUtil {
      * @param defaultVal 默认值
      * @return 转换后的 BigDecimal ，若转换失败则返回为 defaultVal
      */
-    public synchronized static BigDecimal parse(Object val, BigDecimal defaultVal) {
+    public static BigDecimal parse(Object val, BigDecimal defaultVal) {
         if (null == val) {
             return defaultVal;
         }
-        try {
-            return new BigDecimal(val.toString().trim());
-        } catch (Throwable e) {
-            log.debug("将数据【{}】转换为数值时出现问题 {}", val, e);
-            return defaultVal;
-        }
+        BigDecimal decimal = parse(val);
+        return null == decimal ? defaultVal : decimal;
     }
 }

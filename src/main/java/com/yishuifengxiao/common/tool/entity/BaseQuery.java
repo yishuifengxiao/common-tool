@@ -1,10 +1,9 @@
 package com.yishuifengxiao.common.tool.entity;
 
-import java.io.Serializable;
-
-import com.yishuifengxiao.common.tool.lang.NumberUtil;
-
+import com.yishuifengxiao.common.tool.lang.CompareUtil;
 import io.swagger.annotations.ApiModelProperty;
+
+import java.io.Serializable;
 
 /**
  * 顶级查询参数类
@@ -95,7 +94,7 @@ public class BaseQuery implements Serializable {
 	 * @return 如果传入了正确的分页大小就使用传入的值，否则返回默认值(默认值为 10)
 	 */
 	public int pageSize() {
-		if (NumberUtil.gtZero(this.pageSize)) {
+		if (CompareUtil.gtZero(this.pageSize)) {
 			return this.pageSize;
 		}
 		return DEFAULT_PAGE_SIZE;
@@ -107,7 +106,7 @@ public class BaseQuery implements Serializable {
 	 * @return 如果传入了正确的分页大小就使用传入的值，否则返回默认值(默认值为 1)
 	 */
 	public int pageNum() {
-		if (NumberUtil.gtZero(this.pageNum)) {
+		if (CompareUtil.gtZero(this.pageNum)) {
 			return this.pageNum;
 		}
 		return DEFAULT_PAGE_NUM;

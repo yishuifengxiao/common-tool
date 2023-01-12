@@ -18,7 +18,7 @@ import java.math.BigDecimal;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class BoolUtil {
+public final class BoolUtil {
     /**
      * true值对应的文本
      */
@@ -124,7 +124,7 @@ public class BoolUtil {
         if (null == decimal) {
             return null;
         }
-        return NumberUtil.gtZero(decimal) ? true : false;
+        return CompareUtil.gtZero(decimal) ? true : false;
     }
 
     /**

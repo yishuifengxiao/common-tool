@@ -5,7 +5,6 @@ import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
 import com.yishuifengxiao.common.tool.lang.CompareUtil;
-import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,7 +40,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gteZero(String msg, Integer value) {
-        if (!NumberUtil.gteZero(value)) {
+        if (!CompareUtil.gteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -53,7 +52,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gteZero(String msg, Long value) {
-        if (!NumberUtil.gteZero(value)) {
+        if (!CompareUtil.gteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -65,7 +64,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gteZero(String msg, Float value) {
-        if (!NumberUtil.gteZero(value)) {
+        if (!CompareUtil.gteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -77,7 +76,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gteZero(String msg, Double value) {
-        if (!NumberUtil.gteZero(value)) {
+        if (!CompareUtil.gteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -89,7 +88,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gteZero(String msg, BigDecimal value) {
-        if (!NumberUtil.gteZero(value)) {
+        if (!CompareUtil.gteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -101,7 +100,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gtZero(String msg, Integer value) {
-        if (!NumberUtil.gtZero(value)) {
+        if (!CompareUtil.gtZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -113,7 +112,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gtZero(String msg, Long value) {
-        if (!NumberUtil.gtZero(value)) {
+        if (!CompareUtil.gtZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -125,7 +124,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gtZero(String msg, Float value) {
-        if (!NumberUtil.gtZero(value)) {
+        if (!CompareUtil.gtZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -137,7 +136,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gtZero(String msg, Double value) {
-        if (!NumberUtil.gtZero(value)) {
+        if (!CompareUtil.gtZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -149,7 +148,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gtZero(String msg, BigDecimal value) {
-        if (!NumberUtil.gtZero(value)) {
+        if (!CompareUtil.gtZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -161,7 +160,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void lteZero(String msg, Integer value) {
-        if (!NumberUtil.lteZero(value)) {
+        if (!CompareUtil.lteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -173,7 +172,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void lteZero(String msg, Long value) {
-        if (!NumberUtil.lteZero(value)) {
+        if (!CompareUtil.lteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -185,7 +184,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void lteZero(String msg, Float value) {
-        if (!NumberUtil.lteZero(value)) {
+        if (!CompareUtil.lteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -197,7 +196,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void lteZero(String msg, Double value) {
-        if (!NumberUtil.lteZero(value)) {
+        if (!CompareUtil.lteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -209,7 +208,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void lteZero(String msg, BigDecimal value) {
-        if (!NumberUtil.lteZero(value)) {
+        if (!CompareUtil.lteZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -221,7 +220,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void ltZero(String msg, Integer value) {
-        if (!NumberUtil.ltZero(value)) {
+        if (!CompareUtil.ltZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -233,7 +232,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void ltZero(String msg, Long value) {
-        if (!NumberUtil.ltZero(value)) {
+        if (!CompareUtil.ltZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -245,7 +244,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void ltZero(String msg, Float value) {
-        if (!NumberUtil.ltZero(value)) {
+        if (!CompareUtil.ltZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -257,7 +256,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void ltZero(String msg, Double value) {
-        if (!NumberUtil.ltZero(value)) {
+        if (!CompareUtil.ltZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
@@ -269,7 +268,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void ltZero(String msg, BigDecimal value) {
-        if (!NumberUtil.ltZero(value)) {
+        if (!CompareUtil.ltZero(value)) {
             throw new UncheckedException(ErrorCode.DATA_ERROR, msg);
         }
     }
