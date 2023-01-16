@@ -3,19 +3,18 @@
  */
 package com.yishuifengxiao.common.tool.bean;
 
+import com.alibaba.fastjson.JSONObject;
+import com.yishuifengxiao.common.tool.collections.JsonUtil;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
+import org.springframework.beans.BeanUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Collections;
 import java.util.Map;
-
-import org.springframework.beans.BeanUtils;
-
-import com.alibaba.fastjson.JSONObject;
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
-import com.yishuifengxiao.common.tool.text.JsonUtil;
 
 /**
  * <p>

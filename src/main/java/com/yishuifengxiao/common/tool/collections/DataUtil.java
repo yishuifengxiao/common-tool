@@ -153,11 +153,7 @@ public final class DataUtil {
         if (null == objs) {
             return new ArrayList<>();
         }
-        List<T> list = new ArrayList<>(objs.length);
-        for (T t : objs) {
-            list.add(t);
-        }
-        return list;
+        return Arrays.asList(objs).stream().collect(Collectors.toList());
     }
 
     /**
@@ -171,11 +167,7 @@ public final class DataUtil {
         if (null == objs) {
             return new HashSet<>();
         }
-        Set<T> set = new HashSet<>(objs.length);
-        for (T t : objs) {
-            set.add(t);
-        }
-        return set;
+        return Arrays.asList(objs).stream().collect(Collectors.toSet());
     }
 
     /**
@@ -275,7 +267,7 @@ public final class DataUtil {
      * @param defaultValue 缺省值
      * @return 集合里的第一个元素
      */
-    public  synchronized static <T> T first(Collection<T> data, T defaultValue) {
+    public synchronized static <T> T first(Collection<T> data, T defaultValue) {
         T t = first(data);
         return null == t ? defaultValue : t;
     }
