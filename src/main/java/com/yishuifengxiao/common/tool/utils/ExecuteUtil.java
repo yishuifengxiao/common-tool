@@ -23,6 +23,7 @@ public class ExecuteUtil {
      * @param <T>       输出数据类型
      * @return 输出数据
      */
+    @SuppressWarnings("unchecked")
     public synchronized static <T> T execute(Predicate<T> match, Supplier<T>... suppliers) {
         if (null == suppliers) {
             return null;
