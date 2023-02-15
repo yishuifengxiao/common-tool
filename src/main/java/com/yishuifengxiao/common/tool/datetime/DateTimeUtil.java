@@ -3,17 +3,17 @@
  */
 package com.yishuifengxiao.common.tool.datetime;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateUtils;
-
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+
+import org.apache.commons.lang3.time.DateUtils;
+
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -156,9 +156,9 @@ public final class DateTimeUtil {
 
 		try {
 			return date2LocalDateTime(DateUtils.parseDate(timeStr, patterns));
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			log.info("【易水工具】按照解析规则 {} 从字符串 {} 中解析出时间时出现问题，出现问题的原因为{}", patterns, timeStr, e.getMessage());
-			throw new UncheckedException(ErrorCode.PARAM_FORMAT_ERROR, "从字符串中解析时间失败");
+			throw new UncheckedException("从字符串中解析时间失败").setContext(e);
 		}
 	}
 

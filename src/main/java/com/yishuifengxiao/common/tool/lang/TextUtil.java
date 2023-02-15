@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 /**
  * <p>
- * 字符串工具
+ * 文本工具
  * </p>
  * 该工具主要用于将字符串的首字母进行大小写转换
  *
@@ -17,7 +17,7 @@ import java.util.Arrays;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class StringUtil {
+public class TextUtil {
 
 	/**
 	 * 将字符串的首字母变为小写的
@@ -89,6 +89,56 @@ public class StringUtil {
 	 */
 	public static boolean containsInAny(String searchStr, String... strs) {
 		return Arrays.asList(strs).parallelStream().anyMatch(t -> StringUtils.contains(t, searchStr));
+	}
+
+	/**
+	 * 转换为下划线,例如:将CallBack转换成 call_back
+	 * 
+	 * @param camelCaseName 输入的数据
+	 * @return 转换后的数据
+	 */
+	public static synchronized String underscoreName(String camelCaseName) {
+		StringBuilder result = new StringBuilder();
+		if (camelCaseName != null && camelCaseName.length() > 0) {
+			result.append(camelCaseName.substring(0, 1).toLowerCase());
+			for (int i = 1; i < camelCaseName.length(); i++) {
+				char ch = camelCaseName.charAt(i);
+				if (Character.isUpperCase(ch)) {
+					result.append("_");
+					result.append(Character.toLowerCase(ch));
+				} else {
+					result.append(ch);
+				}
+			}
+		}
+		return result.toString();
+	}
+
+	/**
+	 * 转换为驼峰,例如:将call_back转换成 CallBack
+	 * 
+	 * @param underscoreName 输入的数据
+	 * @return 转换后的数据
+	 */
+	public static synchronized String camelCaseName(String underscoreName) {
+		StringBuilder result = new StringBuilder();
+		if (underscoreName != null && underscoreName.length() > 0) {
+			boolean flag = false;
+			for (int i = 0; i < underscoreName.length(); i++) {
+				char ch = underscoreName.charAt(i);
+				if ("_".charAt(0) == ch) {
+					flag = true;
+				} else {
+					if (flag) {
+						result.append(Character.toUpperCase(ch));
+						flag = false;
+					} else {
+						result.append(ch);
+					}
+				}
+			}
+		}
+		return result.toString();
 	}
 
 }

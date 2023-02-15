@@ -3,18 +3,30 @@
  */
 package com.yishuifengxiao.common.tool.io;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.exception.constant.ErrorCode;
-import com.yishuifengxiao.common.tool.random.UID;
-import com.yishuifengxiao.common.tool.utils.Assert;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.StreamUtils;
-
-import javax.validation.constraints.NotNull;
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Base64;
 import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotNull;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.StreamUtils;
+
+import com.yishuifengxiao.common.tool.exception.UncheckedException;	
+import com.yishuifengxiao.common.tool.random.UID;
+import com.yishuifengxiao.common.tool.utils.Assert;
 
 /**
  * 文件处理工具
@@ -245,10 +257,7 @@ public class IoUtil {
      * @param base64File base64格式的文件
      * @return 转换后的文件
      */
-    public synchronized static File base64ToFile(String base64File) {
-        if (StringUtils.isBlank(base64File)) {
-            throw new UncheckedException(ErrorCode.PARAM_NULL, "上传的文件内容不能为空");
-        }
+    public synchronized static File base64ToFile(String base64File) {	
         File file = new File(UID.uuid());
         // 创建文件目录
         BufferedOutputStream bos = null;
@@ -275,8 +284,9 @@ public class IoUtil {
      *
      * @param file 待转换的文件
      * @return 转换后的base64字符串
+     * @throws IOException 
      */
-    public synchronized static String file2Base64(File file) {
+    public synchronized static String file2Base64(File file) throws IOException {
         Assert.notNull("待转换的文件不能为空", file);
 
         try (FileInputStream inputFile = new FileInputStream(file)) {
@@ -284,9 +294,7 @@ public class IoUtil {
             inputFile.read(buffer);
             inputFile.close();
             return Base64.getEncoder().encodeToString(buffer);
-        } catch (Exception e) {
-            throw new UncheckedException(ErrorCode.DATA_CONVERT_ERROR, "文件转换失败");
-        }
+        } 
 
     }
 
