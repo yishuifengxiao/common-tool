@@ -14,6 +14,10 @@ import org.apache.commons.lang3.RandomUtils;
  */
 public final class UserAgent {
     /**
+     * EDGE浏览器标识，默认为 110.0
+     */
+    public final static String USER_AGENT_EDGE_VERSION_110_0 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.41";
+    /**
      * 谷歌浏览器标识，默认为 谷歌78.0
      */
     public final static String USER_AGENT_GOOGLE_VERSION_78_0 = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36";
@@ -125,7 +129,7 @@ public final class UserAgent {
     /**
      * 浏览器标识符集合
      */
-    public static final String[] USER_AGENT_ARRAY = new String[]{USER_AGENT_GOOGLE_VERSION_78_0,
+    public static final String[] USER_AGENT_ARRAY = new String[]{USER_AGENT_EDGE_VERSION_110_0, USER_AGENT_GOOGLE_VERSION_78_0,
             USER_AGENT_GOOGLE_VERSION_75_0, USER_AGENT_FIREFOX_VERSION_70_0, USER_AGENT_FIREFOX_VERSION_MAC,
             USER_AGENT_IE_VERSION_11_476, USER_AGENT_IE_VERSION_9_0, USER_AGENT_EDAG_VERSION_11_476,
             USER_AGENT_SAFARI_VERSION_MAC, USER_AGENT_SAFARI_VERSION_WINDOWS, USER_AGENT_OPERA_VERSION_WINDOWS,

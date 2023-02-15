@@ -6,9 +6,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
-import javax.net.ssl.*;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,10 +37,60 @@ public class HttpClient {
      */
     public final static String CONTENT_TYPE_JSON = "application/json;charset=UTF-8";
 
+
     /**
-     * 请求客户端实例
+     * User-Agent
      */
-    private static volatile HttpClient httpClient = null;
+    private String userAgent;
+
+    /**
+     * 是否使用自动User-Agent
+     */
+    private boolean autoUserAgent = true;
+
+    /**
+     * Content-Type
+     */
+    private String contentType;
+
+    /**
+     * Referer
+     */
+    private String referrer;
+
+    /**
+     * 请求头
+     */
+    private Map<String, Object> headers = new HashMap<>();
+
+    /**
+     * 超时连接或读取之前的毫秒数（千分之一秒）
+     */
+    private Integer timeout;
+
+    /**
+     * 请求的url
+     */
+    private String url;
+
+    /**
+     * 请求的类型
+     */
+    private String method;
+    /**
+     * cookies
+     */
+    private Map<String, Object> cookies;
+    /**
+     * 请求体键值对与 requestBody 互斥
+     */
+    private Map<String, Object> data;
+
+    /**
+     * 请求体，与data  互斥
+     */
+    private String requestBody;
+
 
     /**
      * 获取http客户端（单例模式）
@@ -47,38 +98,188 @@ public class HttpClient {
      * @return http客户端
      */
     public final static HttpClient instance() {
-        if (null == httpClient) {
-            synchronized (HttpClient.class) {
-                if (null == httpClient) {
-                    httpClient = new HttpClient();
-                }
-            }
+        return new HttpClient();
+    }
+
+
+    /**
+     * 设置 userAgent
+     *
+     * @param userAgent 设置 userAgent
+     * @return
+     */
+    public HttpClient userAgent(String userAgent) {
+        this.userAgent = userAgent;
+        return this;
+    }
+
+    /**
+     * 设置 contentType
+     *
+     * @param contentType contentType
+     * @return
+     */
+    public HttpClient contentType(String contentType) {
+        this.contentType = contentType;
+        return this;
+    }
+
+    /**
+     * 设置 referrer
+     *
+     * @param referrer referrer
+     * @return
+     */
+    public HttpClient referrer(String referrer) {
+        this.referrer = referrer;
+        return this;
+    }
+
+    /**
+     * 增加一个请求头
+     *
+     * @param name  请求头名字
+     * @param value 请求头的值
+     * @return
+     */
+    public HttpClient addHeader(String name, Object value) {
+        if (StringUtils.isNoneBlank(name) && null != value) {
+            this.headers.put(name, value.toString());
         }
-        return httpClient;
+        return this;
     }
 
     /**
-     * 根据url发送get请求
+     * 批量增加请求头
      *
-     * @param url url
-     * @return 请求的响应
+     * @param headers 请求头
+     * @return
      */
-    public Connection.Response get(String url) {
-        Connection connection = connection(url, null, 0, UserAgent.autoUserAgent(), null, null, null, null);
-        return execute(connection);
+    public HttpClient addHeaders(Map<String, Object> headers) {
+        if (null == headers) {
+            return this;
+        }
+        headers.forEach((name, value) -> this.addHeader(name, value));
+        return this;
     }
 
     /**
-     * 根据url发送get请求
+     * 设置请求头
      *
-     * @param url      url
-     * @param referrer 流量来源页
-     * @return 请求的响应
+     * @param headers 请求头
+     * @return
      */
-    public Connection.Response get(String url, String referrer) {
-        Connection connection = connection(url, null, 0, UserAgent.autoUserAgent(), referrer, null, null, null);
-        return execute(connection);
+    public HttpClient setHeaders(Map<String, Object> headers) {
+        if (null == headers) {
+            this.headers = new HashMap<>(0);
+            return this;
+        }
+        this.headers.clear();
+        this.addHeaders(headers);
+        return this;
     }
+
+    /**
+     * <p>设置超时时间</p>
+     * <p>设置总请求超时持续时间。如果发生超时，将抛出java.net.SocketTimeoutException。
+     * 默认超时为30秒（30000毫秒）。超时为零被视为无限超时。
+     * 请注意，此超时指定了连接时间和读取完整响应时间的组合最大持续时间。</p>
+     *
+     * @param timeout 连接或读取超时前的毫秒数（千分之一秒）。
+     * @return
+     */
+    public HttpClient timeout(Integer timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
+    /**
+     * 设置请求的url
+     *
+     * @param url
+     * @return
+     */
+    public HttpClient url(String url) {
+        this.url = url;
+        return this;
+    }
+
+    /**
+     * <p>设置请求的类型</p>
+     * <p>默认为get请求</p>
+     *
+     * @param method 请求的类型
+     * @return
+     */
+    public HttpClient method(String method) {
+        this.method = method;
+        return this;
+    }
+
+    /**
+     * 设置是否使用是否使用自动User-Agent
+     *
+     * @param autoUserAgent 是否使用是否使用自动User-Agent,默认值为true
+     * @return
+     */
+    public HttpClient autoUserAgent(boolean autoUserAgent) {
+        this.autoUserAgent = autoUserAgent;
+        return this;
+    }
+
+    /**
+     * 设置请求体
+     *
+     * @param requestBody 请求体(与data  互斥)
+     * @return
+     */
+    public HttpClient requestBody(String requestBody) {
+        this.requestBody = requestBody;
+        return this;
+    }
+
+    /**
+     * 设置请求体键值对
+     *
+     * @param data 请求体键值对与 requestBody 互斥
+     * @return
+     */
+    public HttpClient data(Map<String, Object> data) {
+        this.data = data;
+        return this;
+    }
+
+    /**
+     * 使用 application/x-www-form-urlencoded; charset=UTF-8 方式发送请求
+     *
+     * @return
+     */
+    public HttpClient form() {
+        this.contentType = CONTENT_TYPE_FORM;
+        return this;
+    }
+
+    /**
+     * 使用 application/json;charset=UTF-8 方式发送请求
+     *
+     * @return
+     */
+    public HttpClient json() {
+        this.contentType = CONTENT_TYPE_JSON;
+        return this;
+    }
+
+    /**
+     * 设置 cookies
+     *
+     * @param cookies
+     * @return
+     */
+    public HttpClient cookies(Map<String, Object> cookies) {
+        this.cookies = cookies;
+        return this;
+    }
+
 
     /**
      * 根据url发送get请求，并把响应体转换成文本
@@ -86,24 +287,12 @@ public class HttpClient {
      * @param url url
      * @return 请求的响应体文本
      */
-    public String getAsString(String url) {
-        Connection.Response response = get(url);
-        return null == response ? null : response.body();
+    public String get(String url) {
+        this.url = url;
+        this.method = "get";
+        return this.executeAsString();
     }
 
-
-    /**
-     * 使用 application/x-www-form-urlencoded; charset=UTF-8 方式发送POST请求
-     *
-     * @param url     url
-     * @param headers 请求头
-     * @param data    请求数据
-     * @return 请求的响应
-     */
-    public Connection.Response postForm(String url, Map<String, String> headers, Map<String, String> data) {
-
-        return post(url, CONTENT_TYPE_FORM, headers, data);
-    }
 
     /**
      * 使用 application/x-www-form-urlencoded; charset=UTF-8 方式发送POST请求，并把响应体转换成文本
@@ -113,22 +302,10 @@ public class HttpClient {
      * @param data    请求数据
      * @return 请求的响应体的响应文本
      */
-    public String postFormAsString(String url, Map<String, String> headers, Map<String, String> data) {
-        Connection.Response response = post(url, CONTENT_TYPE_FORM, headers, data);
-        return null == response ? null : response.body();
+    public String postForm(String url, Map<String, Object> headers, Map<String, Object> data) {
+        return executeAsString(url, "post", CONTENT_TYPE_FORM, headers, data);
     }
 
-    /**
-     * 使用 application/x-www-form-urlencoded; charset=UTF-8 方式发送POST请求
-     *
-     * @param url  url
-     * @param data 请求数据
-     * @return 请求的响应
-     */
-    public Connection.Response postForm(String url, Map<String, String> data) {
-
-        return post(url, CONTENT_TYPE_FORM, null, data);
-    }
 
     /**
      * 使用 application/x-www-form-urlencoded; charset=UTF-8 方式发送POST请求，并把响应体转换成文本
@@ -137,23 +314,11 @@ public class HttpClient {
      * @param data 请求数据
      * @return 请求的响应体的响应文本
      */
-    public String postFormAsString(String url, Map<String, String> data) {
+    public String postForm(String url, Map<String, Object> data) {
 
-        Connection.Response response = post(url, CONTENT_TYPE_FORM, null, data);
-        return null == response ? null : response.body();
+        return executeAsString(url, "post", CONTENT_TYPE_FORM, null, data);
     }
 
-    /**
-     * 使用 application/json;charset=UTF-8 方式发送POST请求
-     *
-     * @param url     url
-     * @param headers 请求头
-     * @param data    请求数据
-     * @return 请求的响应
-     */
-    public Connection.Response postJson(String url, Map<String, String> headers, Map<String, String> data) {
-        return post(url, CONTENT_TYPE_JSON, headers, data);
-    }
 
     /**
      * 使用 application/json;charset=UTF-8 方式发送POST请求，并把响应体转换成文本
@@ -163,20 +328,8 @@ public class HttpClient {
      * @param data    请求数据
      * @return 请求的响应体的响应文本
      */
-    public String postJsonAsString(String url, Map<String, String> headers, Map<String, String> data) {
-        Connection.Response response = post(url, CONTENT_TYPE_JSON, headers, data);
-        return null == response ? null : response.body();
-    }
-
-    /**
-     * 使用 application/x-www-form-urlencoded; charset=UTF-8 方式发送POST请求，并把响应体转换成文本
-     *
-     * @param url  url
-     * @param data 请求数据
-     * @return 请求的响应体的响应文本
-     */
-    public Connection.Response postJson(String url, Map<String, String> data) {
-        return post(url, CONTENT_TYPE_JSON, null, data);
+    public String postJson(String url, Map<String, Object> headers, Map<String, Object> data) {
+        return executeAsString(url, "post", CONTENT_TYPE_JSON, headers, data);
     }
 
     /**
@@ -186,98 +339,186 @@ public class HttpClient {
      * @param data 请求数据
      * @return 请求的响应体的响应文本
      */
-    public String postJsonAsString(String url, Map<String, String> data) {
-        Connection.Response response = post(url, CONTENT_TYPE_JSON, null, data);
-        return null == response ? null : response.body();
+    public String postJson(String url, Map<String, Object> data) {
+        return executeAsString(url, "post", CONTENT_TYPE_JSON, null, data);
     }
 
     /**
-     * 根据url发送POST请求
+     * 使用 application/json;charset=UTF-8 方式发送POST请求，并把响应体转换成文本
      *
      * @param url         url
+     * @param requestBody 请求体
+     * @return 请求的响应体的响应文本
+     */
+    public String postJson(String url, String requestBody) {
+        return executeAsString(url, "post", CONTENT_TYPE_JSON, null, requestBody);
+    }
+
+    /**
+     * 发送POST请求并将响应体转换为文本
+     *
+     * @param url         url
+     * @param method      请求方法
      * @param contentType Content-Type
      * @param headers     请求头
      * @param data        请求体
      * @return 响应
      */
-    public Connection.Response post(String url, String contentType, Map<String, String> headers, Map<String, String> data) {
-        Connection connection = connection(url, "post", 0, UserAgent.autoUserAgent(), null, contentType, headers, null);
-        if (null != data) {
-            connection = connection.data(data);
-        }
-        return execute(connection);
+    public Connection.Response execute(String url, String method, String contentType, Map<String, Object> headers, Map<String, Object> data) {
+        this.url = url;
+        this.method = method;
+        this.contentType = contentType;
+        this.headers = headers;
+        this.data = data;
+        this.requestBody = null;
+        return this.execute();
+    }
+
+    /**
+     * 发送POST请求并将响应体转换为文本
+     *
+     * @param url         url
+     * @param method      请求方法
+     * @param contentType Content-Type
+     * @param headers     请求头
+     * @param data        请求体
+     * @return 响应
+     */
+    public String executeAsString(String url, String method, String contentType, Map<String, Object> headers, Map<String, Object> data) {
+        this.url = url;
+        this.method = method;
+        this.contentType = contentType;
+        this.headers = headers;
+        this.data = data;
+        this.requestBody = null;
+        Connection.Response response = this.execute();
+        return null == response ? null : response.body();
+    }
+
+    /**
+     * 发送POST请求并将响应体转换为文本
+     *
+     * @param url         url
+     * @param method      请求方法
+     * @param contentType Content-Type
+     * @param headers     请求头
+     * @param requestBody 请求体
+     * @return 响应
+     */
+    public Connection.Response execute(String url, String method, String contentType, Map<String, Object> headers, String requestBody) {
+        this.url = url;
+        this.method = method;
+        this.contentType = contentType;
+        this.headers = headers;
+        this.data = null;
+        this.requestBody = requestBody;
+        return this.execute();
+    }
+
+    /**
+     * 发送POST请求并将响应体转换为文本
+     *
+     * @param url         url
+     * @param method      请求方法
+     * @param contentType Content-Type
+     * @param headers     请求头
+     * @param requestBody 请求体
+     * @return 响应
+     */
+    public String executeAsString(String url, String method, String contentType, Map<String, Object> headers, String requestBody) {
+        this.url = url;
+        this.method = method;
+        this.contentType = contentType;
+        this.headers = headers;
+        this.data = null;
+        this.requestBody = requestBody;
+        Connection.Response response = this.execute();
+        return null == response ? null : response.body();
     }
 
     /**
      * 执行请求
      *
-     * @param connection 请求连接
      * @return 响应
      */
-    private Connection.Response execute(Connection connection) {
+    public Connection.Response execute() {
         Connection.Response response = null;
         try {
-            response = connection.execute();
+            response = this.connection().execute();
         } catch (Throwable e) {
-            log.warn("======> 请求 {} 时出现问题 {}", connection, e);
+            log.warn("======> 请求 {} 时出现问题 {}", this.url, e);
         }
         return response;
     }
 
     /**
-     * 根据参数构建出请求连接
+     * 执行请求,并将响应体转换为文本
      *
-     * @param url         请求的目标URL
-     * @param method      请求类型
-     * @param timeOut     连接超时时间
-     * @param userAgent   浏览器标识
-     * @param referrer    流量来源页
-     * @param contentType 内容类型
-     * @param headers     请求头
-     * @param cookies     cookies
-     * @return 请求连接
+     * @return 文本响应体
      */
-    public Connection connection(String url, String method, int timeOut, String userAgent, String referrer, String contentType, Map<String, String> headers, Map<String, String> cookies) {
+    public String executeAsString() {
+        Connection.Response response = this.execute();
+        return null == response ? null : response.body();
+    }
 
-        Assert.notNull(url, "请求的url不能为空");
-        url = url.trim();
+    /**
+     * 建立一个连接
+     *
+     * @return 连接
+     */
+    private Connection connection() {
+        String userAgent = this.userAgent;
+        if (this.autoUserAgent && StringUtils.isBlank(this.userAgent)) {
+            userAgent = UserAgent.USER_AGENT_EDGE_VERSION_110_0;
+        }
+        Assert.notNull(this.url, "请求的url不能为空");
+        String url = this.url.trim();
         // 如果是Https请求
         if (url.startsWith("https")) {
             getTrust();
         }
-
         Connection connection = Jsoup.connect(url);
-        connection.method(getMethod(method));
-        connection.timeout(timeOut);
+        connection.method(getMethod(this.method));
+        if (null != this.timeout) {
+            connection.timeout(this.timeout);
+        }
         connection.ignoreHttpErrors(true);
         connection.ignoreContentType(true);
+        connection.followRedirects(true);
         connection.maxBodySize(0);
-
         // 浏览器标识
 
         if (StringUtils.isNotBlank(userAgent)) {
             connection.userAgent(userAgent);
         }
         // 用于指明当前流量的来源参考页面
-        if (StringUtils.isNotBlank(referrer)) {
-            connection.referrer(referrer);
+        if (StringUtils.isNotBlank(this.referrer)) {
+            connection.referrer(this.referrer);
         }
-        if (StringUtils.isNotBlank(contentType)) {
-            if (null == headers) {
-                headers = new HashMap<>(1);
+        Map<String, Object> headers = null == this.headers ? new HashMap<>(0) : this.headers;
+        if (StringUtils.isNotBlank(this.contentType)) {
+            headers.put("Content-Type", this.contentType);
+        }
+        headers.forEach((k, v) -> connection.header(k, null == v ? null : v.toString()));
+        if (null != this.cookies && !this.cookies.isEmpty()) {
+            this.cookies.forEach((k, v) -> {
+                connection.cookie(k, null == v ? null : v.toString());
+            });
+
+        }
+        if (StringUtils.isNotBlank(this.requestBody)) {
+            connection.requestBody(this.requestBody.trim());
+        } else {
+            if (null != this.data) {
+                this.data.forEach((k, v) -> {
+                    connection.data(k, null == v ? null : v.toString());
+                });
             }
-            headers.put("Content-Type", contentType);
         }
 
-        if (null != headers) {
-            headers.forEach((k, v) -> connection.header(k, v));
-        }
-        if (null != cookies && !cookies.isEmpty()) {
-            connection.cookies(cookies);
-        }
         return connection;
-
     }
+
 
     /**
      * 获取请求类型
@@ -311,20 +552,15 @@ public class HttpClient {
      */
     private static void getTrust() {
         try {
-            HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
+            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
             SSLContext context = SSLContext.getInstance("TLS");
             context.init(null, new X509TrustManager[]{new X509TrustManager() {
                 @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                public void checkClientTrusted(X509Certificate[] chain, String authType) {
                 }
 
                 @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                public void checkServerTrusted(X509Certificate[] chain, String authType) {
                 }
 
                 @Override
