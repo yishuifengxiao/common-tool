@@ -381,7 +381,7 @@ public final class CompareUtil {
     /**
      * <p>判断输入值是否大于0</p>
      * <p style="color:yellow">
-     * 若输入的值为null或非数字类型直接返回为false
+     * 若输入的值为null或小于0直接返回为false
      * </p>
      *
      * @param value 需要判断的输入值，若该值为null直接返回false

@@ -3,9 +3,9 @@
  */
 package com.yishuifengxiao.common.tool.collections;
 
-import java.util.Collection;
-
 import com.yishuifengxiao.common.tool.entity.Page;
+
+import java.util.Collection;
 
 /**
  * <p>
@@ -50,7 +50,7 @@ public final class SizeUtil {
      * @param page 分页对象
      * @return 如果不是空返回为true，否则为false
      */
-    public static <T> boolean notEmpty(Page<T> page) {
+    public static <T> boolean isNotEmpty(Page<T> page) {
         return !isEmpty(page);
     }
 
@@ -81,7 +81,7 @@ public final class SizeUtil {
      * @param page 分页对象
      * @return 如果不是空返回为true，否则为false
      */
-    public static <T> boolean notEmpty(org.springframework.data.domain.Page<T> page) {
+    public static <T> boolean isNotEmpty(org.springframework.data.domain.Page<T> page) {
         return !isEmpty(page);
     }
 
@@ -103,7 +103,7 @@ public final class SizeUtil {
      * @param data 数据源
      * @return 如果不为空则返回true，否则为false
      */
-    public static <T> boolean notEmpty(T[] data) {
+    public static <T> boolean isNotEmpty(T[] data) {
         return !isEmpty(data);
     }
 
@@ -184,7 +184,7 @@ public final class SizeUtil {
      * @param data 数据源
      * @return 如果不为空则返回true，否则为false
      */
-    public static <T> boolean notEmpty(Collection<T> data) {
+    public static <T> boolean isNotEmpty(Collection<T> data) {
         return !isEmpty(data);
     }
 

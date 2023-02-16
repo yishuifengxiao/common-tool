@@ -1,10 +1,5 @@
 package com.yishuifengxiao.common.tool.utils;
 
-import com.yishuifengxiao.common.tool.io.CloseUtil;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-
 /**
  * 系统工具类
  *
@@ -384,22 +379,5 @@ public final class SystemUtil {
 
     }
 
-    /**
-     * 提取出异常中的所有输出信息
-     *
-     * @param throwable 异常
-     * @return 异常中的所有输出信息
-     */
-    public static synchronized String extractError(Throwable throwable) {
-        if (null == throwable) {
-            return null;
-        }
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PrintStream printStream = new PrintStream(out);
-        throwable.printStackTrace(printStream);
-        String result = new String(out.toByteArray());
-        CloseUtil.close(printStream, out);
-        return result;
-    }
-
+  
 }

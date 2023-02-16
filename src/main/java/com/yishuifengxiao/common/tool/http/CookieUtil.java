@@ -1,18 +1,15 @@
 package com.yishuifengxiao.common.tool.http;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import com.yishuifengxiao.common.tool.collections.SizeUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.yishuifengxiao.common.tool.collections.SizeUtil;
-
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -159,7 +156,7 @@ public class CookieUtil {
     public Map<String, Cookie> getCookieMap() {
 
         Cookie[] cookies = request.getCookies();
-        if (SizeUtil.notEmpty(cookies)) {
+        if (SizeUtil.isNotEmpty(cookies)) {
             Map<String, Cookie> cookieMap = new HashMap<>(cookies.length);
             for (Cookie cookie : cookies) {
                 cookieMap.put(cookie.getName(), cookie);

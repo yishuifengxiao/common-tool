@@ -15,18 +15,18 @@ import java.io.Serializable;
 public class StringKeyPair<T> extends KeyPair implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = -5795495851726526435L;
+     *
+     */
+    private static final long serialVersionUID = -5795495851726526435L;
 
-	/**
+    /**
      * 全参构造函数
      *
      * @param key 键值对的key
      * @param val 键值对的值
      */
     @SuppressWarnings("unchecked")
-	public StringKeyPair(String key, T val) {
+    public StringKeyPair(String key, T val) {
         super(key, val);
     }
 
@@ -41,8 +41,14 @@ public class StringKeyPair<T> extends KeyPair implements Serializable {
         return null != super.getKey() ? super.getKey().toString() : null;
     }
 
+    /**
+     * 设置键值对的键
+     *
+     * @param key 键值对的键
+     * @return 当前对象实例
+     */
     @SuppressWarnings("unchecked")
-	public StringKeyPair<T> setKey(String key) {
+    public StringKeyPair<T> setKey(String key) {
         super.setKey(key);
         return this;
     }
