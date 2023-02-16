@@ -5,6 +5,7 @@ package com.yishuifengxiao.common.tool.collections;
 
 import com.yishuifengxiao.common.tool.entity.Page;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -121,9 +122,6 @@ public final class SizeUtil {
         if (data.size() == 0) {
             return true;
         }
-        if (data.isEmpty()) {
-            return true;
-        }
         return false;
     }
 
@@ -132,18 +130,12 @@ public final class SizeUtil {
      * @param collections 待判断的集合
      * @return 若全部为空集合或者null则返回为true, 否则为false
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes"})
     public static boolean isAllEmpty(Collection... collections) {
         if (null == collections) {
             return true;
         }
-        for (Collection collection : collections) {
-            if (!isEmpty(collection)) {
-                return false;
-            }
-        }
-
-        return true;
+        return Arrays.stream(collections).allMatch(SizeUtil::isEmpty);
     }
 
     /**
@@ -151,14 +143,12 @@ public final class SizeUtil {
      * @param collections 待判断的集合
      * @return 只要有一个集合为空或者null则返回为true, 否则为false
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes"})
     public static boolean isAnyEmpty(Collection... collections) {
-        for (Collection collection : collections) {
-            if (isEmpty(collection)) {
-                return true;
-            }
+        if (null == collections) {
+            return false;
         }
-        return false;
+        return Arrays.stream(collections).anyMatch(SizeUtil::isEmpty);
     }
 
     /**
@@ -166,14 +156,12 @@ public final class SizeUtil {
      * @param collections 待判断的集合
      * @return 只要有一个集合为空或者null则返回为true, 否则为false
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes"})
     public static boolean isNoneEmpty(Collection... collections) {
-        for (Collection collection : collections) {
-            if (isEmpty(collection)) {
-                return false;
-            }
+        if (null == collections) {
+            return false;
         }
-        return true;
+        return !isAnyEmpty(collections);
     }
 
 
@@ -197,9 +185,6 @@ public final class SizeUtil {
      */
     public static <T> boolean onlyOneElement(Collection<T> data) {
         if (null == data) {
-            return false;
-        }
-        if (data.isEmpty()) {
             return false;
         }
         return data.size() == 1;

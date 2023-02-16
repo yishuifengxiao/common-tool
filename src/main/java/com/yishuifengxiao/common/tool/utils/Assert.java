@@ -128,6 +128,30 @@ public final class Assert {
     }
 
     /**
+     * 判断给定的值是否为null，若不为null则抛出异常
+     *
+     * @param msg   异常提示信息
+     * @param value 需要比较的值
+     */
+    public static void isNull(String msg, Object value) {
+        if (null != value) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否不为null，若为null则抛出异常
+     *
+     * @param msg   异常提示信息
+     * @param value 需要比较的值
+     */
+    public static void isNotNull(String msg, Object value) {
+        if (null == value) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
      * 判读所有给定的数据为true,如果有一个数据不为true就抛出异常
      *
      * @param msg    异常提示信息
@@ -143,6 +167,7 @@ public final class Assert {
         }
 
     }
+
 
     /**
      * 判读所有给定的数据为false,如果有一个数据不为false就抛出异常
