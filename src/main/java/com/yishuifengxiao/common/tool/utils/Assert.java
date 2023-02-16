@@ -4,9 +4,10 @@ import com.yishuifengxiao.common.tool.collections.SizeUtil;
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.CompareUtil;
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -38,22 +39,11 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gteZero(String msg, Number value) {
-        if (!CompareUtil.gteZero(value)) {
+        if (null == value || CompareUtil.ltZero(value)) {
             throw new UncheckedException(msg);
         }
     }
 
-    /**
-     * 判断给定的值是否大于或等于0,如果为null或小于0就抛出异常
-     *
-     * @param msg   异常提示信息
-     * @param value 需要比较的值
-     */
-    public static void gteZero(String msg, BigDecimal value) {
-        if (!CompareUtil.gteZero(value)) {
-            throw new UncheckedException(msg);
-        }
-    }
 
     /**
      * 判断给定的值是否大于0,如果为null或小于0或等于0就抛出异常
@@ -62,19 +52,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gtZero(String msg, Number value) {
-        if (!CompareUtil.gtZero(value)) {
-            throw new UncheckedException(msg);
-        }
-    }
-
-    /**
-     * 判断给定的值是否大于0,如果为null或小于0或等于0就抛出异常
-     *
-     * @param msg   异常提示信息
-     * @param value 需要比较的值
-     */
-    public static void gtZero(String msg, BigDecimal value) {
-        if (!CompareUtil.gtZero(value)) {
+        if (null == value || CompareUtil.lteZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -86,19 +64,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void lteZero(String msg, Number value) {
-        if (!CompareUtil.lteZero(value)) {
-            throw new UncheckedException(msg);
-        }
-    }
-
-    /**
-     * 判断给定的值是否小于或等于0,如果为null或大于0就抛出异常
-     *
-     * @param msg   异常提示信息
-     * @param value 需要比较的值
-     */
-    public static void lteZero(String msg, BigDecimal value) {
-        if (!CompareUtil.lteZero(value)) {
+        if (null == value || CompareUtil.gtZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -110,19 +76,60 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void ltZero(String msg, Number value) {
-        if (!CompareUtil.ltZero(value)) {
+        if (null == value || CompareUtil.gteZero(value)) {
             throw new UncheckedException(msg);
         }
     }
 
     /**
-     * 判断给定的值是否小于0,如果为null或大于0或等于0就抛出异常
+     * 判断给定的值是否大于或等于0,如果小于0就抛出异常
      *
      * @param msg   异常提示信息
-     * @param value 需要比较的值
+     * @param value 需要比较的值(若为null则按照0比较)
      */
-    public static void ltZero(String msg, BigDecimal value) {
-        if (!CompareUtil.ltZero(value)) {
+    public static void gteZeroN(String msg, Number value) {
+        value = null == value ? NumberUtil.ZERO : value;
+        if (CompareUtil.ltZero(value)) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+
+    /**
+     * 判断给定的值是否大于0,如果小于0或等于0就抛出异常
+     *
+     * @param msg   异常提示信息
+     * @param value 需要比较的值(若为null则按照0比较)
+     */
+    public static void gtZeroN(String msg, Number value) {
+        value = null == value ? NumberUtil.ZERO : value;
+        if (CompareUtil.lteZero(value)) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否小于或等于0,如果大于0就抛出异常
+     *
+     * @param msg   异常提示信息
+     * @param value 需要比较的值(若为null则按照0比较)
+     */
+    public static void lteZeroN(String msg, Number value) {
+        value = null == value ? NumberUtil.ZERO : value;
+        if (CompareUtil.gtZero(value)) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否小于0,如果大于0或等于0就抛出异常
+     *
+     * @param msg   异常提示信息
+     * @param value 需要比较的值(若为null则按照0比较)
+     */
+    public static void ltZeroN(String msg, Number value) {
+        value = null == value ? NumberUtil.ZERO : value;
+        if (CompareUtil.gteZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -152,22 +159,64 @@ public final class Assert {
     }
 
     /**
+     * 判断给定的值是否全部为null，若有一个不为null则抛出异常
+     *
+     * @param msg    异常提示信息
+     * @param values 需要比较的值
+     */
+    public static void isAllNull(String msg, Object... values) {
+        if (null == values) {
+            return;
+        }
+        if (Arrays.stream(values).anyMatch(v -> null != v)) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否全部不为null，若有一个为null则抛出异常
+     *
+     * @param msg    异常提示信息
+     * @param values 需要比较的值
+     */
+    public static void isNoneNull(String msg, Object... values) {
+        if (null == values) {
+            return;
+        }
+        if (Arrays.stream(values).anyMatch(v -> null == v)) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否有一个null值，若全部不为null则抛出异常
+     *
+     * @param msg    异常提示信息
+     * @param values 需要比较的值
+     */
+    public static void isAnyNull(String msg, Object... values) {
+        if (null == values) {
+            return;
+        }
+        if (Arrays.stream(values).allMatch(v -> null != v)) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
      * 判读所有给定的数据为true,如果有一个数据不为true就抛出异常
      *
      * @param msg    异常提示信息
      * @param values 需要判断的值
      */
     public static void isTrue(String msg, Boolean... values) {
-        if (null != values) {
-            for (Boolean value : values) {
-                if (null == value || !value) {
-                    throw new UncheckedException(msg);
-                }
-            }
+        if (null == values) {
+            return;
         }
-
+        if (Arrays.stream(values).anyMatch(BooleanUtils::isNotTrue)) {
+            throw new UncheckedException(msg);
+        }
     }
-
 
     /**
      * 判读所有给定的数据为false,如果有一个数据不为false就抛出异常
@@ -176,14 +225,12 @@ public final class Assert {
      * @param values 需要判断的值
      */
     public static void isFalse(String msg, Boolean... values) {
-        if (null != values) {
-            for (Boolean value : values) {
-                if (null != value && value) {
-                    throw new UncheckedException(msg);
-                }
-            }
+        if (null == values) {
+            return;
         }
-
+        if (Arrays.stream(values).anyMatch(BooleanUtils::isNotFalse)) {
+            throw new UncheckedException(msg);
+        }
     }
 
     /**
@@ -215,7 +262,6 @@ public final class Assert {
             throw new UncheckedException(msg);
         }
     }
-
 
     /**
      * 判断分页对象是否为空，若不为空则抛出异常
@@ -308,7 +354,6 @@ public final class Assert {
         }
     }
 
-
     /**
      * 判断Set是否不为空，若为空则抛出异常
      *
@@ -321,7 +366,6 @@ public final class Assert {
             throw new UncheckedException(msg);
         }
     }
-
 
     /**
      * 判断集合里是否只有一个元素，若不是只有一个元素则抛出异常

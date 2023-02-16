@@ -1,19 +1,15 @@
 package com.yishuifengxiao.common.tool.validate;
 
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import com.yishuifengxiao.common.tool.validate.validator.InStringValidator;
 
+import javax.validation.Constraint;
+import javax.validation.Payload;
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.validation.Constraint;
-import javax.validation.Payload;
-
-import com.yishuifengxiao.common.tool.validate.validator.InStringValidator;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * <p>
@@ -44,6 +40,13 @@ public @interface InString {
      * @return 是否允许目标值为null，默认为true
      */
     boolean nullable() default true;
+
+    /**
+     * 是否为大小写敏感，默认为true,表示大小写敏感
+     *
+     * @return 默认为true, 表示大小写敏感
+     */
+    boolean sensitive() default true;
 
     /**
      * 指定的数据

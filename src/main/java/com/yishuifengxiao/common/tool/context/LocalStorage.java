@@ -1,139 +1,217 @@
 package com.yishuifengxiao.common.tool.context;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import org.springframework.util.Assert;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.Set;
 
 /**
  * <p>
  * 全局存储工具
  * </p>
  * 该工具主要是一个基于内存的KV键值对存储工具。
- * 
+ *
  * <p>
  * <strong>该工具是一个线程安全类的工具</strong>
  * </p>
- * 
+ *
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
  */
-@Slf4j
 public final class LocalStorage {
-	/**
-	 * 本地线程存储
-	 */
-	private static final Map<String, Object> LOCAL_HOLLDER = new HashMap<>();
+    /**
+     * 本地线程存储
+     */
+    private static final Map<String, Object> LOCAL_HOLDER = new HashMap<>();
 
-	/**
-	 * 根据键获取存储的值
-	 * 
-	 * @param key 存储的键
-	 * @return 存储的值
-	 */
-	public synchronized static Object get(String key) {
-		Assert.notNull(key, "key值不能为空");
-		return LOCAL_HOLLDER.get(key);
-	}
 
-	/**
-	 * 根据存储的数据的类型获取存储的数据
-	 * 
-	 * @param <T>   存储的数据的类型
-	 * @param clazz 存储的数据的类型
-	 * @return 存储的数据
-	 */
-	@SuppressWarnings("unchecked")
-	public synchronized static <T> T get(Class<T> clazz) {
-		Assert.notNull(clazz, "key值不能为空");
-		try {
-			return (T) get(clazz.getName());
-		} catch (Exception e) {
-			log.info("【易水工具】获取存储的数据时出现问题，出现问题的原因为 {}", e.getMessage());
-		}
-		return null;
+    /**
+     * <p>存储一个数据</p>
+     * <p>存储的时的key值默认为<code>value.getClass().getName()</code></p>
+     *
+     * @param value 待存储的数据
+     */
+    public synchronized void put(Object value) {
+        if (null == value) {
+            return;
+        }
+        LOCAL_HOLDER.put(value.getClass().getName(), value);
+    }
 
-	}
+    /**
+     * <p>存储一个数据</p>
+     *
+     * @param key   待存储的数据的key
+     * @param value 待存储的数据
+     */
+    public synchronized void put(String key, Object value) {
+        if (StringUtils.isBlank(key) || null == value) {
+            return;
+        }
+        LOCAL_HOLDER.put(key.trim(), value);
+    }
 
-	/**
-	 * 根据存储的键获取存储的数据，然后清楚当前存储的数据
-	 * 
-	 * @param key 存储的键
-	 * @return 存储的数据的类型
-	 */
-	public synchronized static Object pop(String key) {
-		try {
-			return get(key);
-		} finally {
-			clear();
-		}
-	}
+    /**
+     * 根据数据的key获取数据
+     *
+     * @param key 待存储的数据的key
+     * @return 获取到的存储数据
+     */
+    public synchronized Object get(String key) {
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+        return LOCAL_HOLDER.get(key.trim());
+    }
 
-	/**
-	 * 根据存储的数据的类型获取存储的数据，然后清楚当前存储的数据
-	 * 
-	 * @param <T>   存储的数据的类型
-	 * @param clazz 存储的数据的类型
-	 * @return 存储的数据
-	 */
-	public synchronized static <T> T pop(Class<T> clazz) {
-		try {
-			return get(clazz);
-		} finally {
-			clear();
-		}
-	}
 
-	/**
-	 * 存入一个数据，存储的键为当前数据的类型，值为当前数据
-	 * 
-	 * @param <T> 存储的数据的类型
-	 * @param t   存储的数据
-	 */
-	public synchronized static <T> void put(T t) {
-		Assert.notNull(t, "存储的值不能为空");
-		put(t.getClass().getName(), t);
-	}
+    /**
+     * 根据数据的key获取数据
+     *
+     * @param key   待存储的数据的key
+     * @param clazz 数据的类型Class
+     * @param <T>   数据的类型
+     * @return 获取到的存储数据
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized <T> T get(String key, Class<T> clazz) {
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+        try {
+            return (T) LOCAL_HOLDER.get(key.trim());
+        } catch (Exception e) {
+        }
+        return null;
 
-	/**
-	 * 向本地线程副本里存储信息
-	 * 
-	 * @param key   信息的键
-	 * @param value 信息的值
-	 */
-	public synchronized static void put(String key, Object value) {
-		Assert.notNull(key, "key值不能为空");
-		LOCAL_HOLLDER.put(key, value);
-	}
+    }
 
-	/**
-	 * 移除本地线程副本里存储信息的某个值
-	 * 
-	 * @param key 信息的键
-	 */
-	public synchronized static void remove(String key) {
-		Assert.notNull(key, "key值不能为空");
-		LOCAL_HOLLDER.put(key, null);
-		LOCAL_HOLLDER.remove(key);
-	}
+    /**
+     * <p>根据数据的key获取数据</p>
+     * <p>此方式下默认key为<code>clazz.getName()</code></p>
+     *
+     * @param clazz 数据的类型Class
+     * @param <T>   数据的类型
+     * @return 获取到的存储数据
+     */
+    public synchronized <T> T get(Class<T> clazz) {
+        if (null == clazz) {
+            return null;
+        }
+        return get(clazz.getName(), clazz);
+    }
 
-	/**
-	 * 清空本地线程副本
-	 */
-	public synchronized static void clear() {
-		LOCAL_HOLLDER.clear();
-	}
+    /**
+     * 根据数据的key获取数据，若成功获取到此数据则从缓存中删除此数据
+     *
+     * @param key   待存储的数据的key
+     * @param clazz 数据的类型Class
+     * @param <T>   数据的类型
+     * @return 获取到的存储数据
+     */
+    @SuppressWarnings("unchecked")
+    public synchronized <T> T getAndRemove(String key, Class<T> clazz) {
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+        try {
+            T value = (T) LOCAL_HOLDER.get(key.trim());
+            if (null != value) {
+                remove(key.trim());
+            }
+            return value;
+        } catch (Exception e) {
+        }
+        return null;
 
-	/**
-	 * 获取本地线程副本里的键值对集合
-	 * 
-	 * @return 本地线程副本里的键值对集合
-	 */
-	public static Map<String, Object> getAll() {
+    }
 
-		return LOCAL_HOLLDER;
-	}
+    /**
+     * <p>根据数据的key获取数据，若成功获取到此数据则从缓存中删除此数据</p>
+     * <p>此方式下默认key为<code>clazz.getName()</code></p>
+     *
+     * @param clazz 数据的类型Class
+     * @param <T>   数据的类型
+     * @return 获取到的存储数据
+     */
+    public synchronized <T> T getAndRemove(Class<T> clazz) {
+        if (null == clazz) {
+            return null;
+        }
+
+        return getAndRemove(clazz.getName(), clazz);
+    }
+
+    /**
+     * 根据数据的key获取数据，若成功获取到此数据则从缓存中删除此数据
+     *
+     * @param key 待存储的数据的key
+     * @return 获取到的存储数据
+     */
+    public synchronized Object getAndRemove(String key) {
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+        Object value = LOCAL_HOLDER.get(key.trim());
+        if (null != value) {
+            remove(key.trim());
+        }
+        return value;
+    }
+
+    /**
+     * 移除存储的数据
+     *
+     * @param key 待移除的数据的key
+     */
+    public synchronized void remove(String key) {
+        if (StringUtils.isBlank(key)) {
+            return;
+        }
+        LOCAL_HOLDER.remove(key.trim());
+    }
+
+    /**
+     * <p>移除存储的数据</p>
+     * <p>此方式下默认key为<code>clazz.getName()</code></p>
+     *
+     * @param clazz 待移除的数据的key
+     */
+    public synchronized <T> void remove(Class<T> clazz) {
+        if (null == clazz) {
+            return;
+        }
+        remove(clazz.getName());
+    }
+
+    /**
+     * 获取所有存储的数据的key
+     *
+     * @return 所有存储的数据的key
+     */
+    public synchronized Set<String> keys() {
+        return LOCAL_HOLDER.keySet();
+    }
+
+    /**
+     * 所有存储的数据的key中是否包含指定的key
+     *
+     * @param key 指定的key
+     * @return 包含返回为true, 否则为false
+     */
+    public synchronized boolean keys(String key) {
+        if (StringUtils.isBlank(key)) {
+            return false;
+        }
+        return LOCAL_HOLDER.containsKey(key);
+    }
+
+    /**
+     * 清空所有存储的数据
+     */
+    public synchronized void clear() {
+        LOCAL_HOLDER.clear();
+    }
 }
