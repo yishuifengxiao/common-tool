@@ -177,6 +177,7 @@ public final class LocalStorage {
      * <p>移除存储的数据</p>
      * <p>此方式下默认key为<code>clazz.getName()</code></p>
      *
+     * @param <T>   数据的类型
      * @param clazz 待移除的数据的key
      */
     public synchronized <T> void remove(Class<T> clazz) {
