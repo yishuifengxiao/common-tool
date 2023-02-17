@@ -67,7 +67,8 @@ public final class LocalCache {
         return LOCAL_HOLDER.get(key.trim());
     }
 
-    public static synchronized <T> T get(String key, Supplier<T> supplier) {
+    @SuppressWarnings("unchecked")
+	public static synchronized <T> T get(String key, Supplier<T> supplier) {
         Object value = get(key.trim());
         if (null != value) {
             try {
@@ -125,7 +126,6 @@ public final class LocalCache {
      * @param <T>   数据的类型
      * @return 获取到的存储数据
      */
-    @SuppressWarnings("unchecked")
     public static synchronized <T> T getAndRemove(String key, Class<T> clazz) {
         if (StringUtils.isBlank(key)) {
             return null;
