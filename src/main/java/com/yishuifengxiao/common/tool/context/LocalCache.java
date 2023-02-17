@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * <p>
@@ -37,7 +38,7 @@ public final class LocalCache {
         if (null == value) {
             return;
         }
-        LOCAL_HOLDER.put(value.getClass().getName(), value);
+        put(value.getClass().getName(), value);
     }
 
     /**
@@ -66,6 +67,22 @@ public final class LocalCache {
         return LOCAL_HOLDER.get(key.trim());
     }
 
+    public static synchronized <T> T get(String key, Supplier<T> supplier) {
+        Object value = get(key.trim());
+        if (null != value) {
+            try {
+                return (T) value;
+            } catch (Exception e) {
+            }
+        }
+        T val = null == supplier ? null : supplier.get();
+        if (null == val) {
+            return null;
+        }
+        put(key.trim(), val);
+        return val;
+    }
+
 
     /**
      * 根据数据的key获取数据
@@ -77,11 +94,8 @@ public final class LocalCache {
      */
     @SuppressWarnings("unchecked")
     public static synchronized <T> T get(String key, Class<T> clazz) {
-        if (StringUtils.isBlank(key)) {
-            return null;
-        }
         try {
-            return (T) LOCAL_HOLDER.get(key.trim());
+            return (T) get(key.trim());
         } catch (Exception e) {
         }
         return null;
@@ -116,15 +130,11 @@ public final class LocalCache {
         if (StringUtils.isBlank(key)) {
             return null;
         }
-        try {
-            T value = (T) LOCAL_HOLDER.get(key.trim());
-            if (null != value) {
-                remove(key.trim());
-            }
-            return value;
-        } catch (Exception e) {
+        T value = get(key.trim(), clazz);
+        if (null != value) {
+            remove(key.trim());
         }
-        return null;
+        return value;
 
     }
 
@@ -154,7 +164,7 @@ public final class LocalCache {
         if (StringUtils.isBlank(key)) {
             return null;
         }
-        Object value = LOCAL_HOLDER.get(key.trim());
+        Object value = get(key.trim());
         if (null != value) {
             remove(key.trim());
         }
