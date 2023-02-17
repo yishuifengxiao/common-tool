@@ -33,7 +33,7 @@ public final class LocalStorage {
      *
      * @param value 待存储的数据
      */
-    public synchronized void put(Object value) {
+    public static synchronized void put(Object value) {
         if (null == value) {
             return;
         }
@@ -46,7 +46,7 @@ public final class LocalStorage {
      * @param key   待存储的数据的key
      * @param value 待存储的数据
      */
-    public synchronized void put(String key, Object value) {
+    public static synchronized void put(String key, Object value) {
         if (StringUtils.isBlank(key) || null == value) {
             return;
         }
@@ -59,7 +59,7 @@ public final class LocalStorage {
      * @param key 待存储的数据的key
      * @return 获取到的存储数据
      */
-    public synchronized Object get(String key) {
+    public static synchronized Object get(String key) {
         if (StringUtils.isBlank(key)) {
             return null;
         }
@@ -76,7 +76,7 @@ public final class LocalStorage {
      * @return 获取到的存储数据
      */
     @SuppressWarnings("unchecked")
-    public synchronized <T> T get(String key, Class<T> clazz) {
+    public static synchronized <T> T get(String key, Class<T> clazz) {
         if (StringUtils.isBlank(key)) {
             return null;
         }
@@ -96,7 +96,7 @@ public final class LocalStorage {
      * @param <T>   数据的类型
      * @return 获取到的存储数据
      */
-    public synchronized <T> T get(Class<T> clazz) {
+    public static synchronized <T> T get(Class<T> clazz) {
         if (null == clazz) {
             return null;
         }
@@ -112,7 +112,7 @@ public final class LocalStorage {
      * @return 获取到的存储数据
      */
     @SuppressWarnings("unchecked")
-    public synchronized <T> T getAndRemove(String key, Class<T> clazz) {
+    public static synchronized <T> T getAndRemove(String key, Class<T> clazz) {
         if (StringUtils.isBlank(key)) {
             return null;
         }
@@ -136,7 +136,7 @@ public final class LocalStorage {
      * @param <T>   数据的类型
      * @return 获取到的存储数据
      */
-    public synchronized <T> T getAndRemove(Class<T> clazz) {
+    public static synchronized <T> T getAndRemove(Class<T> clazz) {
         if (null == clazz) {
             return null;
         }
@@ -150,7 +150,7 @@ public final class LocalStorage {
      * @param key 待存储的数据的key
      * @return 获取到的存储数据
      */
-    public synchronized Object getAndRemove(String key) {
+    public static synchronized Object getAndRemove(String key) {
         if (StringUtils.isBlank(key)) {
             return null;
         }
@@ -166,7 +166,7 @@ public final class LocalStorage {
      *
      * @param key 待移除的数据的key
      */
-    public synchronized void remove(String key) {
+    public static synchronized void remove(String key) {
         if (StringUtils.isBlank(key)) {
             return;
         }
@@ -180,7 +180,7 @@ public final class LocalStorage {
      * @param <T>   数据的类型
      * @param clazz 待移除的数据的key
      */
-    public synchronized <T> void remove(Class<T> clazz) {
+    public static synchronized <T> void remove(Class<T> clazz) {
         if (null == clazz) {
             return;
         }
@@ -192,7 +192,7 @@ public final class LocalStorage {
      *
      * @return 所有存储的数据的key
      */
-    public synchronized Set<String> keys() {
+    public static synchronized Set<String> keys() {
         return LOCAL_HOLDER.keySet();
     }
 
@@ -202,7 +202,7 @@ public final class LocalStorage {
      * @param key 指定的key
      * @return 包含返回为true, 否则为false
      */
-    public synchronized boolean keys(String key) {
+    public static synchronized boolean keys(String key) {
         if (StringUtils.isBlank(key)) {
             return false;
         }
@@ -212,7 +212,7 @@ public final class LocalStorage {
     /**
      * 清空所有存储的数据
      */
-    public synchronized void clear() {
+    public static synchronized void clear() {
         LOCAL_HOLDER.clear();
     }
 }
