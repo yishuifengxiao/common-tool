@@ -566,7 +566,7 @@ ImageUtil.base64ToImage(image2Base64, "待保存的图片的地址");
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.context.LocalStorage
+com.yishuifengxiao.common.tool.context.LocalCache
 ```
 
 示例代码:
@@ -706,13 +706,13 @@ int bool2Int = NumberUtil.bool2Int(true);
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.utils.CallbackUtil
+com.yishuifengxiao.common.tool.utils.ExecuteUtil
 ```
 
 示例代码:
 
 ```java
-CallbackUtil.execute(() -> {
+ExecuteUtil.execute(() -> {
     System.out.println("-------- 回调");
 });
 ```

@@ -20,7 +20,7 @@ import java.util.Set;
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class LocalStorage {
+public final class LocalCache {
     /**
      * 本地线程存储
      */
