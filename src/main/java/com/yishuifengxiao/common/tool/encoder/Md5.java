@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 /**
@@ -26,6 +26,8 @@ import java.security.MessageDigest;
  */
 @Slf4j
 public class Md5 {
+    private static final String[] HEX_DIGITS = {"0", "1", "2", "3", "4", "5",
+            "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
 
     /**
      * 对字符串md5加密(小写+字母)
@@ -35,17 +37,40 @@ public class Md5 {
      */
     public synchronized static String md5(String str) {
         try {
-            // 生成一个MD5加密计算摘要
+            // 创建MessageDigest对象
             MessageDigest md = MessageDigest.getInstance("MD5");
-            // 计算md5函数
-            md.update(str.getBytes());
-            // digest()最后确定返回md5 hash值，返回值为8为字符串。因为md5 hash值是16位的hex值，实际上就是8位的字符
-            // BigInteger函数则将8位的字符串转换成16位hex值，用字符串来表示；得到字符串形式的hash值
-            return new BigInteger(1, md.digest()).toString(16);
+
+            byte[] bytes = md.digest(str.getBytes(StandardCharsets.UTF_8));
+            StringBuffer sb = new StringBuffer();
+            for (int i = 0; i < bytes.length; i++) {
+                sb.append(byteToHexString(bytes[i]));
+            }
+            // 将字节数组转换为16进制位,然后统一返回大写形式的字符串摘要
+            return sb.toString().toLowerCase();
         } catch (Exception e) {
-            log.info("【易水工具】使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", str, e.getMessage());
+            log.warn("【易水工具】使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", str, e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * 将1个字节（1 byte = 8 bit）转为 2个十六进制位
+     * 1个16进制位 = 4个二进制位 （即4 bit）
+     * 转换思路：最简单的办法就是先将byte转为10进制的int类型，然后将十进制数转十六进制
+     */
+    private static String byteToHexString(byte b) {
+        // byte类型赋值给int变量时，java会自动将byte类型转int类型，从低位类型到高位类型自动转换
+        int n = b;
+
+        // 将十进制数转十六进制
+        if (n < 0) {
+            n += 256;
+        }
+        int d1 = n / 16;
+        int d2 = n % 16;
+
+        // d1和d2通过访问数组变量的方式转成16进制字符串；比如 d1 为12 ，那么就转为"c"; 因为int类型不会有a,b,c,d,e,f等表示16进制的字符
+        return HEX_DIGITS[d1] + HEX_DIGITS[d2];
     }
 
     /**
@@ -59,40 +84,6 @@ public class Md5 {
             return null;
         }
         return StringUtils.substring(md5(str), 8, 24);
-    }
-
-    /**
-     * 对字符串md5加密(大写+数字)
-     *
-     * @param s 传入要加密的字符串
-     * @return MD5加密后的字符串 (32位)
-     */
-
-    public synchronized static String md5UpperCase(String s) {
-        char[] hexDigits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-
-        try {
-            byte[] btInput = s.getBytes();
-            // 获得MD5摘要算法的 MessageDigest 对象
-            MessageDigest mdInst = MessageDigest.getInstance("MD5");
-            // 使用指定的字节更新摘要
-            mdInst.update(btInput);
-            // 获得密文
-            byte[] md = mdInst.digest();
-            // 把密文转换成十六进制的字符串形式
-            int j = md.length;
-            char[] str = new char[j * 2];
-            int k = 0;
-            for (int i = 0; i < j; i++) {
-                byte byte0 = md[i];
-                str[k++] = hexDigits[byte0 >>> 4 & 0xf];
-                str[k++] = hexDigits[byte0 & 0xf];
-            }
-            return new String(str);
-        } catch (Exception e) {
-            log.info("【易水工具】使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", s, e.getMessage());
-            return null;
-        }
     }
 
     /**
