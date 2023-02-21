@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * <p>数据流工具类</p>
+ * <p>数据流工具</p>
  * <p>
  * <strong>该工具是一个线程安全类的工具</strong>
  * </p>
