@@ -63,7 +63,7 @@ public final class ClassUtil {
         List<Field> fields = fields(null, clazz);
 
         return noSpecialModifier
-                ? fields.parallelStream().filter(v -> !isSpecialModifier(v)).collect(Collectors.toList())
+                ? fields.stream().filter(v -> !isSpecialModifier(v)).collect(Collectors.toList())
                 : fields;
     }
 
@@ -76,13 +76,11 @@ public final class ClassUtil {
      * @return 所有提取的属性字段
      */
     private static <T> List<Field> fields(List<Field> list, Class<T> clazz) {
-        if (null == list) {
-            list = new ArrayList<>();
-        }
+        list = null == list ? new ArrayList<>() : list;
         DataUtil.stream(clazz.getDeclaredFields()).filter(Objects::nonNull).forEach(list::add);
         Class<? super T> superclass = clazz.getSuperclass();
         if (null == superclass || superclass.isAssignableFrom(Object.class)) {
-            return list.parallelStream().filter(Objects::nonNull).collect(Collectors.toList());
+            return list.stream().filter(Objects::nonNull).collect(Collectors.toList());
         }
         return fields(list, superclass);
     }
@@ -131,11 +129,7 @@ public final class ClassUtil {
         }
 
         // 属性为接口
-        if (Modifier.isInterface(field.getModifiers())) {
-            return true;
-        }
-
-        return false;
+        return Modifier.isInterface(field.getModifiers());
     }
 
     /**
@@ -150,7 +144,7 @@ public final class ClassUtil {
             return null;
         }
         try {
-            Field field = fields(data.getClass()).parallelStream().filter(v -> v.getName().equals(fieldName.trim()))
+            Field field = fields(data.getClass()).stream().filter(v -> v.getName().equals(fieldName.trim()))
                     .findFirst().orElse(null);
             if (null == field) {
                 return null;
