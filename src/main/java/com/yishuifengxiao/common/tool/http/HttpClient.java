@@ -236,9 +236,9 @@ public class HttpClient {
      * @param requestBody 请求体(与data 互斥)
      * @return 当前对象实例
      */
-    public HttpClient requestBody(String requestBody) {
+    public HttpClient data(String requestBody) {
         this.requestBody = requestBody;
-        return this;
+        return this.post();
     }
 
     /**
@@ -249,7 +249,7 @@ public class HttpClient {
      */
     public HttpClient data(Map<String, Object> data) {
         this.data = data;
-        return this;
+        return this.post();
     }
 
     /**
@@ -294,6 +294,47 @@ public class HttpClient {
         this.method = "get";
         return this.executeAsString();
     }
+
+    /**
+     * 设置为post请求
+     *
+     * @return 当前对象实例
+     */
+    public HttpClient post() {
+        this.method = "post";
+        return this;
+    }
+
+    /**
+     * 设置为get请求
+     *
+     * @return 当前对象实例
+     */
+    public HttpClient get() {
+        this.method = "get";
+        return this;
+    }
+
+    /**
+     * 设置为put请求
+     *
+     * @return 当前对象实例
+     */
+    public HttpClient put() {
+        this.method = "put";
+        return this;
+    }
+
+    /**
+     * 设置为delete请求
+     *
+     * @return 当前对象实例
+     */
+    public HttpClient delete() {
+        this.method = "delete";
+        return this;
+    }
+
 
     /**
      * 使用 application/x-www-form-urlencoded; charset=UTF-8 方式发送POST请求，并把响应体转换成文本
@@ -435,6 +476,7 @@ public class HttpClient {
         return null == response ? null : response.body();
     }
 
+
     /**
      * 执行请求
      *
@@ -479,7 +521,12 @@ public class HttpClient {
         Connection connection = Jsoup.connect(url);
         connection.method(getMethod(this.method));
         if (null != this.timeout) {
-            connection.timeout(this.timeout);
+            if (this.timeout < 0) {
+                connection.timeout(0);
+            } else {
+                connection.timeout(this.timeout);
+            }
+
         }
         connection.ignoreHttpErrors(true);
         connection.ignoreContentType(true);

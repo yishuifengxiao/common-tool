@@ -36,6 +36,7 @@ public class Md5 {
      * @return MD5加密后的字符串(32位)
      */
     public synchronized static String md5(String str) {
+        str = null == str ? "" : str;
         try {
             // 创建MessageDigest对象
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -80,9 +81,6 @@ public class Md5 {
      * @return MD5加密后的字符串(16位)
      */
     public synchronized static String md5Short(String str) {
-        if (StringUtils.isBlank(str)) {
-            return null;
-        }
         return StringUtils.substring(md5(str), 8, 24);
     }
 
@@ -115,6 +113,19 @@ public class Md5 {
         } finally {
             CloseUtil.close(inputStream);
         }
+    }
+
+    /**
+     * <p>
+     * 计算一个文件的MD5值(16位)
+     * </p>
+     * <strong>线程安全</strong>
+     *
+     * @param file 待计算的文件
+     * @return MD5加密后的字符串(16位)
+     */
+    public synchronized static String md5Short(File file) {
+        return StringUtils.substring(md5(file), 8, 24);
     }
 
 }
