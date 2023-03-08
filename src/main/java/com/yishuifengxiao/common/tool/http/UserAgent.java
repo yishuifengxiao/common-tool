@@ -144,7 +144,7 @@ public final class UserAgent {
      *
      * @return 浏览器UserAgent
      */
-    public final static String autoUserAgent() {
+    public static String autoUserAgent() {
         int randomVal = RandomUtils.nextInt(0, USER_AGENT_ARRAY.length);
         return USER_AGENT_ARRAY[randomVal];
     }
