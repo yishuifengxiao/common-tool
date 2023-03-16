@@ -7,10 +7,11 @@ import com.yishuifengxiao.common.tool.collections.DataUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.persistence.Transient;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -62,9 +63,7 @@ public final class ClassUtil {
     public synchronized static <T> List<Field> fields(Class<T> clazz, boolean noSpecialModifier) {
         List<Field> fields = fields(null, clazz);
 
-        return noSpecialModifier
-                ? fields.stream().filter(v -> !isSpecialModifier(v)).collect(Collectors.toList())
-                : fields;
+        return noSpecialModifier ? fields.stream().filter(v -> !isSpecialModifier(v)).collect(Collectors.toList()) : fields;
     }
 
     /**
@@ -98,9 +97,9 @@ public final class ClassUtil {
      * @return true表示被特殊修饰
      */
     public synchronized static boolean isSpecialModifier(Field field) {
-        Transient sient = field.getAnnotation(Transient.class);
+        final Annotation[] annotations = field.getAnnotations();
         // 如果被@Transient修饰了就不处理
-        if (null != sient) {
+        if (Arrays.stream(annotations).anyMatch(v -> "javax.persistence.Transient".equals(v.getClass().getName()))) {
             return true;
         }
         // 被Transient 修饰的不处理
@@ -144,8 +143,7 @@ public final class ClassUtil {
             return null;
         }
         try {
-            Field field = fields(data.getClass()).stream().filter(v -> v.getName().equals(fieldName.trim()))
-                    .findFirst().orElse(null);
+            Field field = fields(data.getClass()).stream().filter(v -> v.getName().equals(fieldName.trim())).findFirst().orElse(null);
             if (null == field) {
                 return null;
             }

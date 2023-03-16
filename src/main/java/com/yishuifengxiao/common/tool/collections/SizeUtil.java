@@ -55,35 +55,6 @@ public final class SizeUtil {
         return !isEmpty(page);
     }
 
-    /**
-     * 判断分页对象是否为空
-     *
-     * @param <T>  分页对象里元素的数据类型
-     * @param page 分页对象
-     * @return 如果是空返回为true，否则为false
-     */
-    public static <T> boolean isEmpty(org.springframework.data.domain.Page<T> page) {
-
-        if (page == null) {
-            return true;
-        }
-        if (page.getContent() == null || page.getContent().size() == 0) {
-            return true;
-        }
-        return false;
-
-    }
-
-    /**
-     * 判断分页对象是否不为空
-     *
-     * @param <T>  分页对象里元素的数据类型
-     * @param page 分页对象
-     * @return 如果不是空返回为true，否则为false
-     */
-    public static <T> boolean isNotEmpty(org.springframework.data.domain.Page<T> page) {
-        return !isEmpty(page);
-    }
 
     /**
      * 判断数组是否为空

@@ -289,31 +289,6 @@ public final class Assert {
         }
     }
 
-    /**
-     * 判断分页对象是否为空，若不为空则抛出异常
-     *
-     * @param <T>  给定的数据的类型
-     * @param msg  异常提示信息
-     * @param page 分页对象
-     */
-    public static <T> void isEmpty(String msg, org.springframework.data.domain.Page<T> page) {
-        if (SizeUtil.isNotEmpty(page)) {
-            throw new UncheckedException(msg);
-        }
-    }
-
-    /**
-     * 判断分页对象是否不为空，若为空则抛出异常
-     *
-     * @param <T>  给定的数据的类型
-     * @param msg  异常提示信息
-     * @param page 分页对象
-     */
-    public static <T> void isNotEmpty(String msg, org.springframework.data.domain.Page<T> page) {
-        if (SizeUtil.isEmpty(page)) {
-            throw new UncheckedException(msg);
-        }
-    }
 
     /**
      * 判断数组是否为空，若不为空则抛出异常
