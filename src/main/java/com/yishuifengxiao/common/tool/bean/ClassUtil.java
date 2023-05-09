@@ -7,8 +7,12 @@ import com.yishuifengxiao.common.tool.collections.DataUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.beans.Introspector;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,6 +167,63 @@ public final class ClassUtil {
      */
     public synchronized static void forEach(Object data, BiConsumer<Field, Object> action) {
         fields(data.getClass()).forEach(t -> action.accept(t, extractValue(data, t.getName())));
+    }
+
+
+    /**
+     * 根据pojo类的属性的Function函数获取原始属性的名字
+     *
+     * @param function pojo类的属性的Function函数
+     * @param <T>      the type of the input to the function
+     * @param <R>      the type of the result of the function
+     * @return pojo类的属性的Function函数对应的原始属性的名字
+     */
+    public synchronized static <T, R> String pojoFieldName(SerFunction<T, R> function) {
+
+        try {
+            Method writeReplace = function.getClass().getDeclaredMethod("writeReplace");
+            writeReplace.setAccessible(true);
+            SerializedLambda serializedLambda = (SerializedLambda) writeReplace.invoke(function);
+            // 第2步 implMethodName 即为Field对应的Getter方法名
+            String implMethodName = serializedLambda.getImplMethodName();
+            // 判断是否为boolean属性字段对应的后的is开头的getter方法
+            String instantiatedMethodType = serializedLambda.getInstantiatedMethodType();
+            boolean bool = instantiatedMethodType.endsWith("Ljava/lang/Boolean;") && implMethodName.startsWith("is");
+            String fieldName = bool ? Introspector.decapitalize(implMethodName.substring(2)) : Introspector.decapitalize(implMethodName.substring(3));
+            return fieldName;
+        } catch (Exception e) {
+            log.warn("根据pojo类的属性的Function函数获取原始属性的名字，出现问题的原因为 {}", e.getMessage());
+        }
+
+        return null;
+
+    }
+
+
+    /**
+     * Legacy version of {@link java.util.function.Function java.util.function.Functiona}.
+     *
+     * <p>The {@link SerFunction} class provides common functions and related utilities.
+     *
+     * <p>As this interface extends {@code java.util.function.Functiona}, an instance of this type can be
+     * used as a {@code java.util.function.Functiona} directly. To use a {@code
+     * java.util.function.Functiona} in a context where a {@code com.google.common.base.Functiona} is
+     * needed, use {@code function::apply}.
+     *
+     * <p>This interface is now a legacy type. Use {@code java.util.function.Functiona} (or the
+     * appropriate primitive specialization such as {@code ToIntFunction}) instead whenever possible.
+     * Otherwise, at least reduce <i>explicit</i> dependencies on this type by using lambda expressions
+     * or method references instead of classes, leaving your code easier to migrate in the future.
+     *
+     * <p>See the Guava User Guide article on <a
+     * href="https://github.com/google/guava/wiki/FunctionalExplained">the use of {@code Functiona}</a>.
+     *
+     * @author Kevin Bourrillion
+     * @since 2.0
+     */
+    @FunctionalInterface
+    public interface SerFunction<T extends Object, R extends Object> extends java.util.function.Function<T, R>, Serializable {
+
     }
 
 }
