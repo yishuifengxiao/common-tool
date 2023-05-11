@@ -94,9 +94,6 @@ public class Md5 {
      * @return 文件的MD5值(32位小写)
      */
     public synchronized static String md5(File file) {
-        if (null == file) {
-            return null;
-        }
         FileInputStream inputStream = null;
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");

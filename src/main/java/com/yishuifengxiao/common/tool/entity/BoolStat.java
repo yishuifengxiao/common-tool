@@ -129,6 +129,20 @@ public enum BoolStat {
 
 
     /**
+     * 是否为布尔值选项(是否为0或1)
+     *
+     * @param code 待判断的值
+     * @return true表示传入的值是0或1
+     */
+    public static boolean isBoolVal(Integer code) {
+        if (null == code) {
+            return false;
+        }
+        return code == 0 || code == 1;
+    }
+
+
+    /**
      * <p>是否为true值</p>
      *
      * @param stat 布尔对象值

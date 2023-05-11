@@ -40,13 +40,23 @@ public class InStringValidator implements ConstraintValidator<InString, String> 
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        if (null == value && !this.nullable) {
+
+        if (this.nullable) {
+            //允许为空
+            if (StringUtils.isBlank(value)) {
+                return true;
+            }
+            return this.sensitive ? Arrays.stream(values).filter(StringUtils::isNotBlank)
+                    .anyMatch(v -> StringUtils.equals(v, value)) :
+                    Arrays.stream(values).anyMatch(v -> StringUtils.equalsIgnoreCase(v, value));
+        }
+        //不允许为空
+        if (StringUtils.isBlank(value)) {
             return false;
         }
-        // @formatter:off
-        return this.sensitive ? Arrays.stream(values).anyMatch(v -> StringUtils.equals(v, value)) :
+        return this.sensitive ? Arrays.stream(values).filter(StringUtils::isNotBlank)
+                .anyMatch(v -> StringUtils.equals(v, value)) :
                 Arrays.stream(values).anyMatch(v -> StringUtils.equalsIgnoreCase(v, value));
-        // @formatter:on
     }
 
 }

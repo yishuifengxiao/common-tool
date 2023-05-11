@@ -11,6 +11,7 @@ import org.springframework.util.StreamUtils;
 import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
@@ -75,8 +76,9 @@ public class IoUtil {
      *
      * @param inputStream 输入流
      * @return 转换后的字节数组
+     *  @throws IOException 转换中发生异常
      */
-    public synchronized static byte[] inputStream2ByteArray(InputStream inputStream) {
+    public synchronized static byte[] inputStream2ByteArray(InputStream inputStream) throws IOException {
         if (inputStream == null) {
             return new byte[0];
         }
@@ -102,6 +104,8 @@ public class IoUtil {
         try (InputStreamReader reader = new InputStreamReader(in, charsetName)) {
             String result = new BufferedReader(reader).lines().collect(Collectors.joining(System.lineSeparator()));
             return result;
+        } finally {
+            CloseUtil.close(in);
         }
 
     }
@@ -131,13 +135,10 @@ public class IoUtil {
      * @param inputStream 文件输入流
      * @param file        待保存的目标文件
      * @return 保存后的文件
+     * @throws IOException 转换时出现问题
      */
-    public synchronized static File inputStream2File(@NotNull InputStream inputStream, @NotNull File file) {
-        try {
-            copy(inputStream, new FileOutputStream(file));
-        } catch (Exception e) {
-            throw new UncheckedException("文件转换失败，失败的原因为 " + e);
-        }
+    public synchronized static File inputStream2File(@NotNull InputStream inputStream, @NotNull File file) throws IOException {
+        copy(inputStream, new FileOutputStream(file));
         return file;
     }
 
@@ -213,8 +214,9 @@ public class IoUtil {
      * @param in  the stream to copy from
      * @param out the stream to copy to
      * @return the number of bytes copied
+     * @throws IOException 转换时出现问题
      */
-    public synchronized static int copy(InputStream in, OutputStream out) {
+    public synchronized static int copy(InputStream in, OutputStream out) throws IOException {
         try {
             int byteCount = 0;
             byte[] buffer = new byte[4096];
@@ -225,8 +227,6 @@ public class IoUtil {
             }
             out.flush();
             return byteCount;
-        } catch (Throwable e) {
-            throw new UncheckedException("复制文件流时出现问题 " + e);
         } finally {
             CloseUtil.close(out, in);
         }
@@ -241,18 +241,40 @@ public class IoUtil {
      * @param text 待输入的字符串
      * @param file 目标文件
      * @return 目标文件
+     * @throws IOException 转换时出现问题
      */
-    public synchronized static File string2File(String text, @NotNull File file) {
+    public synchronized static File string2File(String text, @NotNull File file) throws IOException {
         if (StringUtils.isBlank(text) || null == file) {
             return file;
         }
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
             bw.write(text);
             bw.flush();
-        } catch (Exception e) {
-            throw new UncheckedException("文件转换失败，失败的原因为 " + e);
         }
         return file;
+    }
+
+    /**
+     * 将文件按照utf-8编码转换为字符串
+     *
+     * @param file 待转换的文件
+     * @return 转换后的字符串
+     * @throws IOException 转换时出现问题
+     */
+    public synchronized static String file2String(@NotNull File file) throws IOException {
+        return inputStream2String(new FileInputStream(file), StandardCharsets.UTF_8.name());
+    }
+
+    /**
+     * 将文件按照指定的编码转换为字符串
+     *
+     * @param file        待转换的文件
+     * @param charsetName 编码
+     * @return 转换后的字符串
+     * @throws IOException 转换时出现问题
+     */
+    public synchronized static String file2String(@NotNull File file, String charsetName) throws IOException {
+        return inputStream2String(new FileInputStream(file), charsetName);
     }
 
     /**

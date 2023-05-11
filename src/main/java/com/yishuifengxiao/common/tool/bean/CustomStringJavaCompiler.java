@@ -16,7 +16,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Create by andy on 2018-12-06 21:25
+ * <p>
+ * 源码编译器
+ * </p>
+ *
+ * @author yishui
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public class CustomStringJavaCompiler {
     /**

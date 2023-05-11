@@ -34,10 +34,10 @@ public class InIntValidator implements ConstraintValidator<InInt, Integer> {
 
     @Override
     public boolean isValid(Integer value, ConstraintValidatorContext context) {
-        if (null == value && !this.nullable) {
-            return false;
+        if (!this.nullable) {
+            return null != value && Arrays.stream(this.values).anyMatch(v -> CompareUtil.equals(v, value));
         }
-        return Arrays.stream(values).anyMatch(v -> CompareUtil.equals(v, value));
+        return null == value || Arrays.stream(this.values).anyMatch(v -> CompareUtil.equals(v, value));
     }
 
 }
