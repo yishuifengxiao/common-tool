@@ -76,7 +76,7 @@ public class Page<S> implements Serializable {
      * @param converter 分页元素转换工具
      * @return 另一种数据类型的分页对象
      */
-    public synchronized <T> Page<T> map(PageConverter<S, T> converter) {
+    public synchronized <T> Page<T> map(DataConverter<S, T> converter) {
         if (null == this.data) {
             return Page.of(Collections.emptyList(), this.total, this.pageSize, this.pageNum);
         }
@@ -90,7 +90,7 @@ public class Page<S> implements Serializable {
      * @param converter 分页元素转换工具
      * @return 另一种数据类型的分页对象
      */
-    public synchronized <T> Page<T> map(DataConverter<S, T> converter) {
+    public synchronized <T> Page<T> maps(ListConverter<S, T> converter) {
         if (null == this.data) {
             return Page.of(Collections.emptyList(), this.total, this.pageSize, this.pageNum);
         }
@@ -388,7 +388,7 @@ public class Page<S> implements Serializable {
      * @since 1.0.0
      */
     @FunctionalInterface
-    public interface PageConverter<S, T> {
+    public interface DataConverter<S, T> {
 
         /**
          * 将源数据转换成目标数据
@@ -412,7 +412,7 @@ public class Page<S> implements Serializable {
      * @since 1.0.0
      */
     @FunctionalInterface
-    public interface DataConverter<S, T> {
+    public interface ListConverter<S, T> {
 
         /**
          * 将源数据转换成目标数据
