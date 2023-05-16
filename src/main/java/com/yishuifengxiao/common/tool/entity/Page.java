@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
  * </p>
  * 统一分页数据的返回形式
  *
+ * @param <S> 分页里数据的数据类型
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
- * @param <S> 分页里数据的数据类型
  */
 @ApiModel(value = " 通用分页对象", description = "用于所有接口的通用返回数据")
 public class Page<S> implements Serializable {
@@ -70,7 +70,7 @@ public class Page<S> implements Serializable {
     protected Integer pageNum;
 
     /**
-     * 将一种类型数据的分页对象转换成另一种数据类型的分页对象
+     * <p>将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
      *
      * @param <T>       分页元素转换工具的类型
      * @param converter 分页元素转换工具
@@ -84,10 +84,24 @@ public class Page<S> implements Serializable {
     }
 
     /**
+     * <p>将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
+     *
+     * @param <T>       分页元素转换工具的类型
+     * @param converter 分页元素转换工具
+     * @return 另一种数据类型的分页对象
+     */
+    public synchronized <T> Page<T> map(DataConverter<S, T> converter) {
+        if (null == this.data) {
+            return Page.of(Collections.emptyList(), this.total, this.pageSize, this.pageNum);
+        }
+        return Page.of(converter.map(this.data), this.total, this.pageSize, this.pageNum);
+    }
+
+    /**
      * <p>
      * 构造一个空的分页对象
      * </p>
-     *
+     * <p>
      * 该分页对象的属性为:
      * <ol>
      * <li>分页大小:0</li>
@@ -100,14 +114,14 @@ public class Page<S> implements Serializable {
      * @return 分页对象
      */
     public static <S> Page<S> ofEmpty() {
-        return new Page<>(new ArrayList<>(), 0L, 0L, 0, DEFAULT_PAGE_NUM);
+        return new Page<>(new ArrayList<>(), 0L, 0L, DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUM);
     }
 
     /**
      * <p>
      * 构造一个空的分页对象
      * </p>
-     *
+     * <p>
      * 该分页对象的属性为:
      * <ol>
      * <li>分页大小:输入的pageSize的值</li>
@@ -128,7 +142,7 @@ public class Page<S> implements Serializable {
      * <p>
      * 根据数据构造当前页为1，分页大小为数据大小的分页对象
      * </p>
-     *
+     * <p>
      * 该分页对象的属性为:
      * <ol>
      * <li>分页大小:data.size()</li>
@@ -219,21 +233,6 @@ public class Page<S> implements Serializable {
         return new Page<>(data, total, page(total, pageSize).longValue(), pageSize, pageNum);
     }
 
-    /**
-     * 根据分页信息来源对象生成分页对象
-     *
-     * @param <S>    源分页对象里的数据的类型
-     * @param <U>    目标分页对象的数据的类型
-     * @param source 当前页数据
-     * @param data   分页信息来源对象
-     * @return 分页对象
-     */
-    public static <S, U> Page<S> of(Page<U> source, List<S> data) {
-        if (null == source) {
-            return Page.ofEmpty();
-        }
-        return Page.of(data, source.getTotal(), source.getPageSize(), source.getPageNum());
-    }
 
     /**
      * 获取分页大小
@@ -382,11 +381,11 @@ public class Page<S> implements Serializable {
      * </p>
      * 将分页对象里的源数据转换成目标数据
      *
+     * @param <S> 源数据
+     * @param <T> 目标数据
      * @author yishui
      * @version 1.0.0
      * @since 1.0.0
-     * @param <S> 源数据
-     * @param <T> 目标数据
      */
     @FunctionalInterface
     public interface PageConverter<S, T> {
@@ -401,9 +400,34 @@ public class Page<S> implements Serializable {
     }
 
     /**
+     * <p>
+     * 分页数据转换器
+     * </p>
+     * 将分页对象里的源数据转换成目标数据
+     *
+     * @param <S> 源数据
+     * @param <T> 目标数据
+     * @author yishui
+     * @version 1.0.0
+     * @since 1.0.0
+     */
+    @FunctionalInterface
+    public interface DataConverter<S, T> {
+
+        /**
+         * 将源数据转换成目标数据
+         *
+         * @param s 源数据
+         * @return 目标数据
+         */
+        List<T> map(List<S> s);
+    }
+
+    /**
      * 计算分页大小
+     *
      * @param total 全部数据数量
-     * @param size 分页大小，若为空则默认为10
+     * @param size  分页大小，若为空则默认为10
      * @return 分页数量
      */
     public static Number page(Number total, Number size) {
