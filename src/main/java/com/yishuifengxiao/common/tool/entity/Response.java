@@ -145,7 +145,7 @@ public class Response<T> implements Serializable {
      * @return 表示成功的响应对象(响应码200)
      */
     public static <T> Response<T> suc(String msg, T data) {
-        return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, data);
+        return new Response<>(HttpStatus.OK.value(), msg, data);
     }
 
     /**
