@@ -76,7 +76,7 @@ public class IoUtil {
      *
      * @param inputStream 输入流
      * @return 转换后的字节数组
-     *  @throws IOException 转换中发生异常
+     * @throws IOException 转换中发生异常
      */
     public synchronized static byte[] inputStream2ByteArray(InputStream inputStream) throws IOException {
         if (inputStream == null) {
@@ -102,8 +102,10 @@ public class IoUtil {
      */
     public synchronized static String inputStream2String(InputStream in, String charsetName) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(in, charsetName)) {
-            String result = new BufferedReader(reader).lines().collect(Collectors.joining(System.lineSeparator()));
-            return result;
+            try (BufferedReader bw = new BufferedReader(reader)) {
+                String result = bw.lines().collect(Collectors.joining(System.lineSeparator()));
+                return result;
+            }
         } finally {
             CloseUtil.close(in);
         }
@@ -180,8 +182,7 @@ public class IoUtil {
      * @return 对应的编码文本
      * @throws IOException 读取时出现问题
      */
-    public synchronized static <T> String readResourceAsString(Class<T> clazz, String name, String charsetName)
-            throws IOException {
+    public synchronized static <T> String readResourceAsString(Class<T> clazz, String name, String charsetName) throws IOException {
         return inputStream2String(clazz.getClassLoader().getResourceAsStream(name), charsetName);
     }
 

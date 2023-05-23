@@ -109,7 +109,8 @@ public class CustomStringJavaCompiler {
     /**
      * @return 编译信息(错误 警告)
      */
-    public String getCompilerMessage() {
+    @SuppressWarnings("rawtypes")
+	public String getCompilerMessage() {
         StringBuilder sb = new StringBuilder();
         List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
         for (Diagnostic diagnostic : diagnostics) {
@@ -205,8 +206,10 @@ public class CustomStringJavaCompiler {
     /**
      * 自定义一个JavaFileManage来控制编译之后字节码的输出位置
      */
-    private class StringJavaFileManage extends ForwardingJavaFileManager {
-        StringJavaFileManage(JavaFileManager fileManager) {
+    @SuppressWarnings("rawtypes")
+	private class StringJavaFileManage extends ForwardingJavaFileManager {
+        @SuppressWarnings("unchecked")
+		StringJavaFileManage(JavaFileManager fileManager) {
             super(fileManager);
         }
 
