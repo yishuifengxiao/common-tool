@@ -232,6 +232,28 @@ public final class SystemUtil {
     }
 
     /**
+     * <p>获取系统临时文件目录地址</p>
+     * <p>在windows下地址的形式为 <code>C:\Users\yishui\AppData\Local\Temp\</code></p>
+     *
+     * @return 系统临时文件目录地址
+     */
+    public String tmpdir() {
+        return System.getProperty("java.io.tmpdir");
+    }
+
+    /**
+     * <p>获取用户的当前工作目录地址</p>
+     * <p>在linux下地址的形式为 <code>/home/yishui/appname</code></p>
+     * <p>在windows下地址的形式为 <code>D:\yishui\appname</code></p>
+     *
+     * @return 用户的当前工作目录地址
+     */
+    public String userDir() {
+
+        return System.getProperty("user.dir");
+    }
+
+    /**
      * 获取操作系统类型
      *
      * @return 操作系统类型
@@ -379,5 +401,5 @@ public final class SystemUtil {
 
     }
 
-  
+
 }
