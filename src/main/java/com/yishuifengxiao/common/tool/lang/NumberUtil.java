@@ -172,7 +172,7 @@ public final class NumberUtil {
             if (null == val || StringUtils.isBlank(val.toString())) {
                 return null;
             }
-            return new BigDecimal(val.toString().trim());
+            return new BigDecimal(val.toString().replaceAll(",", "").trim());
         } catch (Throwable e) {
             log.debug("将数据【{}】转换为数值时出现问题 {}", val, e);
         }

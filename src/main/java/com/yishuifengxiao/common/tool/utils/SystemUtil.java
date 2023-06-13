@@ -237,7 +237,7 @@ public final class SystemUtil {
      *
      * @return 系统临时文件目录地址
      */
-    public String tmpdir() {
+    public static String tmpdir() {
         return System.getProperty("java.io.tmpdir");
     }
 
@@ -248,7 +248,7 @@ public final class SystemUtil {
      *
      * @return 用户的当前工作目录地址
      */
-    public String userDir() {
+    public static String userDir() {
 
         return System.getProperty("user.dir");
     }
