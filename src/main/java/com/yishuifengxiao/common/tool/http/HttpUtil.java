@@ -1,7 +1,7 @@
 package com.yishuifengxiao.common.tool.http;
 
 import com.yishuifengxiao.common.tool.text.RegexUtil;
-import com.yishuifengxiao.common.tool.utils.SystemUtil;
+import com.yishuifengxiao.common.tool.utils.OsUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -139,21 +139,21 @@ public final class HttpUtil {
             // 已经是网络地址
             return url;
         }
-        if (StringUtils.startsWith(url, SystemUtil.LEFT_SLASH)) {
+        if (StringUtils.startsWith(url, OsUtils.LEFT_SLASH)) {
             // 左斜杠开头，绝对地址
-            return StringUtils.substringBeforeLast(referrer, SystemUtil.LEFT_SLASH) + url;
+            return StringUtils.substringBeforeLast(referrer, OsUtils.LEFT_SLASH) + url;
         }
         if (StringUtils.startsWith(url, RELATIVE_ADDR)) {
             // 以../开头的地址
             long count = StringUtils.countMatches(url, RELATIVE_ADDR);
             for (int i = 0; i <= count; i++) {
-                referrer = StringUtils.substringBeforeLast(referrer, SystemUtil.LEFT_SLASH);
+                referrer = StringUtils.substringBeforeLast(referrer, OsUtils.LEFT_SLASH);
             }
             url = url.replaceAll("\\.\\./", "");
-            return referrer + SystemUtil.LEFT_SLASH + url;
+            return referrer + OsUtils.LEFT_SLASH + url;
         }
         // 相对地址
-        return StringUtils.substringBeforeLast(referrer, SystemUtil.LEFT_SLASH) + SystemUtil.LEFT_SLASH + url;
+        return StringUtils.substringBeforeLast(referrer, OsUtils.LEFT_SLASH) + OsUtils.LEFT_SLASH + url;
     }
 
     /**
@@ -174,7 +174,7 @@ public final class HttpUtil {
         if (StringUtils.isBlank(queryString)) {
             return null;
         }
-        String[] tokens = StringUtils.splitByWholeSeparatorPreserveAllTokens(queryString, SystemUtil.SEPARATOR_AND);
+        String[] tokens = StringUtils.splitByWholeSeparatorPreserveAllTokens(queryString, OsUtils.SEPARATOR_AND);
         if (null == tokens) {
             return null;
         }

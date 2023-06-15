@@ -3,8 +3,8 @@
  */
 package com.yishuifengxiao.common.tool.random;
 
-import com.yishuifengxiao.common.tool.datetime.DateTimeUtil;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.utils.OsUtils;
 import org.apache.commons.lang3.RandomUtils;
 
 import java.io.UnsupportedEncodingException;
@@ -80,7 +80,7 @@ public class RandomUtil {
      * @return 形如yyyyMMddhhmmss的字符串
      */
     public static final synchronized String fromNow() {
-        return LocalDateTime.now(DateTimeUtil.zoneIdOfChina()).format(FORMAT);
+        return LocalDateTime.now(OsUtils.ZONEID_OF_CHINA).format(FORMAT);
 
     }
 
@@ -91,7 +91,7 @@ public class RandomUtil {
      * @return 形如 前缀+yyyyMMddhhmmss的字符串
      */
     public static final synchronized String fromNow(String prefix) {
-        return new StringBuffer(prefix).append(LocalDateTime.now(DateTimeUtil.zoneIdOfChina()).format(FORMAT)).toString();
+        return new StringBuffer(prefix).append(LocalDateTime.now(OsUtils.ZONEID_OF_CHINA).format(FORMAT)).toString();
 
     }
 
@@ -104,7 +104,7 @@ public class RandomUtil {
      * @return 形如yyyyMMddhhmmss100的字符串
      */
     public static final synchronized String fromNowWithNumber() {
-        return new StringBuffer(LocalDateTime.now(DateTimeUtil.zoneIdOfChina()).format(FORMAT)).append(RandomUtils.nextInt(100, 999)).toString();
+        return new StringBuffer(LocalDateTime.now(OsUtils.ZONEID_OF_CHINA).format(FORMAT)).append(RandomUtils.nextInt(100, 999)).toString();
     }
 
 }
