@@ -267,10 +267,12 @@ import java.util.Map;
  * <tr>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">/store/book/author</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">/store/book/author</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.store.book[*].author</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.store.book[*]
+ * .author</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><div style="padding: 0; margin:
  * 0">所有书的作者</div></td>
@@ -303,11 +305,13 @@ import java.util.Map;
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">/store//price</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">/store//price</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.store..price</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.store.
+ * .price</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><div style="padding: 0; margin: 0">store里面所有东西的price</div></td>
@@ -327,11 +331,13 @@ import java.util.Map;
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[last()]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[last()
+ * ]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[(&#64;.length-1)]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[(&#64;
+ * .length-1)]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)">最后一本书</td>
@@ -339,12 +345,15 @@ import java.util.Map;
  * <tr>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[position()&lt;3]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[position()
+ * &lt;3]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[0,1]</code><div
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[0,
+ * 1]</code><div
  * style="padding: 0; margin: 0"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[:2]</code></div></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.
+ * .book[:2]</code></div></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)">前面的两本书。</td>
  * </tr>
@@ -352,11 +361,13 @@ import java.util.Map;
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[isbn]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">//book[isbn]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[?(&#64;.isbn)]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[?(&#64;
+ * .isbn)]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)">&nbsp;过滤出所有的包含isbn的书。</td>
@@ -364,10 +375,12 @@ import java.util.Map;
  * <tr>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[price&lt;10]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[price&lt;
+ * 10]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[?(&#64;.price&lt;10)]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[?(&#64;
+ * .price&lt;10)]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)">过滤出价格低于10的书。</td>
  * </tr>
@@ -388,7 +401,6 @@ import java.util.Map;
  * </tbody>
  * </table>
  *
- *
  * @author qingteng
  * @version 1.0.0
  * @since 1.0.0
@@ -404,7 +416,7 @@ public final class JsonUtil {
      * @param clazz JAVA对象
      * @return 转换后的JAVA对象
      */
-    public synchronized static <T> T str2Bean(String json, Class<T> clazz) {
+    public static <T> T str2Bean(String json, Class<T> clazz) {
         if (StringUtils.isBlank(json)) {
             return null;
         }
@@ -426,7 +438,7 @@ public final class JsonUtil {
      * @param clazz JAVA对象
      * @return 转换后对象集合
      */
-    public synchronized static <T> List<T> str2List(String json, Class<T> clazz) {
+    public static <T> List<T> str2List(String json, Class<T> clazz) {
         List<T> t = null;
         try {
             t = JSONObject.parseArray(json.trim(), clazz);
@@ -449,7 +461,7 @@ public final class JsonUtil {
      * @param jsonPath 提取表达式
      * @return 提取出来的字符串
      */
-    public synchronized static <T> T extract(String json, String jsonPath) {
+    public static <T> T extract(String json, String jsonPath) {
         if (StringUtils.isBlank(json)) {
             return null;
         }
@@ -466,14 +478,13 @@ public final class JsonUtil {
     /**
      * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JAVA对象
      *
-     *
      * @param <T>      java对象类型
      * @param json     json格式的字符串
      * @param jsonPath json表达式
      * @param clazz    待转换的java对象
      * @return 转换后的java对象
      */
-    public synchronized static <T> T extract(String json, String jsonPath, Class<T> clazz) {
+    public static <T> T extract(String json, String jsonPath, Class<T> clazz) {
         Object data = extract(json, jsonPath);
         if (null == data) {
             return null;
@@ -484,12 +495,11 @@ public final class JsonUtil {
     /**
      * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JSONObject对象
      *
-     *
      * @param json     json格式的字符串
      * @param jsonPath json表达式
      * @return 转换后的java对象
      */
-    public synchronized static JSONObject extractJSON(String json, String jsonPath) {
+    public static JSONObject extractJSON(String json, String jsonPath) {
         Object data = extract(json, jsonPath);
         if (null == data) {
             return null;
@@ -515,7 +525,7 @@ public final class JsonUtil {
      * @param clazz    待转换的java对象
      * @return 转换后的java对象集合
      */
-    public synchronized static <T> List<T> extractList(String json, String jsonPath, Class<T> clazz) {
+    public static <T> List<T> extractList(String json, String jsonPath, Class<T> clazz) {
         Object data = extract(json, jsonPath);
         if (null == data) {
             return null;
@@ -529,7 +539,7 @@ public final class JsonUtil {
      * @param data 待转换的数据
      * @return 转换后的json对象，若转换失败则返回null
      */
-    public synchronized static JSONObject toJSON(Object data) {
+    public static JSONObject toJSON(Object data) {
         if (null == data) {
             return null;
         }
@@ -549,7 +559,7 @@ public final class JsonUtil {
      * @param jsonStr 待转换的数据
      * @return 转换后的json对象，若转换失败则返回null
      */
-    public synchronized static JSONObject str2JSONObject(String jsonStr) {
+    public static JSONObject str2JSONObject(String jsonStr) {
         if (StringUtils.isBlank(jsonStr)) {
             return null;
         }
@@ -569,7 +579,7 @@ public final class JsonUtil {
      * @param jsonStr 待转换的数据
      * @return 转换后的json数组，若转换失败则返回null
      */
-    public synchronized static JSONArray str2JSONArray(String jsonStr) {
+    public static JSONArray str2JSONArray(String jsonStr) {
         if (StringUtils.isBlank(jsonStr)) {
             return null;
         }
@@ -589,7 +599,7 @@ public final class JsonUtil {
      * @param text 待转换的数据
      * @return 转换后的map对象，若转换失败则返回null
      */
-    public synchronized static Map<String, Object> json2Map(String text) {
+    public static Map<String, Object> json2Map(String text) {
         if (StringUtils.isBlank(text)) {
             return null;
         }
@@ -605,10 +615,11 @@ public final class JsonUtil {
 
     /**
      * 判断字符串是否为json对象格式
+     *
      * @param text 字符串
      * @return 字符串是否为json对象格式返回为true, 否则为false
      */
-    public synchronized static boolean isJSONObject(String text) {
+    public static boolean isJSONObject(String text) {
         if (StringUtils.isBlank(text)) {
             return false;
         }
@@ -622,10 +633,11 @@ public final class JsonUtil {
 
     /**
      * 判断字符串是否为json数组格式
+     *
      * @param text 字符串
      * @return 字符串是否为json数组格式返回为true, 否则为false
      */
-    public synchronized static boolean isJSONArray(String text) {
+    public static boolean isJSONArray(String text) {
         if (StringUtils.isBlank(text)) {
             return false;
         }

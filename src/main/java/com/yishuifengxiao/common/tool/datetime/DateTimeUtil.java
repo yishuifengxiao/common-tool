@@ -8,6 +8,7 @@ import com.yishuifengxiao.common.tool.utils.OsUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -59,7 +60,7 @@ public final class DateTimeUtil {
      * @param date 给定的时间
      * @return 转换后的时间
      */
-    public static synchronized LocalDateTime date2LocalDateTime(Date date) {
+    public static LocalDateTime date2LocalDateTime(Date date) {
         if (null == date) {
             return null;
         }
@@ -73,7 +74,7 @@ public final class DateTimeUtil {
      * @param localDateTime 给定的时间
      * @return 转换后的时间
      */
-    public static synchronized Date localDateTime2Date(LocalDateTime localDateTime) {
+    public static Date localDateTime2Date(LocalDateTime localDateTime) {
         if (null == localDateTime) {
             return null;
         }
@@ -86,7 +87,7 @@ public final class DateTimeUtil {
      * @param localDateTime 给定的时间
      * @return 由此LocalDateTime对应的 Date对象表示的00:00:00 GMT的毫秒 数 。
      */
-    public static synchronized Long getTime(LocalDateTime localDateTime) {
+    public static Long getTime(LocalDateTime localDateTime) {
         if (null == localDateTime) {
             return null;
         }
@@ -100,7 +101,7 @@ public final class DateTimeUtil {
      * @param date 给定的时间
      * @return 由此 Date对象表示的00:00:00 GMT的毫秒 数 。
      */
-    public static synchronized Long getTime(Date date) {
+    public static Long getTime(Date date) {
         if (null == date) {
             return null;
         }
@@ -113,7 +114,7 @@ public final class DateTimeUtil {
      * @param milliseconds 从1970-01-01T00：00：00Z的时代开始的毫秒 数
      * @return 从1970-01-01T00：00：00Z的时代开始的毫秒 数获得一个LocalDateTime的实例
      */
-    public static synchronized LocalDateTime getLocalDateTime(long milliseconds) {
+    public static LocalDateTime getLocalDateTime(long milliseconds) {
         return date2LocalDateTime(new Date(milliseconds));
     }
 
@@ -127,7 +128,7 @@ public final class DateTimeUtil {
      * @param timeStr 需要解析的字符串
      * @return LocalDateTime形式的时间
      */
-    public static synchronized LocalDateTime parse(String timeStr) {
+    public static LocalDateTime parse(String timeStr) {
         return parse(timeStr, DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT, SIMPLE_DATETIME_FORMAT);
     }
 
@@ -138,10 +139,21 @@ public final class DateTimeUtil {
      * @param patterns 解析规则 当未填写解析规则时
      * @return LocalDateTime形式的时间
      */
-    public static synchronized LocalDateTime parse(String timeStr, String... patterns) {
+    public static LocalDateTime parse(String timeStr, String... patterns) {
+        return date2LocalDateTime(parseDate(timeStr, patterns));
+    }
+
+    /**
+     * 将字符串解析为Date 形式的时间
+     *
+     * @param timeStr  需要解析的字符串
+     * @param patterns 解析规则 当未填写解析规则时
+     * @return Date形式的时间
+     */
+    public synchronized static Date parseDate(String timeStr, String... patterns) {
 
         try {
-            return date2LocalDateTime(DateUtils.parseDate(timeStr, patterns));
+            return DateUtils.parseDate(timeStr, patterns);
         } catch (Exception e) {
             log.info("【易水工具】按照解析规则 {} 从字符串 {} 中解析出时间时出现问题，出现问题的原因为{}", patterns, timeStr, e.getMessage());
             throw new UncheckedException("从字符串中解析时间失败").setContext(e);
@@ -154,7 +166,7 @@ public final class DateTimeUtil {
      * @param localDateTime 给定的时间
      * @return yyyy-MM-dd HH:mm:ss格式的字符串
      */
-    public static synchronized String format(LocalDateTime localDateTime) {
+    public static String format(LocalDateTime localDateTime) {
         return format(localDateTime, DEFAULT_DATETIME_FORMAT);
     }
 
@@ -165,7 +177,7 @@ public final class DateTimeUtil {
      * @param pattern       格式化形式，例如yyyy-MM-dd HH:mm:ss
      * @return 指定形式的字符串
      */
-    public static synchronized String format(LocalDateTime localDateTime, String pattern) {
+    public synchronized static String format(LocalDateTime localDateTime, String pattern) {
         if (null == localDateTime) {
             return null;
         }
@@ -184,8 +196,8 @@ public final class DateTimeUtil {
         if (null == date) {
             return null;
         }
-        DateTimeFormatter format = DateTimeFormatter.ofPattern(pattern);
-        return format.format(date2LocalDateTime(date));
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
+        return format.format(date);
     }
 
     /**
@@ -194,7 +206,7 @@ public final class DateTimeUtil {
      * @param date 给定的时间
      * @return yyyy-MM-dd HH:mm:ss格式的字符串
      */
-    public static synchronized String format(Date date) {
+    public static String format(Date date) {
         return format(date, DEFAULT_DATETIME_FORMAT);
     }
 
@@ -204,7 +216,7 @@ public final class DateTimeUtil {
      * @param date 给定的时间
      * @return yyyy-MM-dd 格式的字符串
      */
-    public static synchronized String formatDate(Date date) {
+    public static String formatDate(Date date) {
         return format(date, DEFAULT_DATE_FORMAT);
     }
 
@@ -214,7 +226,7 @@ public final class DateTimeUtil {
      * @param currentTimeMillis 时间戳
      * @return yyyy-MM-dd HH:mm:ss 格式化后的字符串
      */
-    public static synchronized String formatDate(long currentTimeMillis) {
+    public static String formatDate(long currentTimeMillis) {
         return format(currentTimeMillis, DEFAULT_DATETIME_FORMAT);
     }
 
@@ -225,7 +237,7 @@ public final class DateTimeUtil {
      * @param pattern           格式化形式，例如yyyy-MM-dd HH:mm:ss
      * @return 指定形式的字符串
      */
-    public static synchronized String format(long currentTimeMillis, String pattern) {
+    public static String format(long currentTimeMillis, String pattern) {
         return format(new Date(currentTimeMillis), pattern);
     }
 
@@ -235,7 +247,7 @@ public final class DateTimeUtil {
      * @param localDateTime 给定的时间
      * @return yyyy-MM-dd 格式的字符串
      */
-    public static synchronized String formatDate(LocalDateTime localDateTime) {
+    public static String formatDate(LocalDateTime localDateTime) {
         return format(localDateTime, DEFAULT_DATE_FORMAT);
     }
 

@@ -285,7 +285,7 @@ public final class OsUtils {
      *
      * @return 用户的当前工作目录地址
      */
-    public static synchronized File currentWorkPath() {
+    public static   File currentWorkPath() {
         return new File(userDir());
     }
 
@@ -295,7 +295,7 @@ public final class OsUtils {
      * @param name 待创建的子目录的名字
      * @return 在当前工作目录下创建的子目录
      */
-    public static synchronized File currentWorkSubdirectory(String name) {
+    public static   File currentWorkSubdirectory(String name) {
         return new File(currentWorkPath(), name);
     }
 
@@ -320,7 +320,7 @@ public final class OsUtils {
      * @return JAVA文件的编码
      */
     public static String fileEncoding() {
-        return System.getProperty("os.name");
+        return System.getProperty("file.encoding");
     }
 
 

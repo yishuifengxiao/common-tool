@@ -323,7 +323,7 @@ public final class Assert {
      * @param msg  异常提示信息
      * @param data 待判定的集合
      */
-    public synchronized static <T> void isEmpty(String msg, Collection<T> data) {
+    public   static <T> void isEmpty(String msg, Collection<T> data) {
         if (null != data && data.size() > 0) {
             throw new UncheckedException(msg);
         }

@@ -26,8 +26,8 @@ import java.security.MessageDigest;
  */
 @Slf4j
 public class Md5 {
-    private static final String[] HEX_DIGITS = {"0", "1", "2", "3", "4", "5",
-            "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
+    private static final String[] HEX_DIGITS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
+            "e", "f"};
 
     /**
      * 对字符串md5加密(小写+字母)
@@ -35,7 +35,7 @@ public class Md5 {
      * @param str 传入要加密的字符串
      * @return MD5加密后的字符串(32位)
      */
-    public synchronized static String md5(String str) {
+    public static String md5(String str) {
         str = null == str ? "" : str;
         try {
             // 创建MessageDigest对象
@@ -80,7 +80,7 @@ public class Md5 {
      * @param str 传入要加密的字符串
      * @return MD5加密后的字符串(16位)
      */
-    public synchronized static String md5Short(String str) {
+    public static String md5Short(String str) {
         return StringUtils.substring(md5(str), 8, 24);
     }
 

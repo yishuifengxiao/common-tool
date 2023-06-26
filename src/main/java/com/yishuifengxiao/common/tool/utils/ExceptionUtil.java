@@ -24,7 +24,7 @@ public class ExceptionUtil {
 	 * @param throwable 异常
 	 * @return 异常中的所有输出信息
 	 */
-	public static synchronized String extractError(Throwable throwable) {
+	public static   String extractError(Throwable throwable) {
 		if (null == throwable) {
 			return null;
 		}

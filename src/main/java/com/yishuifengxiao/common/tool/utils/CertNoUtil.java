@@ -1,14 +1,12 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>
@@ -54,7 +52,7 @@ public final class CertNoUtil {
 	 * @param idcard 身份证号
 	 * @return true表示合法，false不合法
 	 */
-	public static synchronized boolean isValid(String idcard) { // 非18位为假
+	public static   boolean isValid(String idcard) { // 非18位为假
 		// 判断出生日期是否正确
 		if (StringUtils.isBlank(idcard)) {
 			return false;
@@ -102,7 +100,7 @@ public final class CertNoUtil {
 	 * @param idcard 身份证号
 	 * @return 出生日期
 	 */
-	public static synchronized LocalDate extractBirthday(String idcard) {
+	public static   LocalDate extractBirthday(String idcard) {
 		if (!isValid(idcard)) {
 			throw new UncheckedException("身份证号格式不正确");
 		}

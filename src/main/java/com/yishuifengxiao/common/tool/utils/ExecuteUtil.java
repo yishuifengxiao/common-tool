@@ -43,7 +43,7 @@ public class ExecuteUtil {
 	 *
 	 * @param runnable 待执行的任务
 	 */
-	public static synchronized void execute(Runnable runnable) {
+	public static   void execute(Runnable runnable) {
 		execute(runnable, null, null);
 	}
 
@@ -53,7 +53,7 @@ public class ExecuteUtil {
 	 * @param runnable 待执行的任务
 	 * @param complete 执行完成后的回调(不论成功还是失败都会触发)
 	 */
-	public static synchronized void execute(Runnable runnable, ExecuteComplete complete) {
+	public static   void execute(Runnable runnable, ExecuteComplete complete) {
 		execute(runnable, complete, null);
 	}
 
@@ -63,7 +63,7 @@ public class ExecuteUtil {
 	 * @param runnable 待执行的任务
 	 * @param error    执行失败后触发的动作
 	 */
-	public static synchronized void execute(Runnable runnable, ExecuteError error) {
+	public static   void execute(Runnable runnable, ExecuteError error) {
 		execute(runnable, null, error);
 	}
 
@@ -74,7 +74,7 @@ public class ExecuteUtil {
 	 * @param complete 执行完成后的回调(不论成功还是失败都会触发)
 	 * @param error    执行失败后触发的动作
 	 */
-	public static synchronized void execute(Runnable runnable, ExecuteComplete complete, ExecuteError error) {	
+	public static   void execute(Runnable runnable, ExecuteComplete complete, ExecuteError error) {	
 		POOL.execute(() -> {
 			try {
 				runnable.run();
@@ -166,7 +166,7 @@ public class ExecuteUtil {
 	 * @return 输出数据
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized static <T> T execute(Predicate<T> match, Supplier<T>... suppliers) {
+	public   static <T> T execute(Predicate<T> match, Supplier<T>... suppliers) {
 		if (null == suppliers) {
 			return null;
 		}

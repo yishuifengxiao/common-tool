@@ -26,7 +26,7 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 任意一个满足条件的非空数据
      */
-    public synchronized static <T> T findAny(Stream<T> stream, Predicate<? super T> predicate) {
+    public static <T> T findAny(Stream<T> stream, Predicate<? super T> predicate) {
         if (null == stream) {
             return null;
         }
@@ -42,7 +42,7 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 任意一个满足条件的非空数据
      */
-    public synchronized static <T> T findAny(List<T> list, Predicate<? super T> predicate) {
+    public static <T> T findAny(List<T> list, Predicate<? super T> predicate) {
         if (null == list) {
             return null;
         }
@@ -58,7 +58,7 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 任意一个满足条件的非空数据
      */
-    public synchronized static <T> T findAny(Set<T> set, Predicate<? super T> predicate) {
+    public static <T> T findAny(Set<T> set, Predicate<? super T> predicate) {
         if (null == set) {
             return null;
         }
@@ -73,7 +73,7 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 存在返回为true，否则为false
      */
-    public synchronized static <T> boolean contain(List<T> list, Predicate<? super T> predicate) {
+    public static <T> boolean contain(List<T> list, Predicate<? super T> predicate) {
         return null != findAny(list, predicate);
     }
 
@@ -85,7 +85,7 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 存在返回为true，否则为false
      */
-    public synchronized static <T> boolean contain(Set<T> set, Predicate<? super T> predicate) {
+    public static <T> boolean contain(Set<T> set, Predicate<? super T> predicate) {
         return null != findAny(set, predicate);
     }
 
@@ -98,11 +98,12 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 删除元素之后的集合
      */
-    public synchronized static <T> List<T> remove(List<T> list, Predicate<? super T> predicate) {
+    public static <T> List<T> remove(List<T> list, Predicate<? super T> predicate) {
         if (null == list) {
             list = new ArrayList<>();
         }
-        List<T> collect = list.parallelStream().filter(Objects::nonNull).filter(predicate.negate()).collect(Collectors.toList());
+        List<T> collect =
+                list.parallelStream().filter(Objects::nonNull).filter(predicate.negate()).collect(Collectors.toList());
         return collect;
     }
 
@@ -116,11 +117,12 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 删除元素之后的集合
      */
-    public synchronized static <T> Set<T> remove(Set<T> set, Predicate<? super T> predicate) {
+    public static <T> Set<T> remove(Set<T> set, Predicate<? super T> predicate) {
         if (null == set) {
             set = new HashSet<>();
         }
-        Set<T> collect = set.parallelStream().filter(Objects::nonNull).filter(predicate.negate()).collect(Collectors.toSet());
+        Set<T> collect =
+                set.parallelStream().filter(Objects::nonNull).filter(predicate.negate()).collect(Collectors.toSet());
         return collect;
     }
 
@@ -135,7 +137,7 @@ public class StreamUtil {
      * @return 替换元素之后的集合
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public synchronized static <T> List<T> replace(List<T> list, T t, Predicate<? super T> predicate) {
+    public static <T> List<T> replace(List<T> list, T t, Predicate<? super T> predicate) {
         if (null == list) {
             list = new ArrayList<>();
         }
@@ -154,7 +156,7 @@ public class StreamUtil {
      * @return 替换元素之后的集合
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public synchronized static <T> Set<T> replace(Set<T> set, T t, Predicate<? super T> predicate) {
+    public static <T> Set<T> replace(Set<T> set, T t, Predicate<? super T> predicate) {
         if (null == set) {
             set = new HashSet<>();
         }
@@ -172,7 +174,7 @@ public class StreamUtil {
      * @param <T>       数据类型
      * @return 处理之后的元素集合
      */
-    public synchronized static <T> List<T> addIfNoPresent(List<T> list, T t, Predicate<? super T> predicate) {
+    public static <T> List<T> addIfNoPresent(List<T> list, T t, Predicate<? super T> predicate) {
         if (null == list) {
             list = new ArrayList<>();
         }

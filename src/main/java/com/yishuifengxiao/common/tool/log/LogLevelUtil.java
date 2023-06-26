@@ -29,7 +29,7 @@ public class LogLevelUtil {
      * @param logLevel   日志级别 ，例如 info
      * @return 是否修改成功
      */
-    public synchronized static boolean setLevel(String loggerName, String logLevel) {
+    public   static boolean setLevel(String loggerName, String logLevel) {
         if (StringUtils.isAnyBlank(loggerName, logLevel)) {
             return false;
         }

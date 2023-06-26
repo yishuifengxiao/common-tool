@@ -107,7 +107,7 @@ public class TextUtil {
      * @param camelCaseName 输入的数据
      * @return 转换后的数据
      */
-    public static synchronized String underscoreName(String camelCaseName) {
+    public static String underscoreName(String camelCaseName) {
         StringBuilder result = new StringBuilder();
         if (camelCaseName != null && camelCaseName.length() > 0) {
             result.append(camelCaseName.substring(0, 1).toLowerCase());
@@ -130,7 +130,7 @@ public class TextUtil {
      * @param underscoreName 输入的数据
      * @return 转换后的数据
      */
-    public static synchronized String camelCaseName(String underscoreName) {
+    public static String camelCaseName(String underscoreName) {
         StringBuilder result = new StringBuilder();
         if (underscoreName != null && underscoreName.length() > 0) {
             boolean flag = false;

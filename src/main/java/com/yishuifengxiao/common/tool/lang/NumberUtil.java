@@ -167,7 +167,7 @@ public final class NumberUtil {
      * @param val 输入值
      * @return 转换后的 BigDecimal ，若转换失败则返回为null
      */
-    public synchronized static BigDecimal parse(Object val) {
+    public static BigDecimal parse(Object val) {
         try {
             if (null == val || StringUtils.isBlank(val.toString())) {
                 return null;

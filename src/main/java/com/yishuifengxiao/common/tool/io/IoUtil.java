@@ -4,7 +4,7 @@
 package com.yishuifengxiao.common.tool.io;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.random.UID;
+import com.yishuifengxiao.common.tool.random.IdWorker;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StreamUtils;
 
@@ -62,7 +62,7 @@ public class IoUtil {
      * @return 转换后的字节数组
      * @throws IOException 转换时出现问题
      */
-    public synchronized static byte[] file2ByteArray(File file) throws IOException {
+    public static byte[] file2ByteArray(File file) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(file)) {
             return inputStream2ByteArray(inputStream);
         }
@@ -78,7 +78,7 @@ public class IoUtil {
      * @return 转换后的字节数组
      * @throws IOException 转换中发生异常
      */
-    public synchronized static byte[] inputStream2ByteArray(InputStream inputStream) throws IOException {
+    public static byte[] inputStream2ByteArray(InputStream inputStream) throws IOException {
         if (inputStream == null) {
             return new byte[0];
         }
@@ -100,7 +100,7 @@ public class IoUtil {
      * @return 转换后的字符串
      * @throws IOException 转换中发生异常
      */
-    public synchronized static String inputStream2String(InputStream in, String charsetName) throws IOException {
+    public static String inputStream2String(InputStream in, String charsetName) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(in, charsetName)) {
             try (BufferedReader bw = new BufferedReader(reader)) {
                 String result = bw.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -124,7 +124,7 @@ public class IoUtil {
      * @return 转换后的字符串
      * @throws IOException 转换中发生异常
      */
-    public synchronized static String inputStream2String(InputStream in) throws IOException {
+    public static String inputStream2String(InputStream in) throws IOException {
         return inputStream2String(in, Charset.defaultCharset().name());
     }
 
@@ -139,7 +139,7 @@ public class IoUtil {
      * @return 保存后的文件
      * @throws IOException 转换时出现问题
      */
-    public synchronized static File inputStream2File(@NotNull InputStream inputStream, @NotNull File file) throws IOException {
+    public static File inputStream2File(@NotNull InputStream inputStream, @NotNull File file) throws IOException {
         copy(inputStream, new FileOutputStream(file));
         return file;
     }
@@ -162,7 +162,7 @@ public class IoUtil {
      * @return 对应的编码文本
      * @throws IOException 读取时出现问题
      */
-    public synchronized static <T> String readResourceAsString(Class<T> clazz, String name) throws IOException {
+    public static <T> String readResourceAsString(Class<T> clazz, String name) throws IOException {
         return readResourceAsString(clazz, name, Charset.defaultCharset().name());
     }
 
@@ -182,7 +182,7 @@ public class IoUtil {
      * @return 对应的编码文本
      * @throws IOException 读取时出现问题
      */
-    public synchronized static <T> String readResourceAsString(Class<T> clazz, String name, String charsetName) throws IOException {
+    public static <T> String readResourceAsString(Class<T> clazz, String name, String charsetName) throws IOException {
         return inputStream2String(clazz.getClassLoader().getResourceAsStream(name), charsetName);
     }
 
@@ -193,7 +193,7 @@ public class IoUtil {
      * @param out  输出流
      * @return 复制失败返回为-1
      */
-    public synchronized static int copy(File file, OutputStream out) {
+    public static int copy(File file, OutputStream out) {
         if (null == file || null == out) {
             return -1;
         }
@@ -217,7 +217,7 @@ public class IoUtil {
      * @return the number of bytes copied
      * @throws IOException 转换时出现问题
      */
-    public synchronized static int copy(InputStream in, OutputStream out) throws IOException {
+    public static int copy(InputStream in, OutputStream out) throws IOException {
         try {
             int byteCount = 0;
             byte[] buffer = new byte[4096];
@@ -244,7 +244,7 @@ public class IoUtil {
      * @return 目标文件
      * @throws IOException 转换时出现问题
      */
-    public synchronized static File string2File(String text, @NotNull File file) throws IOException {
+    public static File string2File(String text, @NotNull File file) throws IOException {
         if (StringUtils.isBlank(text) || null == file) {
             return file;
         }
@@ -262,7 +262,7 @@ public class IoUtil {
      * @return 转换后的字符串
      * @throws IOException 转换时出现问题
      */
-    public synchronized static String file2String(@NotNull File file) throws IOException {
+    public static String file2String(@NotNull File file) throws IOException {
         return inputStream2String(new FileInputStream(file), StandardCharsets.UTF_8.name());
     }
 
@@ -274,7 +274,7 @@ public class IoUtil {
      * @return 转换后的字符串
      * @throws IOException 转换时出现问题
      */
-    public synchronized static String file2String(@NotNull File file, String charsetName) throws IOException {
+    public static String file2String(@NotNull File file, String charsetName) throws IOException {
         return inputStream2String(new FileInputStream(file), charsetName);
     }
 
@@ -287,8 +287,8 @@ public class IoUtil {
      * @param base64File base64格式的文件
      * @return 转换后的文件
      */
-    public synchronized static File base64ToFile(String base64File) {
-        File file = new File(UID.uuid());
+    public static File base64ToFile(String base64File) {
+        File file = new File(IdWorker.uuid());
         // 创建文件目录
         BufferedOutputStream bos = null;
         FileOutputStream fos = null;
@@ -316,7 +316,7 @@ public class IoUtil {
      * @return 转换后的base64字符串
      * @throws IOException 转换时发生异常
      */
-    public synchronized static String file2Base64(File file) throws IOException {
+    public static String file2Base64(File file) throws IOException {
 
         try (FileInputStream inputFile = new FileInputStream(file)) {
             byte[] buffer = new byte[(int) file.length()];

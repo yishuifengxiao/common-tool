@@ -49,7 +49,7 @@ public final class GpsUtil {
      * @param lat2 B点纬度
      * @return 通过经纬度获取的距离(单位 ： 米)
      */
-    public static synchronized long distance(double lng1, double lat1, double lng2, double lat2) {
+    public static   long distance(double lng1, double lat1, double lng2, double lat2) {
         return getDistance(lng1, lat1, lng2, lat2, EARTH_RADIUS * 1000);
     }
 
@@ -74,7 +74,7 @@ public final class GpsUtil {
      * @param lat2 B点纬度
      * @return 通过经纬度获取的距离(单位 ： 千米)
      */
-    public static synchronized long distanceKm(double lng1, double lat1, double lng2, double lat2) {
+    public static   long distanceKm(double lng1, double lat1, double lng2, double lat2) {
 
         return getDistance(lng1, lat1, lng2, lat2, EARTH_RADIUS);
     }

@@ -34,7 +34,7 @@ public final class LocalCache {
      *
      * @param value 待存储的数据
      */
-    public static synchronized void put(Object value) {
+    public static void put(Object value) {
         if (null == value) {
             return;
         }
@@ -68,7 +68,7 @@ public final class LocalCache {
     }
 
     @SuppressWarnings("unchecked")
-	public static synchronized <T> T get(String key, Supplier<T> supplier) {
+    public static synchronized <T> T get(String key, Supplier<T> supplier) {
         Object value = get(key.trim());
         if (null != value) {
             try {
@@ -94,7 +94,7 @@ public final class LocalCache {
      * @return 获取到的存储数据
      */
     @SuppressWarnings("unchecked")
-    public static synchronized <T> T get(String key, Class<T> clazz) {
+    public static <T> T get(String key, Class<T> clazz) {
         try {
             return (T) get(key.trim());
         } catch (Exception e) {
@@ -126,7 +126,7 @@ public final class LocalCache {
      * @param <T>   数据的类型
      * @return 获取到的存储数据
      */
-    public static synchronized <T> T getAndRemove(String key, Class<T> clazz) {
+    public synchronized static <T> T getAndRemove(String key, Class<T> clazz) {
         if (StringUtils.isBlank(key)) {
             return null;
         }
@@ -146,7 +146,7 @@ public final class LocalCache {
      * @param <T>   数据的类型
      * @return 获取到的存储数据
      */
-    public static synchronized <T> T getAndRemove(Class<T> clazz) {
+    public static <T> T getAndRemove(Class<T> clazz) {
         if (null == clazz) {
             return null;
         }
@@ -190,7 +190,7 @@ public final class LocalCache {
      * @param <T>   数据的类型
      * @param clazz 待移除的数据的key
      */
-    public static synchronized <T> void remove(Class<T> clazz) {
+    public static <T> void remove(Class<T> clazz) {
         if (null == clazz) {
             return;
         }

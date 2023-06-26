@@ -32,7 +32,8 @@ public final class RegexUtil {
     /**
      * 协议和域名的正则表达式
      */
-    private final static String REGEX_PROTOCOL_AND_HOST = "http[s]?://[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?";
+    private final static String REGEX_PROTOCOL_AND_HOST =
+            "http[s]?://[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\" + ".[a-zA-Z0" + "-9][-a-zA-Z0-9]{0,62})+\\.?";
 
     /**
      * 域名的正则表达式
@@ -52,12 +53,14 @@ public final class RegexUtil {
     /**
      * URL正则表达式
      */
-    private final static String REGEX_URL = "((http|ftp|https)://)(([a-zA-Z0-9\\._-]+\\.[a-zA-Z]{2,6})|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?";
+    private final static String REGEX_URL =
+            "((http|ftp|https)://)(([a-zA-Z0-9\\._-]+\\.[a-zA-Z]{2,6})|([0-9]{1,3}\\" + ".[0-9]{1,3}\\.[0-9]{1,3}\\" + ".[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?";
 
     /**
      * IPv4地址正则表达式
      */
-    private final static String REGEX_IPV4 = "((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})){3}";
+    private final static String REGEX_IPV4 =
+            "((2(5[0-5]|[0-4]\\d))|[0-1]?\\d{1,2})(\\.((2(5[0-5]|[0-4]\\d))" + "|[0" + "-1]?\\d{1,2})){3}";
 
     /**
      * 判断是否符合形如 http://www.yishuifengxiao.com 的正则表达式
@@ -105,6 +108,7 @@ public final class RegexUtil {
             throw new RuntimeException("正则表达式不能为空");
         }
         regex = regex.trim();
+
         Pattern pattern = PATTERN_CACHE.get(regex);
         if (pattern == null) {
             pattern = Pattern.compile(regex);
@@ -120,7 +124,7 @@ public final class RegexUtil {
      * @param str   待判断的内容
      * @return 若匹配则返回为true, 否则为false
      */
-    public synchronized static boolean match(String regex, String str) {
+    public static boolean match(String regex, String str) {
         Matcher matcher = pattern(regex).matcher(str);
         return matcher.matches();
     }
@@ -132,7 +136,7 @@ public final class RegexUtil {
      * @param str   待判断的内容
      * @return 若匹配则返回为true, 否则为false
      */
-    public synchronized static boolean find(String regex, String str) {
+    public static boolean find(String regex, String str) {
         Matcher matcher = pattern(regex).matcher(str);
         return matcher.find();
     }
@@ -147,7 +151,7 @@ public final class RegexUtil {
      * @param str   目标内容
      * @return 提取出一组匹配的内容
      */
-    public synchronized static String extract(String regex, String str) {
+    public static String extract(String regex, String str) {
         if (StringUtils.isBlank(str)) {
             return null;
         }
@@ -168,7 +172,7 @@ public final class RegexUtil {
      * @param str   目标内容
      * @return 取出所有匹配的内容
      */
-    public synchronized static List<String> extractAll(String regex, String str) {
+    public static List<String> extractAll(String regex, String str) {
         if (StringUtils.isBlank(str)) {
             return new ArrayList<>();
         }

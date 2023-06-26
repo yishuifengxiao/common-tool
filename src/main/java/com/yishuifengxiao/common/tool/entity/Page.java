@@ -27,10 +27,6 @@ import java.util.stream.Collectors;
 @ApiModel(value = " 通用分页对象", description = "用于所有接口的通用返回数据")
 public class Page<S> implements Serializable {
     /**
-     *
-     */
-    private static final long serialVersionUID = 1466782682580092020L;
-    /**
      * 默认的当前页的页码
      */
     public static final int DEFAULT_PAGE_NUM = 1;
@@ -38,7 +34,10 @@ public class Page<S> implements Serializable {
      * 默认的最小页的页码
      */
     public static final int DEFAULT_PAGE_SIZE = 10;
-
+    /**
+     *
+     */
+    private static final long serialVersionUID = 1466782682580092020L;
     /**
      * 当前分页里的数据
      */
@@ -70,31 +69,27 @@ public class Page<S> implements Serializable {
     protected Integer pageNum;
 
     /**
-     * <p>将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
+     * 全参构造函数
      *
-     * @param <T>       分页元素转换工具的类型
-     * @param converter 分页元素转换工具
-     * @return 另一种数据类型的分页对象
+     * @param data     当前页的数据
+     * @param total    记录总数
+     * @param pages    总的分页数
+     * @param pageSize 分页大小
+     * @param pageNum  当前页页码，从1开始
      */
-    public synchronized <T> Page<T> map(DataConverter<S, T> converter) {
-        if (null == this.data) {
-            return Page.of(Collections.emptyList(), this.total, this.pageSize, this.pageNum);
-        }
-        return Page.of(this.data.stream().map(converter::map).collect(Collectors.toList()), this.total, this.pageSize, this.pageNum);
+    public Page(List<S> data, long total, long pages, int pageSize, int pageNum) {
+        this.pageSize = pageSize;
+        this.pageNum = pageNum;
+        this.data = data;
+        this.pages = pages;
+        this.total = total;
     }
 
     /**
-     * <p>将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
-     *
-     * @param <T>       分页元素转换工具的类型
-     * @param converter 分页元素转换工具
-     * @return 另一种数据类型的分页对象
+     * 无参构造函数
      */
-    public synchronized <T> Page<T> maps(ListConverter<S, T> converter) {
-        if (null == this.data) {
-            return Page.of(Collections.emptyList(), this.total, this.pageSize, this.pageNum);
-        }
-        return Page.of(converter.map(this.data), this.total, this.pageSize, this.pageNum);
+    public Page() {
+
     }
 
     /**
@@ -158,7 +153,7 @@ public class Page<S> implements Serializable {
     public static <S> Page<S> toPage(List<S> data) {
         data = data == null ? new ArrayList<>() : data;
 
-        return Page.of(data, data.size() + 0L, data.size(), DEFAULT_PAGE_NUM);
+        return Page.of(data, (long) data.size(), data.size(), DEFAULT_PAGE_NUM);
     }
 
     /**
@@ -204,7 +199,7 @@ public class Page<S> implements Serializable {
             data = list.subList(startNum, list.size());
         }
 
-        return Page.of(data, totalNum + 0L, pageSize, pageNum);
+        return Page.of(data, (long) totalNum, pageSize, pageNum);
     }
 
     /**
@@ -233,6 +228,52 @@ public class Page<S> implements Serializable {
         return new Page<>(data, total, page(total, pageSize).longValue(), pageSize, pageNum);
     }
 
+    /**
+     * 计算分页大小
+     *
+     * @param total 全部数据数量
+     * @param size  分页大小，若为空则默认为10
+     * @return 分页数量
+     */
+    public static Number page(Number total, Number size) {
+        if (null == total) {
+            total = 0;
+        }
+        if (null == size) {
+            size = DEFAULT_PAGE_SIZE;
+        }
+        return total.longValue() % size.longValue() == 0 ? total.longValue() / size.longValue() :
+                (total.longValue() / size.longValue() + 1);
+    }
+
+    /**
+     * <p>将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
+     *
+     * @param <T>       分页元素转换工具的类型
+     * @param converter 分页元素转换工具
+     * @return 另一种数据类型的分页对象
+     */
+    public <T> Page<T> map(DataConverter<S, T> converter) {
+        if (null == this.data) {
+            return Page.of(Collections.emptyList(), this.total, this.pageSize, this.pageNum);
+        }
+        return Page.of(this.data.stream().map(converter::map).collect(Collectors.toList()), this.total, this.pageSize
+                , this.pageNum);
+    }
+
+    /**
+     * <p>将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
+     *
+     * @param <T>       分页元素转换工具的类型
+     * @param converter 分页元素转换工具
+     * @return 另一种数据类型的分页对象
+     */
+    public <T> Page<T> maps(ListConverter<S, T> converter) {
+        if (null == this.data) {
+            return Page.of(Collections.emptyList(), this.total, this.pageSize, this.pageNum);
+        }
+        return Page.of(converter.map(this.data), this.total, this.pageSize, this.pageNum);
+    }
 
     /**
      * 获取分页大小
@@ -334,45 +375,20 @@ public class Page<S> implements Serializable {
         return this;
     }
 
-    /**
-     * 全参构造函数
-     *
-     * @param data     当前页的数据
-     * @param total    记录总数
-     * @param pages    总的分页数
-     * @param pageSize 分页大小
-     * @param pageNum  当前页页码，从1开始
-     */
-    public Page(List<S> data, long total, long pages, int pageSize, int pageNum) {
-        this.pageSize = pageSize;
-        this.pageNum = pageNum;
-        this.data = data;
-        this.pages = pages;
-        this.total = total;
-    }
-
-    /**
-     * 无参构造函数
-     */
-    public Page() {
-
-    }
-
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Page [pageSize=");
-        builder.append(pageSize);
-        builder.append(", pageNum=");
-        builder.append(pageNum);
-        builder.append(", data=");
-        builder.append(data);
-        builder.append(", pages=");
-        builder.append(pages);
-        builder.append(", total=");
-        builder.append(total);
-        builder.append("]");
-        return builder.toString();
+        String builder = "Page [pageSize=" +
+                pageSize +
+                ", pageNum=" +
+                pageNum +
+                ", data=" +
+                data +
+                ", pages=" +
+                pages +
+                ", total=" +
+                total +
+                "]";
+        return builder;
     }
 
     /**
@@ -421,23 +437,6 @@ public class Page<S> implements Serializable {
          * @return 目标数据
          */
         List<T> map(List<S> s);
-    }
-
-    /**
-     * 计算分页大小
-     *
-     * @param total 全部数据数量
-     * @param size  分页大小，若为空则默认为10
-     * @return 分页数量
-     */
-    public static Number page(Number total, Number size) {
-        if (null == total) {
-            total = 0;
-        }
-        if (null == size) {
-            size = DEFAULT_PAGE_SIZE;
-        }
-        return total.longValue() % size.longValue() == 0 ? total.longValue() / size.longValue() : (total.longValue() / size.longValue() + 1);
     }
 
 }

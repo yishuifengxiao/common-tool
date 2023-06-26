@@ -26,7 +26,7 @@ public final class MapUtil<K, V> {
      * @return map工具类实例
      */
     @SuppressWarnings("rawtypes")
-    public synchronized static MapUtil map() {
+    public static MapUtil map() {
         return new MapUtil();
     }
 
@@ -59,7 +59,7 @@ public final class MapUtil<K, V> {
         }
         return this;
     }
-    
+
 
     /**
      * 批量添加一组键值对

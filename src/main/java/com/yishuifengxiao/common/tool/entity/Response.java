@@ -5,7 +5,7 @@ package com.yishuifengxiao.common.tool.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yishuifengxiao.common.tool.random.UID;
+import com.yishuifengxiao.common.tool.random.IdWorker;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.http.HttpStatus;
@@ -32,11 +32,10 @@ import java.util.Date;
  * 在某些情况下，如果系统内置的响应码不符合已进行的业务的需求但是又需要统一响应格式时可以自定义响应码等信息
  * </p>
  *
- *
+ * @param <T> 响应数据的数据类型
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
- * @param <T> 响应数据的数据类型
  */
 @ApiModel(value = "通用响应", description = "用于所有接口的通用返回数据")
 public class Response<T> implements Serializable {
@@ -54,11 +53,13 @@ public class Response<T> implements Serializable {
 
     /**
      * 请求的响应吗,这里借用HttpStatus作为状态标识
-     *
+     * <p>
      * 具体的响应值的信息可以参见 <a href=
-     * "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">https://developer.mozilla.org/en-US/docs/Web/HTTP/Status</a>
+     * "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">https://developer.mozilla
+     * .org/en-US/docs/Web/HTTP/Status</a>
      */
-    @ApiModelProperty("请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla.org/en-US/docs/Web/HTTP/Status)")
+    @ApiModelProperty("请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla" +
+            ".org/en-US/docs/Web/HTTP/Status)")
     protected int code;
 
     /**
@@ -323,7 +324,7 @@ public class Response<T> implements Serializable {
      * @param data 响应数据
      */
     public Response(int code, String msg, T data) {
-        this(UID.uuid(), code, msg, data, new Date());
+        this(IdWorker.uuid(), code, msg, data, new Date());
     }
 
     /**
@@ -333,7 +334,7 @@ public class Response<T> implements Serializable {
      * @param msg  响应提示信息
      */
     public Response(int code, String msg) {
-        this(UID.uuid(), code, msg, null, new Date());
+        this(IdWorker.uuid(), code, msg, null, new Date());
     }
 
     /**

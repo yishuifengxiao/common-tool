@@ -49,7 +49,7 @@ public final class ImageUtil {
      * @return base64字符串
      * @throws IOException 转换时发生问题
      */
-    public static synchronized String imageToBase64ByLocal(String imgPath) throws IOException {
+    public static String imageToBase64ByLocal(String imgPath) throws IOException {
         // 返回Base64编码过的字节数组字符串
         return imageToBase64ByLocal(new File(imgPath));
     }
@@ -66,7 +66,7 @@ public final class ImageUtil {
      * @return base64字符串
      * @throws IOException 转换时发生问题
      */
-    public static synchronized String imageToBase64ByLocal(File image) throws IOException {
+    public static String imageToBase64ByLocal(File image) throws IOException {
         InputStream inputStream = null;
         byte[] data = null;
         // 读取图片字节数组
@@ -94,7 +94,7 @@ public final class ImageUtil {
      * @return 输出图片
      * @throws IOException 转换时发生问题
      */
-    public static synchronized File base64ToImage(String imgBase64Str, String imagePath) throws IOException {
+    public static File base64ToImage(String imgBase64Str, String imagePath) throws IOException {
         File file = new File(imagePath);
         return base64ToImage(imgBase64Str, file);
     }
@@ -112,7 +112,7 @@ public final class ImageUtil {
      * @return 输出图片
      * @throws IOException 转换时发生问题
      */
-    public static synchronized File base64ToImage(String imgBase64Str, File img) throws IOException {
+    public static File base64ToImage(String imgBase64Str, File img) throws IOException {
         OutputStream out = null;
         try {
             imgBase64Str = imgBase64Str.replaceAll(FORMAT_TEMPLATE, "");
@@ -145,7 +145,7 @@ public final class ImageUtil {
      * @param image 需要转换的图片
      * @return 转换后的字符串
      */
-    public static synchronized String image2Base64(BufferedImage image) {
+    public static String image2Base64(BufferedImage image) {
         if (null == image) {
             return null;
         }
@@ -174,7 +174,7 @@ public final class ImageUtil {
      * @param image 需要转换的图片
      * @return 转换后的字符串
      */
-    public static synchronized String image2Base64Png(BufferedImage image) {
+    public static String image2Base64Png(BufferedImage image) {
         if (null == image) {
             return null;
         }

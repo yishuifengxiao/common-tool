@@ -52,7 +52,7 @@ public final class ClassUtil {
      * @param clazz 待处理的类
      * @return 所有提取的属性字段
      */
-    public synchronized static <T> List<Field> fields(Class<T> clazz) {
+    public static <T> List<Field> fields(Class<T> clazz) {
         return fields(null, clazz);
     }
 
@@ -64,10 +64,11 @@ public final class ClassUtil {
      * @param noSpecialModifier 是否过滤掉特殊修饰的字段
      * @return 所有提取的属性字段
      */
-    public synchronized static <T> List<Field> fields(Class<T> clazz, boolean noSpecialModifier) {
+    public static <T> List<Field> fields(Class<T> clazz, boolean noSpecialModifier) {
         List<Field> fields = fields(null, clazz);
 
-        return noSpecialModifier ? fields.stream().filter(v -> !isSpecialModifier(v)).collect(Collectors.toList()) : fields;
+        return noSpecialModifier ? fields.stream().filter(v -> !isSpecialModifier(v)).collect(Collectors.toList()) :
+                fields;
     }
 
     /**
@@ -94,13 +95,14 @@ public final class ClassUtil {
      * </p>
      *
      * <p>
-     * 特殊修饰的关键字如：<code>@Transient</code>、<code>final</code>、<code>static</code>、<code>native</code>、<code>abstract</code>
+     * 特殊修饰的关键字如：<code>@Transient</code>、<code>final</code>、<code>static</code>、<code>native</code>、<code>abstract
+     * </code>
      * </p>
      *
      * @param field 字段
      * @return true表示被特殊修饰
      */
-    public synchronized static boolean isSpecialModifier(Field field) {
+    public static boolean isSpecialModifier(Field field) {
         final Annotation[] annotations = field.getAnnotations();
         // 如果被@Transient修饰了就不处理
         if (Arrays.stream(annotations).anyMatch(v -> "javax.persistence.Transient".equals(v.getClass().getName()))) {
@@ -142,12 +144,13 @@ public final class ClassUtil {
      * @param fieldName 属性名字
      * @return 该属性对应的值
      */
-    public synchronized static Object extractValue(Object data, String fieldName) {
+    public static Object extractValue(Object data, String fieldName) {
         if (null == data || StringUtils.isBlank(fieldName)) {
             return null;
         }
         try {
-            Field field = fields(data.getClass()).stream().filter(v -> v.getName().equals(fieldName.trim())).findFirst().orElse(null);
+            Field field =
+                    fields(data.getClass()).stream().filter(v -> v.getName().equals(fieldName.trim())).findFirst().orElse(null);
             if (null == field) {
                 return null;
             }
@@ -165,7 +168,7 @@ public final class ClassUtil {
      * @param data   待处理的对象
      * @param action 遍历操作
      */
-    public synchronized static void forEach(Object data, BiConsumer<Field, Object> action) {
+    public static void forEach(Object data, BiConsumer<Field, Object> action) {
         fields(data.getClass()).forEach(t -> action.accept(t, extractValue(data, t.getName())));
     }
 
@@ -178,7 +181,7 @@ public final class ClassUtil {
      * @param <R>      the type of the result of the function
      * @return pojo类的属性的Function函数对应的原始属性的名字
      */
-    public synchronized static <T, R> String pojoFieldName(SerFunction<T, R> function) {
+    public static <T, R> String pojoFieldName(SerFunction<T, R> function) {
 
         try {
             Method writeReplace = function.getClass().getDeclaredMethod("writeReplace");
@@ -189,7 +192,8 @@ public final class ClassUtil {
             // 判断是否为boolean属性字段对应的后的is开头的getter方法
             String instantiatedMethodType = serializedLambda.getInstantiatedMethodType();
             boolean bool = instantiatedMethodType.endsWith("Ljava/lang/Boolean;") && implMethodName.startsWith("is");
-            String fieldName = bool ? Introspector.decapitalize(implMethodName.substring(2)) : Introspector.decapitalize(implMethodName.substring(3));
+            String fieldName = bool ? Introspector.decapitalize(implMethodName.substring(2)) :
+                    Introspector.decapitalize(implMethodName.substring(3));
             return fieldName;
         } catch (Exception e) {
             log.warn("根据pojo类的属性的Function函数获取原始属性的名字，出现问题的原因为 {}", e.getMessage());
@@ -222,7 +226,8 @@ public final class ClassUtil {
      * @since 2.0
      */
     @FunctionalInterface
-    public interface SerFunction<T extends Object, R extends Object> extends java.util.function.Function<T, R>, Serializable {
+    public interface SerFunction<T extends Object, R extends Object> extends java.util.function.Function<T, R>,
+            Serializable {
 
     }
 
