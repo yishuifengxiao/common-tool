@@ -6,6 +6,7 @@ package com.yishuifengxiao.common.tool.bean;
 import com.alibaba.fastjson.JSONObject;
 import com.yishuifengxiao.common.tool.collections.JsonUtil;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.io.CloseUtil;
 import org.springframework.beans.BeanUtils;
 
 import java.io.ByteArrayInputStream;
@@ -149,6 +150,38 @@ public final class BeanUtil {
             return Collections.EMPTY_MAP;
         }
         return JsonUtil.json2Map(JSONObject.toJSONString(data));
+    }
+
+    /**
+     * 对象深克隆
+     *
+     * @param val 待克隆的的对象
+     * @return 克隆后的对象
+     */
+    public static Object cloneVal(Object val) {
+        if (null == val) {
+            return null;
+        }
+        ByteArrayOutputStream bos = null;
+        ObjectOutputStream oos = null;
+        ByteArrayInputStream bis = null;
+        ObjectInputStream ois = null;
+        try {
+            bos = new ByteArrayOutputStream();
+            oos = new ObjectOutputStream(bos);
+            // 将原始对象写入字节数组
+            oos.writeObject(val);
+            // 获取字节数组
+            byte[] byteArr = bos.toByteArray();
+            bis = new ByteArrayInputStream(byteArr);
+            ois = new ObjectInputStream(bis);
+            // 从字节数组中读取对象
+            return ois.readObject();
+        } catch (Exception e) {
+            throw UncheckedException.of(e.getMessage());
+        } finally {
+            CloseUtil.close(ois, bis, oos, bos);
+        }
     }
 
 }
