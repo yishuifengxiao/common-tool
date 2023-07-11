@@ -6,6 +6,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.BooleanUtils;
 
+import java.util.Arrays;
+
 /**
  * <p>布尔类型替代枚举</p>
  * <p>用于替换<code>Boolean</code>的使用，方便在灵活业务场景下进行功能扩展</p>
@@ -302,5 +304,19 @@ public enum BoolStat {
      */
     public static Number bool2Int(BoolStat bool, Number trueVal, Number falseVal) {
         return isTrue(bool) ? trueVal : falseVal;
+    }
+
+    /**
+     * <p>判断文本是否是符合要求的boolean值替换表达值</p>
+     * <p>即判断文本内容是否为"0", "1", "true", "false" 或者null其中的一种 </p>
+     *
+     * @param val 待判断的文本
+     * @return 符合要求为true，否则为false
+     */
+    public static boolean isLegalVal(Object val) {
+        if (null == val) {
+            return true;
+        }
+        return Arrays.asList("0", "1", "true", "false").stream().anyMatch(v -> v.equalsIgnoreCase(val.toString().trim()));
     }
 }

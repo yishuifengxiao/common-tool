@@ -121,7 +121,7 @@ public class Md5 {
      * @param file 待计算的文件
      * @return MD5加密后的字符串(16位)
      */
-    public synchronized static String md5Short(File file) {
+    public static String md5Short(File file) {
         return StringUtils.substring(md5(file), 8, 24);
     }
 

@@ -9,7 +9,7 @@ import java.io.Serializable;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class KeyPair<K, V> implements Serializable {
+public class KeyValue<K, V> implements Serializable {
 
     /**
 	 * 
@@ -30,7 +30,7 @@ public class KeyPair<K, V> implements Serializable {
      * @param key 键值对的key
      * @param val 键值对的值
      */
-    public KeyPair(K key, V val) {
+    public KeyValue(K key, V val) {
         this.key = key;
         this.val = val;
     }
@@ -38,7 +38,7 @@ public class KeyPair<K, V> implements Serializable {
     /**
      * 无参构造函数
      */
-    public KeyPair() {
+    public KeyValue() {
     }
 
     /**
@@ -56,7 +56,7 @@ public class KeyPair<K, V> implements Serializable {
      * @param key 键值对数据的key
      * @return 当前实例
      */
-    public KeyPair<K, V> setKey(K key) {
+    public KeyValue<K, V> setKey(K key) {
         this.key = key;
         return this;
     }
@@ -76,7 +76,7 @@ public class KeyPair<K, V> implements Serializable {
      * @param val 键值对数据的值
      * @return 当前实例
      */
-    public KeyPair<K, V> setVal(V val) {
+    public KeyValue<K, V> setVal(V val) {
         this.val = val;
         return this;
     }

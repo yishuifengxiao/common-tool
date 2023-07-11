@@ -1,13 +1,14 @@
 package com.yishuifengxiao.common.tool.text;
 
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -46,6 +47,24 @@ public final class RegexUtil {
     private final static String REGEX_CHINESE = "[\\u4e00-\\u9fa5]+";
 
     /**
+     * <p>匹配所有实数的正则表达式</p>
+     * <p style="color:red">注意此表达式的结果中可能会出现多个小数点，应注意排除</p>
+     * <ul>
+     *     <li><code>[-+]? </code>匹配可选的正负号</li>
+     *     <li>[0-9]* 匹配可选的整数部分</li>
+     *     <li>\.? 匹配可选的小数点</li>
+     *     <li>[0-9]+ 匹配必选的小数部分</li>
+     *     <li>([eE][-+]?[0-9]+)? 匹配可选的指数部分，其中 ([eE]) 匹配指数符号，([-+]?[0-9]+) 匹配指数值</li>
+     * </ul>
+     */
+    public final static String REGEX_NUMBER = "[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?";
+
+    /**
+     * 非法的数字形式表达式，即一个小数里包含多个小数点的正则表达
+     */
+    public final static String REGEX_ILLEGAL_NUMBER = "\\d+\\.\\d+(\\.\\d+)+";
+
+    /**
      * 日期正则表达式
      */
     private final static String REGEX_DATE = "\\d{4}-\\d{1,2}-\\d{1,2}";
@@ -77,25 +96,17 @@ public final class RegexUtil {
      */
     public static final Pattern PATTERN_CHINESE = Pattern.compile(REGEX_CHINESE);
 
-    /**
-     * 日期的正则
-     */
-    public static final Pattern PATTERN_DATE = Pattern.compile(REGEX_DATE);
-
-    /**
-     * IPv4地址的正则
-     */
-    public static final Pattern PATTERN_IPV4 = Pattern.compile(REGEX_IPV4);
 
     /**
      * URL地址的正则
      */
     public static final Pattern PATTERN_URL = Pattern.compile(REGEX_URL);
 
+
     /**
      * 存储正则Pattern的集合 key ：正则表达式 value ：Pattern对象
      */
-    private static final Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
+    private static final Map<String, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 根据正则表达式获取Pattern对象
@@ -103,12 +114,11 @@ public final class RegexUtil {
      * @param regex 正则表达式
      * @return Pattern对象
      */
-    public synchronized static Pattern pattern(String regex) {
+    public static Pattern pattern(String regex) {
         if (StringUtils.isBlank(regex)) {
             throw new RuntimeException("正则表达式不能为空");
         }
         regex = regex.trim();
-
         Pattern pattern = PATTERN_CACHE.get(regex);
         if (pattern == null) {
             pattern = Pattern.compile(regex);
@@ -192,6 +202,20 @@ public final class RegexUtil {
      */
     public static List<String> extractAllChinese(String text) {
         return extractAll(REGEX_CHINESE, text);
+    }
+
+    /**
+     * <p>提取字符中包含的所有实数数</p>
+     *
+     * @param text 待提取的字符串
+     * @return 提取字符中包含的所有整数
+     */
+    public static List<BigDecimal> extractAllNumber(String text) {
+        if (null == text) {
+            return Collections.emptyList();
+        }
+        text = text.replaceAll(REGEX_ILLEGAL_NUMBER, "").trim();
+        return extractAll(REGEX_NUMBER, text).stream().map(NumberUtil::parse).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**

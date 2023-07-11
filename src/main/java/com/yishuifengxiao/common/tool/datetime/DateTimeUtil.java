@@ -6,6 +6,7 @@ package com.yishuifengxiao.common.tool.datetime;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.text.SimpleDateFormat;
@@ -52,6 +53,16 @@ public final class DateTimeUtil {
      * 默认的日期字符串形式 yyyy-MM-dd
      */
     public final static String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
+
+    /**
+     * 默认的日期字符串形式 yyyy/MM/dd
+     */
+    public final static String DEFAULT_SLASH_DATE_FORMAT = "yyyy/MM/dd";
+
+    /**
+     * 默认的完全日期字符串形式 yyyy-MM-dd'T'HH:mm:ss.SSSZ ，例如日期时间格式为 2001-07-04T12:08:56.235-0700
+     */
+    public final static String DEFAULT_FULL_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
 
     /**
@@ -114,23 +125,10 @@ public final class DateTimeUtil {
      * @param milliseconds 从1970-01-01T00：00：00Z的时代开始的毫秒 数
      * @return 从1970-01-01T00：00：00Z的时代开始的毫秒 数获得一个LocalDateTime的实例
      */
-    public static LocalDateTime getLocalDateTime(long milliseconds) {
+    public static LocalDateTime parse(long milliseconds) {
         return date2LocalDateTime(new Date(milliseconds));
     }
 
-    /**
-     * <p>
-     * 将字符串解析为LocalDateTime 形式的时间
-     * </p>
-     * <p>
-     * 默认采用yyyy-MM-dd HH:mm:ss 或 yyyy-MM-dd HH:mm 或 yyyy-MM-dd 形式解析
-     *
-     * @param timeStr 需要解析的字符串
-     * @return LocalDateTime形式的时间
-     */
-    public static LocalDateTime parse(String timeStr) {
-        return parse(timeStr, DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT, SIMPLE_DATETIME_FORMAT);
-    }
 
     /**
      * 将字符串解析为LocalDateTime 形式的时间
@@ -147,13 +145,17 @@ public final class DateTimeUtil {
      * 将字符串解析为Date 形式的时间
      *
      * @param timeStr  需要解析的字符串
-     * @param patterns 解析规则 当未填写解析规则时
+     * @param patterns 解析规则 当未填写解析规则时使用默认的解析规则
      * @return Date形式的时间
      */
     public synchronized static Date parseDate(String timeStr, String... patterns) {
-
+        if (StringUtils.isBlank(timeStr)) {
+            return null;
+        }
         try {
-            return DateUtils.parseDate(timeStr, patterns);
+            patterns = (null != patterns && patterns.length > 0) ? patterns : new String[]{DEFAULT_DATETIME_FORMAT,
+                    DEFAULT_DATE_FORMAT, SIMPLE_DATETIME_FORMAT, DEFAULT_FULL_DATE_FORMAT, DEFAULT_SLASH_DATE_FORMAT};
+            return DateUtils.parseDate(timeStr.trim(), patterns);
         } catch (Exception e) {
             log.info("【易水工具】按照解析规则 {} 从字符串 {} 中解析出时间时出现问题，出现问题的原因为{}", patterns, timeStr, e.getMessage());
             throw new UncheckedException("从字符串中解析时间失败").setContext(e);

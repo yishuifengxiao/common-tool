@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @since 1.0.0
  */
 @SuppressWarnings("rawtypes")
-public class StringKeyPair<T> extends KeyPair implements Serializable {
+public class StringKeyValue<T> extends KeyValue implements Serializable {
 
     /**
      *
@@ -26,14 +26,14 @@ public class StringKeyPair<T> extends KeyPair implements Serializable {
      * @param val 键值对的值
      */
     @SuppressWarnings("unchecked")
-    public StringKeyPair(String key, T val) {
+    public StringKeyValue(String key, T val) {
         super(key, val);
     }
 
     /**
      * 无参构造函数
      */
-    public StringKeyPair() {
+    public StringKeyValue() {
     }
 
     @Override
@@ -48,7 +48,7 @@ public class StringKeyPair<T> extends KeyPair implements Serializable {
      * @return 当前对象实例
      */
     @SuppressWarnings("unchecked")
-    public StringKeyPair<T> setKey(String key) {
+    public StringKeyValue<T> setKey(String key) {
         super.setKey(key);
         return this;
     }
