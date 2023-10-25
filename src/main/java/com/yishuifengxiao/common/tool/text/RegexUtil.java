@@ -3,7 +3,6 @@ package com.yishuifengxiao.common.tool.text;
 import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -210,7 +209,7 @@ public final class RegexUtil {
      * @param text 待提取的字符串
      * @return 提取字符中包含的所有整数
      */
-    public static List<BigDecimal> extractAllNumber(String text) {
+    public static List<Number> extractAllNumber(String text) {
         if (null == text) {
             return Collections.emptyList();
         }

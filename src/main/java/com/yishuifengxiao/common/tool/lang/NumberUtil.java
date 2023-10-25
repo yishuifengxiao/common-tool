@@ -2,6 +2,7 @@ package com.yishuifengxiao.common.tool.lang;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.math.BigDecimal;
 
@@ -76,7 +77,7 @@ public final class NumberUtil {
      * @return 解析成功则返回Double的数据，否则为null
      */
     public static Double parseDouble(String str) {
-        BigDecimal decimal = parse(str);
+        Number decimal = parse(str);
         return null == decimal ? null : decimal.doubleValue();
     }
 
@@ -99,7 +100,7 @@ public final class NumberUtil {
      * @return 解析成功则返回Float的数据，否则为null
      */
     public static Float parseFloat(String str) {
-        BigDecimal decimal = parse(str);
+        Number decimal = parse(str);
         return null == decimal ? null : decimal.floatValue();
     }
 
@@ -122,7 +123,7 @@ public final class NumberUtil {
      * @return 解析成功则返回Integer的数据，否则为null
      */
     public static Integer parseInt(String str) {
-        BigDecimal decimal = parse(str);
+        Number decimal = parse(str);
         return null == decimal ? null : decimal.intValue();
     }
 
@@ -145,7 +146,7 @@ public final class NumberUtil {
      * @return 解析成功则返回Long的数据，否则为null
      */
     public static Long parseLong(String str) {
-        BigDecimal decimal = parse(str);
+        Number decimal = parse(str);
         return null == decimal ? null : decimal.longValue();
     }
 
@@ -167,12 +168,13 @@ public final class NumberUtil {
      * @param val 输入值
      * @return 转换后的 BigDecimal ，若转换失败则返回为null
      */
-    public static BigDecimal parse(Object val) {
+    public static Number parse(Object val) {
         try {
             if (null == val || StringUtils.isBlank(val.toString())) {
                 return null;
             }
-            return new BigDecimal(val.toString().replaceAll(",", "").trim());
+            Number number = NumberUtils.createNumber(val.toString().replaceAll(",", "").trim());
+            return number;
         } catch (Throwable e) {
             log.debug("将数据【{}】转换为数值时出现问题 {}", val, e);
         }
@@ -191,11 +193,11 @@ public final class NumberUtil {
      * @param defaultVal 默认值
      * @return 转换后的 BigDecimal ，若转换失败则返回为 defaultVal
      */
-    public static BigDecimal parse(Object val, BigDecimal defaultVal) {
+    public static Number parse(Object val, BigDecimal defaultVal) {
         if (null == val) {
             return defaultVal;
         }
-        BigDecimal decimal = parse(val);
+        Number decimal = parse(val);
         return null == decimal ? defaultVal : decimal;
     }
 }

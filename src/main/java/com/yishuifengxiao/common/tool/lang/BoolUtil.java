@@ -3,8 +3,6 @@ package com.yishuifengxiao.common.tool.lang;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.math.BigDecimal;
-
 /**
  * <p>布尔工具</p>
  * <p>主要功能如下</p>
@@ -120,7 +118,7 @@ public final class BoolUtil {
         if (StringUtils.equalsIgnoreCase(BoolUtil.FALSE_TEXT, text)) {
             return false;
         }
-        BigDecimal decimal = NumberUtil.parse(text);
+        Number decimal = NumberUtil.parse(text);
         if (null == decimal) {
             return null;
         }
