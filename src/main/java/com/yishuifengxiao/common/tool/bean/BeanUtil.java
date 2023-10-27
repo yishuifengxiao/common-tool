@@ -3,10 +3,11 @@
  */
 package com.yishuifengxiao.common.tool.bean;
 
-import com.alibaba.fastjson.JSONObject;
+
 import com.yishuifengxiao.common.tool.collections.JsonUtil;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.BeanUtils;
 
 import java.io.ByteArrayInputStream;
@@ -149,7 +150,7 @@ public final class BeanUtil {
         if (null == data) {
             return Collections.EMPTY_MAP;
         }
-        return JsonUtil.json2Map(JSONObject.toJSONString(data));
+        return JsonUtil.json2Map(JsonUtil.toJSONString(data));
     }
 
     /**

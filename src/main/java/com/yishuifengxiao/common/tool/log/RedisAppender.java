@@ -1,25 +1,23 @@
 package com.yishuifengxiao.common.tool.log;
 
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.UnsynchronizedAppenderBase;
+import ch.qos.logback.core.spi.DeferredProcessingAware;
+import ch.qos.logback.core.status.ErrorStatus;
+import com.yishuifengxiao.common.tool.collections.JsonUtil;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.RedisURI;
+import io.lettuce.core.RedisURI.Builder;
+import io.lettuce.core.api.StatefulRedisConnection;
+import io.lettuce.core.api.async.RedisAsyncCommands;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.alibaba.fastjson.JSONObject;
-
-import ch.qos.logback.classic.spi.LoggingEvent;
-import ch.qos.logback.core.UnsynchronizedAppenderBase;
-import ch.qos.logback.core.spi.DeferredProcessingAware;
-import ch.qos.logback.core.status.ErrorStatus;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.RedisURI;
-import io.lettuce.core.RedisURI.Builder;
-import io.lettuce.core.api.StatefulRedisConnection;
-import io.lettuce.core.api.async.RedisAsyncCommands;
 
 /**
  * <p>
@@ -232,7 +230,7 @@ public class RedisAppender<E> extends UnsynchronizedAppenderBase<E> {
 
 		lock.lock();
 		try {
-			this.async.publish(this.channel(), JSONObject.toJSONString(logInfo));
+			this.async.publish(this.channel(), JsonUtil.toJSONString(logInfo));
 		} finally {
 			lock.unlock();
 		}

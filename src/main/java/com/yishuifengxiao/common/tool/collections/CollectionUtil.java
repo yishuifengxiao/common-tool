@@ -23,7 +23,7 @@ import java.util.Collection;
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class SizeUtil {
+public final class CollectionUtil {
 
     /**
      * 判断分页对象是否为空
@@ -106,7 +106,7 @@ public final class SizeUtil {
         if (null == collections) {
             return true;
         }
-        return Arrays.stream(collections).allMatch(SizeUtil::isEmpty);
+        return Arrays.stream(collections).allMatch(CollectionUtil::isEmpty);
     }
 
     /**
@@ -120,7 +120,7 @@ public final class SizeUtil {
         if (null == collections) {
             return false;
         }
-        return Arrays.stream(collections).anyMatch(SizeUtil::isEmpty);
+        return Arrays.stream(collections).anyMatch(CollectionUtil::isEmpty);
     }
 
     /**

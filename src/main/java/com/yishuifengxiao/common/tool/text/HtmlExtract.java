@@ -3,7 +3,7 @@
  */
 package com.yishuifengxiao.common.tool.text;
 
-import com.yishuifengxiao.common.tool.collections.SizeUtil;
+import com.yishuifengxiao.common.tool.collections.CollectionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Node;
@@ -146,7 +146,7 @@ public final class HtmlExtract {
      */
     public static String extractAnyTextByCss(String html, String cssSelector) {
         List<String> list = extractTextByCss(html, cssSelector);
-        return SizeUtil.isEmpty(list) ? null : list.get(0);
+        return CollectionUtil.isEmpty(list) ? null : list.get(0);
     }
 
     /**
@@ -181,7 +181,7 @@ public final class HtmlExtract {
      */
     public static String extractAnyByXpath(String html, String xpath) {
         List<String> list = extractByXpath(html, xpath);
-        return SizeUtil.isEmpty(list) ? null : list.get(0);
+        return CollectionUtil.isEmpty(list) ? null : list.get(0);
     }
 
     /**

@@ -3,9 +3,10 @@
  */
 package com.yishuifengxiao.common.tool.entity;
 
-import com.yishuifengxiao.common.tool.collections.SizeUtil;
+import com.yishuifengxiao.common.tool.collections.CollectionUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Builder;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 @ApiModel(value = " 通用分页对象", description = "用于所有接口的通用返回数据")
+@Builder
 public class Page<S> implements Serializable {
     /**
      * 默认的当前页的页码
@@ -48,25 +50,25 @@ public class Page<S> implements Serializable {
      * 总的记录数
      */
     @ApiModelProperty("总的记录数")
-    protected Long total;
+    protected Number total;
 
     /**
      * 总的分页数
      */
     @ApiModelProperty("总的分页数")
-    protected Long pages;
+    protected Number pages;
 
     /**
      * 分页大小
      */
     @ApiModelProperty("分页大小")
-    protected Integer pageSize;
+    protected Number pageSize;
 
     /**
      * 当前页页码(从1开始)
      */
     @ApiModelProperty("当前页页码(从1开始)")
-    protected Integer pageNum;
+    protected Number pageNum;
 
     /**
      * 全参构造函数
@@ -77,7 +79,7 @@ public class Page<S> implements Serializable {
      * @param pageSize 分页大小
      * @param pageNum  当前页页码，从1开始
      */
-    public Page(List<S> data, long total, long pages, int pageSize, int pageNum) {
+    public Page(List<S> data, Number total, Number pages, Number pageSize, Number pageNum) {
         this.pageSize = pageSize;
         this.pageNum = pageNum;
         this.data = data;
@@ -129,7 +131,7 @@ public class Page<S> implements Serializable {
      * @param pageSize 分页大小
      * @return 分页对象
      */
-    public static <S> Page<S> ofEmpty(int pageSize) {
+    public static <S> Page<S> ofEmpty(Number pageSize) {
         return new Page<>(new ArrayList<>(), 0L, 0L, pageSize, DEFAULT_PAGE_NUM);
     }
 
@@ -153,7 +155,7 @@ public class Page<S> implements Serializable {
     public static <S> Page<S> toPage(List<S> data) {
         data = data == null ? new ArrayList<>() : data;
 
-        return Page.of(data, (long) data.size(), data.size(), DEFAULT_PAGE_NUM);
+        return Page.of(data, data.size(), data.size(), DEFAULT_PAGE_NUM);
     }
 
     /**
@@ -165,28 +167,28 @@ public class Page<S> implements Serializable {
      * @param pageNum  当前页页码
      * @return 分页对象
      */
-    public static <S> Page<S> toPage(List<S> list, int pageSize, int pageNum) {
-        if (SizeUtil.isEmpty(list)) {
+    public static <S> Page<S> toPage(List<S> list, Number pageSize, Number pageNum) {
+        if (CollectionUtil.isEmpty(list)) {
             return Page.ofEmpty(pageSize);
         }
-        if (pageSize <= 0) {
+        if (pageSize.longValue() <= 0) {
             pageSize = DEFAULT_PAGE_SIZE;
         }
-        if (pageNum <= 0) {
+        if (pageNum.longValue() <= 0) {
             pageNum = DEFAULT_PAGE_NUM;
         }
         // 总的数据量
-        int totalNum = list.size();
+        long totalNum = list.size();
         // 起始量
-        int startNum = (pageNum - 1) * pageSize;
+        long startNum = (pageNum.longValue() - 1) * pageSize.longValue();
         // 结束量
-        int endNum = pageNum * pageSize;
+        long endNum = pageNum.longValue() * pageSize.longValue();
         // 当前页的数据
         List<S> data = new ArrayList<>();
 
         if (endNum <= list.size()) {
             // 正常情况下
-            data = list.subList(startNum, endNum);
+            data = list.stream().skip(startNum).limit(endNum).collect(Collectors.toList());
         }
 
         if (startNum > list.size()) {
@@ -196,10 +198,10 @@ public class Page<S> implements Serializable {
 
         if (startNum < list.size() && list.size() < endNum) {
             // 最后一页，且最后一页的数量不够
-            data = list.subList(startNum, list.size());
+            data = list.stream().skip(startNum).limit(list.size()).collect(Collectors.toList());
         }
 
-        return Page.of(data, (long) totalNum, pageSize, pageNum);
+        return Page.of(data, totalNum, pageSize, pageNum);
     }
 
     /**
@@ -212,20 +214,20 @@ public class Page<S> implements Serializable {
      * @param pageNum  当前页页码，从1开始
      * @return 分页对象
      */
-    public static <S> Page<S> of(List<S> data, long total, int pageSize, int pageNum) {
-        if (pageSize <= 0) {
+    public static <S> Page<S> of(List<S> data, Number total, Number pageSize, Number pageNum) {
+        if (pageSize.longValue() <= 0) {
             pageSize = DEFAULT_PAGE_SIZE;
         }
-        if (pageNum <= 0) {
+        if (pageNum.longValue() <= 0) {
             pageNum = DEFAULT_PAGE_NUM;
         }
 
-        if (total <= 0) {
+        if (total.longValue() <= 0) {
             total = 0L;
         }
 
 
-        return new Page<>(data, total, page(total, pageSize).longValue(), pageSize, pageNum);
+        return new Page<>(data, total, page(total, pageSize), pageSize, pageNum);
     }
 
     /**
@@ -280,8 +282,8 @@ public class Page<S> implements Serializable {
      *
      * @return 分页大小
      */
-    public Integer getPageSize() {
-        return pageSize;
+    public Number getPageSize() {
+        return this.pageSize;
     }
 
     /**
@@ -290,7 +292,7 @@ public class Page<S> implements Serializable {
      * @param pageSize 分页大小
      * @return 当前分页对象
      */
-    public Page<S> setPageSize(int pageSize) {
+    public Page<S> setPageSize(Number pageSize) {
         this.pageSize = pageSize;
         return this;
     }
@@ -300,8 +302,8 @@ public class Page<S> implements Serializable {
      *
      * @return 当前页页码
      */
-    public Integer getPageNum() {
-        return pageNum;
+    public Number getPageNum() {
+        return this.pageNum;
     }
 
     /**
@@ -310,7 +312,7 @@ public class Page<S> implements Serializable {
      * @param pageNum 当前页页码
      * @return 当前分页对象
      */
-    public Page<S> setPageNum(int pageNum) {
+    public Page<S> setPageNum(Number pageNum) {
         this.pageNum = pageNum;
         return this;
     }
@@ -320,8 +322,8 @@ public class Page<S> implements Serializable {
      *
      * @return 总的记录的数量
      */
-    public Long getTotal() {
-        return total;
+    public Number getTotal() {
+        return this.total;
     }
 
     /**
@@ -330,7 +332,7 @@ public class Page<S> implements Serializable {
      * @param total 总的记录的数量
      * @return 当前分页对象
      */
-    public Page<S> setTotal(long total) {
+    public Page<S> setTotal(Number total) {
         this.total = total;
         return this;
     }
@@ -341,7 +343,7 @@ public class Page<S> implements Serializable {
      * @return 当前页里包含的数据
      */
     public List<S> getData() {
-        return data;
+        return this.data;
     }
 
     /**
@@ -360,8 +362,8 @@ public class Page<S> implements Serializable {
      *
      * @return 分页的数量
      */
-    public Long getPages() {
-        return pages;
+    public Number getPages() {
+        return this.pages;
     }
 
     /**
@@ -370,24 +372,16 @@ public class Page<S> implements Serializable {
      * @param pages 分页的数量
      * @return 当前分页对象
      */
-    public Page<S> setPages(long pages) {
+    public Page<S> setPages(Number pages) {
         this.pages = pages;
         return this;
     }
 
     @Override
     public String toString() {
-        String builder = "Page [pageSize=" +
-                pageSize +
-                ", pageNum=" +
-                pageNum +
-                ", data=" +
-                data +
-                ", pages=" +
-                pages +
-                ", total=" +
-                total +
-                "]";
+        String builder =
+                "Page [pageSize=" + pageSize + ", pageNum=" + pageNum + ", data=" + data + ", pages=" + pages + ", " +
+                        "total=" + total + "]";
         return builder;
     }
 

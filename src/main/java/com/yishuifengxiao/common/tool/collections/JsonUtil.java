@@ -5,6 +5,8 @@ package com.yishuifengxiao.common.tool.collections;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -408,6 +410,8 @@ import java.util.Map;
 @Slf4j
 public final class JsonUtil {
 
+    private final static ObjectMapper MAPPER = new ObjectMapper();
+
     /**
      * 将json格式的字符串转为JAVA对象
      *
@@ -617,7 +621,7 @@ public final class JsonUtil {
      * 判断字符串是否为json对象格式
      *
      * @param text 字符串
-     * @return 字符串是否为json对象格式返回为true, 否则为false
+     * @return 字符串为json对象格式返回为true, 否则为false
      */
     public static boolean isJSONObject(String text) {
         if (StringUtils.isBlank(text)) {
@@ -635,7 +639,7 @@ public final class JsonUtil {
      * 判断字符串是否为json数组格式
      *
      * @param text 字符串
-     * @return 字符串是否为json数组格式返回为true, 否则为false
+     * @return 字符串为json数组格式返回为true, 否则为false
      */
     public static boolean isJSONArray(String text) {
         if (StringUtils.isBlank(text)) {
@@ -647,5 +651,32 @@ public final class JsonUtil {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 判断字符串是否为json格式
+     *
+     * @param text 字符串
+     * @return 字符串为json格式返回为true, 否则为false
+     */
+    public static boolean isJSON(String text) {
+        return isJSONObject(text) || isJSONArray(text);
+    }
+
+    /**
+     * 将对象转换为json格式的字符串
+     *
+     * @param value 待转换的数据
+     * @return
+     */
+    public static String toJSONString(Object value) {
+        try {
+            return MAPPER.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            if (log.isInfoEnabled()) {
+                log.info("将数据 {} 转换成 json格式的字符串 时出现问题 {} ", value, e);
+            }
+        }
+        return null;
     }
 }

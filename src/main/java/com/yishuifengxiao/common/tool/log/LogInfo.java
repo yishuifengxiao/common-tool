@@ -1,18 +1,15 @@
 package com.yishuifengxiao.common.tool.log;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import org.springframework.format.annotation.DateTimeFormat;
-
-import com.alibaba.fastjson.annotation.JSONField;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
@@ -41,7 +38,6 @@ public class LogInfo implements Serializable {
 	 */
 	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
-	@JSONField(format = "yyyy-MM-dd HH:mm:ss.SSS")
 	private Date date;
 
 	/**

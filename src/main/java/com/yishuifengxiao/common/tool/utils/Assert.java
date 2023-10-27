@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.utils;
 
-import com.yishuifengxiao.common.tool.collections.SizeUtil;
+import com.yishuifengxiao.common.tool.collections.CollectionUtil;
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.CompareUtil;
@@ -271,7 +271,7 @@ public final class Assert {
      * @param page 分页对象
      */
     public static <T> void isEmpty(String msg, Page<T> page) {
-        if (SizeUtil.isNotEmpty(page)) {
+        if (CollectionUtil.isNotEmpty(page)) {
             throw new UncheckedException(msg);
         }
     }
@@ -284,7 +284,7 @@ public final class Assert {
      * @param page 分页对象
      */
     public static <T> void isNotEmpty(String msg, Page<T> page) {
-        if (SizeUtil.isEmpty(page)) {
+        if (CollectionUtil.isEmpty(page)) {
             throw new UncheckedException(msg);
         }
     }
@@ -298,7 +298,7 @@ public final class Assert {
      * @param data 数组数据
      */
     public static <T> void isEmpty(String msg, T[] data) {
-        if (SizeUtil.isNotEmpty(data)) {
+        if (CollectionUtil.isNotEmpty(data)) {
             throw new UncheckedException(msg);
         }
     }
@@ -311,7 +311,7 @@ public final class Assert {
      * @param data 数组数据
      */
     public static <T> void isNotEmpty(String msg, T[] data) {
-        if (SizeUtil.isEmpty(data)) {
+        if (CollectionUtil.isEmpty(data)) {
             throw new UncheckedException(msg);
         }
     }
