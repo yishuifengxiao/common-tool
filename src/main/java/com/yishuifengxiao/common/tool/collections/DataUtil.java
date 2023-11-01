@@ -398,30 +398,6 @@ public final class DataUtil {
         return list;
     }
 
-    /**
-     * 生成一个从0开始到指定数值的链表
-     *
-     * @param end 截止数值(不包含该值)
-     * @return 0开始到指定数值的链表
-     */
-    public static List<Integer> intList(int end) {
-        return intList(0, end);
-    }
-
-    /**
-     * 生成一个从开始数值到结束数值的链表
-     *
-     * @param start 开始数值(包含该值)
-     * @param end   截止数值(不包含该值)
-     * @return 0开始到指定数值的链表
-     */
-    public static List<Integer> intList(int start, int end) {
-        List<Integer> list = new ArrayList<>(end - start);
-        for (int i = 0; i < end; i++) {
-            list.add(i);
-        }
-        return list;
-    }
 
     /**
      * 获取链表里的第index个元素
@@ -452,4 +428,6 @@ public final class DataUtil {
         }
         return data[index];
     }
+
+
 }

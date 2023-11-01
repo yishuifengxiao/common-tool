@@ -26,7 +26,7 @@ public class CustomException extends Exception {
 	protected int code;
 
 	/**
-	 * 携带的副驾信息
+	 * 携带的附加信息
 	 */
 	protected transient Object context;
 

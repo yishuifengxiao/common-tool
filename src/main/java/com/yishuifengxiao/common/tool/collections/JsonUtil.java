@@ -3,21 +3,21 @@
  */
 package com.yishuifengxiao.common.tool.collections;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * <p>json转换提取工具</p>
- * <p style="color:yellow">注意这里内部使用的fastjson,故进行数据转换时需要按照fastjson的规范进行标记</p>
+ * <p style="color:red">注意这里内部使用的jackson,故进行数据转换时需要按照jackson的规范进行标记</p>
  * <p>
  * JSONPath语法元素和对应XPath元素的对比语法如下：
  * </p>
@@ -425,7 +425,7 @@ public final class JsonUtil {
             return null;
         }
         try {
-            return JSONObject.parseObject(json.trim(), clazz);
+            return MAPPER.readValue(json.trim(), clazz);
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
                 log.info("将字符串 {} 转换成 java对象 {} 时出现问题 {}", json, clazz, e.getMessage());
@@ -445,9 +445,9 @@ public final class JsonUtil {
     public static <T> List<T> str2List(String json, Class<T> clazz) {
         List<T> t = null;
         try {
-            t = JSONObject.parseArray(json.trim(), clazz);
+            t = MAPPER.readValue(json.trim(), new TypeReference<List<T>>() {
+            });
         } catch (Exception e) {
-            t = Collections.emptyList();
             if (log.isInfoEnabled()) {
                 log.info("将字符串 {} 转换成 {} 集合 时出现问题 {}", json, clazz, e.getMessage());
             }
@@ -459,6 +459,45 @@ public final class JsonUtil {
      * <p>
      * 根据json提取表达式从字符串里提取出内容
      * </p>
+     * <pre>
+     *
+     * {
+     *     "store": {
+     *         "book": [
+     *             {
+     *                 "category": "reference",
+     *                 "author": "NigelRees",
+     *                 "title": "SayingsoftheCentury",
+     *                 "price": 8.95
+     *             },
+     *             {
+     *                 "category": "fiction",
+     *                 "author": "EvelynWaugh",
+     *                 "title": "SwordofHonour",
+     *                 "price": 12.99
+     *             }
+     *         ],
+     *         "bicycle": {
+     *             "color": "red",
+     *             "price": 19.95
+     *         }
+     *     }
+     * }
+     *
+     * </pre>
+     * A JsonPath can be compiled and used as shown:
+     * <pre>
+     * JsonPath path = JsonPath.compile("$.store.book[1]");
+     * List&lt;Objectt&gt; books = path.read(json);
+     * Or:
+     * </pre>
+     * <pre>
+     * List&lt;Objectt&gt; authors = JsonPath.read(json, "$.store.book[*].author")
+     * </pre>
+     * <pre>
+     * If the json path returns a single value (is definite): </pre>
+     * <pre>String author = JsonPath.read(json, "$.store.book[1].author")
+     * </pre>
      *
      * @param <T>      java对象类型
      * @param json     json格式的字符串
@@ -496,27 +535,6 @@ public final class JsonUtil {
         return str2Bean(data.toString(), clazz);
     }
 
-    /**
-     * 根据json提取表达式从字符串里提取出内容,并将提取的内容转换为JSONObject对象
-     *
-     * @param json     json格式的字符串
-     * @param jsonPath json表达式
-     * @return 转换后的java对象
-     */
-    public static JSONObject extractJSON(String json, String jsonPath) {
-        Object data = extract(json, jsonPath);
-        if (null == data) {
-            return null;
-        }
-        try {
-            return JSONObject.parseObject(data.toString().trim());
-        } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("根据表达式 {} 从字符串 {} 提取JSONObject数据 时出现问题 {}", jsonPath, json, e.getMessage());
-            }
-        }
-        return new JSONObject();
-    }
 
     /**
      * <p>
@@ -537,65 +555,6 @@ public final class JsonUtil {
         return str2List(data.toString(), clazz);
     }
 
-    /**
-     * 将java对象转换成json对象
-     *
-     * @param data 待转换的数据
-     * @return 转换后的json对象，若转换失败则返回null
-     */
-    public static JSONObject toJSON(Object data) {
-        if (null == data) {
-            return null;
-        }
-        try {
-            return JSONObject.parseObject(JSONObject.toJSONString(data));
-        } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("将对象 {} 转换成json对象时出现问题 {} ", data, e.getMessage());
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 将json格式的字符串转换为json对象
-     *
-     * @param jsonStr 待转换的数据
-     * @return 转换后的json对象，若转换失败则返回null
-     */
-    public static JSONObject str2JSONObject(String jsonStr) {
-        if (StringUtils.isBlank(jsonStr)) {
-            return null;
-        }
-        try {
-            return JSONObject.parseObject(jsonStr.trim());
-        } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("将字符串 {} 转换成json对象时出现问题 {} ", jsonStr, e.getMessage());
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 将json格式的字符串转换为json数组
-     *
-     * @param jsonStr 待转换的数据
-     * @return 转换后的json数组，若转换失败则返回null
-     */
-    public static JSONArray str2JSONArray(String jsonStr) {
-        if (StringUtils.isBlank(jsonStr)) {
-            return null;
-        }
-        try {
-            return JSONArray.parseArray(jsonStr.trim());
-        } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("将字符串 {} 转换成json数组时出现问题 {} ", jsonStr, e.getMessage());
-            }
-        }
-        return null;
-    }
 
     /**
      * 将json格式的字符串转换为map对象
@@ -608,7 +567,8 @@ public final class JsonUtil {
             return null;
         }
         try {
-            return JSONObject.parseObject(text.trim()).getInnerMap();
+            return MAPPER.readValue(text.trim(), new TypeReference<Map<String, Object>>() {
+            });
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
                 log.info("将字符串 {} 转换成 map 时出现问题 {} ", text, e.getMessage());
@@ -628,11 +588,11 @@ public final class JsonUtil {
             return false;
         }
         try {
-            JSONObject.parseObject(text.trim());
+            JsonNode tree = MAPPER.readTree(text.trim());
+            return tree.isObject();
         } catch (Throwable e) {
             return false;
         }
-        return true;
     }
 
     /**
@@ -646,11 +606,12 @@ public final class JsonUtil {
             return false;
         }
         try {
-            JSONArray.parseArray(text.trim());
+            JsonNode tree = MAPPER.readTree(text.trim());
+            return tree.isArray();
         } catch (Throwable e) {
             return false;
         }
-        return true;
+
     }
 
     /**
@@ -660,7 +621,15 @@ public final class JsonUtil {
      * @return 字符串为json格式返回为true, 否则为false
      */
     public static boolean isJSON(String text) {
-        return isJSONObject(text) || isJSONArray(text);
+        if (StringUtils.isBlank(text)) {
+            return false;
+        }
+        try {
+            MAPPER.readTree(text.trim());
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     /**
@@ -679,4 +648,6 @@ public final class JsonUtil {
         }
         return null;
     }
+
+
 }
