@@ -64,7 +64,7 @@ public class BeanValidator {
      */
     public static <T, G> String validateResult(T t, Class<G> clazz) {
         Set<ConstraintViolation<T>> constraintViolations = VALIDATOR.validate(t, null == clazz ? Default.class : clazz);
-        return null == constraintViolations ? null : constraintViolations.iterator().next().getMessage();
+        return (null == constraintViolations || constraintViolations.isEmpty()) ? null : constraintViolations.iterator().next().getMessage();
     }
 
 }
