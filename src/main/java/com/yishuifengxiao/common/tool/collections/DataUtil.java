@@ -6,6 +6,8 @@ package com.yishuifengxiao.common.tool.collections;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -427,6 +429,21 @@ public final class DataUtil {
             return null;
         }
         return data[index];
+    }
+
+    /**
+     * 遍历一个集合
+     *
+     * @param collection 待遍历的集合
+     * @param consumer   消费者，第一个参数为元素的序号，第二个参数为被遍历到的元素
+     * @param <T>        数据类型
+     */
+    public static <T> void forEach(Collection<T> collection, BiConsumer<Long, T> consumer) {
+        if (null == collection || collection.isEmpty()) {
+            return;
+        }
+        AtomicLong atomic = new AtomicLong(0L);
+        collection.stream().forEach(v -> consumer.accept(atomic.getAndIncrement(), v));
     }
 
 
