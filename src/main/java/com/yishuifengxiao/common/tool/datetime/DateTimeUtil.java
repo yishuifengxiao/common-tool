@@ -38,6 +38,8 @@ import java.util.Date;
 @Slf4j
 public final class DateTimeUtil {
 
+    public final static ZoneId ZONEID_OF_CHINA = OsUtils.ZONEID_OF_CHINA;
+
 
     /**
      * 默认的日期时间的字符串形式 yyyy-MM-dd HH:mm:ss形式
@@ -63,6 +65,16 @@ public final class DateTimeUtil {
      * 默认的完全日期字符串形式 yyyy-MM-dd'T'HH:mm:ss.SSSZ ，例如日期时间格式为 2001-07-04T12:08:56.235-0700
      */
     public final static String DEFAULT_FULL_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+
+
+    /**
+     * 获取北京时区下的当前时间
+     *
+     * @return 京时区下的当前时间
+     */
+    public static LocalDateTime now() {
+        return LocalDateTime.now(OsUtils.ZONEID_OF_CHINA);
+    }
 
 
     /**
@@ -153,8 +165,7 @@ public final class DateTimeUtil {
             return null;
         }
         try {
-            patterns = (null != patterns && patterns.length > 0) ? patterns : new String[]{DEFAULT_DATETIME_FORMAT,
-                    DEFAULT_DATE_FORMAT, SIMPLE_DATETIME_FORMAT, DEFAULT_FULL_DATE_FORMAT, DEFAULT_SLASH_DATE_FORMAT};
+            patterns = (null != patterns && patterns.length > 0) ? patterns : new String[]{DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT, SIMPLE_DATETIME_FORMAT, DEFAULT_FULL_DATE_FORMAT, DEFAULT_SLASH_DATE_FORMAT};
             return DateUtils.parseDate(timeStr.trim(), patterns);
         } catch (Exception e) {
             log.info("【易水工具】按照解析规则 {} 从字符串 {} 中解析出时间时出现问题，出现问题的原因为{}", patterns, timeStr, e.getMessage());

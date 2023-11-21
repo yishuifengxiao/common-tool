@@ -40,13 +40,13 @@ public class Page<S> extends Slice implements Serializable {
     /**
      * 总的记录数
      */
-    @ApiModelProperty("总的记录数")
+    @ApiModelProperty(value = "总的记录数", example = "0", dataType = "java.lang.Long")
     protected Number total;
 
     /**
      * 总的分页数
      */
-    @ApiModelProperty("总的分页数")
+    @ApiModelProperty(value = "总的分页数", example = "0", dataType = "java.lang.Long")
     protected Number pages;
 
 
@@ -157,31 +157,13 @@ public class Page<S> extends Slice implements Serializable {
         if (num.longValue() <= 0) {
             num = DEFAULT_PAGE_NUM;
         }
-        // 总的数据量
-        long totalNum = list.size();
         // 起始量
         long startNum = (num.longValue() - 1) * size.longValue();
-        // 结束量
-        long endNum = num.longValue() * size.longValue();
-        // 当前页的数据
-        List<S> data = new ArrayList<>();
 
-        if (endNum <= list.size()) {
-            // 正常情况下
-            data = list.stream().skip(startNum).limit(endNum).collect(Collectors.toList());
-        }
+        List<S> data = null == list ? Collections.emptyList() :
+                list.stream().skip(startNum).limit(size.longValue()).collect(Collectors.toList());
 
-        if (startNum > list.size()) {
-            // 起始页面过大
-            data = new ArrayList<>();
-        }
-
-        if (startNum < list.size() && list.size() < endNum) {
-            // 最后一页，且最后一页的数量不够
-            data = list.stream().skip(startNum).limit(list.size()).collect(Collectors.toList());
-        }
-
-        return Page.of(data, totalNum, size, num);
+        return Page.of(data, list.size(), size, num);
     }
 
     /**
@@ -195,14 +177,14 @@ public class Page<S> extends Slice implements Serializable {
      * @return 分页对象
      */
     public static <S> Page<S> of(List<S> data, Number total, Number size, Number num) {
-        if (size.longValue() <= 0) {
+        if (null == size || size.longValue() <= 0) {
             size = DEFAULT_PAGE_SIZE;
         }
-        if (num.longValue() <= 0) {
+        if (null == num || num.longValue() <= 0) {
             num = DEFAULT_PAGE_NUM;
         }
 
-        if (total.longValue() <= 0) {
+        if (null == total || total.longValue() <= 0) {
             total = 0L;
         }
 
@@ -339,10 +321,18 @@ public class Page<S> extends Slice implements Serializable {
         return this;
     }
 
+    /**
+     * 是否为空的分页
+     *
+     * @return true表示为空的分页，false不是为非空分页对象
+     */
+    public boolean isEmpty() {
+        return null == this.data || this.data.isEmpty();
+    }
+
     @Override
     public String toString() {
-        String builder = "Page [size=" + size + ", num=" + num + ", data=" + data + ", pages=" + pages + ", " +
-                "total=" + total + "]";
+        String builder = "Page [size=" + size + ", num=" + num + ", data=" + data + ", pages=" + pages + ", " + "total=" + total + "]";
         return builder;
     }
 

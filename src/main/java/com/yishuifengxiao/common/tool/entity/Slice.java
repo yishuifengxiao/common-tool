@@ -43,13 +43,13 @@ public class Slice implements Serializable {
     /**
      * 分页大小
      */
-    @ApiModelProperty(value = "分页大小", example = "10")
+    @ApiModelProperty(value = "分页大小", example = "10", dataType = "java.lang.Long")
     protected Number size;
 
     /**
      * 当前页页码
      */
-    @ApiModelProperty(value = "当前页页码,从1开始", example = "1")
+    @ApiModelProperty(value = "当前页页码,从1开始", example = "1", dataType = "java.lang.Long")
     protected Number num;
 
 

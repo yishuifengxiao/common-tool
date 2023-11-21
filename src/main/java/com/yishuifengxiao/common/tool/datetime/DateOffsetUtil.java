@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.datetime;
 
+import com.yishuifengxiao.common.tool.utils.OsUtils;
+
 import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
@@ -43,7 +45,7 @@ public class DateOffsetUtil {
      * @return 今天0时0分0秒这个时间
      */
     public static Date todayStart() {
-        return getDayStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now()));
+        return getDayStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now(OsUtils.ZONEID_OF_CHINA)));
     }
 
     /**
