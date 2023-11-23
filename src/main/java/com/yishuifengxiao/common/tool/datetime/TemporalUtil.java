@@ -3,6 +3,7 @@ package com.yishuifengxiao.common.tool.datetime;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -288,7 +289,7 @@ public class TemporalUtil {
         if (null == dateTime) {
             return null;
         }
-        return dateTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
+        return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MIN);
     }
 
     /**
@@ -304,7 +305,8 @@ public class TemporalUtil {
         if (null == dateTime) {
             return null;
         }
-        return dateTime.withHour(23).withMinute(59).withSecond(59).withNano(0);
+
+        return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MAX);
     }
 
     /**

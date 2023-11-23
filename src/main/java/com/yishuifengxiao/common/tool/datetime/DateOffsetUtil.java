@@ -3,6 +3,7 @@ package com.yishuifengxiao.common.tool.datetime;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -295,7 +296,7 @@ public class DateOffsetUtil {
             return null;
         }
 
-        return DateTimeUtil.localDateTime2Date(DateTimeUtil.date2LocalDateTime(dateTime).withHour(0).withMinute(0).withSecond(0).withNano(0));
+        return DateTimeUtil.localDateTime2Date(LocalDateTime.of(dateTime.toInstant().atZone(OsUtils.ZONEID_OF_CHINA).toLocalDate(), LocalTime.MIN));
     }
 
     /**
@@ -311,7 +312,7 @@ public class DateOffsetUtil {
         if (null == dateTime) {
             return null;
         }
-        return DateTimeUtil.localDateTime2Date(DateTimeUtil.date2LocalDateTime(dateTime).withHour(23).withMinute(59).withSecond(59).withNano(0));
+        return DateTimeUtil.localDateTime2Date(LocalDateTime.of(dateTime.toInstant().atZone(OsUtils.ZONEID_OF_CHINA).toLocalDate(), LocalTime.MAX));
     }
 
     /**

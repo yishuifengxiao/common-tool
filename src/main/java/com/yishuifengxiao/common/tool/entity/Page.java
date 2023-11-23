@@ -193,6 +193,19 @@ public class Page<S> extends Slice implements Serializable {
     }
 
     /**
+     * 构建一个分页对象
+     *
+     * @param data  当前页数据
+     * @param total 总的记录数
+     * @param slice 分页对象
+     * @param <S>   当前页数据的数据类型
+     * @return 分页对象
+     */
+    public static <S> Page<S> of(List<S> data, Number total, Slice slice) {
+        return of(data, total, slice.size(), slice.num());
+    }
+
+    /**
      * 计算分页大小
      *
      * @param total 全部数据数量
@@ -208,6 +221,7 @@ public class Page<S> extends Slice implements Serializable {
         }
         return total.longValue() % size.longValue() == 0 ? total.longValue() / size.longValue() : (total.longValue() / size.longValue() + 1);
     }
+
 
     /**
      * <p>将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
@@ -326,6 +340,7 @@ public class Page<S> extends Slice implements Serializable {
      *
      * @return true表示为空的分页，false不是为非空分页对象
      */
+
     public boolean isEmpty() {
         return null == this.data || this.data.isEmpty();
     }

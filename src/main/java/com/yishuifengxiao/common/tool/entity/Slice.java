@@ -82,4 +82,35 @@ public class Slice implements Serializable {
 
         return this.num;
     }
+
+    /**
+     * 构建一个基础的分页对象
+     *
+     * @param size 分页大小
+     * @param num  当前页页码
+     * @return 基础分页对象
+     */
+    public static Slice of(Number size, Number num) {
+        size = null == size || size.longValue() <= 0 ? DEFAULT_PAGE_SIZE : size;
+        num = null == num || num.longValue() <= 0 ? DEFAULT_PAGE_NUM : num;
+        return new Slice(size, num);
+    }
+
+    /**
+     * 分页的起始偏移量
+     *
+     * @return 起始偏移量
+     */
+    public Number startOffset() {
+        return (this.num().longValue() - 1) * this.size().longValue();
+    }
+
+    /**
+     * 分页的结束偏移量
+     *
+     * @return 结束偏移量
+     */
+    public Number endOffset() {
+        return this.num().longValue() * this.size().longValue();
+    }
 }
