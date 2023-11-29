@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.http;
 
-import com.yishuifengxiao.common.tool.collections.CollectionUtil;
+import com.yishuifengxiao.common.tool.collections.CollUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -156,7 +156,7 @@ public class CookieUtil {
     public Map<String, Cookie> getCookieMap() {
 
         Cookie[] cookies = request.getCookies();
-        if (CollectionUtil.isNotEmpty(cookies)) {
+        if (CollUtil.isNotEmpty(cookies)) {
             Map<String, Cookie> cookieMap = new HashMap<>(cookies.length);
             for (Cookie cookie : cookies) {
                 cookieMap.put(cookie.getName(), cookie);

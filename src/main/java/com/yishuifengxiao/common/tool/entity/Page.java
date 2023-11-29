@@ -3,7 +3,7 @@
  */
 package com.yishuifengxiao.common.tool.entity;
 
-import com.yishuifengxiao.common.tool.collections.CollectionUtil;
+import com.yishuifengxiao.common.tool.collections.CollUtil;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -148,7 +148,7 @@ public class Page<S> extends Slice implements Serializable {
      * @return 分页对象
      */
     public static <S> Page<S> toPage(List<S> list, Number size, Number num) {
-        if (CollectionUtil.isEmpty(list)) {
+        if (CollUtil.isEmpty(list)) {
             return Page.ofEmpty(size);
         }
         if (size.longValue() <= 0) {

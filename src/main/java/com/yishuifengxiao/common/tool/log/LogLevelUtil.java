@@ -3,7 +3,7 @@ package com.yishuifengxiao.common.tool.log;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import com.yishuifengxiao.common.tool.collections.CollectionUtil;
+import com.yishuifengxiao.common.tool.collections.CollUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class LogLevelUtil {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
             final List<Logger> loggers = loggerContext.getLoggerList();
             final Set<Logger> sets = loggers.parallelStream().filter(v -> StringUtils.equalsIgnoreCase(v.getName(), loggerName)).collect(Collectors.toSet());
-            if (CollectionUtil.isEmpty(sets)) {
+            if (CollUtil.isEmpty(sets)) {
                 return false;
             }
             sets.stream().forEach(logger -> {
