@@ -4,6 +4,7 @@ import com.yishuifengxiao.common.tool.utils.OsUtils;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -34,7 +35,7 @@ import java.util.Date;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class TemporalUtil {
+public class LocalDateTimeUtil {
 
     /**
      * <p>
@@ -289,7 +290,7 @@ public class TemporalUtil {
         if (null == dateTime) {
             return null;
         }
-        return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MIN);
+        return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MIN).truncatedTo(ChronoUnit.SECONDS);
     }
 
     /**
@@ -306,7 +307,7 @@ public class TemporalUtil {
             return null;
         }
 
-        return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MAX);
+        return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MAX).truncatedTo(ChronoUnit.SECONDS);
     }
 
     /**

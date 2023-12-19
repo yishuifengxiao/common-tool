@@ -226,7 +226,7 @@ Date monthStart1 = DateOffsetUtil.monthStart(1);
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.datetime.TemporalUtil
+com.yishuifengxiao.common.tool.datetime.LocalDateTimeUtil
 ```
 
   使用示例:
