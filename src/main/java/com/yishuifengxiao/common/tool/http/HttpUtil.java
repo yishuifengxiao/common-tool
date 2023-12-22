@@ -4,9 +4,13 @@ import com.yishuifengxiao.common.tool.text.RegexUtil;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * http数据工具
@@ -35,6 +39,16 @@ public final class HttpUtil {
      * 相对地址
      */
     private final static String RELATIVE_ADDR = "../";
+
+    /**
+     * X-Forwarded-For：Squid 服务代理
+     * Proxy-Client-IP：apache 服务代理
+     * WL-Proxy-Client-IP：weblogic 服务代理
+     * HTTP_CLIENT_IP：一些代理服务器
+     * X-Real-IP：nginx服务代理
+     */
+    private final static List<String> IP_HEAD_LIST = Stream.of("X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "REMOTE_ADDR", "X-Real-IP").collect(Collectors.toList());
+
 
     /**
      * 从url中提取出来协议和域名
@@ -190,6 +204,17 @@ public final class HttpUtil {
             map.put(strings[0].trim(), strings[1]);
         }
         return map;
+    }
+
+
+    /**
+     * 获取访问者的远程IP,多个代理的情况，第一个IP为客户端真实IP
+     *
+     * @param request HttpServletRequest
+     * @return 访问者的远程IP
+     */
+    public static String getVisitorIp(HttpServletRequest request) {
+        return IP_HEAD_LIST.stream().map(request::getHeader).filter(StringUtils::isNotBlank).filter("unknown"::equalsIgnoreCase).map(ip -> ip.split(",")[0]).findFirst().orElseGet(() -> OsUtils.LOCAL_IPV6.equals(request.getRemoteAddr()) || StringUtils.isBlank(request.getRemoteAddr()) ? OsUtils.LOCAL_IPV4 : request.getRemoteAddr());
     }
 
 }

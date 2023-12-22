@@ -52,6 +52,11 @@ public final class OsUtils {
     public final static String SEPARATOR_AND = "&";
 
     /**
+     * 半角逗号
+     */
+    public final static String COMMA = ",";
+
+    /**
      * 下划线 (英文输入法 _ )
      */
     public final static String SEPARATOR_UNDERLINE = "_";
@@ -60,6 +65,20 @@ public final class OsUtils {
      * 问号 (英文输入法 ? )
      */
     public final static String SEPARATOR_QUESTION_MARK = "?";
+
+    /**
+     * 本机的IPV4地址
+     */
+    public final static String LOCAL_IPV4 = "127.0.0.1";
+    /**
+     * 本机的IPV6地址
+     */
+    public final static String LOCAL_IPV6 = "0:0:0:0:0:0:0:1";
+
+    /**
+     * 本机的地址localhost
+     */
+    public final static String LOCAL_HOST = "localhost";
 
     /**
      * 休眠指定的时间
@@ -285,7 +304,7 @@ public final class OsUtils {
      *
      * @return 用户的当前工作目录地址
      */
-    public static   File currentWorkPath() {
+    public static File currentWorkPath() {
         return new File(userDir());
     }
 
@@ -295,7 +314,7 @@ public final class OsUtils {
      * @param name 待创建的子目录的名字
      * @return 在当前工作目录下创建的子目录
      */
-    public static   File currentWorkSubdirectory(String name) {
+    public static File currentWorkSubdirectory(String name) {
         return new File(currentWorkPath(), name);
     }
 
