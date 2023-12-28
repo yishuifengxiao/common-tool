@@ -118,7 +118,7 @@ public final class BoolUtil {
         if (StringUtils.equalsIgnoreCase(BoolUtil.FALSE_TEXT, text)) {
             return false;
         }
-        Number decimal = NumberUtil.parse(text);
+        Number decimal = NumberUtil.parse(text).orElse(null);
         if (null == decimal) {
             return null;
         }
