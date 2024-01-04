@@ -7,7 +7,7 @@ package com.yishuifengxiao.common.tool.bean;
 import com.yishuifengxiao.common.tool.collections.JsonUtil;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
-import net.minidev.json.JSONObject;
+
 import org.springframework.beans.BeanUtils;
 
 import java.io.ByteArrayInputStream;
@@ -136,7 +136,7 @@ public final class BeanUtil {
         if (null == map) {
             return null;
         }
-        return JsonUtil.str2Bean(JSONObject.toJSONString(map), clazz);
+        return JsonUtil.str2Bean(JsonUtil.toJSONString(map), clazz);
     }
 
     /**

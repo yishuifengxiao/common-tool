@@ -5,10 +5,10 @@ package com.yishuifengxiao.common.tool.io;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.random.IdWorker;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.StreamUtils;
 
-import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

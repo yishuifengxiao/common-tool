@@ -2,9 +2,9 @@ package com.yishuifengxiao.common.tool.http;
 
 import com.yishuifengxiao.common.tool.text.RegexUtil;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

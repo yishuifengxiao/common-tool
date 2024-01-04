@@ -6,8 +6,7 @@ package com.yishuifengxiao.common.tool.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yishuifengxiao.common.tool.random.IdWorker;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
@@ -37,7 +36,7 @@ import java.util.Date;
  * @version 1.0.0
  * @since 1.0.0
  */
-@ApiModel(value = "通用响应", description = "用于所有接口的通用返回数据")
+@Schema(name = "通用响应", description = "用于所有接口的通用返回数据")
 public class Response<T> implements Serializable {
 
     /**
@@ -47,7 +46,7 @@ public class Response<T> implements Serializable {
     /**
      * 请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机
      */
-    @ApiModelProperty("请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
+    @Schema(name ="请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
     @JsonProperty("request-id")
     protected String id;
 
@@ -58,27 +57,27 @@ public class Response<T> implements Serializable {
      * "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">https://developer.mozilla
      * .org/en-US/docs/Web/HTTP/Status</a>
      */
-    @ApiModelProperty("请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla" +
+    @Schema(name ="请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla" +
             ".org/en-US/docs/Web/HTTP/Status)")
     protected int code;
 
     /**
      * 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述
      */
-    @ApiModelProperty(" 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述")
+    @Schema(name =" 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述")
     protected String msg;
 
     /**
      * 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息
      */
-    @ApiModelProperty(" 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
+    @Schema(name =" 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
     @JsonProperty("data")
     protected T data;
 
     /**
      * 响应时间
      */
-    @ApiModelProperty("响应时间")
+    @Schema(name ="响应时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @JsonProperty("response-time")
     protected Date date;

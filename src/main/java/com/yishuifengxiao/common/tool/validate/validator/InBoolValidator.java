@@ -1,9 +1,9 @@
 package com.yishuifengxiao.common.tool.validate.validator;
 
 import com.yishuifengxiao.common.tool.validate.InBool;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 
 /**
  * <p>

@@ -1,8 +1,8 @@
 package com.yishuifengxiao.common.tool.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.Optional;
  * @version 1.0.0
  * @since 1.0.0
  */
-@ApiModel(value = "基础分页查询对象")
+@Schema(name = "基础分页查询对象")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,7 +31,7 @@ public class PageQuery<T> extends Slice implements Serializable {
     private static final long serialVersionUID = 1L;
 
 
-    @ApiModelProperty("查询参数")
+    @Schema(name ="查询参数")
     protected T query;
 
 

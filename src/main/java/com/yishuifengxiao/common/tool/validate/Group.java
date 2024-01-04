@@ -1,7 +1,8 @@
 package com.yishuifengxiao.common.tool.validate;
 
-import javax.validation.GroupSequence;
-import javax.validation.groups.Default;
+
+import jakarta.validation.GroupSequence;
+import jakarta.validation.groups.Default;
 
 /**
  * Default Jakarta Bean Validation group.

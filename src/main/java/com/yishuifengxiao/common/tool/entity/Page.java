@@ -4,8 +4,7 @@
 package com.yishuifengxiao.common.tool.entity;
 
 import com.yishuifengxiao.common.tool.collections.CollUtil;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
  * @version 1.0.0
  * @since 1.0.0
  */
-@ApiModel(value = "通用分页对象", description = "用于所有接口的通用返回数据")
+@Schema(name = "通用分页对象", description = "用于所有接口的通用返回数据")
 public class Page<S> extends Slice implements Serializable {
 
     /**
@@ -34,19 +33,19 @@ public class Page<S> extends Slice implements Serializable {
     /**
      * 当前分页里的数据
      */
-    @ApiModelProperty("当前分页里的数据")
+    @Schema(name = "当前分页里的数据")
     protected List<S> data;
 
     /**
      * 总的记录数
      */
-    @ApiModelProperty(value = "总的记录数", example = "0", dataType = "java.lang.Long")
+    @Schema(name = "总的记录数", example = "0")
     protected Number total;
 
     /**
      * 总的分页数
      */
-    @ApiModelProperty(value = "总的分页数", example = "0", dataType = "java.lang.Long")
+    @Schema(name = "总的分页数", example = "0")
     protected Number pages;
 
 

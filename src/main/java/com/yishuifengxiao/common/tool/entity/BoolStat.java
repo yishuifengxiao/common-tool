@@ -2,8 +2,7 @@ package com.yishuifengxiao.common.tool.entity;
 
 import com.yishuifengxiao.common.tool.lang.BoolUtil;
 import com.yishuifengxiao.common.tool.lang.CompareUtil;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.BooleanUtils;
 
 import java.util.Arrays;
@@ -22,24 +21,24 @@ import java.util.Arrays;
  * @version 1.0.0
  * @since 1.0.0
  */
-@ApiModel(value = " 布尔类型替代枚举", description = "用于替换<code>Boolean</code>的使用，方便在灵活业务场景下进行功能扩展")
+@Schema(name = " 布尔类型替代枚举", description = "用于替换<code>Boolean</code>的使用，方便在灵活业务场景下进行功能扩展")
 public enum BoolStat {
 
 
     /**
      * 类似Boolean中的false值，对应编码0
      */
-    @ApiModelProperty("类似Boolean中的false值，对应编码0") False(0, false),
+    @Schema(name = "类似Boolean中的false值，对应编码0") False(0, false),
 
     /**
      * 类似Boolean中的true值，对应编码1
      */
-    @ApiModelProperty("类似Boolean中的true值，对应编码1") True(1, true),
+    @Schema(name ="类似Boolean中的true值，对应编码1") True(1, true),
 
     /**
      * 类似Boolean中的null值，对应编码-1
      */
-    @ApiModelProperty("类似Boolean中的null值，对应编码-1") Null(-1, null);
+    @Schema(name ="类似Boolean中的null值，对应编码-1") Null(-1, null);
 
     /**
      * 编码
