@@ -43,13 +43,13 @@ public class Slice implements Serializable {
     /**
      * 分页大小
      */
-    @Schema(name = "分页大小", example = "10")
+    @Schema(title = "分页大小", example = "10")
     protected Number size;
 
     /**
      * 当前页页码
      */
-    @Schema(name = "当前页页码,从1开始", example = "1")
+    @Schema(title = "当前页页码,从1开始", example = "1")
     protected Number num;
 
 

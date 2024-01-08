@@ -31,7 +31,7 @@ public class PageQuery<T> extends Slice implements Serializable {
     private static final long serialVersionUID = 1L;
 
 
-    @Schema(name ="查询参数")
+    @Schema(title ="查询参数")
     protected T query;
 
 

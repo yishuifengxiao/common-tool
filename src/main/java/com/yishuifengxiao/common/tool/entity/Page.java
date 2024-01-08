@@ -33,19 +33,19 @@ public class Page<S> extends Slice implements Serializable {
     /**
      * 当前分页里的数据
      */
-    @Schema(name = "当前分页里的数据")
+    @Schema(title = "当前分页里的数据")
     protected List<S> data;
 
     /**
      * 总的记录数
      */
-    @Schema(name = "总的记录数", example = "0")
+    @Schema(title = "总的记录数", example = "0")
     protected Number total;
 
     /**
      * 总的分页数
      */
-    @Schema(name = "总的分页数", example = "0")
+    @Schema(title = "总的分页数", example = "0")
     protected Number pages;
 
 
