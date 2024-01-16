@@ -22,7 +22,7 @@ public class UncheckedException extends RuntimeException {
     /**
      * 错误码
      */
-    protected int code;
+    protected Integer code;
 
     /**
      * 携带的附加信息
@@ -48,7 +48,7 @@ public class UncheckedException extends RuntimeException {
      *                retrieval by the {@link #getMessage()} method.
      */
 
-    public UncheckedException(int code, String message) {
+    public UncheckedException(Integer code, String message) {
         super(message);
         this.code = code;
     }
@@ -124,7 +124,7 @@ public class UncheckedException extends RuntimeException {
      * @param code 错误码
      * @return 当前对象
      */
-    public UncheckedException setCode(int code) {
+    public UncheckedException setCode(Integer code) {
         this.code = code;
         return this;
     }
@@ -134,7 +134,7 @@ public class UncheckedException extends RuntimeException {
      *
      * @return 错误码
      */
-    public int getCode() {
+    public Integer getCode() {
 
         return this.code;
     }
@@ -167,6 +167,17 @@ public class UncheckedException extends RuntimeException {
      */
     public static UncheckedException of(String msg) {
         return new UncheckedException(msg);
+    }
+
+    /**
+     * 构建一个UncheckedException实例对象
+     *
+     * @param code 异常码
+     * @param msg  异常信息
+     * @return CustomException实例对象
+     */
+    public static UncheckedException of(int code, String msg) {
+        return new UncheckedException(msg).setCode(code);
     }
 
     /**
