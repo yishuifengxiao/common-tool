@@ -9,10 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.jsonpath.JsonPath;
 import lombok.extern.slf4j.Slf4j;
@@ -416,16 +413,17 @@ import java.util.Map;
 @Slf4j
 public final class JsonUtil {
 
-    public final static ObjectMapper MAPPER = new ObjectMapper();
+    public  static ObjectMapper MAPPER = MAPPER = new ObjectMapper();
 
     static {
+
         MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         // 反序列化时候遇到不匹配的属性并不抛出异常
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         //确定如果遇到对象Id引用，而该引用没有引用具有该Id的实际对象（“未解析对象Id”）不进行进一步处理
-        MAPPER.configure(DeserializationFeature.FAIL_ON_UNRESOLVED_OBJECT_IDS,false);
+        MAPPER.configure(DeserializationFeature.FAIL_ON_UNRESOLVED_OBJECT_IDS, false);
         //当用com.fasterxml.jackson.annotation.JsonTypeInfo.As.EXTERNAL_property注释的属性丢失，但相关类型id可用时会发生什么的功能则只有当属性标记为“必需”时才会引发异常。
-        MAPPER.configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY,false);
+        MAPPER.configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false);
         // 序列化时候遇到空对象不抛出异常
         MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         // 反序列化的时候如果是无效子类型,不抛出异常
@@ -434,10 +432,6 @@ public final class JsonUtil {
         MAPPER.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, false);
         // 使用JSR310提供的序列化类,里面包含了大量的JDK8时间序列化类
         MAPPER.registerModule(new JavaTimeModule());
-        // 启用反序列化所需的类型信息,在属性中添加@class
-//		objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL,
-//				com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY);
-        MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
         //具有不可解析子类型的字段将被反序列化为null,解决报错 com.fasterxml.jackson.databind.exc.InvalidTypeIdException
         MAPPER.disable(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE);
     }
