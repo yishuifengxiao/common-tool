@@ -2,7 +2,6 @@ package com.yishuifengxiao.common.tool.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +16,6 @@ import java.io.Serializable;
  * @version 1.0.0
  * @since 1.0.0
  */
-@Schema(name = "基础分页对象")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -43,13 +41,11 @@ public class Slice implements Serializable {
     /**
      * 分页大小
      */
-    @Schema(title = "分页大小", example = "10")
     protected Number size;
 
     /**
      * 当前页页码
      */
-    @Schema(title = "当前页页码,从1开始", example = "1")
     protected Number num;
 
 
