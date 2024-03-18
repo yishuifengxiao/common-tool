@@ -2,11 +2,11 @@ package com.yishuifengxiao.common.tool.io;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.Base64Utils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
@@ -78,7 +78,7 @@ public final class ImageUtil {
             CloseUtil.close(inputStream);
         }
         // 返回Base64编码过的字节数组字符串
-        return Base64Utils.encodeToString(data);
+        return Base64.getEncoder().encodeToString(data);
     }
 
     /**
@@ -117,7 +117,7 @@ public final class ImageUtil {
         try {
             imgBase64Str = imgBase64Str.replaceAll(FORMAT_TEMPLATE, "");
             // Base64解码
-            byte[] b = Base64Utils.decodeFromString(imgBase64Str);
+            byte[] b = Base64.getDecoder().decode(imgBase64Str.getBytes(StandardCharsets.UTF_8));
             for (int i = 0; i < b.length; ++i) {
                 if (b[i] < 0) {
                     // 调整异常数据
@@ -195,7 +195,7 @@ public final class ImageUtil {
         }
         ByteArrayInputStream byteArrayInputStream = null;
         try {
-            byte[] b = Base64Utils.decodeFromString(base64);
+            byte[] b = Base64.getDecoder().decode(base64.getBytes(StandardCharsets.UTF_8));
             for (int i = 0; i < b.length; ++i) {
                 if (b[i] < 0) {
                     // 调整异常数据

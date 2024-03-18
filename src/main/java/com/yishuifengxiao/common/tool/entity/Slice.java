@@ -51,7 +51,7 @@ public class Slice implements Serializable {
 
     /**
      * <p>获取分页大小</p>
-     * <p>若分页大小为null或者<=0则返回默认值 10</p>
+     * <p>若分页大小为null或者&lt;=0则返回默认值 10</p>
      *
      * @return 分页大小
      */
@@ -66,7 +66,7 @@ public class Slice implements Serializable {
 
     /**
      * <p>获取当前页页码</p>
-     * <p>若分页大小为null或者<=0则返回默认值 1</p>
+     * <p>若分页大小为null或者&lt;=0则返回默认值 1</p>
      *
      * @return 当前页页码
      */

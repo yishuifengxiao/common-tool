@@ -1,9 +1,9 @@
 package com.yishuifengxiao.common.tool.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
@@ -21,6 +21,7 @@ import java.util.Optional;
 @AllArgsConstructor
 @NoArgsConstructor
 @Accessors(chain = true)
+@EqualsAndHashCode(callSuper=false)
 public class PageQuery<T> extends Slice implements Serializable {
 
     /**
