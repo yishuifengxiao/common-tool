@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.yishuifengxiao.common</groupId>
 	<artifactId>common-tool</artifactId>
-	<version>5.0.0</version>
+	<version>BUILD-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<description>本工具包主要集成了目前在项目开发过程中个人经常会使用到的一些工具类，对工具类进行了一下简单的封装</description>
 	<name>common-tool</name>
