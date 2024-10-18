@@ -8,14 +8,16 @@ import com.yishuifengxiao.common.tool.collections.JsonUtil;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
 
-import org.springframework.beans.BeanUtils;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -47,14 +49,25 @@ public final class BeanUtil {
         if (null == source || null == target) {
             return null;
         }
-        try {
-            BeanUtils.copyProperties(source, target);
-            return target;
-        } catch (Exception e) {
-            throw new UncheckedException(e.getMessage());
+        List<Field> targetFields = ClassUtil.fields(target.getClass());
+        List<Field> sourceFields = ClassUtil.fields(source.getClass());
+        targetFields = targetFields.stream().filter(v -> !(Modifier.isAbstract(v.getModifiers()) || Modifier.isNative(v.getModifiers()) || Modifier.isStatic(v.getModifiers()) || Modifier.isFinal(v.getModifiers()))).filter(v -> sourceFields.stream().anyMatch(s -> s.getName().equals(v.getName()))).collect(Collectors.toList());
+        for (Field field : targetFields) {
+            field.setAccessible(true);
+            try {
+                Object val = field.get(source);
+                if (null == val) {
+                    continue;
+                }
+                field.set(target, val);
+            } catch (IllegalAccessException e) {
+                throw new UncheckedException(e.getMessage());
+            }
         }
 
+        return target;
     }
+
 
     /**
      * 将Java对象序列化为二进制数据

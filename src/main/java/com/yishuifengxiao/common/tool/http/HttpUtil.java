@@ -2,7 +2,6 @@ package com.yishuifengxiao.common.tool.http;
 
 import com.yishuifengxiao.common.tool.text.RegexUtil;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
-import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public final class HttpUtil {
      * HTTP_CLIENT_IP：一些代理服务器
      * X-Real-IP：nginx服务代理
      */
-    private final static List<String> IP_HEAD_LIST = Stream.of("X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "REMOTE_ADDR", "X-Real-IP").collect(Collectors.toList());
+    public final static List<String> IP_HEAD_LIST = Stream.of("X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "REMOTE_ADDR", "X-Real-IP").collect(Collectors.toList());
 
 
     /**
@@ -206,15 +205,5 @@ public final class HttpUtil {
         return map;
     }
 
-
-    /**
-     * 获取访问者的远程IP,多个代理的情况，第一个IP为客户端真实IP
-     *
-     * @param request HttpServletRequest
-     * @return 访问者的远程IP
-     */
-    public static String getVisitorIp(HttpServletRequest request) {
-        return IP_HEAD_LIST.stream().map(request::getHeader).filter(StringUtils::isNotBlank).filter("unknown"::equalsIgnoreCase).map(ip -> ip.split(",")[0]).findFirst().orElseGet(() -> OsUtils.LOCAL_IPV6.equals(request.getRemoteAddr()) || StringUtils.isBlank(request.getRemoteAddr()) ? OsUtils.LOCAL_IPV4 : request.getRemoteAddr());
-    }
 
 }

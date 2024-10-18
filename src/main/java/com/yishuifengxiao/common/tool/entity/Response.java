@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yishuifengxiao.common.tool.random.IdWorker;
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.springframework.http.HttpStatus;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -39,6 +38,7 @@ import java.util.Date;
 @Schema(name = "通用响应", description = "用于所有接口的通用返回数据")
 public class Response<T> implements Serializable {
 
+
     /**
      *
      */
@@ -46,7 +46,7 @@ public class Response<T> implements Serializable {
     /**
      * 请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机
      */
-    @Schema(title ="请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
+    @Schema(title = "请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
     @JsonProperty("request-id")
     protected String id;
 
@@ -57,27 +57,26 @@ public class Response<T> implements Serializable {
      * "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">https://developer.mozilla
      * .org/en-US/docs/Web/HTTP/Status</a>
      */
-    @Schema(title ="请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla" +
-            ".org/en-US/docs/Web/HTTP/Status)")
+    @Schema(title = "请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla" + ".org/en-US/docs/Web/HTTP/Status)")
     protected int code;
 
     /**
      * 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述
      */
-    @Schema(title =" 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述")
+    @Schema(title = " 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述")
     protected String msg;
 
     /**
      * 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息
      */
-    @Schema(title =" 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
+    @Schema(title = " 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
     @JsonProperty("data")
     protected T data;
 
     /**
      * 响应时间
      */
-    @Schema(title ="响应时间")
+    @Schema(title = "响应时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     @JsonProperty("response-time")
     protected Date date;
@@ -103,7 +102,7 @@ public class Response<T> implements Serializable {
      * @return 表示请求成功的响应对象
      */
     public static <T> Response<T> suc(T data) {
-        return new Response<>(HttpStatus.OK.value(), Const.MSG_OK, data);
+        return new Response<>(Const.CODE_OK, Const.MSG_OK, data);
     }
 
     /**
@@ -112,7 +111,7 @@ public class Response<T> implements Serializable {
      * @return 表示成功的响应对象(响应码200)
      */
     public static Response<Object> suc() {
-        return new Response<Object>(HttpStatus.OK.value(), Const.MSG_OK);
+        return new Response<Object>(Const.CODE_OK, Const.MSG_OK);
     }
 
     /**
@@ -122,7 +121,7 @@ public class Response<T> implements Serializable {
      * @return 表示成功的响应对象(响应码200)
      */
     public static Response<Object> suc(String msg) {
-        return new Response<Object>(HttpStatus.OK.value(), msg);
+        return new Response<Object>(Const.CODE_OK, msg);
     }
 
     /**
@@ -133,7 +132,7 @@ public class Response<T> implements Serializable {
      * @return 表示成功的响应对象(响应码200)
      */
     public static <T> Response<T> sucData(T data) {
-        return new Response<T>(HttpStatus.OK.value(), Const.MSG_OK, data);
+        return new Response<T>(Const.CODE_OK, Const.MSG_OK, data);
     }
 
     /**
@@ -145,7 +144,7 @@ public class Response<T> implements Serializable {
      * @return 表示成功的响应对象(响应码200)
      */
     public static <T> Response<T> suc(String msg, T data) {
-        return new Response<>(HttpStatus.OK.value(), msg, data);
+        return new Response<>(Const.CODE_OK, msg, data);
     }
 
     /**
@@ -154,7 +153,7 @@ public class Response<T> implements Serializable {
      * @return 表示参数有误的响应对象(响应码400)
      */
     public static Response<Object> badParam() {
-        return new Response<Object>(HttpStatus.BAD_REQUEST.value(), Const.MSG_BAD_REQUEST);
+        return new Response<Object>(Const.CODE_BAD_REQUEST, Const.MSG_BAD_REQUEST);
     }
 
     /**
@@ -164,7 +163,7 @@ public class Response<T> implements Serializable {
      * @return 表示参数有误的响应对象(响应码400)
      */
     public static Response<Object> badParam(String msg) {
-        return new Response<Object>(HttpStatus.BAD_REQUEST.value(), msg);
+        return new Response<Object>(Const.CODE_BAD_REQUEST, msg);
     }
 
     /**
@@ -176,7 +175,7 @@ public class Response<T> implements Serializable {
      * @return 表示参数有误的响应对象(响应码400)
      */
     public static <T> Response<T> badParam(String msg, T data) {
-        return new Response<>(HttpStatus.BAD_REQUEST.value(), msg, data);
+        return new Response<>(Const.CODE_BAD_REQUEST, msg, data);
     }
 
     /**
@@ -185,7 +184,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源未授权的响应对象(401响应码)
      */
     public static Response<Object> unAuth() {
-        return new Response<Object>(HttpStatus.UNAUTHORIZED.value(), Const.MSG_UNAUTHORIZED);
+        return new Response<Object>(Const.CODE_UNAUTHORIZED, Const.MSG_UNAUTHORIZED);
     }
 
     /**
@@ -195,7 +194,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源未授权的响应对象(401响应码)
      */
     public static Response<Object> unAuth(String msg) {
-        return new Response<Object>(HttpStatus.UNAUTHORIZED.value(), msg);
+        return new Response<Object>(Const.CODE_UNAUTHORIZED, msg);
     }
 
     /**
@@ -207,7 +206,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源未授权的响应对象(401响应码)
      */
     public static <T> Response<T> unAuth(String msg, T data) {
-        return new Response<>(HttpStatus.UNAUTHORIZED.value(), msg, data);
+        return new Response<>(Const.CODE_UNAUTHORIZED, msg, data);
     }
 
     /**
@@ -216,7 +215,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源不可用的响应对象(403响应码)
      */
     public static Response<Object> notAllow() {
-        return new Response<Object>(HttpStatus.FORBIDDEN.value(), Const.MSG_FORBIDDEN);
+        return new Response<Object>(Const.CODE_FORBIDDEN, Const.MSG_FORBIDDEN);
     }
 
     /**
@@ -226,7 +225,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源不可用的响应对象(403响应码)
      */
     public static Response<Object> notAllow(String msg) {
-        return new Response<Object>(HttpStatus.FORBIDDEN.value(), msg);
+        return new Response<Object>(Const.CODE_FORBIDDEN, msg);
     }
 
     /**
@@ -235,7 +234,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源不存在的响应对象(404响应码)
      */
     public static Response<Object> notFoundt() {
-        return new Response<Object>(HttpStatus.NOT_FOUND.value(), Const.MSG_NOT_FOUND);
+        return new Response<Object>(Const.CODE_NOT_FOUND, Const.MSG_NOT_FOUND);
     }
 
     /**
@@ -244,7 +243,7 @@ public class Response<T> implements Serializable {
      * @return 表示请求业务未完成的响应对象(500响应码)
      */
     public static Response<Object> error() {
-        return new Response<Object>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR);
+        return new Response<Object>(Const.CODE_INTERNAL_SERVER_ERROR, Const.MSG_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -255,7 +254,7 @@ public class Response<T> implements Serializable {
      * @return 表示请求业务未完成的响应对象(500响应码)
      */
     public static <T> Response<T> errorData(T data) {
-        return new Response<T>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR, data);
+        return new Response<T>(Const.CODE_INTERNAL_SERVER_ERROR, Const.MSG_INTERNAL_SERVER_ERROR, data);
     }
 
     /**
@@ -265,7 +264,7 @@ public class Response<T> implements Serializable {
      * @return 表示服务器内部异常500时的返回信息
      */
     public static Response<Object> error(String msg) {
-        return new Response<Object>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg);
+        return new Response<Object>(Const.CODE_INTERNAL_SERVER_ERROR, msg);
     }
 
     /**
@@ -276,7 +275,7 @@ public class Response<T> implements Serializable {
      * @return 表示服务器内部异常500时的返回信息
      */
     public static <T> Response<T> error(T data) {
-        return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), Const.MSG_INTERNAL_SERVER_ERROR, data);
+        return new Response<>(Const.CODE_INTERNAL_SERVER_ERROR, Const.MSG_INTERNAL_SERVER_ERROR, data);
     }
 
     /**
@@ -288,7 +287,7 @@ public class Response<T> implements Serializable {
      * @return 表示服务器内部异常500时的返回信息
      */
     public static <T> Response<T> error(String msg, T data) {
-        return new Response<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), msg, data);
+        return new Response<>(Const.CODE_INTERNAL_SERVER_ERROR, msg, data);
     }
 
     /**

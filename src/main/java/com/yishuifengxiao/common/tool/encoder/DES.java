@@ -2,7 +2,6 @@ package com.yishuifengxiao.common.tool.encoder;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.Assert;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -51,7 +50,6 @@ public class DES {
      * @return 加密后的数据, null表示加密失败
      */
     public static final String encrypt(String key, String data) {
-        Assert.notNull(data, "需要加密的数据不能为空");
         try {
             return byte2hex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
@@ -78,7 +76,6 @@ public class DES {
      * @return 解密后的数据, null表示解密失败
      */
     public static final String decrypt(String key, String data) {
-        Assert.notNull(data, "需要解密的数据不能为空");
         try {
             return new String(decrypt(hex2byte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {

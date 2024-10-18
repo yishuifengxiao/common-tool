@@ -5,6 +5,7 @@ import com.yishuifengxiao.common.tool.io.CloseUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.util.function.Supplier;
 
 /**
  * <p>
@@ -16,6 +17,98 @@ import java.io.PrintStream;
  * @since 1.0.0
  */
 public class ExceptionUtil {
+
+    /**
+     * 抛出一个运行时异常
+     *
+     * @param e 运行时异常
+     */
+    public static final void throwThrowable(RuntimeException e) {
+        if (null != e) {
+            throw e;
+        }
+    }
+
+    /**
+     * 判断给定的值是否为true,若为null或false则抛出异常
+     *
+     * @param val 待判断的值
+     * @param msg 异常提示信息
+     */
+    public static void isTrue(Boolean val, String msg) {
+        if (null == val || !val) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否为true或null,若为false则抛出异常
+     *
+     * @param val 待判断的值
+     * @param msg 异常提示信息
+     */
+    public static void isTrueOrNull(Boolean val, String msg) {
+        if (null != val && !val) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否为false,若为null或true则抛出异常
+     *
+     * @param val 待判断的值
+     * @param msg 异常提示信息
+     */
+    public static void isFalse(Boolean val, String msg) {
+        if (null == val || val) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否为false或null，若为true则抛出异常
+     *
+     * @param val 待判断的值
+     * @param msg 异常提示信息
+     */
+    public static void isFalseOrNull(Boolean val, String msg) {
+        if (null != val && val) {
+            throw new UncheckedException(msg);
+        }
+    }
+
+
+    /**
+     * 生成一个 Supplier
+     *
+     * @param message 提示信息
+     * @return Supplier
+     */
+    public static final Supplier<UncheckedException> orElseThrow(String message) {
+        return () -> new UncheckedException(message);
+    }
+
+    /**
+     * 生成一个 Supplier
+     *
+     * @param code    错误码
+     * @param message 提示信息
+     * @return Supplier
+     */
+    public static final Supplier<UncheckedException> orElseThrow(int code, String message) {
+        return () -> new UncheckedException(code, message);
+    }
+
+    /**
+     * 生成一个Supplier
+     *
+     * @param exception 异常信息
+     * @return Supplier
+     */
+    public static final Supplier<UncheckedException> orElseThrow(UncheckedException exception) {
+        return () -> exception;
+    }
+
     /**
      * 提取出异常中的所有输出信息
      *

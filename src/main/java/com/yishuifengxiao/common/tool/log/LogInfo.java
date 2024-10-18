@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,7 +15,7 @@ import java.util.Date;
  * 自定义日志的内容
  * </p>
  * 利用redis的订阅发布功能，将信息通过redis发布时的内容的格式
- * 
+ *
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -28,51 +27,50 @@ import java.util.Date;
 @Builder
 public class LogInfo implements Serializable {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5380449689877786879L;
+    /**
+     *
+     */
+    private static final long serialVersionUID = 5380449689877786879L;
 
-	/**
-	 * 日志的时间
-	 */
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
-	private Date date;
+    /**
+     * 日志的时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS", timezone = "GMT+8")
+    private Date date;
 
-	/**
-	 * 线程名字
-	 */
-	private String threadName;
+    /**
+     * 线程名字
+     */
+    private String threadName;
 
-	/**
-	 * logger 的名字
-	 */
-	private String loggerName;
+    /**
+     * logger 的名字
+     */
+    private String loggerName;
 
-	/**
-	 * 日志级别
-	 */
-	private String level;
+    /**
+     * 日志级别
+     */
+    private String level;
 
-	/**
-	 * 原始消息【格式化之后的消息】
-	 */
-	private String message;
+    /**
+     * 原始消息【格式化之后的消息】
+     */
+    private String message;
 
-	/**
-	 * 应用名称
-	 */
-	private String application;
+    /**
+     * 应用名称
+     */
+    private String application;
 
-	/**
-	 * 附加信息
-	 */
-	private String extra;
+    /**
+     * 附加信息
+     */
+    private String extra;
 
-	/**
-	 * 发送时间
-	 */
-	private Long timeStamp;
+    /**
+     * 发送时间
+     */
+    private Long timeStamp;
 
 }

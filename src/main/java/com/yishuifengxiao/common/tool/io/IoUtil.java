@@ -7,7 +7,6 @@ import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.random.IdWorker;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.util.StreamUtils;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -82,7 +81,7 @@ public class IoUtil {
         if (inputStream == null) {
             return new byte[0];
         }
-        ByteArrayOutputStream out = new ByteArrayOutputStream(StreamUtils.BUFFER_SIZE);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
         copy(inputStream, out);
         return out.toByteArray();
     }
