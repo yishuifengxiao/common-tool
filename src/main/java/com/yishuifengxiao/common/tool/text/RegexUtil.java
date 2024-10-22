@@ -211,7 +211,7 @@ public final class RegexUtil {
             return Collections.emptyList();
         }
         text = text.replaceAll(REGEX_ILLEGAL_NUMBER, "").trim();
-        return extractAll(REGEX_NUMBER, text).stream().map(v -> NumberUtil.parse(v, null)).filter(Objects::nonNull).collect(Collectors.toList());
+        return extractAll(REGEX_NUMBER, text).stream().map(v -> NumberUtil.parse(v).orElse(null)).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
     /**

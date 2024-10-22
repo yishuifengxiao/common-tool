@@ -1,8 +1,7 @@
-package com.yishuifengxiao.common.tool.encoder;
+package com.yishuifengxiao.common.tool.codec;
 
 import com.yishuifengxiao.common.tool.io.CloseUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
@@ -26,8 +25,7 @@ import java.security.MessageDigest;
  */
 @Slf4j
 public class Md5 {
-    private static final String[] HEX_DIGITS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
-            "e", "f"};
+    private static final String[] HEX_DIGITS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
 
     /**
      * 对字符串md5加密(小写+字母)
@@ -98,12 +96,18 @@ public class Md5 {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             inputStream = new FileInputStream(file);
-            byte[] buffer = new byte[8192];
+            byte[] buffer = new byte[1024];
             int length;
             while ((length = inputStream.read(buffer)) != -1) {
                 md5.update(buffer, 0, length);
             }
-            return new String(Hex.encodeHex(md5.digest()));
+            // 将字节数组转换成十六进制格式的字符串
+            StringBuilder sb = new StringBuilder();
+            // 获取最终的摘要字节
+            for (byte b : md5.digest()) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString().toLowerCase();
         } catch (Exception e) {
             log.info("计算文件{}的md5值时出现问题{}", file, e.getMessage());
             return null;

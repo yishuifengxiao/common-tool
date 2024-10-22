@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * http数据工具
+ * url数据工具
  *
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
  */
-public final class HttpUtil {
+public final class UrlUtil {
 
     /**
      * com.cn域名表达式

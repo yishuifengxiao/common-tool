@@ -18,16 +18,6 @@ import java.util.function.Supplier;
  */
 public class ExceptionUtil {
 
-    /**
-     * 抛出一个运行时异常
-     *
-     * @param e 运行时异常
-     */
-    public static final void throwThrowable(RuntimeException e) {
-        if (null != e) {
-            throw e;
-        }
-    }
 
     /**
      * 判断给定的值是否为true,若为null或false则抛出异常
@@ -125,6 +115,15 @@ public class ExceptionUtil {
         String result = new String(out.toByteArray());
         CloseUtil.close(printStream, out);
         return result;
+    }
+
+    /**
+     * 抛出一个自定义运行时异常
+     *
+     * @param msg 异常信息
+     */
+    public static void throwException(Integer code, String msg) {
+        throw new UncheckedException(code, msg);
     }
 
     /**

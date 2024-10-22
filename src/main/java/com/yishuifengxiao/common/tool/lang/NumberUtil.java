@@ -4,7 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * <p>
@@ -167,7 +170,7 @@ public final class NumberUtil {
     public static Optional<BigDecimal> parse(Object val) {
         try {
             if (null == val || StringUtils.isBlank(val.toString())) {
-                return null;
+                return Optional.empty();
             }
             BigDecimal number = new BigDecimal(val.toString().replaceAll(",", "").trim());
             return Optional.ofNullable(number);
@@ -178,21 +181,91 @@ public final class NumberUtil {
     }
 
     /**
-     * <p>
-     * 将输入值转换为 BigDecimal
-     * </p>
-     * <p>
-     * <strong>线程安全</strong>
-     * </p>
+     * 将16进制字符串数据转为10进制数字
      *
-     * @param val        输入值
-     * @param defaultVal 默认值
-     * @return 转换后的 BigDecimal ，若转换失败则返回为 defaultVal
+     * @param hexString 待转换的字符串
+     * @return 转换后的10进制数字
      */
-    public static BigDecimal parse(Object val, BigDecimal defaultVal) {
-        if (null == val) {
-            return defaultVal;
+    public static Optional<BigDecimal> parseHex(String hexString) {
+        try {
+            if (null == hexString || StringUtils.isBlank(hexString.toString())) {
+                return Optional.empty();
+            }
+            BigDecimal number = new BigDecimal(new BigInteger(hexString.toString().replaceAll(",", "").trim(), 16));
+            return Optional.ofNullable(number);
+        } catch (Throwable e) {
+            log.debug("将数据【{}】转换为数值时出现问题 {}", hexString, e);
         }
-        return parse(val).orElse(defaultVal);
+        return Optional.empty();
+    }
+
+    /**
+     * <p>将数字转换指定字节数为16进制字符串</p>
+     * <p>注意转换后的字符串为偶数个字符，即为2*byteNum个字符数，若为奇数个字符则自动左补零</p>
+     * <p>转换后的字符的长度可能大于2*byteNum个字符数</p>
+     *
+     * @param number  待转换的数字
+     * @param byteNum 转换后的字节数，例如byteNum为2时表示最短的字符数为 2*2
+     * @return 16进制字符串
+     */
+    public static String toHexString(Number number, Integer byteNum) {
+
+        String hexString = "";
+        if (null != number) {
+            if (number instanceof Integer) {
+                hexString = Integer.toHexString(number.intValue()).toUpperCase(); // 转为16进制并大写
+            } else if (number instanceof Long) {
+                hexString = Long.toHexString(number.longValue()).toUpperCase(); // 转为16进制并大写
+            } else if (number instanceof Short) {
+                hexString = Integer.toHexString(number.shortValue()).toUpperCase(); // 转为16进制并大写
+            } else if (number instanceof Byte) {
+                hexString = Integer.toHexString(number.byteValue()).toUpperCase(); // 转为16进制并大写
+            } else if (number instanceof Double || number instanceof Float) {
+                // 如果是浮点数，通常我们只处理其整数部分
+                hexString = Long.toHexString(number.longValue()).toUpperCase(); // 转为16进制并大写
+            } else {
+                throw new IllegalArgumentException("Unsupported number type.");
+            }
+        }
+        if (hexString.length() % 2 == 1) {
+            hexString = "0" + hexString;
+        }
+        if (null != byteNum && byteNum > 0 && hexString.length() < byteNum * 2) {
+            String prefix = IntStream.range(0, byteNum * 2 - hexString.length()).mapToObj(v -> "0").collect(Collectors.joining());
+            hexString = prefix + hexString;
+        }
+        return hexString;
+    }
+
+    /**
+     * <p>将数字转换指定字节数为16进制字符串</p>
+     * <p>注意转换后的字符串为偶数个字符，即为2*byteNum个字符数，若为奇数个字符则自动左补零</p>
+     * <p>转换后的字符的长度恰好2*byteNum个字符数，故转换后的</p>
+     *
+     * @param number  待转换的数字
+     * @param byteNum 转换后的字节数，例如byteNum为2时表示最短的字符数为 2*2
+     * @return 16进制字符串
+     */
+    public static String toHex(Number number, Integer byteNum) {
+        String hexString = toHexString(number, byteNum);
+        if (null == byteNum || byteNum <= 0) {
+            return hexString;
+        }
+        if (hexString.length() > (byteNum * 2)) {
+            hexString = hexString.substring(0, byteNum * 2);
+        }
+        return hexString;
+    }
+
+
+    /**
+     * <p>将数字转换为16进制字符串</p>
+     * <p>注意转换后的字符串为偶数个字符，若为奇数个字符则自动左补零</p>
+     *
+     * @param number 待转换的数字
+     * @return 16进制字符串
+     */
+    public static String toHexString(Number number) {
+        return toHexString(number, null);
     }
 }

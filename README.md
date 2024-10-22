@@ -8,7 +8,7 @@
 | [com.yishuifengxiao.common.tool.context](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/context/package-summary.html) | 数据存储工具           |
 | [com.yishuifengxiao.common.tool.converter](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/converter/package-summary.html) | 数据转换工具           |
 | [com.yishuifengxiao.common.tool.datetime](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/datetime/package-summary.html) | 日期时间工具           |
-| [com.yishuifengxiao.common.tool.encoder](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/encoder/package-summary.html) | 加解密工具             |
+| [com.yishuifengxiao.common.tool.codec](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/encoder/package-summary.html) | 加解密工具             |
 | [com.yishuifengxiao.common.tool.entity](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/entity/package-summary.html) | 基础通用对象           |
 | [com.yishuifengxiao.common.tool.exception](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/exception/package-summary.html) | 自定义异常             |
 | [com.yishuifengxiao.common.tool.exception.constant](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/exception/constant/package-summary.html) | 异常错误码常量         |
@@ -310,7 +310,7 @@ LocalDateTime parse1 = DateTimeUtil.parse("2021-10-10 12:12:12", "yyyy-MM-dd HH:
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.encoder.AES
+com.yishuifengxiao.common.tool.codec.AES
 ```
 
   使用示例:
@@ -332,7 +332,7 @@ AES.decrypt("秘钥", encrypt);
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.encoder.DES
+com.yishuifengxiao.common.tool.codec.DES
 ```
 
   使用示例:
@@ -351,7 +351,7 @@ DES.decrypt("秘钥", encrypt);
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.encoder.Md5
+com.yishuifengxiao.common.tool.codec.Md5
 ```
 
   使用示例:
