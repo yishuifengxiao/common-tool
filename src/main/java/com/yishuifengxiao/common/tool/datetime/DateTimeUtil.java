@@ -38,6 +38,9 @@ import java.util.Date;
 @Slf4j
 public final class DateTimeUtil {
 
+    /**
+     * 默认的时区-北京 utc+8
+     */
     public final static ZoneId ZONEID_OF_CHINA = OsUtils.ZONEID_OF_CHINA;
 
 

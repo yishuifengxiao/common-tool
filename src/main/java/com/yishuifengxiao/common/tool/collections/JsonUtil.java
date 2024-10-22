@@ -636,7 +636,7 @@ public final class JsonUtil {
      * 将对象转换为json格式的字符串
      *
      * @param value 待转换的数据
-     * @return
+     * @return json格式的字符串
      */
     public static String toJSONString(Object value) {
         try {

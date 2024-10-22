@@ -25,9 +25,7 @@ public class ExecuteUtil {
     /**
      * 线程池初始化
      */
-    private final static ExecutorService POOL = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-            Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), SIMPLE_THREAD_FACTORY,
-            new ThreadPoolExecutor.AbortPolicy());
+    private final static ExecutorService POOL = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), SIMPLE_THREAD_FACTORY, new ThreadPoolExecutor.AbortPolicy());
 
     /**
      * 获取线程池
@@ -71,6 +69,7 @@ public class ExecuteUtil {
      * 执行任务
      *
      * @param runnable 待执行的任务
+     * @param complete 执行完成后触发
      * @param error    执行失败后触发的动作
      */
     public static void execute(Runnable runnable, ExecuteComplete complete, ExecuteError error) {
@@ -188,7 +187,7 @@ public class ExecuteUtil {
      *        <li>  以Both/Combine结尾的方法，必须所有都完成。 </li>
      * </ul>
      *
-     * @param futures
+     * @param futures 待执行的任务
      */
     public static void execute(CompletableFuture... futures) {
         if (null == futures || futures.length == 0) {

@@ -18,8 +18,6 @@ public final class OsUtils {
 
     /**
      * 获取北京时间的ZoneId
-     *
-     * @return 北京时间的ZoneId
      */
     public final static ZoneId ZONEID_OF_CHINA = ZoneId.of(DEFAULT_ZONE);
     /**

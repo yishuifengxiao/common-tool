@@ -52,6 +52,11 @@ public class CustomStringJavaCompiler {
      */
     private Boolean compile;
 
+    /**
+     * 默认构造器
+     *
+     * @param sourceCode 源代码
+     */
     public CustomStringJavaCompiler(String sourceCode) {
         this.sourceCode = sourceCode;
         this.fullClassName = getFullClassName(sourceCode);
@@ -110,7 +115,7 @@ public class CustomStringJavaCompiler {
      * @return 编译信息(错误 警告)
      */
     @SuppressWarnings("rawtypes")
-	public String getCompilerMessage() {
+    public String getCompilerMessage() {
         StringBuilder sb = new StringBuilder();
         List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
         for (Diagnostic diagnostic : diagnostics) {
@@ -207,9 +212,9 @@ public class CustomStringJavaCompiler {
      * 自定义一个JavaFileManage来控制编译之后字节码的输出位置
      */
     @SuppressWarnings("rawtypes")
-	private class StringJavaFileManage extends ForwardingJavaFileManager {
+    private class StringJavaFileManage extends ForwardingJavaFileManager {
         @SuppressWarnings("unchecked")
-		StringJavaFileManage(JavaFileManager fileManager) {
+        StringJavaFileManage(JavaFileManager fileManager) {
             super(fileManager);
         }
 

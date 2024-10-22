@@ -76,6 +76,11 @@ public @interface InString {
     @Retention(RUNTIME)
     @Documented
     @interface List {
+        /**
+         * 待校验的值
+         *
+         * @return 待校验的值
+         */
         InString[] value();
     }
 }

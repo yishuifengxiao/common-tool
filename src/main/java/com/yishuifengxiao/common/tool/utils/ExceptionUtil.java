@@ -120,7 +120,8 @@ public class ExceptionUtil {
     /**
      * 抛出一个自定义运行时异常
      *
-     * @param msg 异常信息
+     * @param code 异常码
+     * @param msg  异常信息
      */
     public static void throwException(Integer code, String msg) {
         throw new UncheckedException(code, msg);

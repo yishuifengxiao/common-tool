@@ -67,6 +67,14 @@ public final class LocalCache {
         return LOCAL_HOLDER.get(key.trim());
     }
 
+    /**
+     * 根据key获取一个数据
+     *
+     * @param key      指定的key
+     * @param supplier Supplier,不存在key对应的数据时触发
+     * @param <T>      数据类型
+     * @return 返回的数据
+     */
     @SuppressWarnings("unchecked")
     public static synchronized <T> T get(String key, Supplier<T> supplier) {
         Object value = get(key.trim());
