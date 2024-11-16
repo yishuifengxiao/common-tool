@@ -29,7 +29,6 @@ public class PageQuery<T> extends Slice implements Serializable {
      *
      */
     private static final long serialVersionUID = 1L;
-
     /**
      * 查询参数
      */

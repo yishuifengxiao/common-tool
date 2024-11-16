@@ -56,8 +56,12 @@ public final class HtmlExtract {
                 list.add(StringUtils.isBlank(attrName) ? e.outerHtml() : e.attr(attrName.trim()));
             });
         } catch (Exception e) {
-            log.info("使用【css规则】 提取 {} 时出现问题，提取参数为 cssSelector= {} ,attrName = {},问题为 {}", html, cssSelector, attrName,
-                    e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem extracting {} using the CSS rules. The extraction parameters were " +
+                                "cssLlector={}, attrName={}, and the problem was {}", html, cssSelector, attrName,
+                        e.getMessage());
+            }
+
         }
         return list;
     }
@@ -130,7 +134,11 @@ public final class HtmlExtract {
                 list.add(e.ownText());
             });
         } catch (Exception e) {
-            log.info("使用【css 文本规则】 提取 {} 时出现问题，提取参数为 cssSelector= {} ,问题为 {}", html, cssSelector, e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem extracting {} using the CSS Text Rules. The extraction parameter is " +
+                        "cssLlector={}, and the problem is {}", html, cssSelector, e.getMessage());
+            }
+
         }
         return list;
     }
@@ -200,7 +208,10 @@ public final class HtmlExtract {
             org.dom4j.Element root = doc.getRootElement();
             return root;
         } catch (Exception e) {
-            log.info("解析xml [ {} ] 时出现问题 {}", xml, e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem parsing XML [{}], the problem is {}", xml, e.getMessage());
+            }
+
         }
         return null;
     }

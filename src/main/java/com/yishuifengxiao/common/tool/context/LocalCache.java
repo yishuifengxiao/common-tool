@@ -2,9 +2,8 @@ package com.yishuifengxiao.common.tool.context;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 /**
@@ -12,10 +11,6 @@ import java.util.function.Supplier;
  * 全局存储工具
  * </p>
  * 该工具主要是一个基于内存的KV键值对存储工具。
- *
- * <p>
- * <strong>该工具是一个线程安全类的工具</strong>
- * </p>
  *
  * @author yishui
  * @version 1.0.0
@@ -25,7 +20,7 @@ public final class LocalCache {
     /**
      * 本地线程存储
      */
-    private static final Map<String, Object> LOCAL_HOLDER = new HashMap<>();
+    private static final ConcurrentHashMap<String, Object> LOCAL_HOLDER = new ConcurrentHashMap<>();
 
 
     /**
@@ -47,7 +42,7 @@ public final class LocalCache {
      * @param key   待存储的数据的key
      * @param value 待存储的数据
      */
-    public static synchronized void put(String key, Object value) {
+    public synchronized static void put(String key, Object value) {
         if (StringUtils.isBlank(key) || null == value) {
             return;
         }
@@ -60,7 +55,7 @@ public final class LocalCache {
      * @param key 待存储的数据的key
      * @return 获取到的存储数据
      */
-    public static synchronized Object get(String key) {
+    public synchronized static Object get(String key) {
         if (StringUtils.isBlank(key)) {
             return null;
         }
@@ -68,15 +63,15 @@ public final class LocalCache {
     }
 
     /**
-     * 根据key获取一个数据
+     * 根据指定的key获取对应的值，若key不存在时则调用supplier
      *
      * @param key      指定的key
-     * @param supplier Supplier,不存在key对应的数据时触发
+     * @param supplier Supplier
      * @param <T>      数据类型
-     * @return 返回的数据
+     * @return 获取的值
      */
     @SuppressWarnings("unchecked")
-    public static synchronized <T> T get(String key, Supplier<T> supplier) {
+    public synchronized static <T> T get(String key, Supplier<T> supplier) {
         Object value = get(key.trim());
         if (null != value) {
             try {
@@ -94,24 +89,6 @@ public final class LocalCache {
 
 
     /**
-     * 根据数据的key获取数据
-     *
-     * @param key   待存储的数据的key
-     * @param clazz 数据的类型Class
-     * @param <T>   数据的类型
-     * @return 获取到的存储数据
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T get(String key, Class<T> clazz) {
-        try {
-            return (T) get(key.trim());
-        } catch (Exception e) {
-        }
-        return null;
-
-    }
-
-    /**
      * <p>根据数据的key获取数据</p>
      * <p>此方式下默认key为<code>clazz.getName()</code></p>
      *
@@ -119,76 +96,29 @@ public final class LocalCache {
      * @param <T>   数据的类型
      * @return 获取到的存储数据
      */
-    public static synchronized <T> T get(Class<T> clazz) {
+    public static <T> T get(Class<T> clazz) {
         if (null == clazz) {
             return null;
         }
-        return get(clazz.getName(), clazz);
-    }
-
-    /**
-     * 根据数据的key获取数据，若成功获取到此数据则从缓存中删除此数据
-     *
-     * @param key   待存储的数据的key
-     * @param clazz 数据的类型Class
-     * @param <T>   数据的类型
-     * @return 获取到的存储数据
-     */
-    public synchronized static <T> T getAndRemove(String key, Class<T> clazz) {
-        if (StringUtils.isBlank(key)) {
-            return null;
+        try {
+            return (T) get(clazz.getName());
+        } catch (Exception e) {
         }
-        T value = get(key.trim(), clazz);
-        if (null != value) {
-            remove(key.trim());
-        }
-        return value;
+        return null;
 
     }
 
-    /**
-     * <p>根据数据的key获取数据，若成功获取到此数据则从缓存中删除此数据</p>
-     * <p>此方式下默认key为<code>clazz.getName()</code></p>
-     *
-     * @param clazz 数据的类型Class
-     * @param <T>   数据的类型
-     * @return 获取到的存储数据
-     */
-    public static <T> T getAndRemove(Class<T> clazz) {
-        if (null == clazz) {
-            return null;
-        }
-
-        return getAndRemove(clazz.getName(), clazz);
-    }
-
-    /**
-     * 根据数据的key获取数据，若成功获取到此数据则从缓存中删除此数据
-     *
-     * @param key 待存储的数据的key
-     * @return 获取到的存储数据
-     */
-    public static synchronized Object getAndRemove(String key) {
-        if (StringUtils.isBlank(key)) {
-            return null;
-        }
-        Object value = get(key.trim());
-        if (null != value) {
-            remove(key.trim());
-        }
-        return value;
-    }
 
     /**
      * 移除存储的数据
      *
      * @param key 待移除的数据的key
      */
-    public static synchronized void remove(String key) {
+    public synchronized static void remove(String key) {
         if (StringUtils.isBlank(key)) {
             return;
         }
-        LOCAL_HOLDER.remove(key.trim());
+        LOCAL_HOLDER.remove(key);
     }
 
     /**
@@ -210,7 +140,7 @@ public final class LocalCache {
      *
      * @return 所有存储的数据的key
      */
-    public static synchronized Set<String> keys() {
+    public static Set<String> keys() {
         return LOCAL_HOLDER.keySet();
     }
 
@@ -220,7 +150,7 @@ public final class LocalCache {
      * @param key 指定的key
      * @return 包含返回为true, 否则为false
      */
-    public static synchronized boolean keys(String key) {
+    public static boolean containsKey(String key) {
         if (StringUtils.isBlank(key)) {
             return false;
         }
@@ -230,7 +160,7 @@ public final class LocalCache {
     /**
      * 清空所有存储的数据
      */
-    public static synchronized void clear() {
+    public synchronized static void clear() {
         LOCAL_HOLDER.clear();
     }
 }

@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 
 /**
@@ -86,6 +88,7 @@ public class KeyValue<K, V> implements Serializable {
      *
      * @return 若该实例的键和值均不为null即返回为true, 否则为false
      */
+    @JsonIgnore
     public boolean notNull() {
         return null != this.key && null != this.val;
     }
@@ -95,6 +98,7 @@ public class KeyValue<K, V> implements Serializable {
      *
      * @return 若该该实例的键和值是否均为null即返回为true, 否则为false
      */
+    @JsonIgnore
     public boolean isNull() {
         return null == this.key && null == this.val;
     }
@@ -104,6 +108,7 @@ public class KeyValue<K, V> implements Serializable {
      *
      * @return 若该实例的键为null即返回为true, 否则为false
      */
+    @JsonIgnore
     public boolean nullKey() {
         return null == this.key;
     }
@@ -113,6 +118,7 @@ public class KeyValue<K, V> implements Serializable {
      *
      * @return 若该实例的值为null即返回为true, 否则为false
      */
+    @JsonIgnore
     public boolean nullVal() {
         return null == this.val;
     }

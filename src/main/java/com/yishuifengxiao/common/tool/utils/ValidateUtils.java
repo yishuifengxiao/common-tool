@@ -1,5 +1,6 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import com.yishuifengxiao.common.tool.entity.RootEnum;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
 
@@ -16,7 +17,7 @@ import java.util.function.Supplier;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class ExceptionUtil {
+public class ValidateUtils {
 
 
     /**
@@ -28,6 +29,18 @@ public class ExceptionUtil {
     public static void isTrue(Boolean val, String msg) {
         if (null == val || !val) {
             throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否为true,若为null或false则抛出异常
+     *
+     * @param val      待判断的值
+     * @param rootEnum 异常提示信息
+     */
+    public static void isTrue(Boolean val, RootEnum rootEnum) {
+        if (null == val || !val) {
+            throw new UncheckedException(rootEnum);
         }
     }
 
@@ -44,6 +57,18 @@ public class ExceptionUtil {
     }
 
     /**
+     * 判断给定的值是否为true或null,若为false则抛出异常
+     *
+     * @param val      待判断的值
+     * @param rootEnum 异常提示信息
+     */
+    public static void isTrueOrNull(Boolean val, RootEnum rootEnum) {
+        if (null != val && !val) {
+            throw new UncheckedException(rootEnum);
+        }
+    }
+
+    /**
      * 判断给定的值是否为false,若为null或true则抛出异常
      *
      * @param val 待判断的值
@@ -52,6 +77,18 @@ public class ExceptionUtil {
     public static void isFalse(Boolean val, String msg) {
         if (null == val || val) {
             throw new UncheckedException(msg);
+        }
+    }
+
+    /**
+     * 判断给定的值是否为false,若为null或true则抛出异常
+     *
+     * @param val      待判断的值
+     * @param rootEnum 异常提示信息
+     */
+    public static void isFalse(Boolean val, RootEnum rootEnum) {
+        if (null == val || val) {
+            throw new UncheckedException(rootEnum);
         }
     }
 
@@ -67,6 +104,18 @@ public class ExceptionUtil {
         }
     }
 
+    /**
+     * 判断给定的值是否为false或null，若为true则抛出异常
+     *
+     * @param val      待判断的值
+     * @param rootEnum 异常提示信息
+     */
+    public static void isFalseOrNull(Boolean val, RootEnum rootEnum) {
+        if (null != val && val) {
+            throw new UncheckedException(rootEnum);
+        }
+    }
+
 
     /**
      * 生成一个 Supplier
@@ -76,6 +125,16 @@ public class ExceptionUtil {
      */
     public static final Supplier<UncheckedException> orElseThrow(String message) {
         return () -> new UncheckedException(message);
+    }
+
+    /**
+     * 生成一个 Supplier
+     *
+     * @param rootEnum 参数信息
+     * @return Supplier
+     */
+    public static final Supplier<UncheckedException> orElseThrow(RootEnum rootEnum) {
+        return () -> new UncheckedException(rootEnum);
     }
 
     /**
@@ -115,6 +174,35 @@ public class ExceptionUtil {
         String result = new String(out.toByteArray());
         CloseUtil.close(printStream, out);
         return result;
+    }
+
+    /**
+     * 抛出一个自定义运行时异常
+     *
+     * @param rootEnum 异常信息
+     */
+    public static void throwException(RootEnum rootEnum) {
+        throw new UncheckedException(rootEnum);
+    }
+
+    /**
+     * 抛出一个自定义运行时异常
+     *
+     * @param exception 异常信息
+     */
+    public static void throwException(RuntimeException exception) {
+        throw exception;
+    }
+
+
+    /**
+     * 抛出一个自定义运行时异常
+     *
+     * @param rootEnum 异常信息
+     * @param context  异常原因
+     */
+    public static void throwException(RootEnum rootEnum, Object context) {
+        throw new UncheckedException(rootEnum).setContext(context);
     }
 
     /**

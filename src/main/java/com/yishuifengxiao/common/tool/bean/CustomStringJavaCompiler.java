@@ -44,7 +44,8 @@ public class CustomStringJavaCompiler {
     /**
      * 存放编译过程中输出的信息
      */
-    private final DiagnosticCollector<JavaFileObject> diagnosticsCollector = new DiagnosticCollector<>();
+    private final DiagnosticCollector<JavaFileObject> diagnosticsCollector =
+            new DiagnosticCollector<>();
 
 
     /**
@@ -53,7 +54,7 @@ public class CustomStringJavaCompiler {
     private Boolean compile;
 
     /**
-     * 默认构造器
+     * 构造函数
      *
      * @param sourceCode 源代码
      */
@@ -72,12 +73,14 @@ public class CustomStringJavaCompiler {
         Assert.isNotBlank("不是java代码", this.fullClassName);
         if (null == this.compile) {
             //标准的内容管理器,更换成自己的实现，覆盖部分方法
-            StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnosticsCollector, null, null);
+            StandardJavaFileManager standardFileManager =
+                    compiler.getStandardFileManager(diagnosticsCollector, null, null);
             JavaFileManager javaFileManager = new StringJavaFileManage(standardFileManager);
             //构造源代码对象
             JavaFileObject javaFileObject = new StringJavaFileObject(fullClassName, sourceCode);
             //获取一个编译任务
-            JavaCompiler.CompilationTask task = compiler.getTask(null, javaFileManager, diagnosticsCollector, null, null, Arrays.asList(javaFileObject));
+            JavaCompiler.CompilationTask task = compiler.getTask(null, javaFileManager,
+                    diagnosticsCollector, null, null, Arrays.asList(javaFileObject));
             this.compile = task.call();
         }
         return this.compile;
@@ -117,7 +120,8 @@ public class CustomStringJavaCompiler {
     @SuppressWarnings("rawtypes")
     public String getCompilerMessage() {
         StringBuilder sb = new StringBuilder();
-        List<Diagnostic<? extends JavaFileObject>> diagnostics = diagnosticsCollector.getDiagnostics();
+        List<Diagnostic<? extends JavaFileObject>> diagnostics =
+                diagnosticsCollector.getDiagnostics();
         for (Diagnostic diagnostic : diagnostics) {
             sb.append(diagnostic.toString()).append("\r\n");
         }
@@ -232,7 +236,8 @@ public class CustomStringJavaCompiler {
          * @throws IOException
          */
         @Override
-        public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind, FileObject sibling) throws IOException {
+        public JavaFileObject getJavaFileForOutput(Location location, String className,
+                                                   JavaFileObject.Kind kind, FileObject sibling) throws IOException {
             ByteJavaFileObject javaFileObject = new ByteJavaFileObject(className, kind);
             javaFileObjectMap.put(className, javaFileObject);
             return javaFileObject;

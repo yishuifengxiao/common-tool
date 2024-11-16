@@ -59,7 +59,6 @@ CustomException e = new CustomException();
 DataException ex = new DataException();
 
 //将CustomException复制为DataException
-// 在使用此方法时，属性名一致的将会被复制，该方法是一个线程安全类的
 // 第一个参数为源对象，第二个参数为目标对象
 DataException copy = BeanUtil.copy(e, ex);
 
@@ -83,7 +82,7 @@ CustomException exception = BeanUtil.byteToObject(bytes, CustomException.class);
 - 将数据转换成集合
 - 安全地创建集合
 
-> 该工具是线程安全类的
+
 
 工具路径:
 
@@ -176,7 +175,7 @@ Map<String, Object> map = MapUtil.instance().put("k1", "v1").
 - 获取过去指定月份的那个月份的1号的开始时间点(00:00:00)
 - 获取过去指定年份的那个时间的1月1号的那个时间的开始时间点(00:00:00)
 
-> 该工具是线程安全类的
+
 
 工具路径:
 
@@ -221,7 +220,7 @@ Date monthStart1 = DateOffsetUtil.monthStart(1);
 - 获取过去指定月份的那个月份的1号的开始时间点(00:00:00)
 - 获取过去指定年份的那个时间的1月1号的那个时间的开始时间点(00:00:00)
 
-> 该工具是线程安全类的
+
 
 工具路径:
 
@@ -260,7 +259,7 @@ LocalDateTime monthStart1 = TemporalUtil.monthStart(1);
 - 将字符串解析为时间
 - 将时间格式化为字符串
 
-> 该工具是线程安全类的
+
 
 工具路径:
 
@@ -351,7 +350,7 @@ DES.decrypt("秘钥", encrypt);
 工具路径:
 
 ```java
-com.yishuifengxiao.common.tool.codec.Md5
+com.yishuifengxiao.common.tool.codec.MD5
 ```
 
   使用示例:
@@ -483,7 +482,7 @@ Page<Object> convert = page.convert(原始数据 -> {
 
 该工具的主要目的是在安全地关闭各种Closeable实例。
 
-> 该工具是一个线程安全类的工具
+
 
 工具路径:
 
@@ -505,7 +504,7 @@ CloseUtil.close(inputStream, outputStream);
 
 该工具的主要目的是进行文件和base64字符串之间进行互相转换和获取文件的MD5值。
 
-> 该工具是一个线程安全类的工具
+
 
 工具路径:
 
@@ -530,7 +529,7 @@ String md5 = FileUtil.getMd5(file);
 
 该工具的主要目的是进行图片和base64字符串之间进行互相转换
 
-> 该工具是一个线程安全类的工具
+
 
 工具路径:
 
@@ -561,7 +560,7 @@ ImageUtil.base64ToImage(image2Base64, "待保存的图片的地址");
 
 该工具的主要目的是构建一个基于内存的全局字典缓存工具。在使用该工具时注意防止内存泄露。
 
-> 该工具是一个线程安全类的工具
+
 
 工具路径:
 
@@ -596,9 +595,9 @@ com.yishuifengxiao.common.tool.context.LocalCache
 
 ## 7.2 上下文存储工具
 
-该工具与全局存储工具基本类似，但不同的是，该工具是基于当前线程实现的，在当前线程中存储的数据不能再其他线程中访问。在使用该工具时注意防止内存泄露。
+该工具与全局存储工具基本类似，但不同的是，在当前线程中存储的数据不能再其他线程中访问。在使用该工具时注意防止内存泄露。
 
-> 该工具是一个线程安全类的工具
+
 
 工具路径:
 
@@ -724,7 +723,7 @@ ExecuteUtil.execute(() -> {
 - 判断该字符串是否为一个合法的身份证号
 - 从字符串格式的身份证号里提取出出生日期
 
-> 该工具是一个线程安全类的工具
+
 
 工具路径:
 
@@ -747,7 +746,7 @@ System.out.println(birthday);
 
 该工具的主要目的是计算两个经纬度之间距离。
 
-> 该工具是一个线程安全类的工具
+
 
 工具路径:
 

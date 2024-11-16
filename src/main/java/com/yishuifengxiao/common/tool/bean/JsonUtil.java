@@ -1,19 +1,29 @@
 /**
  *
  */
-package com.yishuifengxiao.common.tool.collections;
+package com.yishuifengxiao.common.tool.bean;
 
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.jsonpath.JsonPath;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * <p>json转换提取工具</p>
@@ -273,7 +283,8 @@ import java.util.Map;
  * 22px">/store/book/author</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.store.book[*]
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$.store.book[*]
  * .author</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><div style="padding: 0; margin:
@@ -283,11 +294,13 @@ import java.util.Map;
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//author</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">//author</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..author</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$..author</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><div style="padding: 0; margin: 0">所有的作者</div></td>
@@ -295,10 +308,12 @@ import java.util.Map;
  * <tr>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">/store/*</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">/store/*</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.store.*</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$.store.*</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><div style="padding: 0; margin:
  * 0">store的所有元素。所有的bookst和bicycle</div></td>
@@ -312,7 +327,8 @@ import java.util.Map;
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.store.
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$.store.
  * .price</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
@@ -321,10 +337,12 @@ import java.util.Map;
  * <tr>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[3]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">//book[3]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[2]</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$..book[2]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><div style="padding: 0; margin:
  * 0">第三个书</div></td>
@@ -333,12 +351,14 @@ import java.util.Map;
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[last()
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">//book[last()
  * ]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[(&#64;
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$..book[(&#64;
  * .length-1)]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
@@ -347,11 +367,13 @@ import java.util.Map;
  * <tr>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[position()
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">//book[position()
  * &lt;3]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[0,
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$..book[0,
  * 1]</code><div
  * style="padding: 0; margin: 0"><code style=
  * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$.
@@ -368,7 +390,8 @@ import java.util.Map;
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[?(&#64;
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$..book[?(&#64;
  * .isbn)]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
@@ -377,11 +400,13 @@ import java.util.Map;
  * <tr>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//book[price&lt;
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">//book[price&lt;
  * 10]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..book[?(&#64;
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$..book[?(&#64;
  * .price&lt;10)]</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1)">过滤出价格低于10的书。</td>
@@ -390,11 +415,13 @@ import java.util.Map;
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">//*</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">//*</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><code style=
- * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height: 22px">$..*</code></td>
+ * "font-family: &quot;Courier New&quot;, Courier, monospace; font-size: 14px; line-height:
+ * 22px">$..*</code></td>
  * <td style="padding: 0.25em 0.5em; margin: 0; border-right-color: rgba(0, 0,
  * 0, 1); border-left-color: rgba(0, 0, 0, 1); background-color: rgba(221, 221,
  * 221, 1)"><div style="padding: 0; margin: 0"><span style="color: rgba(34, 0,
@@ -410,7 +437,87 @@ import java.util.Map;
 @Slf4j
 public final class JsonUtil {
 
-    private final static ObjectMapper MAPPER = new ObjectMapper();
+
+    /**
+     * ObjectMapper
+     */
+    private static final ObjectMapper default_mapper = new ObjectMapper();
+
+    /**
+     * ObjectMapper with @class
+     */
+    private static ObjectMapper with_class_mapper = null;
+
+    /**
+     * ObjectMapper with @class
+     */
+    private static ObjectMapper none_null_mapper = null;
+
+
+    static {
+        try {
+            default_mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
+            // 反序列化时候遇到不匹配的属性并不抛出异常
+            default_mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            //默认情况下ObjectMapper序列化没有属性的空对象时会抛异常。可以通过SerializationFeature
+            // .FAIL_ON_EMPTY_BEANS设置当对象没有属性时，让其序列化能成功，不抛异常
+            default_mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+            // 反序列化的时候如果是无效子类型,不抛出异常
+            default_mapper.configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
+            // 不使用默认的dateTime进行序列化,
+            default_mapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, false);
+            // 默认北京时区
+            default_mapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
+            // 使用JSR310提供的序列化类,里面包含了大量的JDK8时间序列化类
+            default_mapper.registerModule(new JavaTimeModule());
+            // 启用反序列化所需的类型信息,在属性中添加@class
+//            mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL,
+//                    JsonTypeInfo.As.PROPERTY);
+            //当反序列化的JSON串里带有反斜杠时，默认objectMapper反序列化会失败，抛出异常Unrecognized character escape。
+            // 可以通过Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER来设置当反斜杠存在时，能被objectMapper反序列化。
+            default_mapper.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER,
+                    true);
+            //当json字符串里带注释符时，默认情况下解析器不能解析。Feature.ALLOW_COMMENTS特性决定解析器是否允许解析使用Java/C++
+            // 样式的注释（包括'/'+'*' 和'//' 变量）。
+            // 默认是false，不能解析带注释的JSON串
+            default_mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+            //objectMapper解析器默认不能识别识别 "Not-a-Number" (NaN)标识集合作为一个合法的浮点数 或
+            // 一个int数，objectMapper默认该功能是关闭的
+            default_mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
+            //默认情况下objectMapper解析器是不能解析以"0"为开头的数字，需要开启Feature.ALLOW_NUMERIC_LEADING_ZEROS才能使用。
+            default_mapper.configure(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS, true);
+            //parser解析器默认情况下不能识别单引号包住的属性和属性值，默认下该属性也是关闭的。需要设置JsonParser.Feature
+            // .ALLOW_SINGLE_QUOTES为true。 开启单引号解析
+            default_mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+            //反序列Json字符串中属性名没有双引号
+            //默认情况下，标准的json串里属性名字都需要用双引号引起来。比如：{age:18, name:"zhangsan"}非标准的json串，解析器默认不能解析，
+            // 需要设置Feature.ALLOW_UNQUOTED_FIELD_NAMES属性来处理这种没有双引号的json串。
+            //开启属性名没有双引号的非标准json字符串
+            default_mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+
+            with_class_mapper = default_mapper.copy();
+            // 启用反序列化所需的类型信息,在属性中添加@class
+            with_class_mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL,
+                    JsonTypeInfo.As.PROPERTY);
+
+            none_null_mapper = default_mapper.copy();
+            //            // 配置 ObjectMapper，忽略 null 值
+            none_null_mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            none_null_mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+        } catch (Exception e) {
+            log.warn("There was a problem initializing the Object Mapper, problem {}", e);
+        }
+
+    }
+
+    /**
+     * 获取项目中使用到的ObjectMapper实例
+     *
+     * @return 项目中使用到的ObjectMapper实例
+     */
+    public static ObjectMapper mapper() {
+        return default_mapper.copy();
+    }
 
     /**
      * 将json格式的字符串转为JAVA对象
@@ -425,10 +532,11 @@ public final class JsonUtil {
             return null;
         }
         try {
-            return MAPPER.readValue(json.trim(), clazz);
+            return with_class_mapper.readValue(json.trim(), clazz);
         } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("将字符串 {} 转换成 java对象 {} 时出现问题 {}", json, clazz, e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.debug("There was a problem converting string {} to Java object {}, problem "
+                        + "{}", json, clazz, e.getMessage());
             }
         }
         return null;
@@ -445,11 +553,12 @@ public final class JsonUtil {
     public static <T> List<T> str2List(String json, Class<T> clazz) {
         List<T> t = null;
         try {
-            t = MAPPER.readValue(json.trim(), new TypeReference<List<T>>() {
+            t = with_class_mapper.readValue(json.trim(), new TypeReference<List<T>>() {
             });
         } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("将字符串 {} 转换成 {} 集合 时出现问题 {}", json, clazz, e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.debug("There was a problem converting the string {} to the {} List, the " +
+                        "problem is" + " {}", json, clazz, e.getMessage());
             }
         }
         return t;
@@ -511,8 +620,11 @@ public final class JsonUtil {
         try {
             return JsonPath.read(json.trim(), jsonPath);
         } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("根据表达式 {} 从字符串 {} 提取数据 时出现问题 {}", jsonPath, json, e.getMessage());
+
+            if (log.isDebugEnabled()) {
+                log.debug("There was a problem extracting data from string {} based on "
+                                + "expression" + " {}. " + "The problem is " + "{}", jsonPath, json,
+                        e.getMessage());
             }
         }
         return null;
@@ -567,11 +679,12 @@ public final class JsonUtil {
             return null;
         }
         try {
-            return MAPPER.readValue(text.trim(), new TypeReference<Map<String, Object>>() {
+            return with_class_mapper.readValue(text.trim(), new TypeReference<>() {
             });
         } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("将字符串 {} 转换成 map 时出现问题 {} ", text, e.getMessage());
+            if (log.isDebugEnabled()) {
+                log.debug("There was a problem converting the string {} to a map, the problem is "
+                        + "{} ", text, e.getMessage());
             }
         }
         return null;
@@ -588,7 +701,7 @@ public final class JsonUtil {
             return false;
         }
         try {
-            JsonNode tree = MAPPER.readTree(text.trim());
+            JsonNode tree = with_class_mapper.readTree(text.trim());
             return tree.isObject();
         } catch (Throwable e) {
             return false;
@@ -606,7 +719,7 @@ public final class JsonUtil {
             return false;
         }
         try {
-            JsonNode tree = MAPPER.readTree(text.trim());
+            JsonNode tree = with_class_mapper.readTree(text.trim());
             return tree.isArray();
         } catch (Throwable e) {
             return false;
@@ -625,7 +738,7 @@ public final class JsonUtil {
             return false;
         }
         try {
-            MAPPER.readTree(text.trim());
+            with_class_mapper.readTree(text.trim());
             return true;
         } catch (Exception e) {
             return false;
@@ -639,15 +752,82 @@ public final class JsonUtil {
      * @return json格式的字符串
      */
     public static String toJSONString(Object value) {
+
+        return toJSONString(true, value);
+    }
+
+    /**
+     * 将对象转换为json格式的字符串
+     *
+     * @param includeNull 是否包含空值
+     * @param value       待转换的数据
+     * @return json格式的字符串
+     */
+    public static String toJSONString(boolean includeNull, Object value) {
         try {
-            return MAPPER.writeValueAsString(value);
+            ObjectMapper mapper = includeNull ? default_mapper : none_null_mapper;
+            return mapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
-            if (log.isInfoEnabled()) {
-                log.info("将数据 {} 转换成 json格式的字符串 时出现问题 {} ", value, e);
+            if (log.isDebugEnabled()) {
+                log.debug("There was a problem converting data {} to a JSON format string, the " + "problem is {} ", value, e);
             }
         }
         return null;
     }
 
+    /**
+     * Factory method for constructing ObjectWriter that will serialize objects using the default
+     * pretty printer for
+     * indentation
+     *
+     * @param value 待转换的数据
+     * @return json格式的字符串
+     */
+    public static String prettyPrinter(Object value) {
+        return prettyPrinter(true, value);
+    }
+
+    /**
+     * Factory method for constructing ObjectWriter that will serialize objects using the default
+     * pretty printer for
+     * indentation
+     *
+     * @param includeNull 是否包含空值
+     * @param value       待转换的数据
+     * @return json格式的字符串
+     */
+    public static String prettyPrinter(boolean includeNull, Object value) {
+        if (null == value) {
+            return null;
+        }
+        try {
+            ObjectMapper mapper = includeNull ? default_mapper : none_null_mapper;
+            return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(value);
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("There was a problem converting data {} to a JSON format string, the " + "problem is {} ", value, e);
+            }
+            throw new UncheckedException(e);
+        }
+
+    }
+
+    /**
+     * 使用jackson的方式实现深克隆
+     *
+     * @param val 待克隆的的对象
+     * @return 克隆后的对象
+     */
+    public static Object deepClone(Object val) {
+        if (null == val) {
+            return null;
+        }
+        try {
+            return with_class_mapper.readValue(with_class_mapper.writeValueAsString(val),
+                    val.getClass());
+        } catch (Exception e) {
+            throw new UncheckedException(e);
+        }
+    }
 
 }

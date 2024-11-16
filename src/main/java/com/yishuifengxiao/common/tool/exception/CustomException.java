@@ -3,6 +3,8 @@
  */
 package com.yishuifengxiao.common.tool.exception;
 
+import com.yishuifengxiao.common.tool.entity.RootEnum;
+
 /**
  * <p>
  * 自定义异常基类
@@ -23,7 +25,7 @@ public class CustomException extends Exception {
     /**
      * 错误码
      */
-    protected Integer code;
+    protected Object code;
 
     /**
      * 携带的附加信息
@@ -51,6 +53,19 @@ public class CustomException extends Exception {
         this(0, message);
 
     }
+
+    /**
+     * Constructs a new runtime exception with the specified detail message. The
+     * cause is not initialized, and may subsequently be initialized by a call to
+     * {@link #initCause}.
+     *
+     * @param rootEnum 异常信息
+     */
+    public CustomException(RootEnum rootEnum) {
+        super(null == rootEnum ? null : rootEnum.description());
+        this.code = null == rootEnum ? null : rootEnum.code();
+    }
+
 
     /**
      * Constructs a new runtime exception with the specified detail message. The
@@ -123,7 +138,7 @@ public class CustomException extends Exception {
      *
      * @return 错误码
      */
-    public Integer getCode() {
+    public Object getCode() {
         return code;
     }
 
@@ -133,7 +148,7 @@ public class CustomException extends Exception {
      * @param code 错误码
      * @return 当前对象
      */
-    public CustomException setCode(Integer code) {
+    public CustomException setCode(Object code) {
         this.code = code;
         return this;
     }

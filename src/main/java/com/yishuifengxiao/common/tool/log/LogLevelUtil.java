@@ -29,14 +29,16 @@ public class LogLevelUtil {
      * @param logLevel   日志级别 ，例如 info
      * @return 是否修改成功
      */
-    public   static boolean setLevel(String loggerName, String logLevel) {
+    public static boolean setLevel(String loggerName, String logLevel) {
         if (StringUtils.isAnyBlank(loggerName, logLevel)) {
             return false;
         }
         try {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
             final List<Logger> loggers = loggerContext.getLoggerList();
-            final Set<Logger> sets = loggers.parallelStream().filter(v -> StringUtils.equalsIgnoreCase(v.getName(), loggerName)).collect(Collectors.toSet());
+            final Set<Logger> sets =
+                    loggers.parallelStream().filter(v -> StringUtils.equalsIgnoreCase(v.getName()
+                            , loggerName)).collect(Collectors.toSet());
             if (CollUtil.isEmpty(sets)) {
                 return false;
             }
@@ -45,7 +47,12 @@ public class LogLevelUtil {
             });
 
         } catch (Throwable e) {
-            log.warn("动态修改日志级别 loggerName ={} ， logLevel ={} 时出现问题 {} ", loggerName, logLevel, e);
+            if (log.isWarnEnabled()) {
+                log.warn("There is a problem when dynamically modifying the log level loggerName={}, logLevel={}, and" +
+                        " the" +
+                        " reason for the problem is {} ", loggerName, logLevel, e);
+            }
+
             return false;
         }
         return true;

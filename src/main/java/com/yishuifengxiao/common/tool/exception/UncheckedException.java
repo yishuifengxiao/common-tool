@@ -3,6 +3,8 @@
  */
 package com.yishuifengxiao.common.tool.exception;
 
+import com.yishuifengxiao.common.tool.entity.RootEnum;
+
 /**
  * <p>
  * 自定义运行时异常基类
@@ -22,7 +24,7 @@ public class UncheckedException extends RuntimeException {
     /**
      * 错误码
      */
-    protected Integer code;
+    protected Object code;
 
     /**
      * 携带的附加信息
@@ -48,9 +50,21 @@ public class UncheckedException extends RuntimeException {
      *                retrieval by the {@link #getMessage()} method.
      */
 
-    public UncheckedException(Integer code, String message) {
+    public UncheckedException(Object code, String message) {
         super(message);
         this.code = code;
+    }
+
+    /**
+     * Constructs a new runtime exception with the specified detail message. The
+     * cause is not initialized, and may subsequently be initialized by a call to
+     * {@link #initCause}.
+     *
+     * @param rootEnum 异常信息
+     */
+    public UncheckedException(RootEnum rootEnum) {
+        super(null == rootEnum ? null : rootEnum.description());
+        this.code = null == rootEnum ? null : rootEnum.code();
     }
 
     /**
@@ -134,7 +148,7 @@ public class UncheckedException extends RuntimeException {
      *
      * @return 错误码
      */
-    public Integer getCode() {
+    public Object getCode() {
 
         return this.code;
     }

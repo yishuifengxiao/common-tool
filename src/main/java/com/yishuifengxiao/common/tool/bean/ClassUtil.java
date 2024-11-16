@@ -3,7 +3,6 @@
  */
 package com.yishuifengxiao.common.tool.bean;
 
-import com.yishuifengxiao.common.tool.collections.DataUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -34,9 +33,6 @@ import java.util.stream.Collectors;
  * <li>根据属性的名字获取对象的属性的值</li>
  * </ul>
  *
- * <p>
- * <strong>当前工具是一个线程安全类工具</strong>
- * </p>
  *
  * @author yishui
  * @version 1.0.0
@@ -67,7 +63,8 @@ public final class ClassUtil {
     public static <T> List<Field> fields(Class<T> clazz, boolean noSpecialModifier) {
         List<Field> fields = fields(null, clazz);
 
-        return noSpecialModifier ? fields.stream().filter(v -> !isSpecialModifier(v)).collect(Collectors.toList()) :
+        return noSpecialModifier ?
+                fields.stream().filter(v -> !isSpecialModifier(v)).collect(Collectors.toList()) :
                 fields;
     }
 
@@ -81,7 +78,7 @@ public final class ClassUtil {
      */
     private static <T> List<Field> fields(List<Field> list, Class<T> clazz) {
         list = null == list ? new ArrayList<>() : list;
-        DataUtil.stream(clazz.getDeclaredFields()).filter(Objects::nonNull).forEach(list::add);
+        Arrays.asList(clazz.getDeclaredFields()).stream().filter(Objects::nonNull).forEach(list::add);
         Class<? super T> superclass = clazz.getSuperclass();
         if (null == superclass || superclass.isAssignableFrom(Object.class)) {
             return list.stream().filter(Objects::nonNull).collect(Collectors.toList());
@@ -95,7 +92,8 @@ public final class ClassUtil {
      * </p>
      *
      * <p>
-     * 特殊修饰的关键字如：<code>@Transient</code>、<code>final</code>、<code>static</code>、<code>native</code>、<code>abstract
+     * 特殊修饰的关键字如：<code>@Transient</code>、<code>final</code>、<code>static</code>、<code>native
+     * </code>、<code>abstract
      * </code>
      * </p>
      *
@@ -157,7 +155,12 @@ public final class ClassUtil {
             field.setAccessible(true);
             return field.get(data);
         } catch (Exception e) {
-            log.warn("根据属性名获取属性值时出现问题，出现问题的原因为 {}", e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem obtaining attribute values based on attribute "
+                        + "names, and the reason for" +
+                        " the problem is {}", e.getMessage());
+            }
+
         }
         return null;
     }
@@ -191,12 +194,18 @@ public final class ClassUtil {
             String implMethodName = serializedLambda.getImplMethodName();
             // 判断是否为boolean属性字段对应的后的is开头的getter方法
             String instantiatedMethodType = serializedLambda.getInstantiatedMethodType();
-            boolean bool = instantiatedMethodType.endsWith("Ljava/lang/Boolean;") && implMethodName.startsWith("is");
+            boolean bool =
+                    instantiatedMethodType.endsWith("Ljava/lang/Boolean;") && implMethodName.startsWith("is");
             String fieldName = bool ? Introspector.decapitalize(implMethodName.substring(2)) :
                     Introspector.decapitalize(implMethodName.substring(3));
             return fieldName;
         } catch (Exception e) {
-            log.warn("根据pojo类的属性的Function函数获取原始属性的名字，出现问题的原因为 {}", e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("The reason for the problem in obtaining the name of the original "
+                        + "attribute based on the " +
+                        "Function function of the pojo class attribute is {}", e.getMessage());
+            }
+
         }
 
         return null;
@@ -209,18 +218,23 @@ public final class ClassUtil {
      *
      * <p>The {@link SerFunction} class provides common functions and related utilities.
      *
-     * <p>As this interface extends {@code java.util.function.Functiona}, an instance of this type can be
+     * <p>As this interface extends {@code java.util.function.Functiona}, an instance of this
+     * type can be
      * used as a {@code java.util.function.Functiona} directly. To use a {@code
-     * java.util.function.Functiona} in a context where a {@code com.google.common.base.Functiona} is
+     * java.util.function.Functiona} in a context where a {@code com.google.common.base
+     * .Functiona} is
      * needed, use {@code function::apply}.
      *
      * <p>This interface is now a legacy type. Use {@code java.util.function.Functiona} (or the
-     * appropriate primitive specialization such as {@code ToIntFunction}) instead whenever possible.
-     * Otherwise, at least reduce <i>explicit</i> dependencies on this type by using lambda expressions
+     * appropriate primitive specialization such as {@code ToIntFunction}) instead whenever
+     * possible.
+     * Otherwise, at least reduce <i>explicit</i> dependencies on this type by using lambda
+     * expressions
      * or method references instead of classes, leaving your code easier to migrate in the future.
      *
      * <p>See the Guava User Guide article on <a
-     * href="https://github.com/google/guava/wiki/FunctionalExplained">the use of {@code Functiona}</a>.
+     * href="https://github.com/google/guava/wiki/FunctionalExplained">the use of {@code
+     * Functiona}</a>.
      *
      * @author Kevin Bourrillion
      * @since 2.0

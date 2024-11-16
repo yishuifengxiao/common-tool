@@ -15,17 +15,17 @@ import java.security.MessageDigest;
  * </p>
  * 基于MD5算法实现的加密工具
  *
- * <p>
- * <strong>该工具是一个线程安全类的工具</strong>
- * </p>
- *
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
  */
 @Slf4j
-public class Md5 {
-    private static final String[] HEX_DIGITS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
+public class MD5 {
+    /**
+     * HEX_DIGITS
+     */
+    private static final String[] HEX_DIGITS = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d",
+            "e", "f"};
 
     /**
      * 对字符串md5加密(小写+字母)
@@ -47,7 +47,11 @@ public class Md5 {
             // 将字节数组转换为16进制位,然后统一返回大写形式的字符串摘要
             return sb.toString().toLowerCase();
         } catch (Exception e) {
-            log.warn("【易水工具】使用md5加密字符串{} 时出现问题，出现问题的原因为 {}", str, e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem encrypting the string {} using md5, and the reason for the problem is " +
+                        "{}", str, e);
+            }
+
             return null;
         }
     }
@@ -86,7 +90,6 @@ public class Md5 {
      * <p>
      * 计算一个文件的MD5值
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param file 待计算的文件
      * @return 文件的MD5值(32位小写)
@@ -109,7 +112,11 @@ public class Md5 {
             }
             return sb.toString().toLowerCase();
         } catch (Exception e) {
-            log.info("计算文件{}的md5值时出现问题{}", file, e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem calculating the md5 value of file {}, the problem is {}", file,
+                        e.getMessage());
+            }
+
             return null;
         } finally {
             CloseUtil.close(inputStream);
@@ -120,7 +127,6 @@ public class Md5 {
      * <p>
      * 计算一个文件的MD5值(16位)
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param file 待计算的文件
      * @return MD5加密后的字符串(16位)

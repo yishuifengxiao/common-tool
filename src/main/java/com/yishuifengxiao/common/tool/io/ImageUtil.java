@@ -15,9 +15,6 @@ import java.util.Base64;
  * <p>
  * 该工具的主要作用是实现图片与base64字符串之间的互相转换.
  * </p>
- * <p>
- * <strong>该工具是一个线程安全类的工具</strong>
- * </p>
  *
  * @author yishui
  * @version 1.0.0
@@ -156,7 +153,11 @@ public final class ImageUtil {
             stream.flush();
 
         } catch (Exception e) {
-            log.info("将图片转换成base64时出现问题，出现问题的原因为 {}", e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem converting the image to base64, and the reason for "
+                        + "the problem is {}", e);
+            }
+
         }
         return base64;
 

@@ -17,10 +17,6 @@ import java.util.stream.Collectors;
 /**
  * 文件处理工具
  *
- * <p>
- * <strong>该工具是一个线程安全类的工具</strong>
- * </p>
- *
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -55,7 +51,6 @@ public class IoUtil {
      * <p>
      * 将文件转换为字节数组
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param file 待转换的文件
      * @return 转换后的字节数组
@@ -71,7 +66,6 @@ public class IoUtil {
      * <p>
      * 将输入流转换为字节数组
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param inputStream 输入流
      * @return 转换后的字节数组
@@ -131,7 +125,6 @@ public class IoUtil {
      * <p>
      * 将文件输入流保存为文件
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param inputStream 文件输入流
      * @param file        待保存的目标文件
@@ -209,7 +202,6 @@ public class IoUtil {
      * Copy the contents of the given InputStream to the given OutputStream. Closes
      * both streams when done.
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param in  the stream to copy from
      * @param out the stream to copy to
@@ -236,7 +228,6 @@ public class IoUtil {
      * <p>
      * 将字符串复制到指定的文件中
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param text 待输入的字符串
      * @param file 目标文件
@@ -281,7 +272,6 @@ public class IoUtil {
      * <p>
      * 将base64字符串转换成文件
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param base64File base64格式的文件
      * @return 转换后的文件
@@ -298,7 +288,7 @@ public class IoUtil {
             bos.write(bytes);
             bos.flush();
         } catch (Exception e) {
-            throw new UncheckedException("文件转换失败，失败的原因为 " + e);
+            throw new UncheckedException(e);
         } finally {
             CloseUtil.close(bos, fos);
         }
@@ -309,7 +299,6 @@ public class IoUtil {
      * <p>
      * 将文件转换成base64字符串
      * </p>
-     * <strong>线程安全</strong>
      *
      * @param file 待转换的文件
      * @return 转换后的base64字符串

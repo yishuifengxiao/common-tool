@@ -175,8 +175,13 @@ public final class NumberUtil {
             BigDecimal number = new BigDecimal(val.toString().replaceAll(",", "").trim());
             return Optional.ofNullable(number);
         } catch (Throwable e) {
-            log.debug("将数据【{}】转换为数值时出现问题 {}", val, e);
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem converting data [{}] to numerical values, and the reason for the " +
+                        "problem is" +
+                        " {}", val, e);
+            }
         }
+
         return Optional.empty();
     }
 
@@ -194,7 +199,11 @@ public final class NumberUtil {
             BigDecimal number = new BigDecimal(new BigInteger(hexString.toString().replaceAll(",", "").trim(), 16));
             return Optional.ofNullable(number);
         } catch (Throwable e) {
-            log.debug("将数据【{}】转换为数值时出现问题 {}", hexString, e);
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem converting data [{}] to numerical values, and the reason for the " +
+                        "problem is" +
+                        " {}", hexString, e);
+            }
         }
         return Optional.empty();
     }
@@ -231,7 +240,8 @@ public final class NumberUtil {
             hexString = "0" + hexString;
         }
         if (null != byteNum && byteNum > 0 && hexString.length() < byteNum * 2) {
-            String prefix = IntStream.range(0, byteNum * 2 - hexString.length()).mapToObj(v -> "0").collect(Collectors.joining());
+            String prefix =
+                    IntStream.range(0, byteNum * 2 - hexString.length()).mapToObj(v -> "0").collect(Collectors.joining());
             hexString = prefix + hexString;
         }
         return hexString;

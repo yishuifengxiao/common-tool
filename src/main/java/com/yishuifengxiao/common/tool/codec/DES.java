@@ -1,5 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -13,8 +14,7 @@ import java.security.SecureRandom;
  * <p>
  * DES加密工具
  * </p>
- * 基于DES加解密实现的加密工具，该工具可以进行可逆加密，加密时的秘钥很重要，一定要自己改秘钥，打死也不要告诉其他人。
- * <strong>该工具是一个线程安全类的工具。</strong>
+ * <p>基于DES加解密实现的加密工具，该工具可以进行可逆加密，加密时的秘钥很重要，一定要自己改秘钥，打死也不要告诉其他人。</p>
  *
  * @author yishui
  * @version 1.0.0
@@ -53,7 +53,10 @@ public class DES {
         try {
             return byte2hex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
-            log.info("【易水工具】使用密钥加密数据 {} 时出现问题，出现问题的原因为 {}", data, e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There is a problem encrypting data {}  with a key, and the reason for the problem is {}",
+                        data, e);
+            }
         }
         return null;
     }
@@ -79,7 +82,11 @@ public class DES {
         try {
             return new String(decrypt(hex2byte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
-            log.info("【易水工具】使用密钥解密数据 {} 时出现问题，出现问题的原因为 {}", data, e.getMessage());
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem decrypting data {} using the key, and the reason "
+                                + "for the problem is {}"
+                        , data, e);
+            }
         }
         return null;
     }
@@ -206,7 +213,7 @@ public class DES {
     private static byte[] hex2byte(byte[] b) {
 
         if ((b.length % EVEN_FLAG) != 0) {
-            throw new IllegalArgumentException("长度不是偶数");
+            throw new UncheckedException("The length is not even");
         }
         byte[] b2 = new byte[b.length / 2];
         for (int n = 0; n < b.length; n += EVEN_FLAG) {

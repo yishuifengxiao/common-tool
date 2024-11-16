@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
  * <li>判断给定的字符串是否为一个合法的18位身份证号</li>
  * <li>从合法的身份证号中提取出当前身份证里的出生日期</li>
  * </ol>
- * <strong>该工具是一个线程安全类的工具。</strong>
  *
  * @author yishui
  * @version 1.0.0
@@ -43,10 +42,6 @@ public final class CertNoUtil {
     /**
      * <p>
      * 校验18位身份证号的合法性
-     * </p>
-     *
-     * <p>
-     * <strong>线程安全</strong>
      * </p>
      *
      * @param idcard 身份证号
@@ -93,23 +88,25 @@ public final class CertNoUtil {
      * <p>
      * 从身份证号里提取出出生日期
      * </p>
-     * <p>
-     * <strong>线程安全</strong>
-     * </p>
      *
      * @param idcard 身份证号
      * @return 出生日期
      */
     public static LocalDate extractBirthday(String idcard) {
         if (!isValid(idcard)) {
-            throw new UncheckedException("身份证号格式不正确");
+            throw new UncheckedException("身份证号格式不正确").setContext(idcard);
         }
         try {
             String dateStr = StringUtils.substring(idcard.trim(), 6, 14);
             return LocalDate.parse(dateStr, DateTimeFormatter.BASIC_ISO_DATE);
         } catch (Exception e) {
-            log.info("【易水工具】从身份证号{}中提取出生日期时出现异常，出现异常的原因为 {}", idcard.trim(), e.getMessage());
-            throw new UncheckedException("身份证号出生日期格式不正确");
+            if (log.isInfoEnabled()) {
+                log.info("An exception occurred while extracting the birth date from ID number {}. The reason for the" +
+                        " " +
+                        "exception is {}", idcard.trim(), e.getMessage());
+            }
+
+            throw new UncheckedException("身份证号出生日期格式不正确").setContext(idcard);
         }
     }
 

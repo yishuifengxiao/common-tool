@@ -22,7 +22,7 @@ import java.util.Arrays;
  * @since 1.0.0
  */
 @Schema(name = " 布尔类型替代枚举", description = "用于替换<code>Boolean</code>的使用，方便在灵活业务场景下进行功能扩展")
-public enum BoolStat {
+public enum BoolStat implements RootEnum {
 
 
     /**
@@ -33,17 +33,17 @@ public enum BoolStat {
     /**
      * 类似Boolean中的true值，对应编码1
      */
-    @Schema(name ="类似Boolean中的true值，对应编码1") True(1, true),
+    @Schema(name = "类似Boolean中的true值，对应编码1") True(1, true),
 
     /**
      * 类似Boolean中的null值，对应编码-1
      */
-    @Schema(name ="类似Boolean中的null值，对应编码-1") Null(-1, null);
+    @Schema(name = "类似Boolean中的null值，对应编码-1") Null(-1, null);
 
     /**
      * 编码
      */
-    private int code;
+    private Integer code;
     /**
      * 代表的值
      */
@@ -54,8 +54,18 @@ public enum BoolStat {
      *
      * @return 枚举值对应的编码
      */
-    public int code() {
+    public Integer code() {
         return this.code;
+    }
+
+    /**
+     * 获取枚举值的描述
+     *
+     * @return 枚举值的描述
+     */
+    @Override
+    public String description() {
+        return null;
     }
 
 

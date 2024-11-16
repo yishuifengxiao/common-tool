@@ -218,7 +218,8 @@ public class Page<S> extends Slice implements Serializable {
         if (null == size) {
             size = DEFAULT_PAGE_SIZE;
         }
-        return total.longValue() % size.longValue() == 0 ? total.longValue() / size.longValue() : (total.longValue() / size.longValue() + 1);
+        return total.longValue() % size.longValue() == 0 ? total.longValue() / size.longValue() :
+                (total.longValue() / size.longValue() + 1);
     }
 
 
@@ -233,21 +234,8 @@ public class Page<S> extends Slice implements Serializable {
         if (null == this.data) {
             return Page.of(Collections.emptyList(), this.total, this.size, this.num);
         }
-        return Page.of(this.data.stream().map(converter::map).collect(Collectors.toList()), this.total, this.size, this.num);
-    }
-
-    /**
-     * <p>将一种类型数据的分页对象转换成另一种数据类型的分页对象</p>
-     *
-     * @param <T>       分页元素转换工具的类型
-     * @param converter 分页元素转换工具
-     * @return 另一种数据类型的分页对象
-     */
-    public <T> Page<T> maps(ListConverter<S, T> converter) {
-        if (null == this.data) {
-            return Page.of(Collections.emptyList(), this.total, this.size, this.num);
-        }
-        return Page.of(converter.map(this.data), this.total, this.size, this.num);
+        return Page.of(this.data.stream().map(converter::map).collect(Collectors.toList()), this.total, this.size,
+                this.num);
     }
 
 
@@ -346,7 +334,8 @@ public class Page<S> extends Slice implements Serializable {
 
     @Override
     public String toString() {
-        String builder = "Page [size=" + size + ", num=" + num + ", data=" + data + ", pages=" + pages + ", " + "total=" + total + "]";
+        String builder = "Page [size=" + size + ", num=" + num + ", data=" + data + ", pages=" + pages + ", " +
+                "total=" + total + "]";
         return builder;
     }
 
@@ -374,28 +363,5 @@ public class Page<S> extends Slice implements Serializable {
         T map(S s);
     }
 
-    /**
-     * <p>
-     * 分页数据转换器
-     * </p>
-     * 将分页对象里的源数据转换成目标数据
-     *
-     * @param <S> 源数据
-     * @param <T> 目标数据
-     * @author yishui
-     * @version 1.0.0
-     * @since 1.0.0
-     */
-    @FunctionalInterface
-    public interface ListConverter<S, T> {
-
-        /**
-         * 将源数据转换成目标数据
-         *
-         * @param s 源数据
-         * @return 目标数据
-         */
-        List<T> map(List<S> s);
-    }
 
 }

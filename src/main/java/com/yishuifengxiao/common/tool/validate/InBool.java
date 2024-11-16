@@ -67,9 +67,9 @@ public @interface InBool {
     @Documented
     @interface List {
         /**
-         * 待校验的值
+         * 校验值
          *
-         * @return 待校验的值
+         * @return 校验值
          */
         InBool[] value();
     }

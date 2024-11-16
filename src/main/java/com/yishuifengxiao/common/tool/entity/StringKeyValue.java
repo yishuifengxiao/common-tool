@@ -1,5 +1,6 @@
 package com.yishuifengxiao.common.tool.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -58,6 +59,7 @@ public class StringKeyValue<T> extends KeyValue implements Serializable {
      *
      * @return 若该实例的键为null或空字符串即返回为true, 否则为false
      */
+    @JsonIgnore
     public boolean blankKey() {
         return StringUtils.isBlank(getKey());
     }
@@ -67,6 +69,7 @@ public class StringKeyValue<T> extends KeyValue implements Serializable {
      *
      * @return 该实例的键是否不为null或空字符串且值不为null即返回为true, 否则为false
      */
+    @JsonIgnore
     public boolean notBlank() {
         return !blankKey() && !nullVal();
     }
@@ -76,6 +79,7 @@ public class StringKeyValue<T> extends KeyValue implements Serializable {
      *
      * @return 该实例的键是否为null或空字符串且值为null即返回为true, 否则为false
      */
+    @JsonIgnore
     public boolean isBlank() {
         return blankKey() && nullVal();
     }

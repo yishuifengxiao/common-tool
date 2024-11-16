@@ -13,9 +13,6 @@ import java.math.BigDecimal;
  * <p>
  * 算法来源 https://www.cnblogs.com/zhoug2020/p/8993750.html
  * </p>
- * <p>
- * <strong>该工具是一个线程安全类的工具。</strong>
- * </p>
  *
  * @author yishui
  * @version 1.0.0

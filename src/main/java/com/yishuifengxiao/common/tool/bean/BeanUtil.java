@@ -4,9 +4,10 @@
 package com.yishuifengxiao.common.tool.bean;
 
 
-import com.yishuifengxiao.common.tool.collections.JsonUtil;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -17,7 +18,6 @@ import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -34,10 +34,12 @@ import java.util.stream.Collectors;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public final class BeanUtil {
 
+
     /**
-     * 将源对象里属性值复制给目标对象(当前方法是一个线程安全类的方法)
+     * 将源对象里属性值复制给目标对象
      *
      * @param <S>    源对象的类型
      * @param <T>    目标对象的类型
@@ -47,24 +49,42 @@ public final class BeanUtil {
      */
     public static <S, T> T copy(S source, T target) {
         if (null == source || null == target) {
-            return null;
+            return target;
         }
+        //@formatter:off
         List<Field> targetFields = ClassUtil.fields(target.getClass());
         List<Field> sourceFields = ClassUtil.fields(source.getClass());
-        targetFields = targetFields.stream().filter(v -> !(Modifier.isAbstract(v.getModifiers()) || Modifier.isNative(v.getModifiers()) || Modifier.isStatic(v.getModifiers()) || Modifier.isFinal(v.getModifiers()))).filter(v -> sourceFields.stream().anyMatch(s -> s.getName().equals(v.getName()))).collect(Collectors.toList());
-        for (Field field : targetFields) {
-            field.setAccessible(true);
+        targetFields.parallelStream().filter(v -> !(
+                Modifier.isAbstract(v.getModifiers())
+                        || Modifier.isNative(v.getModifiers())
+                        || Modifier.isStatic(v.getModifiers())
+                        || Modifier.isFinal(v.getModifiers())
+                ))
+                .filter(v -> sourceFields.stream().anyMatch(s -> s.getName().equals(v.getName())))
+                .map(Field::getName)
+                .forEach(fieldName -> {
             try {
-                Object val = field.get(source);
-                if (null == val) {
-                    continue;
+                Field targetField =
+                        targetFields.stream().filter(s -> StringUtils.equals(s.getName(),
+                                fieldName)).findFirst().orElse(null);
+                Field sourceField =
+                        sourceFields.stream().filter(s -> StringUtils.equals(s.getName(),
+                                fieldName)).findFirst().orElse(null);
+                targetField.setAccessible(true);
+                sourceField.setAccessible(true);
+                Object val = sourceField.get(source);
+                if (null != val) {
+                    targetField.set(target, val);
                 }
-                field.set(target, val);
-            } catch (IllegalAccessException e) {
-                throw new UncheckedException(e.getMessage());
-            }
-        }
+            } catch (Exception e) {
+                if(log.isInfoEnabled()){
+                    log.info("There was a problem copying the attribute {} from {} to " + "{}, the "
+                            + "problem is {}", fieldName, source, target, e);
+                }
 
+            }
+        });
+        //@formatter:on
         return target;
     }
 
@@ -77,17 +97,16 @@ public final class BeanUtil {
      */
     public static byte[] objectToByte(Object obj) {
         byte[] bytes = null;
-        try {
+        //@formatter:off
+        try (ByteArrayOutputStream bo = new ByteArrayOutputStream();
+             ObjectOutputStream oo = new ObjectOutputStream(bo);) {
             // object to bytearray
-            ByteArrayOutputStream bo = new ByteArrayOutputStream();
-            ObjectOutputStream oo = new ObjectOutputStream(bo);
             oo.writeObject(obj);
             bytes = bo.toByteArray();
-            bo.close();
-            oo.close();
         } catch (Exception e) {
             throw new UncheckedException(e.getMessage());
         }
+        //@formatter:on
         return bytes;
     }
 
@@ -99,16 +118,15 @@ public final class BeanUtil {
      */
     public static Object byteToObject(byte[] bytes) {
         Object obj = null;
-        try {
+        //@formatter:off
+        try (ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
+             ObjectInputStream oi = new ObjectInputStream(bi);) {
             // bytearray to object
-            ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
-            ObjectInputStream oi = new ObjectInputStream(bi);
             obj = oi.readObject();
-            bi.close();
-            oi.close();
         } catch (Exception e) {
             throw new UncheckedException(e.getMessage());
         }
+        //@formatter:on
         return obj;
     }
 
@@ -123,16 +141,15 @@ public final class BeanUtil {
     @SuppressWarnings("unchecked")
     public static <T> T byteToObject(byte[] bytes, Class<T> clazz) {
         T t = null;
-        try {
+        //@formatter:off
+        try ( ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
+              ObjectInputStream oi = new ObjectInputStream(bi);){
             // bytearray to object
-            ByteArrayInputStream bi = new ByteArrayInputStream(bytes);
-            ObjectInputStream oi = new ObjectInputStream(bi);
             t = (T) oi.readObject();
-            bi.close();
-            oi.close();
         } catch (Exception e) {
             throw new UncheckedException(e.getMessage());
         }
+        //@formatter:on
         return t;
     }
 
@@ -176,6 +193,7 @@ public final class BeanUtil {
         if (null == val) {
             return null;
         }
+        //@formatter:off
         ByteArrayOutputStream bos = null;
         ObjectOutputStream oos = null;
         ByteArrayInputStream bis = null;
@@ -192,10 +210,21 @@ public final class BeanUtil {
             // 从字节数组中读取对象
             return ois.readObject();
         } catch (Exception e) {
-            throw UncheckedException.of(e.getMessage());
+            throw new UncheckedException(e);
         } finally {
             CloseUtil.close(ois, bis, oos, bos);
         }
+        //@formatter:on
+    }
+
+    /**
+     * 使用jackson的方式实现深克隆
+     *
+     * @param val 待克隆的的对象
+     * @return 克隆后的对象
+     */
+    public static Object deepClone(Object val) {
+        return JsonUtil.deepClone(val);
     }
 
 }

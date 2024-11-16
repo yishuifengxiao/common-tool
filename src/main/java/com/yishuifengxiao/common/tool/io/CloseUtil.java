@@ -11,10 +11,6 @@ import java.io.Flushable;
  * </p>
  * 该工具主要目的是优雅地关闭掉各种IO流，从而屏蔽掉因为关闭IO时强制异常捕获代码造成代码优雅性的降低
  *
- * <p>
- * <strong>该工具是一个线程安全类的工具</strong>
- * </p>
- *
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -54,7 +50,11 @@ public class CloseUtil {
                 close.close();
                 close = null;
             } catch (Exception e) {
-                log.debug("【易水工具】关闭流时出现问题，出现问题的原因为 {}", e.getMessage());
+                if (log.isDebugEnabled()) {
+                    log.debug("There was a problem closing the stream, and the reason for the problem is {}",
+                            e.getMessage());
+                }
+
             }
         }
     }

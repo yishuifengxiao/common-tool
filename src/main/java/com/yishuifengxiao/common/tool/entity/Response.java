@@ -57,8 +57,9 @@ public class Response<T> implements Serializable {
      * "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">https://developer.mozilla
      * .org/en-US/docs/Web/HTTP/Status</a>
      */
-    @Schema(title = "请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer.mozilla" + ".org/en-US/docs/Web/HTTP/Status)")
-    protected int code;
+    @Schema(title = "请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer"
+            + ".mozilla" + ".org/en-US/docs/Web/HTTP/Status)")
+    protected Object code;
 
     /**
      * 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述
@@ -90,7 +91,7 @@ public class Response<T> implements Serializable {
      * @param data 响应数据
      * @return 响应对象
      */
-    public static <T> Response<T> of(int code, String msg, T data) {
+    public static <T> Response<T> of(Object code, String msg, T data) {
         return new Response<>(code, msg, data);
     }
 
@@ -111,29 +112,9 @@ public class Response<T> implements Serializable {
      * @return 表示成功的响应对象(响应码200)
      */
     public static Response<Object> suc() {
-        return new Response<Object>(Const.CODE_OK, Const.MSG_OK);
+        return new Response<>(Const.CODE_OK, Const.MSG_OK);
     }
 
-    /**
-     * 根据响应提示信息生成一个表示成功的响应对象
-     *
-     * @param msg 响应提示信息
-     * @return 表示成功的响应对象(响应码200)
-     */
-    public static Response<Object> suc(String msg) {
-        return new Response<Object>(Const.CODE_OK, msg);
-    }
-
-    /**
-     * 根据响应提示信息生成一个表示成功的响应对象
-     *
-     * @param <T>  响应数据的类型
-     * @param data 响应数据
-     * @return 表示成功的响应对象(响应码200)
-     */
-    public static <T> Response<T> sucData(T data) {
-        return new Response<T>(Const.CODE_OK, Const.MSG_OK, data);
-    }
 
     /**
      * 根据响应提示信息和响应数据生成一个表示成功的响应对象
@@ -153,7 +134,7 @@ public class Response<T> implements Serializable {
      * @return 表示参数有误的响应对象(响应码400)
      */
     public static Response<Object> badParam() {
-        return new Response<Object>(Const.CODE_BAD_REQUEST, Const.MSG_BAD_REQUEST);
+        return new Response<>(Const.CODE_BAD_REQUEST, Const.MSG_BAD_REQUEST);
     }
 
     /**
@@ -163,7 +144,7 @@ public class Response<T> implements Serializable {
      * @return 表示参数有误的响应对象(响应码400)
      */
     public static Response<Object> badParam(String msg) {
-        return new Response<Object>(Const.CODE_BAD_REQUEST, msg);
+        return new Response<>(Const.CODE_BAD_REQUEST, msg);
     }
 
     /**
@@ -184,7 +165,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源未授权的响应对象(401响应码)
      */
     public static Response<Object> unAuth() {
-        return new Response<Object>(Const.CODE_UNAUTHORIZED, Const.MSG_UNAUTHORIZED);
+        return new Response<>(Const.CODE_UNAUTHORIZED, Const.MSG_UNAUTHORIZED);
     }
 
     /**
@@ -194,7 +175,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源未授权的响应对象(401响应码)
      */
     public static Response<Object> unAuth(String msg) {
-        return new Response<Object>(Const.CODE_UNAUTHORIZED, msg);
+        return new Response<>(Const.CODE_UNAUTHORIZED, msg);
     }
 
     /**
@@ -215,7 +196,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源不可用的响应对象(403响应码)
      */
     public static Response<Object> notAllow() {
-        return new Response<Object>(Const.CODE_FORBIDDEN, Const.MSG_FORBIDDEN);
+        return new Response<>(Const.CODE_FORBIDDEN, Const.MSG_FORBIDDEN);
     }
 
     /**
@@ -225,7 +206,7 @@ public class Response<T> implements Serializable {
      * @return 表示资源不可用的响应对象(403响应码)
      */
     public static Response<Object> notAllow(String msg) {
-        return new Response<Object>(Const.CODE_FORBIDDEN, msg);
+        return new Response<>(Const.CODE_FORBIDDEN, msg);
     }
 
     /**
@@ -233,8 +214,8 @@ public class Response<T> implements Serializable {
      *
      * @return 表示资源不存在的响应对象(404响应码)
      */
-    public static Response<Object> notFoundt() {
-        return new Response<Object>(Const.CODE_NOT_FOUND, Const.MSG_NOT_FOUND);
+    public static Response<Object> notFound() {
+        return new Response<>(Const.CODE_NOT_FOUND, Const.MSG_NOT_FOUND);
     }
 
     /**
@@ -243,18 +224,8 @@ public class Response<T> implements Serializable {
      * @return 表示请求业务未完成的响应对象(500响应码)
      */
     public static Response<Object> error() {
-        return new Response<Object>(Const.CODE_INTERNAL_SERVER_ERROR, Const.MSG_INTERNAL_SERVER_ERROR);
-    }
-
-    /**
-     * 生成一个默认表示请求业务未完成的响应对象(500响应码)
-     *
-     * @param <T>  响应数据的类型
-     * @param data 响应数据
-     * @return 表示请求业务未完成的响应对象(500响应码)
-     */
-    public static <T> Response<T> errorData(T data) {
-        return new Response<T>(Const.CODE_INTERNAL_SERVER_ERROR, Const.MSG_INTERNAL_SERVER_ERROR, data);
+        return new Response<>(Const.CODE_INTERNAL_SERVER_ERROR,
+                Const.MSG_INTERNAL_SERVER_ERROR);
     }
 
     /**
@@ -264,18 +235,7 @@ public class Response<T> implements Serializable {
      * @return 表示服务器内部异常500时的返回信息
      */
     public static Response<Object> error(String msg) {
-        return new Response<Object>(Const.CODE_INTERNAL_SERVER_ERROR, msg);
-    }
-
-    /**
-     * 根据响应数据生成表示服务器内部异常500时的返回信息
-     *
-     * @param <T>  响应数据的数据类型
-     * @param data 响应数据
-     * @return 表示服务器内部异常500时的返回信息
-     */
-    public static <T> Response<T> error(T data) {
-        return new Response<>(Const.CODE_INTERNAL_SERVER_ERROR, Const.MSG_INTERNAL_SERVER_ERROR, data);
+        return new Response<>(Const.CODE_INTERNAL_SERVER_ERROR, msg);
     }
 
     /**
@@ -306,7 +266,7 @@ public class Response<T> implements Serializable {
      * @param data 响应数据
      * @param date 响应时间
      */
-    public Response(String id, int code, String msg, T data, Date date) {
+    public Response(String id, Object code, String msg, T data, Date date) {
         this.id = id;
         this.code = code;
         this.msg = msg;
@@ -321,7 +281,7 @@ public class Response<T> implements Serializable {
      * @param msg  响应提示信息
      * @param data 响应数据
      */
-    public Response(int code, String msg, T data) {
+    public Response(Object code, String msg, T data) {
         this(IdWorker.uuid(), code, msg, data, new Date());
     }
 
@@ -331,7 +291,7 @@ public class Response<T> implements Serializable {
      * @param code 响应码
      * @param msg  响应提示信息
      */
-    public Response(int code, String msg) {
+    public Response(Object code, String msg) {
         this(IdWorker.uuid(), code, msg, null, new Date());
     }
 
@@ -360,8 +320,8 @@ public class Response<T> implements Serializable {
      *
      * @return 当前响应的响应码
      */
-    public int getCode() {
-        return code;
+    public Object getCode() {
+        return this.code;
     }
 
     /**
@@ -370,7 +330,7 @@ public class Response<T> implements Serializable {
      * @param code 响应码
      * @return 当前通用响应对象
      */
-    public Response<T> setCode(int code) {
+    public Response<T> setCode(Object code) {
         this.code = code;
         return this;
     }
@@ -381,7 +341,7 @@ public class Response<T> implements Serializable {
      * @return 响应提示信息
      */
     public String getMsg() {
-        return msg;
+        return this.msg;
     }
 
     /**
@@ -412,7 +372,7 @@ public class Response<T> implements Serializable {
      * @return 响应数据
      */
     public T getData() {
-        return data;
+        return this.data;
     }
 
     /**
@@ -443,7 +403,7 @@ public class Response<T> implements Serializable {
      * @return 响应的时间
      */
     public Date getDate() {
-        return date;
+        return this.date;
     }
 
     /**
@@ -508,7 +468,7 @@ public class Response<T> implements Serializable {
         /**
          * 500响应码对应的默认信息
          */
-        public final static String MSG_INTERNAL_SERVER_ERROR = "请求失败";
+        public final static String MSG_INTERNAL_SERVER_ERROR = "请求处理失败";
         /**
          * 500响应码
          */
@@ -520,7 +480,7 @@ public class Response<T> implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + code;
+        result = prime * result + ((code == null) ? 0 : code.hashCode());
         result = prime * result + ((data == null) ? 0 : data.hashCode());
         result = prime * result + ((date == null) ? 0 : date.hashCode());
         result = prime * result + ((id == null) ? 0 : id.hashCode());
@@ -577,7 +537,8 @@ public class Response<T> implements Serializable {
 
     @Override
     public String toString() {
-        return "Response [id=" + id + ", code=" + code + ", msg=" + msg + ", data=" + data + ", date=" + date + "]";
+        return "Response [id=" + id + ", code=" + code + ", msg=" + msg + ", data=" + data + ", "
+                + "date=" + date + "]";
     }
 
 }

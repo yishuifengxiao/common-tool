@@ -20,16 +20,12 @@ import java.util.Date;
  * <p>
  * 时间转换解析工具
  * </p>
- * 该工具的主要作用是将LocalDateTime和Date形式的时间互相转换以及将字符串格式的时间和日期时间互相转换。该工具是一个线程安全类的工具，其主要的功能如下：
+ * 该工具的主要作用是将LocalDateTime和Date形式的时间互相转换以及将字符串格式的时间和日期时间互相转换，其主要的功能如下：
  * <ol>
  * <li>将LocalDateTime和Date形式的时间互相转换</li>
  * <li>将指定格式的字符串按解析为日期时间</li>
  * <li>将日期时间按照指定的格式转换成字符串</li>
  * </ol>
- *
- * <p>
- * <strong>该工具是一个线程安全类的工具</strong>
- * </p>
  *
  * @author yishui
  * @version 1.0.0
@@ -37,9 +33,8 @@ import java.util.Date;
  */
 @Slf4j
 public final class DateTimeUtil {
-
     /**
-     * 默认的时区-北京 utc+8
+     * 默认的中国时区uct+8
      */
     public final static ZoneId ZONEID_OF_CHINA = OsUtils.ZONEID_OF_CHINA;
 
@@ -168,11 +163,21 @@ public final class DateTimeUtil {
             return null;
         }
         try {
-            patterns = (null != patterns && patterns.length > 0) ? patterns : new String[]{DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT, SIMPLE_DATETIME_FORMAT, DEFAULT_FULL_DATE_FORMAT, DEFAULT_SLASH_DATE_FORMAT};
+            patterns = (null != patterns && patterns.length > 0) ? patterns :
+                    new String[]{DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT,
+                            SIMPLE_DATETIME_FORMAT, DEFAULT_FULL_DATE_FORMAT,
+                            DEFAULT_SLASH_DATE_FORMAT};
             return DateUtils.parseDate(timeStr.trim(), patterns);
         } catch (Exception e) {
-            log.info("【易水工具】按照解析规则 {} 从字符串 {} 中解析出时间时出现问题，出现问题的原因为{}", patterns, timeStr, e.getMessage());
-            throw new UncheckedException("从字符串中解析时间失败").setContext(e);
+            if (log.isInfoEnabled()) {
+                log.info("There was a problem parsing the time from the string {} according to "
+                                + "the parsing rule {}, " +
+                                "and " +
+                                "the reason for the problem is {}", patterns, timeStr,
+                        e);
+            }
+
+            throw new UncheckedException(e);
         }
     }
 
