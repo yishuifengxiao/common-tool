@@ -4,8 +4,8 @@ import com.yishuifengxiao.common.tool.entity.RootEnum;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.io.CloseUtil;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.function.Supplier;
 
 /**
@@ -19,7 +19,6 @@ import java.util.function.Supplier;
  */
 public class ValidateUtils {
 
-
     /**
      * 判断给定的值是否为true,若为null或false则抛出异常
      *
@@ -27,9 +26,7 @@ public class ValidateUtils {
      * @param msg 异常提示信息
      */
     public static void isTrue(Boolean val, String msg) {
-        if (null == val || !val) {
-            throw new UncheckedException(msg);
-        }
+        validate(val, true, false, msg);
     }
 
     /**
@@ -39,9 +36,7 @@ public class ValidateUtils {
      * @param rootEnum 异常提示信息
      */
     public static void isTrue(Boolean val, RootEnum rootEnum) {
-        if (null == val || !val) {
-            throw new UncheckedException(rootEnum);
-        }
+        validate(val, true, false, rootEnum);
     }
 
     /**
@@ -51,9 +46,7 @@ public class ValidateUtils {
      * @param msg 异常提示信息
      */
     public static void isTrueOrNull(Boolean val, String msg) {
-        if (null != val && !val) {
-            throw new UncheckedException(msg);
-        }
+        validate(val, true, true, msg);
     }
 
     /**
@@ -63,9 +56,7 @@ public class ValidateUtils {
      * @param rootEnum 异常提示信息
      */
     public static void isTrueOrNull(Boolean val, RootEnum rootEnum) {
-        if (null != val && !val) {
-            throw new UncheckedException(rootEnum);
-        }
+        validate(val, true, true, rootEnum);
     }
 
     /**
@@ -75,9 +66,7 @@ public class ValidateUtils {
      * @param msg 异常提示信息
      */
     public static void isFalse(Boolean val, String msg) {
-        if (null == val || val) {
-            throw new UncheckedException(msg);
-        }
+        validate(val, false, false, msg);
     }
 
     /**
@@ -87,9 +76,7 @@ public class ValidateUtils {
      * @param rootEnum 异常提示信息
      */
     public static void isFalse(Boolean val, RootEnum rootEnum) {
-        if (null == val || val) {
-            throw new UncheckedException(rootEnum);
-        }
+        validate(val, false, false, rootEnum);
     }
 
     /**
@@ -99,9 +86,7 @@ public class ValidateUtils {
      * @param msg 异常提示信息
      */
     public static void isFalseOrNull(Boolean val, String msg) {
-        if (null != val && val) {
-            throw new UncheckedException(msg);
-        }
+        validate(val, false, true, msg);
     }
 
     /**
@@ -111,11 +96,20 @@ public class ValidateUtils {
      * @param rootEnum 异常提示信息
      */
     public static void isFalseOrNull(Boolean val, RootEnum rootEnum) {
-        if (null != val && val) {
-            throw new UncheckedException(rootEnum);
-        }
+        validate(val, false, true, rootEnum);
     }
 
+    // 私有通用验证方法
+    private static void validate(Boolean value, boolean expected, boolean allowNull, Object errorMsg) {
+        boolean conditionMet = allowNull ? (value == null || value == expected) : (value != null && value == expected);
+        if (!conditionMet) {
+            if (errorMsg instanceof RootEnum) {
+                throw new UncheckedException((RootEnum) errorMsg);
+            } else if (errorMsg instanceof String) {
+                throw new UncheckedException((String) errorMsg);
+            }
+        }
+    }
 
     /**
      * 生成一个 Supplier
@@ -123,7 +117,7 @@ public class ValidateUtils {
      * @param message 提示信息
      * @return Supplier
      */
-    public static final Supplier<UncheckedException> orElseThrow(String message) {
+    public static Supplier<UncheckedException> orElseThrow(String message) {
         return () -> new UncheckedException(message);
     }
 
@@ -133,7 +127,7 @@ public class ValidateUtils {
      * @param rootEnum 参数信息
      * @return Supplier
      */
-    public static final Supplier<UncheckedException> orElseThrow(RootEnum rootEnum) {
+    public static Supplier<UncheckedException> orElseThrow(RootEnum rootEnum) {
         return () -> new UncheckedException(rootEnum);
     }
 
@@ -144,19 +138,24 @@ public class ValidateUtils {
      * @param message 提示信息
      * @return Supplier
      */
-    public static final Supplier<UncheckedException> orElseThrow(int code, String message) {
+    public static Supplier<UncheckedException> orElseThrow(int code, String message) {
         return () -> new UncheckedException(code, message);
     }
 
-    /**
-     * 生成一个Supplier
-     *
-     * @param exception 异常信息
-     * @return Supplier
-     */
-    public static final Supplier<UncheckedException> orElseThrow(UncheckedException exception) {
-        return () -> exception;
-    }
+/**
+ * 生成一个Supplier
+ *
+ * @param exception 异常信息
+ * @return Supplier
+ */
+public static Supplier<UncheckedException> orElseThrow(UncheckedException exception) {
+    return () -> {
+        UncheckedException newException = new UncheckedException(exception.getCode(), exception.getMessage());
+        newException.setContext(exception.getContext());
+        return (UncheckedException) newException.initCause(exception.getCause());
+    };
+}
+
 
     /**
      * 提取出异常中的所有输出信息
@@ -168,12 +167,11 @@ public class ValidateUtils {
         if (null == throwable) {
             return null;
         }
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PrintStream printStream = new PrintStream(out);
-        throwable.printStackTrace(printStream);
-        String result = new String(out.toByteArray());
-        CloseUtil.close(printStream, out);
-        return result;
+        StringWriter writer = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(writer);
+        throwable.printStackTrace(printWriter);
+        CloseUtil.close(printWriter); // 只需关闭外层 PrintWriter 即可
+        return writer.toString();
     }
 
     /**
@@ -193,7 +191,6 @@ public class ValidateUtils {
     public static void throwException(RuntimeException exception) {
         throw exception;
     }
-
 
     /**
      * 抛出一个自定义运行时异常

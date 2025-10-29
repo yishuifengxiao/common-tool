@@ -14,69 +14,77 @@ public final class OsUtils {
     /**
      * 默认的时区,上海
      */
-    public final static String DEFAULT_ZONE = "Asia/Shanghai";
+    public static final String DEFAULT_ZONE = "Asia/Shanghai";
 
     /**
      * 获取北京时间的ZoneId
      */
-    public final static ZoneId ZONEID_OF_CHINA = ZoneId.of(DEFAULT_ZONE);
+    public static final ZoneId ZONEID_OF_CHINA = ZoneId.of(DEFAULT_ZONE);
+
     /**
      * 获取操作系统的名字
      */
-    private static String OS = System.getProperty("os.name").toLowerCase();
+    private static final String OS = System.getProperty("os.name").toLowerCase();
 
     /**
      * 左斜杠 (英文输入法 / )
      */
-    public final static String LEFT_SLASH = "/";
+    public static final String LEFT_SLASH = "/";
 
     /**
      * 右斜杠 (英文输入法 \ )
      */
-    public final static String RIGHT_SLASH = "\\";
+    public static final String RIGHT_SLASH = "\\";
 
     /**
      * 点 (英文输入法 . )
      */
-    public final static String SPOT = ".";
+    public static final String SPOT = ".";
+
     /**
      * 冒号 (英文输入法 : )
      */
-    public final static String COLON = ":";
+    public static final String COLON = ":";
 
     /**
-     * 分隔符 &#38;
+     * 分隔符 &
      */
-    public final static String SEPARATOR_AND = "&";
+    public static final String SEPARATOR_AND = "&";
 
     /**
      * 半角逗号
      */
-    public final static String COMMA = ",";
+    public static final String COMMA = ",";
 
     /**
      * 下划线 (英文输入法 _ )
      */
-    public final static String SEPARATOR_UNDERLINE = "_";
+    public static final String SEPARATOR_UNDERLINE = "_";
 
     /**
      * 问号 (英文输入法 ? )
      */
-    public final static String SEPARATOR_QUESTION_MARK = "?";
+    public static final String SEPARATOR_QUESTION_MARK = "?";
 
     /**
      * 本机的IPV4地址
      */
-    public final static String LOCAL_IPV4 = "127.0.0.1";
+    public static final String LOCAL_IPV4 = "127.0.0.1";
+
     /**
      * 本机的IPV6地址
      */
-    public final static String LOCAL_IPV6 = "0:0:0:0:0:0:0:1";
+    public static final String LOCAL_IPV6 = "0:0:0:0:0:0:0:1";
 
     /**
      * 本机的地址localhost
      */
-    public final static String LOCAL_HOST = "localhost";
+    public static final String LOCAL_HOST = "localhost";
+
+    // 缓存常用系统属性
+    private static volatile String cachedTmpDir;
+    private static volatile String cachedUserDir;
+    private static volatile String cachedHomeDir;
 
     /**
      * 休眠指定的时间
@@ -87,7 +95,8 @@ public final class OsUtils {
     public static boolean sleep(long millis) {
         try {
             Thread.sleep(millis);
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return false;
         }
         return true;
@@ -99,7 +108,7 @@ public final class OsUtils {
      * </p>
      *
      * <p>
-     * windows下返回左斜杠<code>/</code>,其他环境下返回右斜杠<code>\</code>
+     * windows下返回右斜杠<code>\</code>,其他环境下返回左斜杠<code>/</code>
      * </p>
      *
      * @return 路径分隔符
@@ -114,7 +123,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isLinux() {
-        return OS.indexOf("linux") >= 0;
+        return OS.contains("linux");
     }
 
     /**
@@ -123,7 +132,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isMacOs() {
-        return OS.indexOf("mac") >= 0 && OS.indexOf("os") > 0 && OS.indexOf("x") < 0;
+        return OS.startsWith("mac os") && !OS.contains("x");
     }
 
     /**
@@ -132,7 +141,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isMacOsX() {
-        return OS.indexOf("mac") >= 0 && OS.indexOf("os") > 0 && OS.indexOf("x") > 0;
+        return OS.startsWith("mac os x");
     }
 
     /**
@@ -141,7 +150,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isWindows() {
-        return OS.indexOf("windows") >= 0;
+        return OS.contains("windows");
     }
 
     /**
@@ -150,7 +159,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isOs2() {
-        return OS.indexOf("os/2") >= 0;
+        return OS.contains("os/2");
     }
 
     /**
@@ -159,7 +168,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isSolaris() {
-        return OS.indexOf("solaris") >= 0;
+        return OS.contains("solaris");
     }
 
     /**
@@ -168,7 +177,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isSunOs() {
-        return OS.indexOf("sunos") >= 0;
+        return OS.contains("sunos");
     }
 
     /**
@@ -177,7 +186,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isMpeIx() {
-        return OS.indexOf("mpe/ix") >= 0;
+        return OS.contains("mpe/ix");
     }
 
     /**
@@ -186,7 +195,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isHpUx() {
-        return OS.indexOf("hp-ux") >= 0;
+        return OS.contains("hp-ux");
     }
 
     /**
@@ -195,7 +204,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isAix() {
-        return OS.indexOf("aix") >= 0;
+        return OS.contains("aix");
     }
 
     /**
@@ -204,7 +213,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isOs390() {
-        return OS.indexOf("os/390") >= 0;
+        return OS.contains("os/390");
     }
 
     /**
@@ -213,7 +222,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isFreeBsd() {
-        return OS.indexOf("freebsd") >= 0;
+        return OS.contains("freebsd");
     }
 
     /**
@@ -222,7 +231,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isIrix() {
-        return OS.indexOf("irix") >= 0;
+        return OS.contains("irix");
     }
 
     /**
@@ -231,7 +240,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isDigitalUnix() {
-        return OS.indexOf("digital") >= 0 && OS.indexOf("unix") > 0;
+        return OS.contains("digital") && OS.contains("unix");
     }
 
     /**
@@ -240,7 +249,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isNetWare() {
-        return OS.indexOf("netware") >= 0;
+        return OS.contains("netware");
     }
 
     /**
@@ -249,7 +258,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isOsf1() {
-        return OS.indexOf("osf1") >= 0;
+        return OS.contains("osf1");
     }
 
     /**
@@ -258,7 +267,7 @@ public final class OsUtils {
      * @return 若是返回为true, 否则为false
      */
     public static boolean isOpenVms() {
-        return OS.indexOf("openvms") >= 0;
+        return OS.contains("openvms");
     }
 
     /**
@@ -268,7 +277,14 @@ public final class OsUtils {
      * @return 系统临时文件目录地址
      */
     public static String tmpdir() {
-        return System.getProperty("java.io.tmpdir");
+        if (cachedTmpDir == null) {
+            synchronized (OsUtils.class) {
+                if (cachedTmpDir == null) {
+                    cachedTmpDir = System.getProperty("java.io.tmpdir");
+                }
+            }
+        }
+        return cachedTmpDir;
     }
 
     /**
@@ -279,8 +295,14 @@ public final class OsUtils {
      * @return 用户的当前工作目录地址
      */
     public static String userDir() {
-
-        return System.getProperty("user.dir");
+        if (cachedUserDir == null) {
+            synchronized (OsUtils.class) {
+                if (cachedUserDir == null) {
+                    cachedUserDir = System.getProperty("user.dir");
+                }
+            }
+        }
+        return cachedUserDir;
     }
 
     /**
@@ -291,8 +313,14 @@ public final class OsUtils {
      * @return 用户的当前工作目录地址
      */
     public static String homeDir() {
-
-        return System.getProperty("user.home");
+        if (cachedHomeDir == null) {
+            synchronized (OsUtils.class) {
+                if (cachedHomeDir == null) {
+                    cachedHomeDir = System.getProperty("user.home");
+                }
+            }
+        }
+        return cachedHomeDir;
     }
 
     /**
@@ -340,7 +368,6 @@ public final class OsUtils {
         return System.getProperty("file.encoding");
     }
 
-
     /**
      * 获取操作系统的默认编码
      *
@@ -350,52 +377,49 @@ public final class OsUtils {
         return System.getProperty("sun.jnu.encoding");
     }
 
-
     /**
      * 获取操作系统类型
      *
      * @return 操作系统类型
      */
     public static Platform getPlatform() {
-        Platform platform = null;
         if (isAix()) {
-            platform = Platform.AIX;
+            return Platform.AIX;
         } else if (isDigitalUnix()) {
-            platform = Platform.Digital_Unix;
+            return Platform.DIGITAL_UNIX;
         } else if (isFreeBsd()) {
-            platform = Platform.FreeBSD;
+            return Platform.FREE_BSD;
         } else if (isHpUx()) {
-            platform = Platform.HP_UX;
+            return Platform.HP_UX;
         } else if (isIrix()) {
-            platform = Platform.Irix;
+            return Platform.IRIX;
         } else if (isLinux()) {
-            platform = Platform.Linux;
+            return Platform.LINUX;
         } else if (isMacOs()) {
-            platform = Platform.Mac_OS;
+            return Platform.MAC_OS;
         } else if (isMacOsX()) {
-            platform = Platform.Mac_OS_X;
+            return Platform.MAC_OS_X;
         } else if (isMpeIx()) {
-            platform = Platform.MPEiX;
+            return Platform.MPE_IX;
         } else if (isNetWare()) {
-            platform = Platform.NetWare_411;
+            return Platform.NET_WARE_411;
         } else if (isOpenVms()) {
-            platform = Platform.OpenVMS;
+            return Platform.OPEN_VMS;
         } else if (isOs2()) {
-            platform = Platform.OS2;
+            return Platform.OS2;
         } else if (isOs390()) {
-            platform = Platform.OS390;
+            return Platform.OS390;
         } else if (isOsf1()) {
-            platform = Platform.OSF1;
+            return Platform.OSF1;
         } else if (isSolaris()) {
-            platform = Platform.Solaris;
+            return Platform.SOLARIS;
         } else if (isSunOs()) {
-            platform = Platform.SunOS;
+            return Platform.SUN_OS;
         } else if (isWindows()) {
-            platform = Platform.Windows;
+            return Platform.WINDOWS;
         } else {
-            platform = Platform.Others;
+            return Platform.OTHERS;
         }
-        return platform;
     }
 
     /**
@@ -409,19 +433,19 @@ public final class OsUtils {
         /**
          * Linux操作系统
          */
-        Linux("Linux"),
+        LINUX("Linux"),
         /**
          * Mac_OS操作系统
          */
-        Mac_OS("Mac OS"),
+        MAC_OS("Mac OS"),
         /**
          * Mac_OS_X操作系统
          */
-        Mac_OS_X("Mac OS X"),
+        MAC_OS_X("Mac OS X"),
         /**
          * Windows操作系统
          */
-        Windows("Windows"),
+        WINDOWS("Windows"),
         /**
          * OS2操作系统
          */
@@ -429,15 +453,15 @@ public final class OsUtils {
         /**
          * Solaris操作系统
          */
-        Solaris("Solaris"),
+        SOLARIS("Solaris"),
         /**
          * SunOS操作系统
          */
-        SunOS("SunOS"),
+        SUN_OS("SunOS"),
         /**
          * MPEiX操作系统
          */
-        MPEiX("MPE/iX"),
+        MPE_IX("MPE/iX"),
         /**
          * HP_UX操作系统
          */
@@ -453,19 +477,19 @@ public final class OsUtils {
         /**
          * FreeBSD操作系统
          */
-        FreeBSD("FreeBSD"),
+        FREE_BSD("FreeBSD"),
         /**
          * Irix操作系统
          */
-        Irix("Irix"),
+        IRIX("Irix"),
         /**
          * Digital_Unix操作系统
          */
-        Digital_Unix("Digital Unix"),
+        DIGITAL_UNIX("Digital Unix"),
         /**
          * NetWare_411操作系统
          */
-        NetWare_411("NetWare"),
+        NET_WARE_411("NetWare"),
         /**
          * OSF1操作系统
          */
@@ -473,20 +497,17 @@ public final class OsUtils {
         /**
          * OpenVMS操作系统
          */
-        OpenVMS("OpenVMS"),
+        OPEN_VMS("OpenVMS"),
         /**
          * Others操作系统
          */
-        Others("Others");
+        OTHERS("Others");
+
+        private final String name;
 
         Platform(String name) {
             this.name = name;
         }
-
-        /**
-         * 操作系统名字
-         */
-        private String name;
 
         /**
          * 获取操作系统名字
@@ -496,8 +517,5 @@ public final class OsUtils {
         public String getName() {
             return name;
         }
-
     }
-
-
 }

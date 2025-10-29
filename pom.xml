@@ -51,21 +51,24 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.3.5</version>
+        <version>3.5.7</version>
     </parent>
     <properties>
-        <swagger.v3.version>2.2.20</swagger.v3.version>
-        <commons-collections4.version>4.4</commons-collections4.version>
-        <jsoup.version>1.17.2</jsoup.version>
-        <dom4j.version>2.1.4</dom4j.version>
-        <lombok.version>1.18.30</lombok.version>
+        <maven.source.version>21</maven.source.version>
+        <maven.target.version>21</maven.target.version>
+        <swagger.v3.version>2.2.40</swagger.v3.version>
+        <jsoup.version>1.21.2</jsoup.version>
+        <dom4j.version>2.2.0</dom4j.version>
+        <lombok.version>1.18.42</lombok.version>
         <logback.version>1.5.11</logback.version>
-        <jackson.version>2.9.1</jackson.version>
+        <jackson.version>2.20.0</jackson.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
         <nexus-staging-maven-plugin.version>1.6.13</nexus-staging-maven-plugin.version>
         <maven-gpg-plugin.version>3.1.0</maven-gpg-plugin.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mockito.version>4.6.1</mockito.version>
     </properties>
     <dependencies>
         <dependency>
@@ -123,6 +126,18 @@
             <artifactId>jackson-datatype-jsr310</artifactId>
             <version>${jackson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
     <profiles>
         <profile>
@@ -171,8 +186,9 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <version>${maven-compiler-plugin.version}</version>
                         <configuration>
-                            <source>17</source>
-                            <target>17</target>
+                            <encoding>UTF-8</encoding>
+                            <source>${maven.source.version}</source>
+                            <target>${maven.target.version}</target>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -218,8 +234,9 @@
                         <artifactId>maven-compiler-plugin</artifactId>
                         <version>${maven-compiler-plugin.version}</version>
                         <configuration>
-                            <source>17</source>
-                            <target>17</target>
+                            <encoding>UTF-8</encoding>
+                            <source>${maven.source.version}</source>
+                            <target>${maven.target.version}</target>
                         </configuration>
                     </plugin>
                     <plugin>

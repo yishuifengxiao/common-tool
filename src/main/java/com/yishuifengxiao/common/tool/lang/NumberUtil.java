@@ -6,8 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * <p>
@@ -114,7 +112,7 @@ public final class NumberUtil {
      */
     public static Float parseFloat(String str, float defaultValue) {
         Float value = parseFloat(str);
-        return null == value ? defaultValue : value.floatValue();
+        return null == value ? defaultValue : value;
     }
 
     /**
@@ -168,20 +166,17 @@ public final class NumberUtil {
      * @return 转换后的 BigDecimal ，若转换失败则返回为null
      */
     public static Optional<BigDecimal> parse(Object val) {
+        if (val == null || StringUtils.isBlank(val.toString())) {
+            return Optional.empty();
+        }
         try {
-            if (null == val || StringUtils.isBlank(val.toString())) {
-                return Optional.empty();
-            }
-            BigDecimal number = new BigDecimal(val.toString().replaceAll(",", "").trim());
-            return Optional.ofNullable(number);
-        } catch (Throwable e) {
-            if (log.isInfoEnabled()) {
-                log.info("There was a problem converting data [{}] to numerical values, and the reason for the " +
-                        "problem is" +
-                        " {}", val, e);
+            String cleanStr = val.toString().replaceAll(",", "").trim();
+            return Optional.of(new BigDecimal(cleanStr));
+        } catch (NumberFormatException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to convert [{}] to BigDecimal", val, e);
             }
         }
-
         return Optional.empty();
     }
 
@@ -192,17 +187,15 @@ public final class NumberUtil {
      * @return 转换后的10进制数字
      */
     public static Optional<BigDecimal> parseHex(String hexString) {
+        if (hexString == null || StringUtils.isBlank(hexString)) {
+            return Optional.empty();
+        }
         try {
-            if (null == hexString || StringUtils.isBlank(hexString.toString())) {
-                return Optional.empty();
-            }
-            BigDecimal number = new BigDecimal(new BigInteger(hexString.toString().replaceAll(",", "").trim(), 16));
-            return Optional.ofNullable(number);
-        } catch (Throwable e) {
-            if (log.isInfoEnabled()) {
-                log.info("There was a problem converting data [{}] to numerical values, and the reason for the " +
-                        "problem is" +
-                        " {}", hexString, e);
+            String cleanHex = hexString.replaceAll(",", "").trim();
+            return Optional.of(new BigDecimal(new BigInteger(cleanHex, 16)));
+        } catch (NumberFormatException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("Failed to convert hex string [{}] to BigDecimal", hexString, e);
             }
         }
         return Optional.empty();
@@ -218,32 +211,35 @@ public final class NumberUtil {
      * @return 16进制字符串
      */
     public static String toHexString(Number number, Integer byteNum) {
-
-        String hexString = "";
-        if (null != number) {
-            if (number instanceof Integer) {
-                hexString = Integer.toHexString(number.intValue()).toUpperCase(); // 转为16进制并大写
-            } else if (number instanceof Long) {
-                hexString = Long.toHexString(number.longValue()).toUpperCase(); // 转为16进制并大写
-            } else if (number instanceof Short) {
-                hexString = Integer.toHexString(number.shortValue()).toUpperCase(); // 转为16进制并大写
-            } else if (number instanceof Byte) {
-                hexString = Integer.toHexString(number.byteValue()).toUpperCase(); // 转为16进制并大写
-            } else if (number instanceof Double || number instanceof Float) {
-                // 如果是浮点数，通常我们只处理其整数部分
-                hexString = Long.toHexString(number.longValue()).toUpperCase(); // 转为16进制并大写
-            } else {
-                throw new IllegalArgumentException("Unsupported number type.");
-            }
+        if (number == null) {
+            return "";
         }
+
+        String hexString;
+        if (number instanceof Integer) {
+            hexString = Integer.toHexString(number.intValue()).toUpperCase();
+        } else if (number instanceof Long) {
+            hexString = Long.toHexString(number.longValue()).toUpperCase();
+        } else if (number instanceof Short) {
+            hexString = Integer.toHexString(number.shortValue()).toUpperCase();
+        } else if (number instanceof Byte) {
+            hexString = Integer.toHexString(number.byteValue()).toUpperCase();
+        } else if (number instanceof Double || number instanceof Float) {
+            hexString = Long.toHexString(number.longValue()).toUpperCase();
+        } else {
+            throw new IllegalArgumentException("Unsupported number type: " + number.getClass());
+        }
+
         if (hexString.length() % 2 == 1) {
             hexString = "0" + hexString;
         }
-        if (null != byteNum && byteNum > 0 && hexString.length() < byteNum * 2) {
-            String prefix =
-                    IntStream.range(0, byteNum * 2 - hexString.length()).mapToObj(v -> "0").collect(Collectors.joining());
+
+        if (byteNum != null && byteNum > 0 && hexString.length() < byteNum * 2) {
+            int padLength = byteNum * 2 - hexString.length();
+            String prefix = "0".repeat(padLength); // Java 11+
             hexString = prefix + hexString;
         }
+
         return hexString;
     }
 
@@ -258,7 +254,7 @@ public final class NumberUtil {
      */
     public static String toHex(Number number, Integer byteNum) {
         String hexString = toHexString(number, byteNum);
-        if (null == byteNum || byteNum <= 0) {
+        if (byteNum == null || byteNum <= 0) {
             return hexString;
         }
         if (hexString.length() > (byteNum * 2)) {

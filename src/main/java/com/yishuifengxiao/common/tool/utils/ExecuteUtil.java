@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * 执行工具
@@ -18,7 +19,7 @@ import java.util.function.Supplier;
 @Slf4j
 public class ExecuteUtil {
     /**
-     * 简单线程工程
+     * 简单线程工厂
      */
     public final static ThreadFactory SIMPLE_THREAD_FACTORY = new SimpleThreadFactory();
 
@@ -26,10 +27,13 @@ public class ExecuteUtil {
      * 线程池初始化
      */
     private final static ExecutorService POOL =
-            new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(),
-                    Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
+            new ThreadPoolExecutor(
+                    Runtime.getRuntime().availableProcessors(),
+                    200, // 修改最大线程数上限防止OOM
+                    60L, TimeUnit.SECONDS,
+                    new LinkedBlockingQueue<>(1000), // 设置有界队列控制积压量
                     SIMPLE_THREAD_FACTORY,
-                    new ThreadPoolExecutor.AbortPolicy());
+                    new ThreadPoolExecutor.CallerRunsPolicy()); // 更安全拒绝策略
 
     /**
      * 获取线程池
@@ -79,43 +83,41 @@ public class ExecuteUtil {
     public static void execute(Runnable runnable, ExecuteComplete complete, ExecuteError error) {
         POOL.execute(() -> {
             try {
-                runnable.run();
+                if (runnable != null) {
+                    runnable.run();
+                }
             } catch (Throwable e) {
                 if (log.isInfoEnabled()) {
-                    log.info("There was a problem while executing callback task {}, and the "
-                                    + "problem that occurred was" +
-                                    " {}"
-                            , runnable, e.getMessage());
+                    log.info("There was a problem while executing callback task {}", runnable, e);
                 }
 
-                if (null != error) {
+                if (error != null) {
                     error.onError(e);
                 }
             } finally {
-                if (null != complete) {
+                if (complete != null) {
                     complete.onComplete();
                 }
             }
         });
-
     }
 
     /**
-     * 简单线程工程
+     * 简单线程工厂
      *
      * @author yishui
      * @version 1.0.0
      * @since 1.0.0
      */
     public static class SimpleThreadFactory implements ThreadFactory {
+        private static final AtomicLong threadNumber = new AtomicLong(0);
 
         @Override
         public Thread newThread(Runnable r) {
             Thread thread = new Thread(r);
-            thread.setName(new StringBuilder("callback-").append(System.currentTimeMillis()).toString());
+            thread.setName("callback-" + threadNumber.incrementAndGet());
             return thread;
         }
-
     }
 
     /**
@@ -173,14 +175,18 @@ public class ExecuteUtil {
      * @param <T>       输出数据类型
      * @return 输出数据
      */
-    @SuppressWarnings("unchecked")
+    @SafeVarargs
     public static <T> T execute(Predicate<T> match, Supplier<T>... suppliers) {
-        if (null == suppliers) {
+        if (suppliers == null || match == null) {
             return null;
         }
-        return Arrays.stream(suppliers).filter(Objects::nonNull).map(v -> v.get()).filter(v -> match.test(v)).findFirst().orElse(null);
+        return Arrays.stream(suppliers)
+                .filter(Objects::nonNull)
+                .map(Supplier::get)
+                .filter(match::test)
+                .findFirst()
+                .orElse(null);
     }
-
 
     /**
      * <p>等待所有的任务都执行完成</p>
@@ -199,10 +205,14 @@ public class ExecuteUtil {
      *
      * @param futures 待执行的任务
      */
-    public static void execute(CompletableFuture... futures) {
-        if (null == futures || futures.length == 0) {
+    public static void execute(CompletableFuture<?>... futures) {
+        if (futures == null || futures.length == 0) {
             return;
         }
-        CompletableFuture.allOf(futures);
+        try {
+            CompletableFuture.allOf(futures).join(); // 实际阻塞等待全部完成
+        } catch (Exception ignored) {
+            // 忽略中断或异常，符合原设计意图
+        }
     }
 }

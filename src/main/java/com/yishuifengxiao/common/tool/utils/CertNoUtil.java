@@ -40,6 +40,11 @@ public final class CertNoUtil {
     private static final int[] POWER = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
 
     /**
+     * 校验码映射表
+     */
+    private static final String[] CHECK_CODES = {"1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"};
+
+    /**
      * <p>
      * 校验18位身份证号的合法性
      * </p>
@@ -47,37 +52,28 @@ public final class CertNoUtil {
      * @param idcard 身份证号
      * @return true表示合法，false不合法
      */
-    public static boolean isValid(String idcard) { // 非18位为假
-        // 判断出生日期是否正确
+    public static boolean isValid(String idcard) {
         if (StringUtils.isBlank(idcard)) {
             return false;
         }
-        if (!REGEX_18_CARD.matcher(idcard.trim()).matches()) {
+        idcard = idcard.trim();
+        if (!REGEX_18_CARD.matcher(idcard).matches()) {
             return false;
         }
-        // 获取前17位
-        String idcard17 = idcard.trim().substring(0, 17);
-        // 获取第18位
-        String idcard18Code = idcard.trim().substring(17, 18);
 
-        // 是否都为数字
+        String idcard17 = idcard.substring(0, 17);
+        String idcard18Code = idcard.substring(17, 18);
+
         if (!isDigital(idcard17)) {
             return false;
         }
 
         char[] c = idcard17.toCharArray();
-
         int[] bit = converCharToInt(c);
-
         int sum17 = getPowerSum(bit);
-
-        // 将和值与11取模得到余数进行校验码判断
         String checkCode = getCheckCodeBySum(sum17);
-        if (null == checkCode) {
-            return false;
-        }
-        // 将身份证的第18位与算出来的校码进行匹配，不相等就为假
-        if (!idcard18Code.equalsIgnoreCase(checkCode)) {
+
+        if (checkCode == null || !idcard18Code.equalsIgnoreCase(checkCode)) {
             return false;
         }
 
@@ -117,7 +113,7 @@ public final class CertNoUtil {
      * @return true表示为纯数字
      */
     private static boolean isDigital(String str) {
-        return str == null || "".equals(str) ? false : str.matches("^[0-9]*$");
+        return str != null && !str.isEmpty() && str.matches("^[0-9]+$");
     }
 
     /**
@@ -127,19 +123,9 @@ public final class CertNoUtil {
      * @return
      */
     private static int getPowerSum(int[] bit) {
-
         int sum = 0;
-
-        if (POWER.length != bit.length) {
-            return sum;
-        }
-
         for (int i = 0; i < bit.length; i++) {
-            for (int j = 0; j < POWER.length; j++) {
-                if (i == j) {
-                    sum = sum + bit[i] * POWER[j];
-                }
-            }
+            sum += bit[i] * POWER[i];
         }
         return sum;
     }
@@ -151,45 +137,11 @@ public final class CertNoUtil {
      * @return 校验位
      */
     private static String getCheckCodeBySum(int sum17) {
-        String checkCode = null;
-        switch (sum17 % 11) {
-            case 10:
-                checkCode = "2";
-                break;
-            case 9:
-                checkCode = "3";
-                break;
-            case 8:
-                checkCode = "4";
-                break;
-            case 7:
-                checkCode = "5";
-                break;
-            case 6:
-                checkCode = "6";
-                break;
-            case 5:
-                checkCode = "7";
-                break;
-            case 4:
-                checkCode = "8";
-                break;
-            case 3:
-                checkCode = "9";
-                break;
-            case 2:
-                checkCode = "x";
-                break;
-            case 1:
-                checkCode = "0";
-                break;
-            case 0:
-                checkCode = "1";
-                break;
-            default:
-                break;
+        int remainder = sum17 % 11;
+        if (remainder >= 0 && remainder < CHECK_CODES.length) {
+            return CHECK_CODES[remainder];
         }
-        return checkCode;
+        return null;
     }
 
     /**
@@ -200,9 +152,8 @@ public final class CertNoUtil {
      */
     private static int[] converCharToInt(char[] c) {
         int[] a = new int[c.length];
-        int k = 0;
-        for (char temp : c) {
-            a[k++] = Integer.parseInt(String.valueOf(temp));
+        for (int i = 0; i < c.length; i++) {
+            a[i] = c[i] - '0';
         }
         return a;
     }

@@ -36,11 +36,16 @@ public class TextUtil {
      * @return 转换之后的字符串
      */
     public static String toLowerCaseFirstOne(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
         if (Character.isLowerCase(s.charAt(0))) {
             return s;
         }
-        return (new StringBuilder()).append(Character.toLowerCase(s.charAt(0))).append(s.substring(1)).toString();
-
+        return new StringBuilder()
+                .append(Character.toLowerCase(s.charAt(0)))
+                .append(s.substring(1))
+                .toString();
     }
 
     /**
@@ -50,11 +55,16 @@ public class TextUtil {
      * @return 转换之后的字符串
      */
     public static String toUpperCaseFirstOne(String s) {
+        if (s == null || s.isEmpty()) {
+            return s;
+        }
         if (Character.isUpperCase(s.charAt(0))) {
             return s;
         }
-        return (new StringBuilder()).append(Character.toUpperCase(s.charAt(0))).append(s.substring(1)).toString();
-
+        return new StringBuilder()
+                .append(Character.toUpperCase(s.charAt(0)))
+                .append(s.substring(1))
+                .toString();
     }
 
     /**
@@ -65,7 +75,10 @@ public class TextUtil {
      * @return 若包含则返回为true, 否则为false
      */
     public static boolean containsAnyIgnoreCase(String text, String... searchStrs) {
-        return Arrays.asList(searchStrs).parallelStream().anyMatch(t -> StringUtils.containsIgnoreCase(text, t));
+        if (text == null || searchStrs == null || searchStrs.length == 0) {
+            return false;
+        }
+        return Arrays.stream(searchStrs).anyMatch(t -> StringUtils.containsIgnoreCase(text, t));
     }
 
     /**
@@ -76,7 +89,10 @@ public class TextUtil {
      * @return 若包含则返回为true, 否则为false
      */
     public static boolean containsAny(String text, String... searchStrs) {
-        return Arrays.asList(searchStrs).parallelStream().anyMatch(t -> StringUtils.contains(text, t));
+        if (text == null || searchStrs == null || searchStrs.length == 0) {
+            return false;
+        }
+        return Arrays.stream(searchStrs).anyMatch(t -> StringUtils.contains(text, t));
     }
 
     /**
@@ -87,7 +103,10 @@ public class TextUtil {
      * @return 若包含则返回为true, 否则为false
      */
     public static boolean containsIgnoreCaseInAny(String searchStr, String... strs) {
-        return Arrays.asList(strs).parallelStream().anyMatch(t -> StringUtils.containsIgnoreCase(t, searchStr));
+        if (searchStr == null || strs == null || strs.length == 0) {
+            return false;
+        }
+        return Arrays.stream(strs).anyMatch(t -> StringUtils.containsIgnoreCase(t, searchStr));
     }
 
     /**
@@ -98,7 +117,10 @@ public class TextUtil {
      * @return 若包含则返回为true, 否则为false
      */
     public static boolean containsInAny(String searchStr, String... strs) {
-        return Arrays.asList(strs).parallelStream().anyMatch(t -> StringUtils.contains(t, searchStr));
+        if (searchStr == null || strs == null || strs.length == 0) {
+            return false;
+        }
+        return Arrays.stream(strs).anyMatch(t -> StringUtils.contains(t, searchStr));
     }
 
     /**
@@ -108,19 +130,23 @@ public class TextUtil {
      * @return 转换后的数据
      */
     public static String underscoreName(String camelCaseName) {
+        if (camelCaseName == null || camelCaseName.isEmpty()) {
+            return camelCaseName;
+        }
+
         StringBuilder result = new StringBuilder();
-        if (camelCaseName != null && camelCaseName.length() > 0) {
-            result.append(camelCaseName.substring(0, 1).toLowerCase());
-            for (int i = 1; i < camelCaseName.length(); i++) {
-                char ch = camelCaseName.charAt(i);
-                if (Character.isUpperCase(ch)) {
-                    result.append("_");
-                    result.append(Character.toLowerCase(ch));
-                } else {
-                    result.append(ch);
-                }
+        result.append(Character.toLowerCase(camelCaseName.charAt(0)));
+
+        for (int i = 1; i < camelCaseName.length(); i++) {
+            char ch = camelCaseName.charAt(i);
+            if (Character.isUpperCase(ch)) {
+                result.append('_');
+                result.append(Character.toLowerCase(ch));
+            } else {
+                result.append(ch);
             }
         }
+
         return result.toString();
     }
 
@@ -131,24 +157,29 @@ public class TextUtil {
      * @return 转换后的数据
      */
     public static String camelCaseName(String underscoreName) {
+        if (underscoreName == null || underscoreName.isEmpty()) {
+            return underscoreName;
+        }
+
         StringBuilder result = new StringBuilder();
-        if (underscoreName != null && underscoreName.length() > 0) {
-            boolean flag = false;
-            for (int i = 0; i < underscoreName.length(); i++) {
-                char ch = underscoreName.charAt(i);
-                if ("_".charAt(0) == ch) {
-                    flag = true;
+        boolean nextUpper = false;
+        boolean firstChar = true;
+
+        for (int i = 0; i < underscoreName.length(); i++) {
+            char ch = underscoreName.charAt(i);
+            if (ch == '_') {
+                nextUpper = true;
+            } else {
+                if (nextUpper || firstChar) {
+                    result.append(Character.toUpperCase(ch));
+                    nextUpper = false;
+                    firstChar = false;
                 } else {
-                    if (flag) {
-                        result.append(Character.toUpperCase(ch));
-                        flag = false;
-                    } else {
-                        result.append(ch);
-                    }
+                    result.append(ch);
                 }
             }
         }
+
         return result.toString();
     }
-
 }

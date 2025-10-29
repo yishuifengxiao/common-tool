@@ -20,7 +20,7 @@ import java.security.MessageDigest;
  * @since 1.0.0
  */
 @Slf4j
-public class MD5 {
+public class Md5 {
     /**
      * HEX_DIGITS
      */

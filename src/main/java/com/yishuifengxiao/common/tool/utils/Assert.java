@@ -5,10 +5,8 @@ import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.CompareUtil;
 import com.yishuifengxiao.common.tool.lang.NumberUtil;
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -168,8 +166,10 @@ public final class Assert {
         if (null == values) {
             return;
         }
-        if (Arrays.stream(values).anyMatch(v -> null != v)) {
-            throw new UncheckedException(msg);
+        for (Object v : values) {
+            if (null != v) {
+                throw new UncheckedException(msg);
+            }
         }
     }
 
@@ -183,8 +183,10 @@ public final class Assert {
         if (null == values) {
             return;
         }
-        if (Arrays.stream(values).anyMatch(v -> null == v)) {
-            throw new UncheckedException(msg);
+        for (Object v : values) {
+            if (null == v) {
+                throw new UncheckedException(msg);
+            }
         }
     }
 
@@ -198,7 +200,14 @@ public final class Assert {
         if (null == values) {
             return;
         }
-        if (Arrays.stream(values).allMatch(v -> null != v)) {
+        boolean allNonNull = true;
+        for (Object v : values) {
+            if (null == v) {
+                allNonNull = false;
+                break;
+            }
+        }
+        if (allNonNull) {
             throw new UncheckedException(msg);
         }
     }
@@ -213,8 +222,10 @@ public final class Assert {
         if (null == values) {
             return;
         }
-        if (Arrays.stream(values).anyMatch(BooleanUtils::isNotTrue)) {
-            throw new UncheckedException(msg);
+        for (Boolean b : values) {
+            if (!Boolean.TRUE.equals(b)) {
+                throw new UncheckedException(msg);
+            }
         }
     }
 
@@ -228,8 +239,10 @@ public final class Assert {
         if (null == values) {
             return;
         }
-        if (Arrays.stream(values).anyMatch(BooleanUtils::isNotFalse)) {
-            throw new UncheckedException(msg);
+        for (Boolean b : values) {
+            if (!Boolean.FALSE.equals(b)) {
+                throw new UncheckedException(msg);
+            }
         }
     }
 
@@ -243,8 +256,11 @@ public final class Assert {
         if (null == values) {
             return;
         }
-        if (!Arrays.stream(values).allMatch(v -> null == v || StringUtils.isBlank(v.toString()))) {
-            throw new UncheckedException(msg);
+        for (Object v : values) {
+            String str = (v == null) ? null : v.toString();
+            if (!(str == null || StringUtils.isBlank(str))) {
+                throw new UncheckedException(msg);
+            }
         }
     }
 
@@ -258,8 +274,11 @@ public final class Assert {
         if (null == values) {
             return;
         }
-        if (Arrays.stream(values).anyMatch(v -> null == v || StringUtils.isBlank(v.toString()))) {
-            throw new UncheckedException(msg);
+        for (Object v : values) {
+            String str = (v == null) ? null : v.toString();
+            if (str == null || StringUtils.isBlank(str)) {
+                throw new UncheckedException(msg);
+            }
         }
     }
 
@@ -323,8 +342,8 @@ public final class Assert {
      * @param msg  异常提示信息
      * @param data 待判定的集合
      */
-    public   static <T> void isEmpty(String msg, Collection<T> data) {
-        if (null != data && data.size() > 0) {
+    public static <T> void isEmpty(String msg, Collection<T> data) {
+        if (CollUtil.isNotEmpty(data)) {
             throw new UncheckedException(msg);
         }
     }
@@ -337,7 +356,7 @@ public final class Assert {
      * @param data 待判定的集合
      */
     public static <T> void isNotEmpty(String msg, Collection<T> data) {
-        if (null == data || data.size() == 0) {
+        if (CollUtil.isEmpty(data)) {
             throw new UncheckedException(msg);
         }
     }
@@ -350,7 +369,7 @@ public final class Assert {
      * @param data 集合
      */
     public static <T> void isOnlyOne(String msg, Collection<T> data) {
-        if (null == data || data.size() != 1) {
+        if (data == null || data.size() != 1) {
             throw new UncheckedException(msg);
         }
     }
@@ -363,7 +382,7 @@ public final class Assert {
      * @param data 集合
      */
     public static <T> void isNotOnlyOne(String msg, Collection<T> data) {
-        if (null != data && data.size() == 1) {
+        if (data != null && data.size() == 1) {
             throw new UncheckedException(msg);
         }
     }

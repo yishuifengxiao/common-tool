@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * url数据工具
@@ -46,7 +44,12 @@ public final class UrlUtil {
      * HTTP_CLIENT_IP：一些代理服务器
      * X-Real-IP：nginx服务代理
      */
-    public final static List<String> IP_HEAD_LIST = Stream.of("X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP", "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP", "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA", "REMOTE_ADDR", "X-Real-IP").collect(Collectors.toList());
+    public final static List<String> IP_HEAD_LIST = List.of(
+            "X-Forwarded-For", "Proxy-Client-IP", "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR", "HTTP_X_FORWARDED", "HTTP_X_CLUSTER_CLIENT_IP",
+            "HTTP_CLIENT_IP", "HTTP_FORWARDED_FOR", "HTTP_FORWARDED", "HTTP_VIA",
+            "REMOTE_ADDR", "X-Real-IP"
+    );
 
 
     /**
@@ -61,7 +64,6 @@ public final class UrlUtil {
         }
         Matcher matcher = RegexUtil.PATTERN_PROTOCOL_AND_HOST.matcher(url);
         return matcher.find() ? matcher.group() : null;
-
     }
 
     /**
@@ -104,7 +106,6 @@ public final class UrlUtil {
      * @return url里提取出简短域名信息
      */
     public static String keyword(String url) {
-
         String domain = extractDomain(url);
 
         if (StringUtils.isBlank(domain)) {
@@ -117,23 +118,28 @@ public final class UrlUtil {
             position -= 1;
         }
 
-        return tokens[position];
+        if (position >= 0 && position < tokens.length) {
+            return tokens[position];
+        } else {
+            return null;
+        }
     }
 
-    /**
-     * 从url中提取出协议
-     *
-     * @param url 待提取的url
-     * @return url中提取出协议
-     */
     public static String extractProtocol(String url) {
-        Matcher matcher = RegexUtil.PATTERN_PROTOCOL_AND_HOST.matcher(url);
-        if (matcher.find()) {
-            String protocolAndDomian = matcher.group();
-            return StringUtils.substringBefore(protocolAndDomian, ":");
+        if (StringUtils.isBlank(url)) {
+            return null;
         }
-        return null;
+
+        try {
+            Matcher matcher = RegexUtil.PATTERN_PROTOCOL_AND_HOST.matcher(url);
+            return matcher.find() ? matcher.group(1) : null;
+        } catch (IllegalStateException e) {
+            return null;
+        } catch (Exception e) {
+            return null;
+        }
     }
+
 
     /**
      * 根据url的来源地址将此url补全为网络地址
@@ -143,29 +149,30 @@ public final class UrlUtil {
      * @return 补全后网络地址形式的url
      */
     public static String urlComplete(String referrer, String url) {
-        if (!StringUtils.isNoneBlank(referrer, url)) {
+        if (StringUtils.isBlank(referrer) || StringUtils.isBlank(url)) {
             return null;
         }
         url = url.trim();
         referrer = referrer.trim();
+
         if (RegexUtil.isUrl(url)) {
-            // 已经是网络地址
             return url;
         }
+
         if (StringUtils.startsWith(url, OsUtils.LEFT_SLASH)) {
-            // 左斜杠开头，绝对地址
             return StringUtils.substringBeforeLast(referrer, OsUtils.LEFT_SLASH) + url;
         }
+
         if (StringUtils.startsWith(url, RELATIVE_ADDR)) {
-            // 以../开头的地址
             long count = StringUtils.countMatches(url, RELATIVE_ADDR);
-            for (int i = 0; i <= count; i++) {
-                referrer = StringUtils.substringBeforeLast(referrer, OsUtils.LEFT_SLASH);
+            String baseReferrer = referrer;
+            for (int i = 0; i < count; i++) {
+                baseReferrer = StringUtils.substringBeforeLast(baseReferrer, OsUtils.LEFT_SLASH);
             }
-            url = url.replaceAll("\\.\\./", "");
-            return referrer + OsUtils.LEFT_SLASH + url;
+            url = url.replaceFirst("(\\.\\./)+", ""); // 更安全的方式去除 ../
+            return baseReferrer + OsUtils.LEFT_SLASH + url;
         }
-        // 相对地址
+
         return StringUtils.substringBeforeLast(referrer, OsUtils.LEFT_SLASH) + OsUtils.LEFT_SLASH + url;
     }
 
@@ -183,27 +190,25 @@ public final class UrlUtil {
      * @return 转换后的map数据
      */
     public static Map<String, String> queryString2Map(String queryString) {
-
         if (StringUtils.isBlank(queryString)) {
             return null;
         }
+
         String[] tokens = StringUtils.splitByWholeSeparatorPreserveAllTokens(queryString, OsUtils.SEPARATOR_AND);
         if (null == tokens) {
             return null;
         }
+
         Map<String, String> map = new HashMap<>(tokens.length);
         for (String token : tokens) {
-            String[] strings = token.split("=");
-            if (null == strings || strings.length < 2) {
+            String[] strings = token.split("=", 2); // 最多分割成两段
+            if (strings.length < 2 || StringUtils.isBlank(strings[0])) {
                 continue;
             }
-            if (StringUtils.isBlank(strings[0])) {
-                continue;
-            }
-            map.put(strings[0].trim(), strings[1]);
+            String key = strings[0].trim();
+            String value = strings.length > 1 ? strings[1] : "";
+            map.put(key, value);
         }
         return map;
     }
-
-
 }

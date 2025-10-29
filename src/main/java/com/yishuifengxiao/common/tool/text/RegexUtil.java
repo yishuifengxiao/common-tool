@@ -29,7 +29,7 @@ public final class RegexUtil {
      * 协议和域名的正则表达式
      */
     private final static String REGEX_PROTOCOL_AND_HOST =
-            "http[s]?://[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\" + ".[a-zA-Z0" + "-9][-a-zA-Z0-9]{0,62})+\\.?";
+            "http[s]?://[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\\.?";
 
     /**
      * 域名的正则表达式
@@ -68,7 +68,7 @@ public final class RegexUtil {
      * URL正则表达式
      */
     private final static String REGEX_URL =
-            "((http|ftp|https)://)(([a-zA-Z0-9\\._-]+\\.[a-zA-Z]{2,6})|([0-9]{1,3}\\" + ".[0-9]{1,3}\\.[0-9]{1,3}\\" + ".[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?";
+            "((http|ftp|https)://)(([a-zA-Z0-9\\._-]+\\.[a-zA-Z]{2,6})|([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}))(:[0-9]{1,4})*(/[a-zA-Z0-9\\&%_\\./-~-]*)?";
 
     /**
      * IPv4地址正则表达式
@@ -130,8 +130,7 @@ public final class RegexUtil {
      * @return 若匹配则返回为true, 否则为false
      */
     public static boolean match(String regex, String str) {
-        Matcher matcher = pattern(regex).matcher(str);
-        return matcher.matches();
+        return pattern(regex).matcher(str).matches();
     }
 
     /**
@@ -142,8 +141,7 @@ public final class RegexUtil {
      * @return 若匹配则返回为true, 否则为false
      */
     public static boolean find(String regex, String str) {
-        Matcher matcher = pattern(regex).matcher(str);
-        return matcher.find();
+        return pattern(regex).matcher(str).find();
     }
 
     /**
@@ -206,11 +204,20 @@ public final class RegexUtil {
      * @return 提取字符中包含的所有整数
      */
     public static List<Number> extractAllNumber(String text) {
-        if (null == text) {
+        if (StringUtils.isBlank(text)) {
             return Collections.emptyList();
         }
-        text = text.replaceAll(REGEX_ILLEGAL_NUMBER, "").trim();
-        return extractAll(REGEX_NUMBER, text).stream().map(v -> NumberUtil.parse(v).orElse(null)).filter(Objects::nonNull).collect(Collectors.toList());
+
+        // 先找出所有疑似数字的子串
+        List<String> candidates = extractAll(REGEX_NUMBER, text);
+
+        // 过滤掉非法数字（含有多个小数点）
+        return candidates.stream()
+                .filter(candidate -> !candidate.matches(REGEX_ILLEGAL_NUMBER))
+                .map(NumberUtil::parse)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -244,10 +251,10 @@ public final class RegexUtil {
     }
 
     /**
-     * 如果都是汉字则返回为true
+     * 从给定的字符串中提取出所有的中文
      *
-     * @param str 需要判断的字符串
-     * @return 如果都是汉字则返回为true，否则为false
+     * @param str 需要提取的字符串
+     * @return 提取出来的所有的中文
      */
     public static List<String> extractChinese(String str) {
         return extractAll(REGEX_CHINESE, str);

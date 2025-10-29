@@ -29,8 +29,7 @@ public class HttpClient {
     /**
      * Content-Type:application/x-www-form-urlencoded; charset=UTF-8
      */
-    public final static String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded; "
-            + "charset=UTF-8";
+    public final static String CONTENT_TYPE_FORM = "application/x-www-form-urlencoded; charset=UTF-8";
 
     /**
      * Content-Type:application/json;charset=UTF-8
@@ -140,7 +139,7 @@ public class HttpClient {
      * @return 当前对象实例
      */
     public HttpClient addHeader(String name, Object value) {
-        if (StringUtils.isNoneBlank(name) && null != value) {
+        if (StringUtils.isNotBlank(name) && value != null) {
             this.headers.put(name, value.toString());
         }
         return this;
@@ -358,7 +357,6 @@ public class HttpClient {
      * @return 请求的响应体的响应文本
      */
     public static String postForm(String url, Map<String, String> data) {
-
         return executeAsString(url, "post", CONTENT_TYPE_FORM, null, data);
     }
 
@@ -484,10 +482,9 @@ public class HttpClient {
         try {
             response = this.connection().execute();
         } catch (Throwable e) {
-            if (log.isInfoEnabled()) {
-                log.info("There was a problem requesting {}, the problem is {}", this.url, e);
+            if (log.isWarnEnabled()) {
+                log.warn("There was a problem requesting {}, the problem is {}", this.url, e);
             }
-
         }
         return response;
     }
@@ -620,7 +617,9 @@ public class HttpClient {
             HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
 
         } catch (Exception e) {
-            e.printStackTrace();
+            if (log.isErrorEnabled()) {
+                log.error("Failed to set trust manager", e);
+            }
         }
     }
 }

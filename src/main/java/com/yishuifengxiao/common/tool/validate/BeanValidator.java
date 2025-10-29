@@ -17,6 +17,7 @@ import java.util.Set;
  * @since 1.0.0
  */
 public class BeanValidator {
+    // Validator 是线程安全的，因此静态初始化是安全的做法
     private final static Validator VALIDATOR = Validation.buildDefaultValidatorFactory().getValidator();
 
     /**
@@ -51,7 +52,7 @@ public class BeanValidator {
      * @return 校验结果，若数据合法则输出结果为空
      */
     public static <T, G> Set<ConstraintViolation<T>> validate(T t, Class<G> clazz) {
-        Set<ConstraintViolation<T>> constraintViolations = VALIDATOR.validate(t, null == clazz ? Default.class : clazz);
+        Set<ConstraintViolation<T>> constraintViolations = performValidation(t, clazz);
         return null == constraintViolations ? Collections.emptySet() : constraintViolations;
     }
 
@@ -65,8 +66,20 @@ public class BeanValidator {
      * @return 校验结果，若数据不符合要求则提取出第一条提示信息
      */
     public static <T, G> String validateResult(T t, Class<G> clazz) {
-        Set<ConstraintViolation<T>> constraintViolations = VALIDATOR.validate(t, null == clazz ? Default.class : clazz);
+        Set<ConstraintViolation<T>> constraintViolations = performValidation(t, clazz);
         return (null == constraintViolations || constraintViolations.isEmpty()) ? null : constraintViolations.iterator().next().getMessage();
     }
 
+    /**
+     * 执行实际的校验操作
+     *
+     * @param t     待校验对象
+     * @param clazz 分组类
+     * @param <T>   对象泛型
+     * @param <G>   分组泛型
+     * @return 约束违规集合
+     */
+    private static <T, G> Set<ConstraintViolation<T>> performValidation(T t, Class<G> clazz) {
+        return VALIDATOR.validate(t, null == clazz ? Default.class : clazz);
+    }
 }

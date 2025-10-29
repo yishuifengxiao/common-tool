@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
  */
 public class IoUtil {
 
+    private static final int DEFAULT_BUFFER_SIZE = 4096;
+    private static final int MAX_BUFFER_SIZE = 8192;
+
     /**
      * 获取文件的后缀名
      *
@@ -75,7 +78,7 @@ public class IoUtil {
         if (inputStream == null) {
             return new byte[0];
         }
-        ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
+        ByteArrayOutputStream out = new ByteArrayOutputStream(DEFAULT_BUFFER_SIZE);
         copy(inputStream, out);
         return out.toByteArray();
     }
@@ -211,7 +214,9 @@ public class IoUtil {
     public static int copy(InputStream in, OutputStream out) throws IOException {
         try {
             int byteCount = 0;
-            byte[] buffer = new byte[4096];
+            // 根据可用内存动态调整缓冲区大小，但不超过最大限制
+            int bufferSize = Math.min(Math.max(DEFAULT_BUFFER_SIZE, in.available()), MAX_BUFFER_SIZE);
+            byte[] buffer = new byte[bufferSize];
             int bytesRead = -1;
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
@@ -305,14 +310,10 @@ public class IoUtil {
      * @throws IOException 转换时发生异常
      */
     public static String file2Base64(File file) throws IOException {
-
         try (FileInputStream inputFile = new FileInputStream(file)) {
             byte[] buffer = new byte[(int) file.length()];
             inputFile.read(buffer);
-            inputFile.close();
             return Base64.getEncoder().encodeToString(buffer);
         }
-
     }
-
 }
