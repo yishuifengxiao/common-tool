@@ -6,8 +6,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.security.PublicKey;
 import java.security.cert.CertificateException;
@@ -24,6 +26,7 @@ import java.util.regex.Pattern;
  * X.509证书解析工具类
  * 支持十六进制、Base64和PEM格式的证书数据
  */
+@Slf4j
 public class X509Helper {
 
     private static final String PEM_HEADER = "-----BEGIN CERTIFICATE-----";
@@ -162,7 +165,7 @@ public class X509Helper {
     @AllArgsConstructor
     @NoArgsConstructor
     @Accessors(chain = true)
-    public static class Cert {
+    public static class Cert implements Serializable {
         /**
          * 主题（Subject）
          */
@@ -311,13 +314,13 @@ public class X509Helper {
 
             info.setPublicKeyValue(publicKeyValue.toUpperCase());
         } catch (Exception e) {
-            System.err.println("Failed to extract public key value: " + e.getMessage());
+            log.info("Failed to extract public key value: " + e.getMessage());
             // 如果提取失败，使用完整编码作为后备
             try {
                 byte[] publicKeyBytes = publicKey.getEncoded();
                 info.setPublicKeyValue(bytesToHex(publicKeyBytes).toUpperCase());
             } catch (Exception ex) {
-                System.err.println("Failed to extract public key encoded value: " + ex.getMessage());
+                log.warn("Failed to extract public key encoded value: " + ex.getMessage());
             }
         }
     }
@@ -352,7 +355,7 @@ public class X509Helper {
             byte[] publicKeyDER = publicKey.getEncoded();
             return bytesToHex(publicKeyDER);
         } catch (Exception e) {
-            System.err.println("Failed to extract RSA public key: " + e.getMessage());
+            log.info("Failed to extract RSA public key: " + e.getMessage());
             return "";
         }
     }
@@ -396,7 +399,7 @@ public class X509Helper {
 
             return bytesToHex(buf);
         } catch (Exception e) {
-            System.err.println("Failed to extract ECDSA public key: " + e.getMessage());
+            log.info("Failed to extract ECDSA public key: " + e.getMessage());
             return "";
         }
     }
@@ -415,13 +418,41 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Failed to extract Subject Key Identifier: " + e.getMessage());
+            log.info("Failed to extract Subject Key Identifier: " + e.getMessage());
         }
     }
 
     private static void extractCipkid(X509Certificate certificate, Cert info) {
-        Cert cipkid = info.setCipkid(TLVUtil.fetchValueFromTlv("04", info.getSkid()));
+        info.setCipkid(TLVUtil.fetchValueFromTlv("04", info.getSkid()));
     }
+
+    /**
+     * 从证书数据中提取CIPKID（Certificate Issuer Public Key Identifier）
+     *
+     * @param certData 证书数据字符串，用于解析和提取SKID信息
+     * @return 返回提取到的CIPKID值，如果提取失败则返回null
+     */
+    public String extractCipkid(String certData) {
+        try {
+            // 解析证书数据获取X509证书对象
+            X509Certificate certificate = parseCert(certData);
+            // 获取Subject Key Identifier扩展值（OID: 2.5.29.14）
+            byte[] skidExtension = certificate.getExtensionValue("2.5.29.14"); // Subject Key Identifier OID
+            if (skidExtension != null) {
+                // SKID扩展值是OCTET STRING包装的，需要解析
+                byte[] skidValue = parseOctetStringExtension(skidExtension);
+                if (skidValue != null) {
+                    String skid = bytesToHex(skidValue);
+                    // 从TLV格式数据中提取值
+                    return TLVUtil.fetchValueFromTlv("04", skid);
+                }
+            }
+        } catch (Exception e) {
+            log.info("Failed to extract Subject Key Identifier: " + e.getMessage());
+        }
+        return null;
+    }
+
 
     /**
      * 从Authority Key Identifier扩展中提取Key Identifier
@@ -462,7 +493,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Failed to parse Authority Key Identifier: " + e.getMessage());
+            log.info("Failed to parse Authority Key Identifier: " + e.getMessage());
         }
         return null;
     }
@@ -504,7 +535,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Failed to parse OCTET STRING extension: " + e.getMessage());
+            log.info("Failed to parse OCTET STRING extension: " + e.getMessage());
         }
         return null;
     }
@@ -522,7 +553,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Failed to extract Authority Key Identifier: " + e.getMessage());
+            log.info("Failed to extract Authority Key Identifier: " + e.getMessage());
         }
     }
 
@@ -553,7 +584,7 @@ public class X509Helper {
                 }
             }
         } catch (CertificateParsingException e) {
-            System.err.println("Failed to parse subject alternative names: " + e.getMessage());
+            log.info("Failed to parse subject alternative names: " + e.getMessage());
         }
 
         info.setOid(oid);
@@ -579,7 +610,7 @@ public class X509Helper {
                 }
             }
         } catch (CertificateParsingException e) {
-            System.err.println("Failed to extract OID: " + e.getMessage());
+            log.info("Failed to extract OID: " + e.getMessage());
         }
         return oid;
     }
@@ -591,8 +622,30 @@ public class X509Helper {
         return certificate != null ? certificate.getPublicKey() : null;
     }
 
+
     /**
-     * 仅提取公钥值（十六进制字符串）
+     * 从证书数据中提取公钥值
+     *
+     * @param certData 证书数据字符串，可以是PEM格式或DER格式的证书
+     * @return 返回提取的公钥值字符串，如果提取失败则返回null
+     */
+    public static String extractPublicKeyValue(String certData) {
+        try {
+            // 解析证书数据并提取公钥值
+            X509Certificate certificate = parseCert(certData);
+            return extractPublicKeyValue(certificate);
+        } catch (Exception e) {
+            log.info("Failed to extract public key value: " + e.getMessage());
+            return null;
+        }
+    }
+
+
+    /**
+     * 从X509证书中提取公钥值并转换为十六进制字符串
+     *
+     * @param certificate X509证书对象，用于提取公钥
+     * @return 公钥的十六进制字符串表示，如果提取失败或证书为空则返回null
      */
     public static String extractPublicKeyValue(X509Certificate certificate) {
         if (certificate == null) {
@@ -600,13 +653,15 @@ public class X509Helper {
         }
 
         try {
+            // 获取证书公钥的编码字节数组并转换为十六进制字符串
             byte[] publicKeyBytes = certificate.getPublicKey().getEncoded();
             return bytesToHex(publicKeyBytes);
         } catch (Exception e) {
-            System.err.println("Failed to extract public key value: " + e.getMessage());
+            log.info("Failed to extract public key value: " + e.getMessage());
             return null;
         }
     }
+
 
     /**
      * 仅提取SKID
@@ -619,7 +674,7 @@ public class X509Helper {
                 return skidValue != null ? bytesToHex(skidValue) : null;
             }
         } catch (Exception e) {
-            System.err.println("Failed to extract SKID: " + e.getMessage());
+            log.info("Failed to extract SKID: " + e.getMessage());
         }
         return null;
     }
@@ -642,7 +697,7 @@ public class X509Helper {
                 return keyIdentifier != null ? bytesToHex(keyIdentifier) : null;
             }
         } catch (Exception e) {
-            System.err.println("Failed to extract CIPKID: " + e.getMessage());
+            log.info("Failed to extract CIPKID: " + e.getMessage());
         }
         return null;
     }
@@ -671,35 +726,35 @@ public class X509Helper {
      */
     public static void printCertificateDetails(X509Certificate certificate) {
         if (certificate == null) {
-            System.out.println("证书为空");
+            log.debug("证书为空");
             return;
         }
 
         Cert info = extractFullInfo(certificate);
 
-        System.out.println("================= 证书详细信息 =================");
-        System.out.println("主题 (Subject): " + info.getSubject());
-        System.out.println("颁发者 (Issuer): " + info.getIssuer());
-        System.out.println("序列号 (Serial Number): " + info.getSerialNumber());
-        System.out.println("有效期从 (Not Before): " + info.getNotBefore());
-        System.out.println("有效期至 (Not After): " + info.getNotAfter());
-        System.out.println("版本 (Version): " + info.getVersion());
-        System.out.println("公钥算法 (Public Key Algorithm): " + info.getPublicKeyAlgorithm());
-        System.out.println("公钥值 (Public Key Value): " + info.getPublicKeyValue());
-        System.out.println("主题密钥标识符 (SKID): " + info.getSkid());
-        System.out.println("证书颁发者公钥标识符 (CIPKID): " + info.getCipkid());
-        System.out.println("授权密钥标识符 (AKID): " + info.getAkid());
-        System.out.println("OID: " + info.getOid());
+        log.debug("================= 证书详细信息 =================");
+        log.debug("主题 (Subject): " + info.getSubject());
+        log.debug("颁发者 (Issuer): " + info.getIssuer());
+        log.debug("序列号 (Serial Number): " + info.getSerialNumber());
+        log.debug("有效期从 (Not Before): " + info.getNotBefore());
+        log.debug("有效期至 (Not After): " + info.getNotAfter());
+        log.debug("版本 (Version): " + info.getVersion());
+        log.debug("公钥算法 (Public Key Algorithm): " + info.getPublicKeyAlgorithm());
+        log.debug("公钥值 (Public Key Value): " + info.getPublicKeyValue());
+        log.debug("主题密钥标识符 (SKID): " + info.getSkid());
+        log.debug("证书颁发者公钥标识符 (CIPKID): " + info.getCipkid());
+        log.debug("授权密钥标识符 (AKID): " + info.getAkid());
+        log.debug("OID: " + info.getOid());
 
-        System.out.println("主题备用名称 (Subject Alternative Names):");
+        log.debug("主题备用名称 (Subject Alternative Names):");
         if (info.getSubjectAlternativeNames() != null && !info.getSubjectAlternativeNames().isEmpty()) {
             for (String san : info.getSubjectAlternativeNames()) {
-                System.out.println("  - " + san);
+                log.debug("  - " + san);
             }
         } else {
-            System.out.println("  - 无");
+            log.debug("  - 无");
         }
-        System.out.println("==============================================");
+        log.debug("==============================================");
     }
 
 }

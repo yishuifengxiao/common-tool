@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.text;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
@@ -16,6 +18,7 @@ import java.util.*;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class TLVFormatter {
 
     /**
@@ -119,7 +122,7 @@ public class TLVFormatter {
         try {
             return formatTLV(beautiful, tlvRaw);
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+            log.info("Error: " + e.getMessage());
             throw new IllegalArgumentException("TLV格式化失败", e);
         }
     }
