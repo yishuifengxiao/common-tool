@@ -165,7 +165,13 @@ public class X509Helper {
         private String subject;
         private String issuer;
         private String serialNumber;
+        /**
+         * Not Before（生效时间） 形式为 Mon Aug 18 17:26:25 CST 2025
+         */
         private String notBefore;
+        /**
+         * Not After（失效时间） 形式为 Mon Aug 18 17:26:25 CST 2025
+         */
         private String notAfter;
         private int version;
         private PublicKey publicKey;
@@ -176,6 +182,12 @@ public class X509Helper {
         private String oid;  // Object Identifier from Subject Alternative Names
         private List<String> subjectAlternativeNames;
         private String akid; // Authority Key Identifier
+
+        /**
+         * 验证证书是否有效（当前时间是否在生效时间和失效时间之间）
+         */
+        private Boolean isValid;
+
 
     }
 
@@ -199,6 +211,7 @@ public class X509Helper {
         info.setNotBefore(certificate.getNotBefore().toString());
         info.setNotAfter(certificate.getNotAfter().toString());
         info.setVersion(certificate.getVersion());
+        info.setIsValid(certificate.getNotBefore().before(new Date()) && certificate.getNotAfter().after(new Date()));
 
         // 提取公钥信息
         extractPublicKeyInfo(certificate, info);
