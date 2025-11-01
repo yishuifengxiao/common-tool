@@ -3,6 +3,7 @@ package com.yishuifengxiao.common.tool.text;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.BitSet;
+import java.util.regex.Pattern;
 
 /**
  * TLV工具类
@@ -47,8 +48,7 @@ public class TLVUtil {
                 }
 
                 // 提取长度字段
-                String lengthStr = tlvData.substring(tagIndex + targetTag.length(),
-                        tagIndex + targetTag.length() + 2);
+                String lengthStr = tlvData.substring(tagIndex + targetTag.length(), tagIndex + targetTag.length() + 2);
                 int valueLength = Integer.parseInt(lengthStr, 16);
 
                 // 提取值字段
@@ -134,8 +134,7 @@ public class TLVUtil {
             return false;
         }
         char firstChar = tag.charAt(0);
-        return (firstChar >= '8' && firstChar <= 'F') ||
-                (firstChar >= 'a' && firstChar <= 'f');
+        return (firstChar >= '8' && firstChar <= 'F') || (firstChar >= 'a' && firstChar <= 'f');
     }
 
     /**
@@ -281,8 +280,7 @@ public class TLVUtil {
 
         for (int i = 0; i < len; i += 2) {
             // 每两个字符解析为一个字节
-            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
-                    + Character.digit(hex.charAt(i + 1), 16));
+            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4) + Character.digit(hex.charAt(i + 1), 16));
         }
 
         return data;
@@ -451,8 +449,7 @@ public class TLVUtil {
         byte[] bytes = new byte[len / 2];
 
         for (int i = 0; i < len; i += 2) {
-            bytes[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4)
-                    + Character.digit(hexString.charAt(i + 1), 16));
+            bytes[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i + 1), 16));
         }
 
         return byteArrayToBitSet(bytes, false);
@@ -547,4 +544,16 @@ public class TLVUtil {
         byte[] bytes = Base64.getDecoder().decode(base64String);
         return bytesToHex(bytes);
     }
+
+    /**
+     * 正则表达式模式，用于匹配有效的十六进制字符串
+     * 匹配任意长度的十六进制字符（大小写字母和数字）
+     */
+    private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9a-fA-F]+$");
+
+    // 检查是否为有效的十六进制字符串
+    public static boolean isHex(String str) {
+        return HEX_PATTERN.matcher(str).matches();
+    }
+
 }

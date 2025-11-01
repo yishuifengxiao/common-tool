@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * TLV格式字符串解析工具类
@@ -95,7 +94,7 @@ public class TLVFormatter {
         String tlvRaw;
 
         // 验证输入字符串是否为有效的十六进制表示
-        if (!isHex(val)) {
+        if (!TLVUtil.isHex(val)) {
             // 如果不是有效的十六进制,则尝试作为Base64编码的字符串进行解码
             try {
                 // 先检查是否为PEM格式
@@ -963,10 +962,6 @@ public class TLVFormatter {
         return str.replaceAll("\\s+", "");
     }
 
-    // 检查是否为有效的十六进制字符串
-    private static boolean isHex(String str) {
-        return Pattern.compile("^[0-9a-fA-F]+$").matcher(str).matches();
-    }
 
     // Base64字符串转十六进制
     private static String base64StringToHex(String base64Str) {
