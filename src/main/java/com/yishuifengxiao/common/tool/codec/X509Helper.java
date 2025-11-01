@@ -162,8 +162,17 @@ public class X509Helper {
     @NoArgsConstructor
     @Accessors(chain = true)
     public static class Cert {
+        /**
+         * 主题（Subject）
+         */
         private String subject;
+        /**
+         * 颁发者（Issuer）
+         */
         private String issuer;
+        /**
+         * 序列号（SerialNumber）
+         */
         private String serialNumber;
         /**
          * Not Before（生效时间） 形式为 Mon Aug 18 17:26:25 CST 2025
@@ -173,15 +182,37 @@ public class X509Helper {
          * Not After（失效时间） 形式为 Mon Aug 18 17:26:25 CST 2025
          */
         private String notAfter;
+        /**
+         * X.509版本号从v1开始计数，但ASN.1编码中版本号从0开始：
+         * v1 → 0（通常省略）
+         * v2 → 1
+         * v3 → 2
+         * 因此，0x02（十进制2）对应v3版本。
+         */
         private int version;
         private PublicKey publicKey;
         private String publicKeyAlgorithm;
-        private String publicKeyValue; // 公钥的原始字节值（十六进制）
-        private String skid; // Subject Key Identifier
-        private String cipkid; // Certificate Issuer Public Key Identifier
-        private String oid;  // Object Identifier from Subject Alternative Names
+        /**
+         * 公钥的原始字节值（十六进制）
+         */
+        private String publicKeyValue;
+        /**
+         * Subject Key Identifier
+         */
+        private String skid;
+        /**
+         * Certificate Issuer Public Key Identifier
+         */
+        private String cipkid;
+        /**
+         * Object Identifier from Subject Alternative Names
+         */
+        private String oid;
         private List<String> subjectAlternativeNames;
-        private String akid; // Authority Key Identifier
+        /**
+         * Authority Key Identifier
+         */
+        private String akid;
 
         /**
          * 验证证书是否有效（当前时间是否在生效时间和失效时间之间）
