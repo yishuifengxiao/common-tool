@@ -15,7 +15,7 @@ public class ECPrivateKeyUtilTest {
                 "AwEHoUQDQgAEweVfV6RO21zC2AemcJNw49YCu7JkltjMJB5XplZh/oVSyQDatSNg\n" +
                 "q66RVQtY/YcaIc4cQ1F96scD+bgMb9OqbQ==\n" +
                 "-----END EC PRIVATE KEY-----";
-        String dValue = ECPrivateKeyUtil.extractPrivateDValue(val);
+        String dValue = ECC.extractPrivateDValue(val);
         Assert.assertTrue("26369D44023C1BD51284A691858C20E56D28215D825226E8C2B201981F690C7D".equalsIgnoreCase(dValue));
     }
 
@@ -26,7 +26,7 @@ public class ECPrivateKeyUtilTest {
                 "AwEHoUQDQgAEweVfV6RO21zC2AemcJNw49YCu7JkltjMJB5XplZh/oVSyQDatSNg\n" +
                 "q66RVQtY/YcaIc4cQ1F96scD+bgMb9OqbQ==\n" +
                 "-----END EC PRIVATE KEY-----";
-        String dValue = ECPrivateKeyUtil.extractPrivateDValue(val);
+        String dValue = ECC.extractPrivateDValue(val);
         Assert.assertTrue("26369D44023C1BD51284A691858C20E56D28215D825226E8C2B201981F690C7D".equalsIgnoreCase(dValue));
     }
 
@@ -35,7 +35,7 @@ public class ECPrivateKeyUtilTest {
         String val = "MHcCAQEEICY2nUQCPBvVEoSmkYWMIOVtKCFdglIm6MKyAZgfaQx9oAoGCCqGSM49\n" +
                 "AwEHoUQDQgAEweVfV6RO21zC2AemcJNw49YCu7JkltjMJB5XplZh/oVSyQDatSNg\n" +
                 "q66RVQtY/YcaIc4cQ1F96scD+bgMb9OqbQ==";
-        String dValue = ECPrivateKeyUtil.extractPrivateDValue(val);
+        String dValue = ECC.extractPrivateDValue(val);
         Assert.assertTrue("26369D44023C1BD51284A691858C20E56D28215D825226E8C2B201981F690C7D".equalsIgnoreCase(dValue));
     }
 
@@ -44,7 +44,7 @@ public class ECPrivateKeyUtilTest {
         String val = "MHcCAQEEICY2nUQCPBvVEoSmkYWMIOVtKCFdglIm6MKyAZgfaQx9oAoGCCqGSM49\n" +
                 "AwEHoUQDQgAEweVfV6RO21zC2AemcJNw49YCu7JkltjMJB5XplZh/oVSyQDatSNg\n" +
                 "q66RVQtY/YcaIc4cQ1F96scD+bgMb9OqbQ==";
-        String dValue = ECPrivateKeyUtil.extractPrivateDValue(val);
+        String dValue = ECC.extractPrivateDValue(val);
         Assert.assertTrue("26369D44023C1BD51284A691858C20E56D28215D825226E8C2B201981F690C7D".equalsIgnoreCase(dValue));
     }
 }
