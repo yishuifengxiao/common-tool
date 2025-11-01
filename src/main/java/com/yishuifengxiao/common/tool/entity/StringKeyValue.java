@@ -5,9 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 
+
 /**
  * 键为字符串类型的键值对数据
  *
+ * @param <T> 值的类型
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0

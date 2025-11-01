@@ -435,30 +435,10 @@ public final class ClassUtil {
 
 
     /**
-     * Legacy version of {@link java.util.function.Function java.util.function.Functiona}.
+     * 函数式接口
      *
-     * <p>The {@link SerFunction} class provides common functions and related utilities.
-     *
-     * <p>As this interface extends {@code java.util.function.Functiona}, an instance of this
-     * type can be
-     * used as a {@code java.util.function.Functiona} directly. To use a {@code
-     * java.util.function.Functiona} in a context where a {@code com.google.common.base
-     * .Functiona} is
-     * needed, use {@code function::apply}.
-     *
-     * <p>This interface is now a legacy type. Use {@code java.util.function.Functiona} (or the
-     * appropriate primitive specialization such as {@code ToIntFunction}) instead whenever
-     * possible.
-     * Otherwise, at least reduce <i>explicit</i> dependencies on this type by using lambda
-     * expressions
-     * or method references instead of classes, leaving your code easier to migrate in the future.
-     *
-     * <p>See the Guava User Guide article on <a
-     * href="https://github.com/google/guava/wiki/FunctionalExplained">the use of {@code
-     * Functiona}</a>.
-     *
-     * @author Kevin Bourrillion
-     * @since 2.0
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result of the function
      */
     @FunctionalInterface
     public interface SerFunction<T extends Object, R extends Object> extends java.util.function.Function<T, R>, Serializable {

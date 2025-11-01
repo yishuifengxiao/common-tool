@@ -4,9 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.io.Serializable;
 
+
 /**
  * 键值对数据
  *
+ * @param <K> 键的类型
+ * @param <V> 值的类型
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
@@ -14,10 +17,10 @@ import java.io.Serializable;
 public class KeyValue<K, V> implements Serializable {
 
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 6141567080605609052L;
-	/**
+     *
+     */
+    private static final long serialVersionUID = 6141567080605609052L;
+    /**
      * 数据的键
      */
     private K key;

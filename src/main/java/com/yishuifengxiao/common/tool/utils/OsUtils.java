@@ -47,7 +47,7 @@ public final class OsUtils {
     public static final String COLON = ":";
 
     /**
-     * 分隔符 &
+     * 分隔符 &#38;
      */
     public static final String SEPARATOR_AND = "&";
 

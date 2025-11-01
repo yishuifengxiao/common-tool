@@ -11,9 +11,11 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 import java.util.Optional;
 
+
 /**
  * 基础分页查询参数
  *
+ * @param <T> 查询参数的类型
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
