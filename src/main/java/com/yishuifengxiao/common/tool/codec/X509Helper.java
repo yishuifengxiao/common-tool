@@ -1,5 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
+import com.yishuifengxiao.common.tool.text.OIDConverter;
 import com.yishuifengxiao.common.tool.text.TLVUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -190,6 +191,15 @@ public class X509Helper {
          * 因此，0x02（十进制2）对应v3版本。
          */
         private int version;
+        /**
+         * 算法OID： 位置1：tbsCertificate.signature - 表示CA用来签署证书的算法，例如 ecdsa-with-SHA256。
+         * 位置2：tbsCertificate.subjectPublicKeyInfo.algorithm - 这里的算法OID是 ecPublicKey (1.2.840.10045.2.1)。这告诉你这个公钥是基于ECC的。
+         */
+        private String sigAlgOID;
+        /**
+         * 算法名称
+         */
+        private String sigAlgName;
         private PublicKey publicKey;
         private String publicKeyAlgorithm;
         /**
@@ -218,7 +228,10 @@ public class X509Helper {
          * 验证证书是否有效（当前时间是否在生效时间和失效时间之间）
          */
         private Boolean isValid;
-
+        /**
+         * 使用ECC算法时曲线的OID
+         */
+        String algid;
 
     }
 
@@ -243,6 +256,11 @@ public class X509Helper {
         info.setNotAfter(certificate.getNotAfter().toString());
         info.setVersion(certificate.getVersion());
         info.setIsValid(certificate.getNotBefore().before(new Date()) && certificate.getNotAfter().after(new Date()));
+
+
+        info.setSigAlgOID(certificate.getSigAlgOID());
+        info.setSigAlgName(certificate.getSigAlgName());
+
 
         // 提取公钥信息
         extractPublicKeyInfo(certificate, info);
@@ -269,17 +287,22 @@ public class X509Helper {
         PublicKey publicKey = certificate.getPublicKey();
         info.setPublicKey(publicKey);
         info.setPublicKeyAlgorithm(publicKey.getAlgorithm());
-
         // 根据公钥类型提取特定的公钥值
         try {
             String publicKeyValue = "";
 
             if (publicKey instanceof ECPublicKey) {
+                ECPublicKey eCPublicKey = (ECPublicKey) publicKey;
+                //曲线的algid
+                String algid = getCurveOIDFromPublicKeyEncoding(eCPublicKey.getEncoded());
+                info.setAlgid(algid);
                 // ECDSA公钥处理
-                publicKeyValue = extractECDSAPublicKeyHex((ECPublicKey) publicKey);
+                publicKeyValue = extractECDSAPublicKeyHex(eCPublicKey);
             } else if (publicKey instanceof RSAPublicKey) {
+                RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+
                 // RSA公钥处理
-                publicKeyValue = extractRSAPublicKeyHex((RSAPublicKey) publicKey);
+                publicKeyValue = extractRSAPublicKeyHex(rsaPublicKey);
             } else {
                 // 其他类型的公钥，使用完整编码
                 byte[] publicKeyBytes = publicKey.getEncoded();
@@ -297,6 +320,27 @@ public class X509Helper {
                 System.err.println("Failed to extract public key encoded value: " + ex.getMessage());
             }
         }
+    }
+
+    public static String getCurveOIDFromPublicKeyEncoding(byte[] encoded) {
+        // 定位第二个OID的内容
+        if (encoded.length < 23) {
+            throw new IllegalArgumentException("公钥编码长度不足");
+        }
+        // 检查结构是否符合预期
+        if (encoded[0] != 0x30 || encoded[2] != 0x30 || encoded[4] != 0x06 || encoded[13] != 0x06) {
+            throw new IllegalArgumentException("非预期的公钥编码结构");
+        }
+        // 第二个OID的长度
+        int oidLength = encoded[14];
+        if (oidLength != 8) {
+            throw new IllegalArgumentException("非预期的OID长度");
+        }
+        byte[] oidBytes = new byte[oidLength];
+        System.arraycopy(encoded, 15, oidBytes, 0, oidLength);
+        String hex = bytesToHex(oidBytes);
+        String notation = OIDConverter.hexToDotNotation(hex);
+        return notation;
     }
 
     /**
