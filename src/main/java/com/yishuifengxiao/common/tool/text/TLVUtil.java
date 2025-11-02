@@ -248,7 +248,6 @@ public class TLVUtil {
      * @return 十六进制字符串，每两个字符代表一个字节
      */
     public static String bytesToHex(byte[] bytes) {
-        // 兼容旧版本 Android/Java 的实现
         StringBuilder hexString = new StringBuilder();
         for (byte b : bytes) {
             String hex = Integer.toHexString(0xff & b);
