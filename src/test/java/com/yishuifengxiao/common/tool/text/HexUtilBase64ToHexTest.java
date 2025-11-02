@@ -6,16 +6,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 /**
- * TLVUtil.base64ToHex 方法的单元测试类
+ * HexUtil.base64ToHex 方法的单元测试类
  */
-public class TLVUtilBase64ToHexTest {
+public class HexUtilBase64ToHexTest {
 
     /**
      * TC01: 输入为 null，应返回空字符串
      */
     @Test
     public void testBase64ToHex_NullInput() {
-        String result = TLVUtil.base64ToHex(null);
+        String result = HexUtil.base64ToHex(null);
         assertEquals("", result);
     }
 
@@ -24,7 +24,7 @@ public class TLVUtilBase64ToHexTest {
      */
     @Test
     public void testBase64ToHex_EmptyString() {
-        String result = TLVUtil.base64ToHex("");
+        String result = HexUtil.base64ToHex("");
         assertEquals("", result);
     }
 
@@ -35,7 +35,7 @@ public class TLVUtilBase64ToHexTest {
     public void testBase64ToHex_NormalCase() {
         String base64Str = "AQID"; // [0x01, 0x02, 0x03]
         String expectedHex = "010203";
-        String result = TLVUtil.base64ToHex(base64Str);
+        String result = HexUtil.base64ToHex(base64Str);
         assertEquals(expectedHex, result);
     }
 
@@ -46,7 +46,7 @@ public class TLVUtilBase64ToHexTest {
     public void testBase64ToHex_WithPadding() {
         String base64Str = "AA=="; // [0x00]
         String expectedHex = "00";
-        String result = TLVUtil.base64ToHex(base64Str);
+        String result = HexUtil.base64ToHex(base64Str);
         assertEquals(expectedHex, result);
     }
 
@@ -57,7 +57,7 @@ public class TLVUtilBase64ToHexTest {
     public void testBase64ToHex_IllegalBase64() {
         String illegalBase64 = "!!!";
         assertThrows(IllegalArgumentException.class, () -> {
-            TLVUtil.base64ToHex(illegalBase64);
+            HexUtil.base64ToHex(illegalBase64);
         });
     }
 }

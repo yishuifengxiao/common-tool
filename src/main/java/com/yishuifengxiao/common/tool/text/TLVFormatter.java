@@ -97,7 +97,7 @@ public class TLVFormatter {
         String tlvRaw;
 
         // 验证输入字符串是否为有效的十六进制表示
-        if (!TLVUtil.isHex(val)) {
+        if (!HexUtil.isHex(val)) {
             // 如果不是有效的十六进制,则尝试作为Base64编码的字符串进行解码
             try {
                 // 先检查是否为PEM格式

@@ -7,16 +7,16 @@ import java.util.BitSet;
 import static org.junit.Assert.assertArrayEquals;
 
 /**
- * TLVUtil.bitSetToByteArray 方法的单元测试类
+ * HexUtil.bitSetToByteArray 方法的单元测试类
  */
-public class TLVUtilBitSetToByteArrayTest {
+public class HexUtilBitSetToByteArrayTest {
 
     /**
      * TC01: BitSet 为 null，应返回空数组
      */
     @Test
     public void testBitSetToByteArray_NullInput() {
-        byte[] result = TLVUtil.bitSetToByteArray(null);
+        byte[] result = HexUtil.bitSetToByteArray(null);
         assertArrayEquals(new byte[0], result);
     }
 
@@ -26,7 +26,7 @@ public class TLVUtilBitSetToByteArrayTest {
     @Test
     public void testBitSetToByteArray_EmptyBitSet() {
         BitSet bitSet = new BitSet();
-        byte[] result = TLVUtil.bitSetToByteArray(bitSet);
+        byte[] result = HexUtil.bitSetToByteArray(bitSet);
         assertArrayEquals(new byte[0], result);
     }
 
@@ -37,7 +37,7 @@ public class TLVUtilBitSetToByteArrayTest {
     public void testBitSetToByteArray_SingleBitSetAtZero() {
         BitSet bitSet = new BitSet();
         bitSet.set(0);
-        byte[] result = TLVUtil.bitSetToByteArray(bitSet);
+        byte[] result = HexUtil.bitSetToByteArray(bitSet);
         assertArrayEquals(new byte[]{0x01}, result);
     }
 
@@ -50,7 +50,7 @@ public class TLVUtilBitSetToByteArrayTest {
         bitSet.set(0);
         bitSet.set(1);
         bitSet.set(7);
-        byte[] result = TLVUtil.bitSetToByteArray(bitSet);
+        byte[] result = HexUtil.bitSetToByteArray(bitSet);
         assertArrayEquals(new byte[]{(byte) 0x83}, result); // 1000 0011
     }
 
@@ -61,7 +61,7 @@ public class TLVUtilBitSetToByteArrayTest {
     public void testBitSetToByteArray_BitBeyondFirstByte() {
         BitSet bitSet = new BitSet();
         bitSet.set(8);
-        byte[] result = TLVUtil.bitSetToByteArray(bitSet);
+        byte[] result = HexUtil.bitSetToByteArray(bitSet);
         assertArrayEquals(new byte[]{0x00, 0x01}, result);
     }
 
@@ -75,7 +75,7 @@ public class TLVUtilBitSetToByteArrayTest {
         for (int i = 0; i < 8; i++) {
             bitSet.set(i);
         }
-        byte[] result = TLVUtil.bitSetToByteArray(bitSet);
+        byte[] result = HexUtil.bitSetToByteArray(bitSet);
         assertArrayEquals(new byte[]{(byte) 0xFF}, result);
     }
 

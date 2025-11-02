@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.text.TLVUtil;
+import com.yishuifengxiao.common.tool.text.HexUtil;
 import org.junit.Test;
 
 import java.security.KeyPair;
@@ -32,7 +32,7 @@ public class ECCTest {
             byte[] signature = ECC.signData(originalData.getBytes("UTF-8"), privateKey);
             String signatureBase64 = Base64.getEncoder().encodeToString(signature);
             System.out.println("签名结果 (Base64): " + signatureBase64);
-            System.out.println("签名结果 (Hex): " + TLVUtil.bytesToHex(signature));
+            System.out.println("签名结果 (Hex): " + HexUtil.bytesToHex(signature));
 
             // 3. 使用公钥验签
             boolean isValid = ECC.verifySignature(originalData.getBytes("UTF-8"), signature, publicKey);

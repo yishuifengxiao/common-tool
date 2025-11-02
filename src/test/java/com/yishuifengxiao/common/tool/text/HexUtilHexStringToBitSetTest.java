@@ -7,9 +7,9 @@ import java.util.BitSet;
 import static org.junit.Assert.*;
 
 /**
- * TLVUtil.hexStringToBitSet 方法的单元测试类
+ * HexUtil.hexStringToBitSet 方法的单元测试类
  */
-public class TLVUtilHexStringToBitSetTest {
+public class HexUtilHexStringToBitSetTest {
 
 
     /**
@@ -17,7 +17,7 @@ public class TLVUtilHexStringToBitSetTest {
      */
     @Test
     public void testHexStringToBitSet_EmptyInput() {
-        BitSet result = TLVUtil.hexStringToBitSet("");
+        BitSet result = HexUtil.hexStringToBitSet("");
         assertNotNull(result);
         assertEquals(0, result.cardinality());
     }
@@ -28,6 +28,6 @@ public class TLVUtilHexStringToBitSetTest {
      */
     @Test(expected = StringIndexOutOfBoundsException.class)
     public void testHexStringToBitSet_OddLengthString() {
-        TLVUtil.hexStringToBitSet("ABC");
+        HexUtil.hexStringToBitSet("ABC");
     }
 }

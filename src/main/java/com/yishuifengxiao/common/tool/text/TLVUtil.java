@@ -1,10 +1,5 @@
 package com.yishuifengxiao.common.tool.text;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.BitSet;
-import java.util.regex.Pattern;
-
 /**
  * TLV工具类
  *
@@ -106,7 +101,7 @@ public class TLVUtil {
                 String value = tlvData.substring(valueStartIndex, valueEndIndex);
 
                 // 在值部分递归查找
-                if (isPotentialTlv(value)) {
+                if (isTlv(value)) {
                     String nestedResult = parseTlvRecursive(targetTag, value);
                     if (!nestedResult.isEmpty()) {
                         return nestedResult;
@@ -143,7 +138,7 @@ public class TLVUtil {
      * @param value 要检查的字符串
      * @return 是否可能是TLV结构
      */
-    private static boolean isPotentialTlv(String value) {
+    private static boolean isTlv(String value) {
         // 简单检查：长度是否为偶数，并且至少有6个字符（Tag2字节+Length2字节+Value至少2字节）
         if (value == null || value.length() < 6 || value.length() % 2 != 0) {
             return false;
@@ -219,71 +214,6 @@ public class TLVUtil {
         return hex;
     }
 
-    /**
-     * 将字符串转换为十六进制字符串（使用UTF-8编码）
-     *
-     * @param str 原始字符串
-     * @return 十六进制字符串，每两个字符代表一个字节
-     */
-    public static String stringToHex(String str) {
-        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
-        return bytesToHex(bytes);
-    }
-
-    /**
-     * 将十六进制字符串转换为原始字符串（使用UTF-8编码）
-     *
-     * @param hex 十六进制字符串
-     * @return 原始字符串
-     */
-    public static String hexToString(String hex) {
-        byte[] bytes = hexToBytes(hex);
-        return new String(bytes, StandardCharsets.UTF_8);
-    }
-
-    /**
-     * 将字节数组转换为十六进制字符串
-     *
-     * @param bytes 字节数组
-     * @return 十六进制字符串，每两个字符代表一个字节
-     */
-    public static String bytesToHex(byte[] bytes) {
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : bytes) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) {
-                hexString.append('0');
-            }
-            hexString.append(hex);
-        }
-        return hexString.toString().toUpperCase();
-    }
-
-    /**
-     * 将十六进制字符串转换为字节数组
-     *
-     * @param hex 十六进制字符串
-     * @return 字节数组
-     */
-    public static byte[] hexToBytes(String hex) {
-        // 移除可能存在的空格
-        hex = hex.replaceAll("\\s", "");
-
-        // 检查十六进制字符串长度是否为偶数
-        if (hex.length() % 2 != 0) {
-            throw new IllegalArgumentException("十六进制字符串长度必须为偶数");
-        }
-
-        int len = hex.length();
-        byte[] data = new byte[len / 2];
-
-        for (int i = 0; i < len; i += 2) {
-            // 每两个字符解析为一个字节
-            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4) + Character.digit(hex.charAt(i + 1), 16));
-        }
-
-        return data;
-    }
 
     /**
      * 便捷方法：将字符串转换为TLV格式（自动转换为十六进制）
@@ -293,7 +223,7 @@ public class TLVUtil {
      * @return TLV格式字符串
      */
     public static String stringToTLV(String tag, String text) {
-        String hexValue = stringToHex(text);
+        String hexValue = HexUtil.stringToHex(text);
         return toTLV(tag, hexValue);
     }
 
@@ -305,254 +235,11 @@ public class TLVUtil {
      * @return TLV格式字符串
      */
     public static String bytesToTLV(String tag, byte[] bytes) {
-        String hexValue = bytesToHex(bytes);
+        String hexValue = HexUtil.bytesToHex(bytes);
         return toTLV(tag, hexValue);
     }
 
-    /**
-     * 将BitSet转换为byte数组
-     *
-     * @param bitSet 要转换的BitSet
-     * @return 转换后的byte数组
-     */
-    public static byte[] bitSetToByteArray(BitSet bitSet) {
-        if (bitSet == null) {
-            return new byte[0];
-        }
-
-        // 如果BitSet为空，返回空数组
-        if (bitSet.length() == 0) {
-            return new byte[0];
-        }
-
-        // 计算需要的字节数
-        int byteCount = (bitSet.length() + 7) / 8;
-        byte[] bytes = new byte[byteCount];
-
-        // 遍历所有设置的位
-        for (int bitIndex = bitSet.nextSetBit(0); bitIndex >= 0; bitIndex = bitSet.nextSetBit(bitIndex + 1)) {
-            int byteIndex = bitIndex / 8;
-            int bitOffset = bitIndex % 8;
-            bytes[byteIndex] |= (1 << bitOffset);
-        }
-
-        return bytes;
-    }
-
-    /**
-     * 将byte数组转换为BitSet
-     *
-     * @param bytes 要转换的byte数组
-     * @return 转换后的BitSet
-     */
-    public static BitSet byteArrayToBitSet(byte[] bytes) {
-        if (bytes == null) {
-            return new BitSet();
-        }
-
-        BitSet bitSet = new BitSet(bytes.length * 8);
-
-        for (int i = 0; i < bytes.length * 8; i++) {
-            int byteIndex = i / 8;
-            int bitIndex = i % 8;
-
-            if ((bytes[byteIndex] & (1 << bitIndex)) != 0) {
-                bitSet.set(i);
-            }
-        }
-
-        return bitSet;
-    }
-
-    /**
-     * 将BitSet转换为byte数组（支持指定字节序）
-     *
-     * @param bitSet    要转换的BitSet
-     * @param bigEndian 是否使用大端序（true: 高位在前, false: 低位在前）
-     * @return 转换后的byte数组
-     */
-    public static byte[] bitSetToByteArray(BitSet bitSet, boolean bigEndian) {
-        if (bitSet == null) {
-            return new byte[0];
-        }
-
-        int byteCount = (bitSet.length() + 7) / 8;
-        byte[] bytes = new byte[byteCount];
-
-        for (int i = 0; i < bitSet.length(); i++) {
-            if (bitSet.get(i)) {
-                int byteIndex = i / 8;
-                int bitIndex = bigEndian ? (7 - (i % 8)) : (i % 8);
-                bytes[byteIndex] |= (1 << bitIndex);
-            }
-        }
-
-        return bytes;
-    }
-
-    /**
-     * 将byte数组转换为BitSet（支持指定字节序）
-     *
-     * @param bytes     要转换的byte数组
-     * @param bigEndian 是否使用大端序
-     * @return 转换后的BitSet
-     */
-    public static BitSet byteArrayToBitSet(byte[] bytes, boolean bigEndian) {
-        if (bytes == null) {
-            return new BitSet();
-        }
-
-        BitSet bitSet = new BitSet(bytes.length * 8);
-
-        for (int i = 0; i < bytes.length * 8; i++) {
-            int byteIndex = i / 8;
-            int bitIndex = bigEndian ? (7 - (i % 8)) : (i % 8);
-
-            if ((bytes[byteIndex] & (1 << bitIndex)) != 0) {
-                bitSet.set(i);
-            }
-        }
-
-        return bitSet;
-    }
-
-    /**
-     * 将BitSet转换为十六进制字符串
-     *
-     * @param bitSet 要转换的BitSet
-     * @return 十六进制字符串
-     */
-    public static String bitSetToHexString(BitSet bitSet) {
-        byte[] bytes = bitSetToByteArray(bitSet, false);
-        StringBuilder hexString = new StringBuilder();
-
-        for (byte b : bytes) {
-            hexString.append(String.format("%02X", b));
-        }
-
-        return hexString.toString();
-    }
-
-    /**
-     * 从十六进制字符串创建BitSet
-     *
-     * @param hexString 十六进制字符串
-     * @return 创建的BitSet
-     */
-    public static BitSet hexStringToBitSet(String hexString) {
-        if (hexString == null || hexString.isEmpty()) {
-            return new BitSet();
-        }
-
-        int len = hexString.length();
-        byte[] bytes = new byte[len / 2];
-
-        for (int i = 0; i < len; i += 2) {
-            bytes[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i + 1), 16));
-        }
-
-        return byteArrayToBitSet(bytes, false);
-    }
-
-    /**
-     * 获取BitSet的二进制字符串表示
-     */
-    public static String toBinaryString(BitSet bitSet) {
-        if (bitSet == null) return "";
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bitSet.length(); i++) {
-            sb.append(bitSet.get(i) ? '1' : '0');
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 从二进制字符串创建BitSet
-     */
-    public static BitSet fromBinaryString(String binaryString) {
-        if (binaryString == null || binaryString.isEmpty()) {
-            return new BitSet();
-        }
-
-        BitSet bitSet = new BitSet(binaryString.length());
-        for (int i = 0; i < binaryString.length(); i++) {
-            if (binaryString.charAt(i) == '1') {
-                bitSet.set(i);
-            }
-        }
-        return bitSet;
-    }
 
 
-    /**
-     * 比较两个BitSet的内容是否相同
-     */
-    public static boolean contentEquals(BitSet bitSet1, BitSet bitSet2) {
-        if (bitSet1 == bitSet2) return true;
-        if (bitSet1 == null || bitSet2 == null) return false;
-
-        return bitSet1.equals(bitSet2);
-    }
-
-    /**
-     * 将十六进制字符串转换为Base64字符串（兼容Java 8+）
-     *
-     * @param hexString 十六进制字符串
-     * @return Base64编码的字符串
-     */
-    public static String hexToBase64(String hexString) {
-        if (hexString == null || hexString.isEmpty()) {
-            return "";
-        }
-
-        // 移除可能存在的空格和前缀
-        hexString = hexString.replaceAll("\\s", "").replace("0x", "");
-
-        // 确保十六进制字符串长度为偶数
-        if (hexString.length() % 2 != 0) {
-            throw new IllegalArgumentException("Invalid hex string length");
-        }
-
-        byte[] bytes = new byte[hexString.length() / 2];
-        for (int i = 0; i < hexString.length(); i += 2) {
-            int firstDigit = Character.digit(hexString.charAt(i), 16);
-            int secondDigit = Character.digit(hexString.charAt(i + 1), 16);
-
-            if (firstDigit == -1 || secondDigit == -1) {
-                throw new IllegalArgumentException("Invalid hex character");
-            }
-
-            bytes[i / 2] = (byte) ((firstDigit << 4) + secondDigit);
-        }
-
-        return Base64.getEncoder().encodeToString(bytes);
-    }
-
-    /**
-     * 将Base64字符串转换为十六进制字符串（兼容Java 8+）
-     *
-     * @param base64String Base64编码的字符串
-     * @return 十六进制字符串
-     */
-    public static String base64ToHex(String base64String) {
-        if (base64String == null || base64String.isEmpty()) {
-            return "";
-        }
-
-        byte[] bytes = Base64.getDecoder().decode(base64String);
-        return bytesToHex(bytes);
-    }
-
-    /**
-     * 正则表达式模式，用于匹配有效的十六进制字符串
-     * 匹配任意长度的十六进制字符（大小写字母和数字）
-     */
-    private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9a-fA-F]+$");
-
-    // 检查是否为有效的十六进制字符串
-    public static boolean isHex(String str) {
-        return HEX_PATTERN.matcher(str).matches();
-    }
 
 }

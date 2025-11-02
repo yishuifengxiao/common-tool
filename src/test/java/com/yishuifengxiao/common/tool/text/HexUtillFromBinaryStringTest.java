@@ -7,16 +7,16 @@ import java.util.BitSet;
 import static org.junit.Assert.*;
 
 /**
- * TLVUtil.fromBinaryString 方法的单元测试类
+ * HexUtil.fromBinaryString 方法的单元测试类
  */
-public class TLVUtilFromBinaryStringTest {
+public class HexUtillFromBinaryStringTest {
 
     /**
      * TC01: 输入为 null，应返回空 BitSet
      */
     @Test
     public void testFromBinaryString_NullInput() {
-        BitSet result = TLVUtil.fromBinaryString(null);
+        BitSet result = HexUtil.fromBinaryString(null);
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -26,7 +26,7 @@ public class TLVUtilFromBinaryStringTest {
      */
     @Test
     public void testFromBinaryString_EmptyInput() {
-        BitSet result = TLVUtil.fromBinaryString("");
+        BitSet result = HexUtil.fromBinaryString("");
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -36,7 +36,7 @@ public class TLVUtilFromBinaryStringTest {
      */
     @Test
     public void testFromBinaryString_SingleOne() {
-        BitSet result = TLVUtil.fromBinaryString("1");
+        BitSet result = HexUtil.fromBinaryString("1");
         assertNotNull(result);
         assertEquals(1, result.length());
         assertTrue(result.get(0));
@@ -47,7 +47,7 @@ public class TLVUtilFromBinaryStringTest {
      */
     @Test
     public void testFromBinaryString_SingleZero() {
-        BitSet result = TLVUtil.fromBinaryString("0");
+        BitSet result = HexUtil.fromBinaryString("0");
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -59,7 +59,7 @@ public class TLVUtilFromBinaryStringTest {
      */
     @Test
     public void testFromBinaryString_LongerString() {
-        BitSet result = TLVUtil.fromBinaryString("100000001");
+        BitSet result = HexUtil.fromBinaryString("100000001");
         assertNotNull(result);
         assertEquals(9, result.length());
         assertTrue(result.get(0));
@@ -74,7 +74,7 @@ public class TLVUtilFromBinaryStringTest {
      */
     @Test
     public void testFromBinaryString_AllZeros() {
-        BitSet result = TLVUtil.fromBinaryString("0000");
+        BitSet result = HexUtil.fromBinaryString("0000");
         assertNotNull(result);
         assertTrue(result.isEmpty());
     }
@@ -84,7 +84,7 @@ public class TLVUtilFromBinaryStringTest {
      */
     @Test
     public void testFromBinaryString_AllOnes() {
-        BitSet result = TLVUtil.fromBinaryString("1111");
+        BitSet result = HexUtil.fromBinaryString("1111");
         assertNotNull(result);
         assertEquals(4, result.length());
         for (int i = 0; i < 4; i++) {

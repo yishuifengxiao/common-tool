@@ -8,16 +8,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 
 /**
- * TLVUtil.hexToBase64 方法的单元测试类
+ * HexUtil.hexToBase64 方法的单元测试类
  */
-public class TLVUtilHexToBase64Test {
+public class HexUtilHexToBase64Test {
 
     /**
      * TC01: 输入为 null，应返回空字符串
      */
     @Test
     public void testHexToBase64_NullInput() {
-        String result = TLVUtil.hexToBase64(null);
+        String result = HexUtil.hexToBase64(null);
         assertEquals("", result);
     }
 
@@ -26,7 +26,7 @@ public class TLVUtilHexToBase64Test {
      */
     @Test
     public void testHexToBase64_EmptyString() {
-        String result = TLVUtil.hexToBase64("");
+        String result = HexUtil.hexToBase64("");
         assertEquals("", result);
     }
 
@@ -35,7 +35,7 @@ public class TLVUtilHexToBase64Test {
      */
     @Test
     public void testHexToBase64_OddLength() {
-        assertThrows(IllegalArgumentException.class, () -> TLVUtil.hexToBase64("123"));
+        assertThrows(IllegalArgumentException.class, () -> HexUtil.hexToBase64("123"));
     }
 
     /**
@@ -43,7 +43,7 @@ public class TLVUtilHexToBase64Test {
      */
     @Test
     public void testHexToBase64_InvalidCharacter() {
-        assertThrows(IllegalArgumentException.class, () -> TLVUtil.hexToBase64("12GZ"));
+        assertThrows(IllegalArgumentException.class, () -> HexUtil.hexToBase64("12GZ"));
     }
 
     /**
@@ -52,7 +52,7 @@ public class TLVUtilHexToBase64Test {
      */
     @Test
     public void testHexToBase64_NormalHex() {
-        String result = TLVUtil.hexToBase64("48656c6c6f");
+        String result = HexUtil.hexToBase64("48656c6c6f");
         assertEquals(Base64.getEncoder().encodeToString("Hello".getBytes()), result);
     }
 
@@ -62,7 +62,7 @@ public class TLVUtilHexToBase64Test {
      */
     @Test
     public void testHexToBase64_WithSpacesAndPrefix() {
-        String result = TLVUtil.hexToBase64("0x48 65 6c 6c 6f");
+        String result = HexUtil.hexToBase64("0x48 65 6c 6c 6f");
         assertEquals(Base64.getEncoder().encodeToString("Hello".getBytes()), result);
     }
 
@@ -71,7 +71,7 @@ public class TLVUtilHexToBase64Test {
      */
     @Test
     public void testHexToBase64_BlankInput() {
-        String result = TLVUtil.hexToBase64("   ");
+        String result = HexUtil.hexToBase64("   ");
         assertEquals("", result);
     }
 }

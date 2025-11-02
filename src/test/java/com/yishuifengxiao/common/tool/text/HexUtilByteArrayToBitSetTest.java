@@ -7,16 +7,16 @@ import java.util.BitSet;
 import static org.junit.Assert.*;
 
 /**
- * TLVUtil.byteArrayToBitSet 方法的单元测试类
+ * HexUtil.byteArrayToBitSet 方法的单元测试类
  */
-public class TLVUtilByteArrayToBitSetTest {
+public class HexUtilByteArrayToBitSetTest {
 
     /**
      * TC01: 输入为 null，应返回空 BitSet
      */
     @Test
     public void testByteArrayToBitSet_NullInput() {
-        BitSet result = TLVUtil.byteArrayToBitSet(null);
+        BitSet result = HexUtil.byteArrayToBitSet(null);
         assertNotNull(result);
         assertEquals(0, result.length());
     }
@@ -26,7 +26,7 @@ public class TLVUtilByteArrayToBitSetTest {
      */
     @Test
     public void testByteArrayToBitSet_EmptyArray() {
-        BitSet result = TLVUtil.byteArrayToBitSet(new byte[0]);
+        BitSet result = HexUtil.byteArrayToBitSet(new byte[0]);
         assertNotNull(result);
         assertEquals(0, result.length());
     }
@@ -37,7 +37,7 @@ public class TLVUtilByteArrayToBitSetTest {
     @Test
     public void testByteArrayToBitSet_SingleByteLowestBit() {
         byte[] input = new byte[]{0x01}; // 0000 0001
-        BitSet result = TLVUtil.byteArrayToBitSet(input);
+        BitSet result = HexUtil.byteArrayToBitSet(input);
 
         assertTrue(result.get(0));
         for (int i = 1; i < 8; i++) {
@@ -51,7 +51,7 @@ public class TLVUtilByteArrayToBitSetTest {
     @Test
     public void testByteArrayToBitSet_SingleByteHighestBit() {
         byte[] input = new byte[]{(byte) 0x80}; // 1000 0000
-        BitSet result = TLVUtil.byteArrayToBitSet(input);
+        BitSet result = HexUtil.byteArrayToBitSet(input);
 
         assertTrue(result.get(7));
         for (int i = 0; i < 7; i++) {
@@ -65,7 +65,7 @@ public class TLVUtilByteArrayToBitSetTest {
     @Test
     public void testByteArrayToBitSet_MultipleBytes() {
         byte[] input = new byte[]{0x01, 0x02}; // 0000 0001, 0000 0010
-        BitSet result = TLVUtil.byteArrayToBitSet(input);
+        BitSet result = HexUtil.byteArrayToBitSet(input);
 
         assertTrue(result.get(0));   // 第一个字节第 0 位
         assertTrue(result.get(9));   // 第二个字节第 1 位（8 + 1）
@@ -79,7 +79,7 @@ public class TLVUtilByteArrayToBitSetTest {
     @Test
     public void testByteArrayToBitSet_AllBitsSet() {
         byte[] input = new byte[]{(byte) 0xFF}; // 1111 1111
-        BitSet result = TLVUtil.byteArrayToBitSet(input);
+        BitSet result = HexUtil.byteArrayToBitSet(input);
 
         for (int i = 0; i < 8; i++) {
             assertTrue(result.get(i));

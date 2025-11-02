@@ -1,12 +1,15 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.text.TLVUtil;
+import com.yishuifengxiao.common.tool.text.HexUtil;
 
+import javax.crypto.KeyAgreement;
+import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.*;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.regex.Pattern;
 
@@ -18,6 +21,48 @@ import java.util.regex.Pattern;
  * @since 1.0.0
  */
 public class ECC {
+
+    /**
+     * secp256r1 (NIST P-256) - 256位素数域
+     */
+    public static final String defalut_curveOID = "1.2.840.10045.3.1.7";
+    /**
+     * secp256r1 (NIST P-256) - 256位素数域
+     */
+    public static final String defalut_curveName = "secp256r1";
+
+    /**
+     * 使用secp256r1曲线生成ECC密钥对
+     *
+     * @return ECC密钥对对象
+     * @throws Exception 当密钥生成过程中发生错误时抛出异常
+     */
+    public static KeyPair generateECCKeyPair() throws Exception {
+
+        return generateECCKeyPair(defalut_curveName);
+    }
+
+
+    /**
+     * 生成ECC椭圆曲线加密算法的密钥对
+     *
+     * @param stdName 椭圆曲线的OID标识符，用于指定使用的标准曲线参数,例如1.2.840.10045.3.1.7或secp256r1
+     * @return 生成的ECC密钥对，包含公钥和私钥
+     * @throws Exception 当密钥生成过程中发生错误时抛出异常
+     */
+    public static KeyPair generateECCKeyPair(String stdName) throws Exception {
+        // 使用KeyPairGenerator来获取标准曲线的参数
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+
+        // 直接使用OID初始化
+        ECGenParameterSpec ecGenSpec = new ECGenParameterSpec(stdName);
+        keyPairGenerator.initialize(ecGenSpec);
+
+        // 生成一个临时密钥对以获取曲线参数
+        return keyPairGenerator.generateKeyPair();
+    }
+
+
     /**
      * 常见ECC曲线信息
      *
@@ -100,7 +145,7 @@ public class ECC {
      * @return ECPublicKey 解析后的公钥对象
      * @throws Exception 当解析过程中发生错误时抛出异常
      */
-    private static ECPublicKey parsePublicKeyFromHex(String publicKeyHex, ECParameterSpec ecParameterSpec) throws Exception {
+    public static ECPublicKey parsePublicKeyFromHex(String publicKeyHex, ECParameterSpec ecParameterSpec) throws Exception {
         // 移除可能的前缀
         if (publicKeyHex.startsWith("04")) {
             publicKeyHex = publicKeyHex.substring(2);
@@ -128,6 +173,20 @@ public class ECC {
     }
 
     /**
+     * 从十六进制字符串解析椭圆曲线公钥
+     *
+     * @param curveOID     椭圆曲线对象标识符，用于获取对应的参数规范
+     * @param publicKeyHex 公钥的十六进制字符串表示
+     * @return 解析得到的ECPublicKey对象
+     * @throws Exception 当解析过程中发生错误时抛出异常
+     */
+    public static ECPublicKey parsePublicKeyFromHex(String curveOID, String publicKeyHex) throws Exception {
+        ECParameterSpec parameterSpec = getECParameterSpecFromOID(curveOID);
+        return parsePublicKeyFromHex(publicKeyHex, parameterSpec);
+    }
+
+
+    /**
      * 从十六进制字符串解析私钥
      *
      * @param privateKeyDHex  私钥D值的十六进制字符串表示
@@ -135,7 +194,7 @@ public class ECC {
      * @return ECPrivateKey 解析后的私钥对象
      * @throws Exception 当解析过程中发生错误时抛出异常
      */
-    private static ECPrivateKey parsePrivateKeyFromHex(String privateKeyDHex, ECParameterSpec ecParameterSpec) throws Exception {
+    public static ECPrivateKey parsePrivateKeyFromHex(String privateKeyDHex, ECParameterSpec ecParameterSpec) throws Exception {
         BigInteger privateKeyD = new BigInteger(privateKeyDHex, 16);
 
         // 构建私钥
@@ -143,6 +202,21 @@ public class ECC {
         KeyFactory keyFactory = KeyFactory.getInstance("EC");
         return (ECPrivateKey) keyFactory.generatePrivate(privateKeySpec);
     }
+
+    /**
+     * 从十六进制字符串解析EC私钥
+     *
+     * @param curveOID       椭圆曲线OID标识符，用于获取对应的参数规格
+     * @param privateKeyDHex 私钥D值的十六进制字符串表示
+     * @return 解析后的EC私钥对象
+     * @throws Exception 当解析过程中发生错误时抛出异常
+     */
+    public static ECPrivateKey parsePrivateKeyFromHex(String curveOID, String privateKeyDHex) throws Exception {
+
+        ECParameterSpec parameterSpec = getECParameterSpecFromOID(curveOID);
+        return parsePrivateKeyFromHex(privateKeyDHex, parameterSpec);
+    }
+
 
     /**
      * 使用私钥对数据进行签名
@@ -761,7 +835,7 @@ public class ECC {
         }
 
         // 转换为十六进制
-        return TLVUtil.bytesToHex(encodedKey).toUpperCase();
+        return HexUtil.bytesToHex(encodedKey).toUpperCase();
     }
 
 
@@ -820,4 +894,222 @@ public class ECC {
         PEM_PKCS8_ENCRYPTED,
         UNKNOWN
     }
+
+    /**
+     * 执行ECDH密钥协商
+     *
+     * @param privateKey 本地私钥，用于密钥协商
+     * @param publicKey  对方公钥，用于密钥协商
+     * @return 协商生成的共享密钥字节数组
+     * @throws Exception 如果密钥协商过程中发生错误
+     */
+    public static byte[] performKeyAgreement(PrivateKey privateKey, PublicKey publicKey)
+            throws Exception {
+        // 创建ECDH密钥协商实例
+        KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
+        // 初始化密钥协商对象，设置本地私钥
+        keyAgreement.init(privateKey);
+        // 执行密钥协商阶段，使用对方公钥
+        keyAgreement.doPhase(publicKey, true);
+        // 生成并返回共享密钥
+        return keyAgreement.generateSecret();
+    }
+
+    /**
+     * 执行密钥协商操作，根据提供的椭圆曲线参数和密钥信息生成共享密钥
+     *
+     * @param curveOID       椭圆曲线的OID标识符，用于指定使用的椭圆曲线类型
+     * @param publicKeyHex   对方公钥的十六进制字符串表示
+     * @param privateKeyDHex 本地私钥的十六进制字符串表示
+     * @return 协商生成的共享密钥字节数组
+     * @throws Exception 当密钥协商过程中发生错误时抛出异常
+     */
+    public static byte[] performKeyAgreement(String curveOID, String privateKeyDHex, String publicKeyHex) throws Exception {
+        // 根据椭圆曲线参数和密钥组件创建密钥对
+        KeyPair keyPair = createKeyPairFromComponents(curveOID, publicKeyHex, privateKeyDHex);
+        // 执行密钥协商操作并返回结果
+        return performKeyAgreement(keyPair.getPrivate(), keyPair.getPublic());
+    }
+
+    /**
+     * 从字节数组重建公钥
+     *
+     * @param publicKeyBytes 公钥的字节数组表示
+     * @return 重建后的PublicKey对象
+     * @throws Exception 当密钥工厂创建失败或公钥生成失败时抛出异常
+     */
+    public static PublicKey rebuildPublicKey(byte[] publicKeyBytes) throws Exception {
+        // 创建EC算法的密钥工厂
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
+        // 使用X509编码格式创建公钥规范
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+        // 根据公钥规范生成公钥对象
+        return keyFactory.generatePublic(keySpec);
+    }
+
+
+    /**
+     * 从字节数组重建私钥
+     *
+     * @param privateKeyBytes 私钥的字节数组表示
+     * @return 重建的PrivateKey对象
+     * @throws Exception 当密钥工厂生成失败或密钥规范解析失败时抛出异常
+     */
+    public static PrivateKey rebuildPrivateKey(byte[] privateKeyBytes) throws Exception {
+        // 创建EC算法的密钥工厂
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
+        // 使用PKCS8格式编码的密钥规范
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        // 根据密钥规范生成私钥对象
+        return keyFactory.generatePrivate(keySpec);
+    }
+
+
+    /**
+     * 获取公钥的字节数组表示
+     *
+     * @param publicKey 公钥对象，用于获取其字节编码表示
+     * @return 返回公钥的字节数组编码，如果公钥为null则可能返回null或抛出异常
+     */
+    public static byte[] getPublicKeyBytes(PublicKey publicKey) {
+        return publicKey.getEncoded();
+    }
+
+
+    /**
+     * 获取私钥的字节数组表示
+     *
+     * @param privateKey 私钥对象，用于获取其字节编码表示
+     * @return 返回私钥的字节数组编码，如果私钥为null则可能返回null
+     */
+    public static byte[] getPrivateKeyBytes(PrivateKey privateKey) {
+        return privateKey.getEncoded();
+    }
+
+
+    /**
+     * 创建共享密钥规范对象
+     *
+     * @param algorithm    算法名称，如"AES"等
+     * @param sharedSecret 原始共享密钥字节数组
+     * @return SecretKeySpec 对象，包含派生后的对称密钥
+     * @throws Exception 当获取消息摘要实例或派生密钥过程中发生错误时抛出
+     */
+    public static SecretKeySpec createSharedSecret(String algorithm, byte[] sharedSecret) throws Exception {
+        // 使用KDF（密钥派生函数）派生对称密钥
+        // 这里使用简单的SHA-256哈希作为KDF示例
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] derivedKey = digest.digest(sharedSecret);
+
+        // 根据需要的密钥长度截取
+        int keyLength = getKeyLength(algorithm);
+        byte[] finalKey = Arrays.copyOf(derivedKey, keyLength / 8);
+        return new SecretKeySpec(finalKey, algorithm);
+    }
+
+
+    /**
+     * 获取指定加密算法的密钥长度
+     *
+     * @param algorithm 加密算法名称，如AES、DES、DESEDE等
+     * @return 返回对应算法的密钥长度（位数），默认返回128位
+     */
+    private static int getKeyLength(String algorithm) {
+        // 根据算法名称返回对应的密钥长度
+        switch (algorithm.toUpperCase()) {
+            case "AES":
+                return 128;
+            case "DES":
+                return 64;
+            case "DESEDE":
+                return 192;
+            default:
+                return 128;
+        }
+    }
+
+    /**
+     * 对hex字符串进行左侧填充到指定字节数
+     *
+     * @param hexString   原始hex字符串
+     * @param targetBytes 目标字节数
+     * @return 填充后的hex字符串（保持原始的前缀格式）
+     */
+    public static String padHexLeft(String hexString, int targetBytes) {
+        if (hexString == null || targetBytes <= 0) {
+            throw new IllegalArgumentException("参数不能为空且目标字节数必须大于0");
+        }
+
+        // 处理前缀（0x或0X）
+        String prefix = "";
+        String cleanHex = hexString;
+
+        if (cleanHex.startsWith("0x") || cleanHex.startsWith("0X")) {
+            prefix = cleanHex.substring(0, 2); // 保留原始的大小写格式
+            cleanHex = cleanHex.substring(2);
+        }
+
+        // 移除可能存在的空格
+        cleanHex = cleanHex.replaceAll("\\s+", "");
+
+        // 验证是否为有效的hex字符串
+        if (!cleanHex.matches("[0-9a-fA-F]+")) {
+            throw new IllegalArgumentException("无效的hex字符串: " + hexString);
+        }
+
+        int targetLength = targetBytes * 2; // 每个字节对应2个hex字符
+        int currentLength = cleanHex.length();
+
+        // 如果已经达到或超过目标长度，直接返回
+        if (currentLength >= targetLength) {
+            return prefix + cleanHex;
+        }
+
+        // 左侧填充0
+        int zerosToAdd = targetLength - currentLength;
+        StringBuilder padded = new StringBuilder();
+        for (int i = 0; i < zerosToAdd; i++) {
+            padded.append('0');
+        }
+        padded.append(cleanHex);
+
+        return prefix + padded.toString();
+    }
+
+    /**
+     * 执行ECC密钥协商算法，生成共享密钥
+     *
+     * @param curveOID       椭圆曲线OID标识符
+     * @param publicKeyHex   对方公钥的十六进制字符串表示
+     * @param privateKeyDHex 己方私钥的十六进制字符串表示
+     * @param sShareInfo     共享信息字符串，用于密钥派生
+     * @param iKeyLen        期望生成的密钥长度（字节数）
+     * @return 派生出的共享密钥的十六进制字符串表示
+     * @throws Exception 当密钥协商或哈希计算过程中发生错误时抛出
+     */
+    public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex, String sShareInfo, int iKeyLen) throws Exception {
+
+
+        // 执行ECC密钥协商，获取原始共享密钥数据
+        byte[] bytes = performKeyAgreement(curveOID, privateKeyDHex, publicKeyHex);
+        String hex = HexUtil.bytesToHex(bytes);
+
+        // 对原始密钥数据进行左填充，确保长度为32字节
+        String result = HexUtil.padHexLeft(hex, 32);
+
+
+        // 计算需要进行哈希运算的次数
+        int klen_bit = iKeyLen * 8;
+        int hlen = (klen_bit % 256 == 0) ? klen_bit / 256 : (klen_bit / 256 + 1);
+
+
+        // 通过迭代哈希运算派生最终的密钥
+        StringBuilder hashSb = new StringBuilder();
+        for (int i = 1; i <= hlen; i++) {
+            String counter = HexUtil.padHexLeft(Integer.toHexString(i), 4);
+            hashSb.append(SHA256.calculateSHA256FromHex(result + counter + sShareInfo));
+        }
+        return hashSb.toString().substring(0, iKeyLen * 2).toUpperCase();
+    }
+
 }

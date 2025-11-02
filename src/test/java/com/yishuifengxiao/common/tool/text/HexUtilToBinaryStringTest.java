@@ -7,16 +7,16 @@ import java.util.BitSet;
 import static org.junit.Assert.assertEquals;
 
 /**
- * TLVUtil.toBinaryString 方法的单元测试类
+ * HexUtil.toBinaryString 方法的单元测试类
  */
-public class TLVUtilToBinaryStringTest {
+public class HexUtilToBinaryStringTest {
 
     /**
      * TC01: BitSet 为 null，应返回空字符串 ""
      */
     @Test
     public void testToBinaryString_NullInput() {
-        String result = TLVUtil.toBinaryString(null);
+        String result = HexUtil.toBinaryString(null);
         assertEquals("", result);
     }
 
@@ -26,7 +26,7 @@ public class TLVUtilToBinaryStringTest {
     @Test
     public void testToBinaryString_EmptyBitSet() {
         BitSet bitSet = new BitSet();
-        String result = TLVUtil.toBinaryString(bitSet);
+        String result = HexUtil.toBinaryString(bitSet);
         assertEquals("", result);
     }
 
@@ -37,7 +37,7 @@ public class TLVUtilToBinaryStringTest {
     public void testToBinaryString_SingleBitSetAtZero() {
         BitSet bitSet = new BitSet();
         bitSet.set(0);
-        String result = TLVUtil.toBinaryString(bitSet);
+        String result = HexUtil.toBinaryString(bitSet);
         assertEquals("1", result);
     }
 
@@ -50,7 +50,7 @@ public class TLVUtilToBinaryStringTest {
         bitSet.set(0);
         bitSet.set(1);
         bitSet.set(2);
-        String result = TLVUtil.toBinaryString(bitSet);
+        String result = HexUtil.toBinaryString(bitSet);
         assertEquals("111", result);
     }
 
@@ -64,7 +64,7 @@ public class TLVUtilToBinaryStringTest {
         bitSet.set(2);
         bitSet.set(4);
         bitSet.set(6);
-        String result = TLVUtil.toBinaryString(bitSet);
+        String result = HexUtil.toBinaryString(bitSet);
         assertEquals("1010101", result);
     }
 
@@ -76,7 +76,7 @@ public class TLVUtilToBinaryStringTest {
     public void testToBinaryString_HigherBitSet() {
         BitSet bitSet = new BitSet();
         bitSet.set(10);
-        String result = TLVUtil.toBinaryString(bitSet);
+        String result = HexUtil.toBinaryString(bitSet);
         assertEquals("00000000001", result);
     }
 
@@ -89,7 +89,7 @@ public class TLVUtilToBinaryStringTest {
         for (int i = 0; i < 8; i++) {
             bitSet.set(i);
         }
-        String result = TLVUtil.toBinaryString(bitSet);
+        String result = HexUtil.toBinaryString(bitSet);
         assertEquals("11111111", result);
     }
 }

@@ -1,5 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
+import com.yishuifengxiao.common.tool.text.HexUtil;
 import com.yishuifengxiao.common.tool.text.OIDConverter;
 import com.yishuifengxiao.common.tool.text.TLVUtil;
 import lombok.AllArgsConstructor;
@@ -309,7 +310,7 @@ public class X509Helper {
             } else {
                 // 其他类型的公钥，使用完整编码
                 byte[] publicKeyBytes = publicKey.getEncoded();
-                publicKeyValue = TLVUtil.bytesToHex(publicKeyBytes);
+                publicKeyValue = HexUtil.bytesToHex(publicKeyBytes);
             }
 
             info.setPublicKeyValue(publicKeyValue.toUpperCase());
@@ -318,7 +319,7 @@ public class X509Helper {
             // 如果提取失败，使用完整编码作为后备
             try {
                 byte[] publicKeyBytes = publicKey.getEncoded();
-                info.setPublicKeyValue(TLVUtil.bytesToHex(publicKeyBytes).toUpperCase());
+                info.setPublicKeyValue(HexUtil.bytesToHex(publicKeyBytes).toUpperCase());
             } catch (Exception ex) {
                 log.warn("Failed to extract public key encoded value: " + ex.getMessage());
             }
@@ -341,7 +342,7 @@ public class X509Helper {
         }
         byte[] oidBytes = new byte[oidLength];
         System.arraycopy(encoded, 15, oidBytes, 0, oidLength);
-        String hex = TLVUtil.bytesToHex(oidBytes);
+        String hex = HexUtil.bytesToHex(oidBytes);
         String notation = OIDConverter.hexToDotNotation(hex);
         return notation;
     }
@@ -349,11 +350,11 @@ public class X509Helper {
     /**
      * 提取RSA公钥的十六进制表示
      */
-    private static String extractRSAPublicKeyHex(RSAPublicKey publicKey) {
+    public static String extractRSAPublicKeyHex(RSAPublicKey publicKey) {
         try {
             // 将RSA公钥编码为DER格式
             byte[] publicKeyDER = publicKey.getEncoded();
-            return TLVUtil.bytesToHex(publicKeyDER);
+            return HexUtil.bytesToHex(publicKeyDER);
         } catch (Exception e) {
             log.info("Failed to extract RSA public key: " + e.getMessage());
             return "";
@@ -363,7 +364,7 @@ public class X509Helper {
     /**
      * 提取ECDSA公钥的十六进制表示（未压缩格式）
      */
-    private static String extractECDSAPublicKeyHex(ECPublicKey publicKey) {
+    public static String extractECDSAPublicKeyHex(ECPublicKey publicKey) {
         try {
             // 获取公钥点坐标
             ECPoint point = publicKey.getW();
@@ -397,7 +398,7 @@ public class X509Helper {
                 System.arraycopy(yBytes, yBytes.length - keySize, buf, 1 + keySize, keySize);
             }
 
-            return TLVUtil.bytesToHex(buf);
+            return HexUtil.bytesToHex(buf);
         } catch (Exception e) {
             log.info("Failed to extract ECDSA public key: " + e.getMessage());
             return "";
@@ -414,7 +415,7 @@ public class X509Helper {
                 // SKID扩展值是OCTET STRING包装的，需要解析
                 byte[] skidValue = parseOctetStringExtension(skidExtension);
                 if (skidValue != null) {
-                    info.setSkid(TLVUtil.bytesToHex(skidValue));
+                    info.setSkid(HexUtil.bytesToHex(skidValue));
                 }
             }
         } catch (Exception e) {
@@ -442,7 +443,7 @@ public class X509Helper {
                 // SKID扩展值是OCTET STRING包装的，需要解析
                 byte[] skidValue = parseOctetStringExtension(skidExtension);
                 if (skidValue != null) {
-                    String skid = TLVUtil.bytesToHex(skidValue);
+                    String skid = HexUtil.bytesToHex(skidValue);
                     // 从TLV格式数据中提取值
                     return TLVUtil.fetchValueFromTlv("04", skid);
                 }
@@ -549,7 +550,7 @@ public class X509Helper {
             if (akidExtension != null) {
                 byte[] keyIdentifier = extractKeyIdentifierFromAKID(akidExtension);
                 if (keyIdentifier != null) {
-                    info.setAkid(TLVUtil.bytesToHex(keyIdentifier));
+                    info.setAkid(HexUtil.bytesToHex(keyIdentifier));
                 }
             }
         } catch (Exception e) {
@@ -673,7 +674,7 @@ public class X509Helper {
         try {
             // 获取证书公钥的编码字节数组并转换为十六进制字符串
             byte[] publicKeyBytes = certificate.getPublicKey().getEncoded();
-            return TLVUtil.bytesToHex(publicKeyBytes);
+            return HexUtil.bytesToHex(publicKeyBytes);
         } catch (Exception e) {
             log.info("Failed to extract public key value: " + e.getMessage());
             return null;
@@ -689,7 +690,7 @@ public class X509Helper {
             byte[] skidExtension = certificate.getExtensionValue("2.5.29.14");
             if (skidExtension != null) {
                 byte[] skidValue = parseOctetStringExtension(skidExtension);
-                return skidValue != null ? TLVUtil.bytesToHex(skidValue) : null;
+                return skidValue != null ? HexUtil.bytesToHex(skidValue) : null;
             }
         } catch (Exception e) {
             log.info("Failed to extract SKID: " + e.getMessage());
@@ -712,7 +713,7 @@ public class X509Helper {
             byte[] akidExtension = certificate.getExtensionValue("2.5.29.35");
             if (akidExtension != null) {
                 byte[] keyIdentifier = extractKeyIdentifierFromAKID(akidExtension);
-                return keyIdentifier != null ? TLVUtil.bytesToHex(keyIdentifier) : null;
+                return keyIdentifier != null ? HexUtil.bytesToHex(keyIdentifier) : null;
             }
         } catch (Exception e) {
             log.info("Failed to extract CIPKID: " + e.getMessage());

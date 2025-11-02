@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.text.HexUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,6 +14,7 @@ import java.security.SecureRandom;
  * <p>
  * DES加密工具
  * </p>
+ * <p>默认会使用DES/ECB/PKCS5Padding 填充模式</p>
  * <p>基于DES加解密实现的加密工具，该工具可以进行可逆加密，加密时的秘钥很重要，一定要自己改秘钥，打死也不要告诉其他人。</p>
  *
  * @author yishui
@@ -37,10 +38,6 @@ public class DES {
      */
     private static final int LENGTH = 8;
 
-    /**
-     * 偶数的标志
-     */
-    private static final int EVEN_FLAG = 2;
 
     /**
      * 对输入的数据进行加密
@@ -51,11 +48,10 @@ public class DES {
      */
     public static final String encrypt(String key, String data) {
         try {
-            return byte2hex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
+            return HexUtil.byte2hex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
-                log.info("There is a problem encrypting data {}  with a key, and the reason for the problem is {}",
-                        data, e);
+                log.info("There is a problem encrypting data {}  with a key, and the reason for the problem is {}", data, e);
             }
         }
         return null;
@@ -80,12 +76,10 @@ public class DES {
      */
     public static final String decrypt(String key, String data) {
         try {
-            return new String(decrypt(hex2byte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
+            return new String(decrypt(HexUtil.hex2byte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
-                log.info("There was a problem decrypting data {} using the key, and the reason "
-                                + "for the problem is {}"
-                        , data, e);
+                log.info("There was a problem decrypting data {} using the key, and the reason " + "for the problem is {}", data, e);
             }
         }
         return null;
@@ -187,40 +181,109 @@ public class DES {
         return sb.toString();
     }
 
+
     /**
-     * 二行制转字符串
+     * 解密数据
      *
-     * @param b
-     * @return
+     * @param data 待解密的数据，应为十六进制格式的字符串
+     * @return 解密后的数据字符串
+     * @throws Exception 解密过程中可能抛出的异常
      */
-    private static String byte2hex(byte[] b) {
-
-        StringBuilder hs = new StringBuilder();
-
-        StringBuilder stmp = new StringBuilder();
-
-        for (int n = 0; n < b.length; n++) {
-            stmp = new StringBuilder((java.lang.Integer.toHexString(b[n] & 0XFF)));
-            if (stmp.length() == 1) {
-                hs = hs.append("0").append(stmp);
-            } else {
-                hs = hs.append(stmp);
-            }
-        }
-        return hs.toString().toUpperCase();
+    public final static String decryptData(String data) throws Exception {
+        return decryptData(null, data);
     }
 
-    private static byte[] hex2byte(byte[] b) {
 
-        if ((b.length % EVEN_FLAG) != 0) {
-            throw new UncheckedException("The length is not even");
-        }
-        byte[] b2 = new byte[b.length / 2];
-        for (int n = 0; n < b.length; n += EVEN_FLAG) {
-            String item = new String(b, n, 2);
-            b2[n / 2] = (byte) Integer.parseInt(item, 16);
-        }
-        return b2;
+    /**
+     * 解密数据
+     *
+     * @param key  解密密钥，如果为空或空白字符则使用默认密钥PASSWORD_CRYPT_KEY
+     * @param data 待解密的数据，应为十六进制格式的字符串
+     * @return 解密后的明文字符串
+     * @throws Exception 解密过程中可能抛出的异常
+     */
+    public final static String decryptData(String key, String data) throws Exception {
+        // 如果密钥为空或空白字符，则使用默认密钥
+        key = StringUtils.isBlank(key) ? PASSWORD_CRYPT_KEY : key;
+        // 将十六进制数据转换为字节数组并解密，然后转换为字符串返回
+        return new String(decrypt(HexUtil.hex2byte(data.getBytes()), key.getBytes()));
     }
+
+
+    /**
+     * 加密数据方法
+     *
+     * @param data 待加密的数据字符串
+     * @return 加密后的数据字符串
+     * @throws Exception 加密过程中可能抛出的异常
+     */
+    public final static String encryptData(String data) throws Exception {
+        return encryptData(null, data);
+    }
+
+
+    /**
+     * 加密数据
+     *
+     * @param key  加密密钥，如果为空则使用默认密钥PASSWORD_CRYPT_KEY
+     * @param data 待加密的数据
+     * @return 加密后的数据，以十六进制字符串形式返回
+     * @throws Exception 加密过程中可能抛出的异常
+     */
+    public final static String encryptData(String key, String data) throws Exception {
+        // 如果密钥为空，则使用默认密钥
+        key = StringUtils.isBlank(key) ? PASSWORD_CRYPT_KEY : key;
+        // 对数据进行加密并转换为十六进制字符串
+        return HexUtil.byte2hex(encrypt(data.getBytes(), key.getBytes()));
+    }
+
+    /**
+     * 计算数据的MAC（消息认证码）
+     *
+     * @param data 待计算MAC的数据字符串
+     * @return 返回计算得到的MAC值
+     * @throws Exception 当计算过程中发生错误时抛出异常
+     */
+    public static String mac(String data) throws Exception {
+
+        return mac(null, data);
+    }
+
+
+    /**
+     * 计算数据的MAC(Message Authentication Code)值
+     *
+     * @param key 用于加密的密钥字符串
+     * @param data 待计算MAC的数据字符串(十六进制格式)
+     * @return 返回计算得到的MAC值(16位十六进制字符串)
+     * @throws Exception 当加密过程发生错误时抛出异常
+     */
+    public static String mac(String key, String data) throws Exception {
+        // 将十六进制数据转换为字节数组
+        byte[] planData = HexUtil.hex2byte(data.getBytes());
+        final int dataLength = planData.length;
+        final int lastLength = dataLength % 8;
+        final int lastBlockLength = lastLength == 0 ? 8 : lastLength;
+        final int blockCount = dataLength / 8 + (lastLength > 0 ? 1 : 0);
+
+        // 将数据按8字节分组存储到二维数组中
+        byte[][] dataBlock = new byte[blockCount][8];
+        for (int i = 0; i < blockCount; i++) {
+            int copyLength = i == blockCount - 1 ? lastBlockLength : 8;
+            System.arraycopy(planData, i * 8, dataBlock[i], 0, copyLength);
+        }
+
+        // 执行MAC计算：异或后DES加密，循环处理所有数据块
+        byte[] desXor = new byte[8];
+        for (int i = 0; i < blockCount; i++) {
+            byte[] tXor = HexUtil.xOr(desXor, dataBlock[i]);
+            desXor = encrypt(tXor, key.getBytes());
+        }
+
+        // 将最终结果转换为十六进制字符串并截取前16位作为MAC值
+        return HexUtil.byte2hex(desXor).substring(0, 16);
+    }
+
+
 
 }
