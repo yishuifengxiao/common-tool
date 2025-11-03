@@ -20,10 +20,10 @@ public class ECCKeyPairOIDExample {
         System.out.println("\n1. 使用普通方法生成:");
         for (String oid : commonOIDs) {
             try {
-                KeyPair keyPair = KeyPairUtil.generateECCKeyPairByOID(oid);
-                String curveName = KeyPairUtil.getCurveNameByOID(oid);
+                KeyPair keyPair = KeyPairHelper.generateECCKeyPairByOID(oid);
+                String curveName = KeyPairHelper.getCurveNameByOID(oid);
                 System.out.println("OID: " + oid + " -> " + curveName);
-                KeyPairUtil.printKeyInfo(keyPair);
+                KeyPairHelper.printKeyInfo(keyPair);
                 System.out.println();
             } catch (Exception e) {
                 System.out.println("生成 " + oid + " 失败: " + e.getMessage());
@@ -34,42 +34,42 @@ public class ECCKeyPairOIDExample {
         System.out.println("\n2. 使用安全随机数生成:");
         try {
             SecureRandom secureRandom = new SecureRandom();
-            KeyPair keyPair = KeyPairUtil.generateSecureECCKeyPairByOID(
+            KeyPair keyPair = KeyPairHelper.generateSecureECCKeyPairByOID(
                 "1.2.840.10045.3.1.7", secureRandom);
             System.out.println("使用安全随机数生成的P-256密钥对:");
-            KeyPairUtil.printKeyInfo(keyPair);
+            KeyPairHelper.printKeyInfo(keyPair);
         } catch (Exception e) {
             e.printStackTrace();
         }
         
         // 显示支持的曲线
         System.out.println("\n3. 支持的ECC曲线OID:");
-        String[] supportedOIDs = KeyPairUtil.getSupportedECCurveOIDs();
+        String[] supportedOIDs = KeyPairHelper.getSupportedECCurveOIDs();
         for (String oid : supportedOIDs) {
-            String name = KeyPairUtil.getCurveNameByOID(oid);
+            String name = KeyPairHelper.getCurveNameByOID(oid);
             System.out.println("  " + oid + " -> " + name);
         }
         
         // 生成并显示Base64编码的密钥
         System.out.println("\n4. Base64编码的密钥示例:");
-        KeyPair keyPair = KeyPairUtil.generateECCKeyPairByOID("1.2.840.10045.3.1.7");
+        KeyPair keyPair = KeyPairHelper.generateECCKeyPairByOID("1.2.840.10045.3.1.7");
         System.out.println("公钥Base64:");
-        System.out.println(KeyPairUtil.encodeKeyToBase64(keyPair.getPublic()));
+        System.out.println(KeyPairHelper.encodeKeyToBase64(keyPair.getPublic()));
         System.out.println("私钥Base64:");
-        System.out.println(KeyPairUtil.encodeKeyToBase64(keyPair.getPrivate()));
+        System.out.println(KeyPairHelper.encodeKeyToBase64(keyPair.getPrivate()));
 
         System.out.println("生成RSA 2048位密钥对...");
-        KeyPair rsaKeyPair = KeyPairUtil.generateRSAKeyPair(2048);
-        KeyPairUtil.printKeyDetails(rsaKeyPair);
+        KeyPair rsaKeyPair = KeyPairHelper.generateRSAKeyPair(2048);
+        KeyPairHelper.printKeyDetails(rsaKeyPair);
         System.out.println();
 
         System.out.println("生成ECC secp256r1密钥对...");
-        KeyPair eccKeyPair = KeyPairUtil.generateECCKeyPair("secp256r1");
-        KeyPairUtil. printKeyDetails(eccKeyPair);
+        KeyPair eccKeyPair = KeyPairHelper.generateECCKeyPair("secp256r1");
+        KeyPairHelper. printKeyDetails(eccKeyPair);
         System.out.println();
 
         System.out.println("生成DSA 2048位密钥对...");
-        KeyPair dsaKeyPair = KeyPairUtil.generateDSAKeyPair(2048);
-        KeyPairUtil. printKeyDetails(dsaKeyPair);
+        KeyPair dsaKeyPair = KeyPairHelper.generateDSAKeyPair(2048);
+        KeyPairHelper. printKeyDetails(dsaKeyPair);
     }
 }

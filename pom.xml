@@ -54,8 +54,8 @@
         <version>3.5.7</version>
     </parent>
     <properties>
-        <maven.source.version>21</maven.source.version>
-        <maven.target.version>21</maven.target.version>
+        <maven.source.version>8</maven.source.version>
+        <maven.target.version>8</maven.target.version>
         <swagger.v3.version>2.2.40</swagger.v3.version>
         <jsoup.version>1.21.2</jsoup.version>
         <dom4j.version>2.2.0</dom4j.version>

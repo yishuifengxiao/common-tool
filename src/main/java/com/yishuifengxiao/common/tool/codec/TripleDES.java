@@ -17,7 +17,7 @@ import java.util.Base64;
  * @author yishui
  * @version 1.0.0
  */
-public class TripleDESUtil {
+public class TripleDES {
     private static final String DESEDE_ALGORITHM = "DESede";
     private static final String DESEDE_TRANSFORMATION = "DESede/CBC/PKCS5Padding";
     private static final int DESEDE_KEY_SIZE = 168; // 3DES密钥长度

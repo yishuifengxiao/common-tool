@@ -10,13 +10,13 @@ public class CryptoTest {
 
             // 测试3DES加解密
             System.out.println("\n=== 3DES加解密测试 ===");
-            String desKey = TripleDESUtil.generate3DESKey();
+            String desKey = TripleDES.generate3DESKey();
             System.out.println("3DES密钥: " + desKey);
 
-            String desEncrypted = TripleDESUtil.encrypt(originalText, desKey);
+            String desEncrypted = TripleDES.encrypt(originalText, desKey);
             System.out.println("3DES加密后: " + desEncrypted);
 
-            String desDecrypted = TripleDESUtil.decrypt(desEncrypted, desKey);
+            String desDecrypted = TripleDES.decrypt(desEncrypted, desKey);
             System.out.println("3DES解密后: " + desDecrypted);
 
             System.out.println("3DES加解密验证: " + originalText.equals(desDecrypted));
