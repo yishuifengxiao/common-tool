@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.text;
+package com.yishuifengxiao.common.tool.lang;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.text;
+package com.yishuifengxiao.common.tool.lang;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 
@@ -465,5 +465,120 @@ public class HexUtil {
 
         // 将交换后的字符数组转换回字符串
         return new String(chars);
+    }
+
+    /**
+     * <p>将数字转换指定字节数为16进制字符串</p>
+     * <p>注意转换后的字符串为偶数个字符，即为2*byteNum个字符数，若为奇数个字符则自动左补零</p>
+     * <p>转换后的字符的长度可能大于2*byteNum个字符数</p>
+     *
+     * @param number  待转换的数字
+     * @param byteNum 转换后的字节数，例如byteNum为2时表示最短的字符数为 2*2
+     * @return 16进制字符串
+     */
+    public static String toHexString(Number number, Integer byteNum) {
+        if (number == null) {
+            return "";
+        }
+
+        // 校验 byteNum 合法性
+        if (byteNum != null && byteNum < 0) {
+            throw new IllegalArgumentException("byteNum must be non-negative");
+        }
+
+        String hexString;
+
+        if (number instanceof Integer i) {
+            // 先进行基本转换
+            hexString = Integer.toHexString(i);
+            // 如果设置了byteNum，只进行补齐操作，不进行截断
+            if (byteNum != null && byteNum > 0) {
+                // 检查是否需要补齐
+                if (hexString.length() < byteNum * 2) {
+                    // 如果需要补齐，先进行掩码操作确保值在有效范围内
+                    long unsignedValue = i & ((1L << (byteNum * 8)) - 1);
+                    hexString = Long.toHexString(unsignedValue);
+                }
+                // 否则保持原值（不做截断）
+            }
+        } else if (number instanceof Long l) {
+            // 先进行基本转换
+            hexString = Long.toHexString(l);
+            // 如果设置了byteNum，只进行补齐操作，不进行截断
+            if (byteNum != null && byteNum > 0) {
+                // 检查是否需要补齐
+                if (hexString.length() < byteNum * 2) {
+                    // 如果需要补齐，先进行掩码操作确保值在有效范围内
+                    long mask = (1L << (byteNum * 8)) - 1;
+                    long unsignedValue = l & mask;
+                    hexString = Long.toHexString(unsignedValue);
+                }
+                // 否则保持原值（不做截断）
+            }
+        } else if (number instanceof Short s) {
+            // Short类型按实际值处理
+            int unsignedValue = s & 0xFFFF;
+            hexString = Integer.toHexString(unsignedValue);
+            // 如果设置了byteNum，只进行补齐操作，不进行截断
+            if (byteNum != null && byteNum > 0) {
+                // 检查是否需要补齐
+                if (hexString.length() < byteNum * 2) {
+                    // 如果需要补齐，先进行掩码操作确保值在有效范围内
+                    long mask = (1L << (byteNum * 8)) - 1;
+                    unsignedValue = (int) (unsignedValue & mask);
+                    hexString = Integer.toHexString(unsignedValue);
+                }
+                // 否则保持原值（不做截断）
+            }
+        } else if (number instanceof Byte b) {
+            // Byte类型按实际值处理
+            int unsignedValue = b & 0xFF;
+            hexString = Integer.toHexString(unsignedValue);
+            // 如果设置了byteNum，只进行补齐操作，不进行截断
+            if (byteNum != null && byteNum > 0) {
+                // 检查是否需要补齐
+                if (hexString.length() < byteNum * 2) {
+                    // 如果需要补齐，先进行掩码操作确保值在有效范围内
+                    long mask = (1L << (byteNum * 8)) - 1;
+                    unsignedValue = (int) (unsignedValue & mask);
+                    hexString = Integer.toHexString(unsignedValue);
+                }
+                // 否则保持原值（不做截断）
+            }
+        } else if (number instanceof Double || number instanceof Float) {
+            throw new IllegalArgumentException("Floating point numbers are not supported.");
+        } else {
+            throw new IllegalArgumentException("Unsupported number type: " + number.getClass().getSimpleName()
+                    + ". Supported types: Integer, Long, Short, Byte.");
+        }
+
+        // 统一大写
+        hexString = hexString.toUpperCase();
+
+        // 若长度为奇数，前面补0使其变为偶数长度
+        if (hexString.length() % 2 == 1) {
+            hexString = "0" + hexString;
+        }
+
+        // 若设置了 byteNum 并且当前长度不足，则补齐至 2 * byteNum
+        if (byteNum != null && byteNum > 0 && hexString.length() < byteNum * 2) {
+            int padLength = byteNum * 2 - hexString.length();
+            String prefix = "0".repeat(padLength); // Java 11+
+            hexString = prefix + hexString;
+        }
+
+        return hexString;
+    }
+
+
+    /**
+     * <p>将数字转换为16进制字符串</p>
+     * <p>注意转换后的字符串为偶数个字符，若为奇数个字符则自动左补零</p>
+     *
+     * @param number 待转换的数字
+     * @return 16进制字符串
+     */
+    public static String toHexString(Number number) {
+        return toHexString(number, null);
     }
 }

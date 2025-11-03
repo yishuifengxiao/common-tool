@@ -3,7 +3,6 @@ package com.yishuifengxiao.common.tool.utils;
 import com.yishuifengxiao.common.tool.collections.CollUtil;
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.lang.CompareUtil;
 import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,7 +36,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gteZero(String msg, Number value) {
-        if (null == value || CompareUtil.ltZero(value)) {
+        if (null == value || NumberUtil.ltZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -50,7 +49,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void gtZero(String msg, Number value) {
-        if (null == value || CompareUtil.lteZero(value)) {
+        if (null == value || NumberUtil.lteZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -62,7 +61,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void lteZero(String msg, Number value) {
-        if (null == value || CompareUtil.gtZero(value)) {
+        if (null == value || NumberUtil.gtZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -74,7 +73,7 @@ public final class Assert {
      * @param value 需要比较的值
      */
     public static void ltZero(String msg, Number value) {
-        if (null == value || CompareUtil.gteZero(value)) {
+        if (null == value || NumberUtil.gteZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -87,7 +86,7 @@ public final class Assert {
      */
     public static void gteZeroN(String msg, Number value) {
         value = null == value ? NumberUtil.ZERO : value;
-        if (CompareUtil.ltZero(value)) {
+        if (NumberUtil.ltZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -101,7 +100,7 @@ public final class Assert {
      */
     public static void gtZeroN(String msg, Number value) {
         value = null == value ? NumberUtil.ZERO : value;
-        if (CompareUtil.lteZero(value)) {
+        if (NumberUtil.lteZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -114,7 +113,7 @@ public final class Assert {
      */
     public static void lteZeroN(String msg, Number value) {
         value = null == value ? NumberUtil.ZERO : value;
-        if (CompareUtil.gtZero(value)) {
+        if (NumberUtil.gtZero(value)) {
             throw new UncheckedException(msg);
         }
     }
@@ -127,7 +126,7 @@ public final class Assert {
      */
     public static void ltZeroN(String msg, Number value) {
         value = null == value ? NumberUtil.ZERO : value;
-        if (CompareUtil.gteZero(value)) {
+        if (NumberUtil.gteZero(value)) {
             throw new UncheckedException(msg);
         }
     }

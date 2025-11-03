@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.text.HexUtil;
+import com.yishuifengxiao.common.tool.lang.HexUtil;
 import org.junit.Test;
 
 import java.security.KeyPair;

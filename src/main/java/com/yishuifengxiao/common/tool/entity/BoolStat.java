@@ -1,7 +1,7 @@
 package com.yishuifengxiao.common.tool.entity;
 
 import com.yishuifengxiao.common.tool.lang.BoolUtil;
-import com.yishuifengxiao.common.tool.lang.CompareUtil;
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.apache.commons.lang3.BooleanUtils;
 
@@ -209,7 +209,7 @@ public enum BoolStat implements RootEnum {
         if (null == number) {
             return BoolStat.Null;
         }
-        return CompareUtil.gt(number, 0) ? BoolStat.True : BoolStat.False;
+        return NumberUtil.gt(number, 0) ? BoolStat.True : BoolStat.False;
     }
 
     /**
@@ -245,7 +245,7 @@ public enum BoolStat implements RootEnum {
      * @return 转换后的布尔值
      */
     public static BoolStat twoState(Number number) {
-        if (null == number || CompareUtil.lte(number, 0)) {
+        if (null == number || NumberUtil.lte(number, 0)) {
             return BoolStat.False;
         }
         return BoolStat.True;
@@ -267,9 +267,9 @@ public enum BoolStat implements RootEnum {
         if (null == number) {
             return BoolStat.Null;
         }
-        if (CompareUtil.gt(number, 0)) {
+        if (NumberUtil.gt(number, 0)) {
             return BoolStat.True;
-        } else if (CompareUtil.lt(number, 0)) {
+        } else if (NumberUtil.lt(number, 0)) {
             return BoolStat.Null;
         } else {
             return BoolStat.False;

@@ -111,19 +111,33 @@ public final class BoolUtil {
         if (null == val) {
             return null;
         }
-        String text = val.toString().trim();
+
+        String text;
+        if (val instanceof String) {
+            text = ((String) val).trim();
+        } else {
+            text = val.toString().trim();
+        }
+
         if (StringUtils.equalsIgnoreCase(BoolUtil.TRUE_TEXT, text)) {
             return true;
         }
         if (StringUtils.equalsIgnoreCase(BoolUtil.FALSE_TEXT, text)) {
             return false;
         }
-        Number decimal = NumberUtil.parse(text).orElse(null);
-        if (null == decimal) {
+
+        try {
+            Number decimal = NumberUtil.parse(text).orElse(null);
+            if (null == decimal) {
+                return null;
+            }
+            return NumberUtil.gtZero(decimal);
+        } catch (Exception e) {
+            // 忽略解析失败的情况，统一返回 null
             return null;
         }
-        return CompareUtil.gtZero(decimal) ? true : false;
     }
+
 
     /**
      * <p>将数据转换为布尔值</p>

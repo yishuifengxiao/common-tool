@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.text;
 
+import com.yishuifengxiao.common.tool.lang.HexUtil;
+
 /**
  * TLV工具类
  *

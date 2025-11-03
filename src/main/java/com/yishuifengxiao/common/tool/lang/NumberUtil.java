@@ -169,16 +169,41 @@ public final class NumberUtil {
         if (val == null || StringUtils.isBlank(val.toString())) {
             return Optional.empty();
         }
+
         try {
+            // 直接处理常见的数字类型，避免精度丢失
+            if (val instanceof BigDecimal) {
+                return Optional.of((BigDecimal) val);
+            } else if (val instanceof Integer) {
+                return Optional.of(new BigDecimal((Integer) val));
+            } else if (val instanceof Long) {
+                return Optional.of(new BigDecimal((Long) val));
+            } else if (val instanceof Double) {
+                Double doubleVal = (Double) val;
+                if (doubleVal.isNaN() || doubleVal.isInfinite()) {
+                    return Optional.empty();
+                }
+                return Optional.of(BigDecimal.valueOf(doubleVal));
+            } else if (val instanceof Float) {
+                Float floatVal = (Float) val;
+                if (floatVal.isNaN() || floatVal.isInfinite()) {
+                    return Optional.empty();
+                }
+                return Optional.of(BigDecimal.valueOf(floatVal));
+            }
+
+            // 处理字符串类型
             String cleanStr = val.toString().replaceAll(",", "").trim();
             return Optional.of(new BigDecimal(cleanStr));
         } catch (NumberFormatException e) {
-            if (log.isDebugEnabled()) {
-                log.debug("Failed to convert [{}] to BigDecimal", val, e);
-            }
+            log.warn("Failed to convert [{}] to BigDecimal", val, e);
+        } catch (Exception e) {
+            log.warn("Unexpected error when converting [{}] to BigDecimal", val, e);
         }
+
         return Optional.empty();
     }
+
 
     /**
      * 将16进制字符串数据转为10进制数字
@@ -202,76 +227,175 @@ public final class NumberUtil {
     }
 
     /**
-     * <p>将数字转换指定字节数为16进制字符串</p>
-     * <p>注意转换后的字符串为偶数个字符，即为2*byteNum个字符数，若为奇数个字符则自动左补零</p>
-     * <p>转换后的字符的长度可能大于2*byteNum个字符数</p>
+     * 第一个数是否大于第二个数
      *
-     * @param number  待转换的数字
-     * @param byteNum 转换后的字节数，例如byteNum为2时表示最短的字符数为 2*2
-     * @return 16进制字符串
+     * @param v1 第一个数，若为null直接返回为false
+     * @param v2 第二个数，若为null直接返回为true
+     * @return 第一个数大于第二个数返回为true, 否则为false
      */
-    public static String toHexString(Number number, Integer byteNum) {
-        if (number == null) {
-            return "";
+    public static boolean gt(Number v1, Number v2) {
+        if (null == v1) {
+            return false;
         }
-
-        String hexString;
-        if (number instanceof Integer) {
-            hexString = Integer.toHexString(number.intValue()).toUpperCase();
-        } else if (number instanceof Long) {
-            hexString = Long.toHexString(number.longValue()).toUpperCase();
-        } else if (number instanceof Short) {
-            hexString = Integer.toHexString(number.shortValue()).toUpperCase();
-        } else if (number instanceof Byte) {
-            hexString = Integer.toHexString(number.byteValue()).toUpperCase();
-        } else if (number instanceof Double || number instanceof Float) {
-            hexString = Long.toHexString(number.longValue()).toUpperCase();
-        } else {
-            throw new IllegalArgumentException("Unsupported number type: " + number.getClass());
+        if (null == v2) {
+            return true;
         }
-
-        if (hexString.length() % 2 == 1) {
-            hexString = "0" + hexString;
-        }
-
-        if (byteNum != null && byteNum > 0 && hexString.length() < byteNum * 2) {
-            int padLength = byteNum * 2 - hexString.length();
-            String prefix = "0".repeat(padLength); // Java 11+
-            hexString = prefix + hexString;
-        }
-
-        return hexString;
+        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) > 0;
     }
 
     /**
-     * <p>将数字转换指定字节数为16进制字符串</p>
-     * <p>注意转换后的字符串为偶数个字符，即为2*byteNum个字符数，若为奇数个字符则自动左补零</p>
-     * <p>转换后的字符的长度恰好2*byteNum个字符数，故转换后的</p>
+     * 第一个数是否大于或等于第二个数
      *
-     * @param number  待转换的数字
-     * @param byteNum 转换后的字节数，例如byteNum为2时表示最短的字符数为 2*2
-     * @return 16进制字符串
+     * @param v1 第一个数，若为null直接返回为false
+     * @param v2 第二个数，若为null直接返回为true
+     * @return 第一个数大于或等于第二个数返回为true, 否则为false
      */
-    public static String toHex(Number number, Integer byteNum) {
-        String hexString = toHexString(number, byteNum);
-        if (byteNum == null || byteNum <= 0) {
-            return hexString;
+    public static boolean gte(Number v1, Number v2) {
+        if (null == v1) {
+            return false;
         }
-        if (hexString.length() > (byteNum * 2)) {
-            hexString = hexString.substring(0, byteNum * 2);
+        if (null == v2) {
+            return true;
         }
-        return hexString;
+        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) >= 0;
     }
-
 
     /**
-     * <p>将数字转换为16进制字符串</p>
-     * <p>注意转换后的字符串为偶数个字符，若为奇数个字符则自动左补零</p>
+     * 第一个数是否小于第二个数
      *
-     * @param number 待转换的数字
-     * @return 16进制字符串
+     * @param v1 第一个数，若为null直接返回为true
+     * @param v2 第二个数，若为null直接返回为false
+     * @return 第一个数小于第二个数返回为true, 否则为false
      */
-    public static String toHexString(Number number) {
-        return toHexString(number, null);
+    public static boolean lt(Number v1, Number v2) {
+        if (null == v1) {
+            return true;
+        }
+        if (null == v2) {
+            return false;
+        }
+        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) < 0;
     }
+
+    /**
+     * 第一个数是否小于或等于第二个数
+     *
+     * @param v1 第一个数，若为null直接返回为true
+     * @param v2 第二个数，若为null直接返回为false
+     * @return 第一个数小于或等于第二个数返回为true, 否则为false
+     */
+    public static boolean lte(Number v1, Number v2) {
+        if (null == v1) {
+            return true;
+        }
+        if (null == v2) {
+            return false;
+        }
+        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) <= 0;
+    }
+
+    /**
+     * <p>
+     * 判断两个数据是否相等
+     * </p>
+     * <p style="color:yellow">
+     * 若输入的值为null直接返回为false
+     * </p>
+     *
+     * @param originalValue 原始值，如果原始值为null直接返回为 false
+     * @param value         被比较值,若为null直接返回false
+     * @return 如果两个值相等返回为true, 否则为false
+     */
+    public static boolean equals(Number originalValue, Number value) {
+        if (null == originalValue || null == value) {
+            return false;
+        }
+
+        return new BigDecimal(originalValue.toString()).compareTo(new BigDecimal(value.toString())) == 0;
+    }
+
+    /**
+     * <p>
+     * 判断输入值是否大于或等于0
+     * </p>
+     * <p>输入值若为null直接返回为false</p>
+     *
+     * @param value 需要判断的输入值，若为null直接返回为false
+     * @return 输入值大于或等于0返回为true, 否则为false
+     */
+    public static boolean gteZero(Number value) {
+        return gte(value, NumberUtil.ZERO);
+    }
+
+    /**
+     * <p>
+     * 判断输入值是否大于0
+     * </p>
+     * <p>输入值若为null直接返回为false</p>
+     *
+     * @param value 需要判断的输入值，若为null直接返回为false
+     * @return 输入值大于0返回为true, 否则为false
+     */
+    public static boolean gtZero(Number value) {
+        return gt(value, NumberUtil.ZERO);
+    }
+
+    /**
+     * <p>
+     * 判断输入值是否小于或等于0
+     * </p>
+     * <p>输入值若为null直接返回为true</p>
+     *
+     * @param value 需要判断的输入值，若为null直接返回为true
+     * @return 输入值小于或等于0返回为true, 否则为false
+     */
+    public static boolean lteZero(Number value) {
+        return lte(value, NumberUtil.ZERO);
+    }
+
+    /**
+     * <p>
+     * 判断输入值是否小于0
+     * </p>
+     * <p>输入值若为null直接返回为true</p>
+     *
+     * @param value 需要判断的输入值，若为null直接返回为true
+     * @return 输入值小于0返回为true, 否则为false
+     */
+    public static boolean ltZero(Number value) {
+        return lt(value, NumberUtil.ZERO);
+    }
+
+    /**
+     * <p>
+     * 判断输入值是否等于0
+     * </p>
+     *
+     * @param value 需要判断的输入值，若为null直接返回为false
+     * @return 输入值等于0返回为true, 否则为false
+     */
+    public static boolean isZero(Number value) {
+        return equals(value, NumberUtil.ZERO);
+    }
+
+    /**
+     * 判断数据里是否有等于目标数据的数字
+     *
+     * @param originalValue 目标数据，如果为null直接返回为false
+     * @param values        待比较的数据，如果为null直接返回为false
+     * @return 待比较的数据里包含了目标数据就返回为true，否则为false
+     */
+    public static boolean containsAny(Number originalValue, Number... values) {
+        if (null == originalValue || null == values) {
+            return false;
+        }
+        for (Number value : values) {
+            if (value != null && equals(originalValue, value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

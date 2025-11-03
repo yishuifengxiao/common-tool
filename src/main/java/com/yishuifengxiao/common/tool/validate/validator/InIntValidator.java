@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.validate.validator;
 
-import com.yishuifengxiao.common.tool.lang.CompareUtil;
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import com.yishuifengxiao.common.tool.validate.InInt;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -35,9 +35,9 @@ public class InIntValidator implements ConstraintValidator<InInt, Integer> {
     @Override
     public boolean isValid(Integer value, ConstraintValidatorContext context) {
         if (!this.nullable) {
-            return null != value && Arrays.stream(this.values).anyMatch(v -> CompareUtil.equals(v, value));
+            return null != value && Arrays.stream(this.values).anyMatch(v -> NumberUtil.equals(v, value));
         }
-        return null == value || Arrays.stream(this.values).anyMatch(v -> CompareUtil.equals(v, value));
+        return null == value || Arrays.stream(this.values).anyMatch(v -> NumberUtil.equals(v, value));
     }
 
 }

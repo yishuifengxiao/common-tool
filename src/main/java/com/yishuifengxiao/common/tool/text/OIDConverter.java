@@ -52,19 +52,25 @@ public class OIDConverter {
 
         // 处理剩余的字节（base128编码）
         long currentValue = 0;
+        boolean expectingMoreBytes = false; // 新增：标记是否期望更多字节
+
         for (int i = 1; i < data.length; i++) {
             byte b = data[i];
             currentValue = (currentValue << 7) | (b & 0x7F);
 
-            // 如果最高位为0，表示这个数字结束
-            if ((b & 0x80) == 0) {
+            // 如果最高位为1，表示还有更多字节
+            if ((b & 0x80) != 0) {
+                expectingMoreBytes = true;
+            } else {
+                // 最高位为0，表示这个数字结束
                 components.add(String.valueOf(currentValue));
                 currentValue = 0;
+                expectingMoreBytes = false;
             }
         }
 
-        // 检查是否有未结束的数字
-        if (currentValue != 0) {
+        // 检查是否有未结束的数字或不完整的base128编码
+        if (currentValue != 0 || expectingMoreBytes) {
             throw new IllegalArgumentException("incomplete base128 encoding");
         }
 
@@ -142,6 +148,7 @@ public class OIDConverter {
         return bytesToHex(resultArray).toUpperCase();
     }
 
+
     /**
      * 将数字编码为base128格式（用于OID编码）
      *
@@ -153,25 +160,28 @@ public class OIDConverter {
             return new byte[]{0};
         }
 
-        byte[] buffer = new byte[5]; // 最大5个字节足够表示uint32
-        int pos = buffer.length - 1;
-
-        // 从低位到高位编码
-        while (n > 0) {
-            buffer[pos] = (byte) (n & 0x7F);
-            if (pos != buffer.length - 1) {
-                buffer[pos] |= 0x80; // 设置最高位，表示还有更多字节
-            }
-            n >>= 7;
-            pos--;
+        // 计算需要的字节数
+        int byteCount = 0;
+        long temp = n;
+        while (temp > 0) {
+            byteCount++;
+            temp >>= 7;
         }
 
-        // 返回有效部分
-        int startPos = pos + 1;
-        byte[] result = new byte[buffer.length - startPos];
-        System.arraycopy(buffer, startPos, result, 0, result.length);
+        byte[] result = new byte[byteCount];
+
+        // 从低位到高位编码
+        for (int i = byteCount - 1; i >= 0; i--) {
+            result[i] = (byte) (n & 0x7F);
+            if (i != byteCount - 1) {
+                result[i] |= 0x80; // 设置最高位，表示还有更多字节（除了最后一个字节）
+            }
+            n >>= 7;
+        }
+
         return result;
     }
+
 
     /**
      * 将十六进制字符串转换为字节数组

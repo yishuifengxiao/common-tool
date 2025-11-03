@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.text.HexUtil;
+import com.yishuifengxiao.common.tool.lang.HexUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 

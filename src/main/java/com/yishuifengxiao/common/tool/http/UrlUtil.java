@@ -4,6 +4,7 @@ import com.yishuifengxiao.common.tool.text.RegexUtil;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -125,12 +126,19 @@ public final class UrlUtil {
         }
     }
 
+        /**
+     * 从URL字符串中提取协议部分
+     *
+     * @param url 输入的URL字符串
+     * @return 返回URL中的协议部分，如果URL为空或解析失败则返回null
+     */
     public static String extractProtocol(String url) {
         if (StringUtils.isBlank(url)) {
             return null;
         }
 
         try {
+            // 使用正则表达式匹配URL中的协议和主机部分
             Matcher matcher = RegexUtil.PATTERN_PROTOCOL_AND_HOST.matcher(url);
             return matcher.find() ? matcher.group(1) : null;
         } catch (IllegalStateException e) {
@@ -152,31 +160,63 @@ public final class UrlUtil {
         if (StringUtils.isBlank(referrer) || StringUtils.isBlank(url)) {
             return null;
         }
+
         url = url.trim();
         referrer = referrer.trim();
 
+        // 判断是否已经是完整URL
         if (RegexUtil.isUrl(url)) {
             return url;
         }
 
-        if (StringUtils.startsWith(url, OsUtils.LEFT_SLASH)) {
-            return StringUtils.substringBeforeLast(referrer, OsUtils.LEFT_SLASH) + url;
+        // 校验 referrer 必须是完整 URL 才能提取基础路径
+        if (!RegexUtil.isUrl(referrer)) {
+            return null;
         }
 
-        if (StringUtils.startsWith(url, RELATIVE_ADDR)) {
-            long count = StringUtils.countMatches(url, RELATIVE_ADDR);
-            String baseReferrer = referrer;
-            for (int i = 0; i < count; i++) {
-                baseReferrer = StringUtils.substringBeforeLast(baseReferrer, OsUtils.LEFT_SLASH);
+        try {
+            if (StringUtils.startsWith(url, OsUtils.LEFT_SLASH)) {
+                int lastSlashIndex = referrer.lastIndexOf(OsUtils.LEFT_SLASH);
+                if (lastSlashIndex <= 8) { // 协议头长度 "http://" or "https://"
+                    return null;
+                }
+                return referrer.substring(0, lastSlashIndex) + url;
             }
-            url = url.replaceFirst("(\\.\\./)+", ""); // 更安全的方式去除 ../
-            return baseReferrer + OsUtils.LEFT_SLASH + url;
-        }
 
-        return StringUtils.substringBeforeLast(referrer, OsUtils.LEFT_SLASH) + OsUtils.LEFT_SLASH + url;
+            if (StringUtils.startsWith(url, RELATIVE_ADDR)) {
+                long count = StringUtils.countMatches(url, RELATIVE_ADDR);
+                String baseReferrer = referrer;
+
+                for (int i = 0; i < count; i++) {
+                    int lastSlashIndex = baseReferrer.lastIndexOf(OsUtils.LEFT_SLASH);
+                    if (lastSlashIndex <= 8) {
+                        return null;
+                    }
+                    baseReferrer = baseReferrer.substring(0, lastSlashIndex);
+                }
+
+                // 安全地移除所有 "../" 并规范化路径
+                String normalizedRelativePath = Paths.get("", url).normalize().toString().replace('\\', '/');
+                if (normalizedRelativePath.startsWith("../")) {
+                    return null; // 路径越界
+                }
+
+                return baseReferrer + OsUtils.LEFT_SLASH + normalizedRelativePath;
+            }
+
+            int lastSlashIndex = referrer.lastIndexOf(OsUtils.LEFT_SLASH);
+            if (lastSlashIndex <= 8) {
+                return null;
+            }
+            return referrer.substring(0, lastSlashIndex) + OsUtils.LEFT_SLASH + url;
+
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    /**
+
+        /**
      * <p>
      * 将查询字符串转为map结构
      * </p>
@@ -194,21 +234,47 @@ public final class UrlUtil {
             return null;
         }
 
-        String[] tokens = StringUtils.splitByWholeSeparatorPreserveAllTokens(queryString, OsUtils.SEPARATOR_AND);
-        if (null == tokens) {
+        String[] tokens = queryString.split("&");
+        if (tokens.length == 0) {
             return null;
         }
 
         Map<String, String> map = new HashMap<>(tokens.length);
         for (String token : tokens) {
-            String[] strings = token.split("=", 2); // 最多分割成两段
-            if (strings.length < 2 || StringUtils.isBlank(strings[0])) {
+            if (StringUtils.isBlank(token)) {
                 continue;
             }
-            String key = strings[0].trim();
-            String value = strings.length > 1 ? strings[1] : "";
+
+            String[] strings = token.split("=", 2);
+            if (strings.length < 1 || StringUtils.isBlank(strings[0])) {
+                continue;
+            }
+
+            String key;
+            String value;
+
+            try {
+                key = java.net.URLDecoder.decode(strings[0].trim(), "UTF-8");
+                // 对于值部分，如果包含不完整的转义序列，直接使用原始值
+                if (strings.length > 1) {
+                    try {
+                        value = java.net.URLDecoder.decode(strings[1], "UTF-8");
+                    } catch (IllegalArgumentException e) {
+                        // 如果解码失败（如不完整的转义序列），使用原始值
+                        value = strings[1];
+                    }
+                } else {
+                    value = "";
+                }
+            } catch (java.io.UnsupportedEncodingException e) {
+                // 正常不会发生，UTF-8 必定支持
+                throw new RuntimeException("Unsupported encoding", e);
+            }
+
             map.put(key, value);
         }
         return map;
     }
+
+
 }

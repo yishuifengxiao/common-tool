@@ -3,10 +3,6 @@
  */
 package com.yishuifengxiao.common.tool.lang;
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Arrays;
-
 /**
  * <p>
  * 文本工具
@@ -67,61 +63,6 @@ public class TextUtil {
                 .toString();
     }
 
-    /**
-     * 判断文本里是否包含指定的字符(不区分大小写)
-     *
-     * @param text       原始文本
-     * @param searchStrs 待查找的文本
-     * @return 若包含则返回为true, 否则为false
-     */
-    public static boolean containsAnyIgnoreCase(String text, String... searchStrs) {
-        if (text == null || searchStrs == null || searchStrs.length == 0) {
-            return false;
-        }
-        return Arrays.stream(searchStrs).anyMatch(t -> StringUtils.containsIgnoreCase(text, t));
-    }
-
-    /**
-     * 判断文本里是否包含指定的字符(区分大小写)
-     *
-     * @param text       原始文本
-     * @param searchStrs 待查找的文本
-     * @return 若包含则返回为true, 否则为false
-     */
-    public static boolean containsAny(String text, String... searchStrs) {
-        if (text == null || searchStrs == null || searchStrs.length == 0) {
-            return false;
-        }
-        return Arrays.stream(searchStrs).anyMatch(t -> StringUtils.contains(text, t));
-    }
-
-    /**
-     * 目标文本里是否包含指定的字符串(忽略大小写)
-     *
-     * @param searchStr 待匹配的文本
-     * @param strs      原始文本集
-     * @return 若包含则返回为true, 否则为false
-     */
-    public static boolean containsIgnoreCaseInAny(String searchStr, String... strs) {
-        if (searchStr == null || strs == null || strs.length == 0) {
-            return false;
-        }
-        return Arrays.stream(strs).anyMatch(t -> StringUtils.containsIgnoreCase(t, searchStr));
-    }
-
-    /**
-     * 目标文本里是否包含指定的字符串(区分大小写)
-     *
-     * @param searchStr 待匹配的文本
-     * @param strs      原始文本集
-     * @return 若包含则返回为true, 否则为false
-     */
-    public static boolean containsInAny(String searchStr, String... strs) {
-        if (searchStr == null || strs == null || strs.length == 0) {
-            return false;
-        }
-        return Arrays.stream(strs).anyMatch(t -> StringUtils.contains(t, searchStr));
-    }
 
     /**
      * 转换为下划线,例如:将CallBack转换成 call_back

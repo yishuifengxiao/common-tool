@@ -1,6 +1,7 @@
 package com.yishuifengxiao.common.tool.datetime;
 
 import com.yishuifengxiao.common.tool.utils.OsUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -339,4 +340,60 @@ public class LocalDateTimeUtil {
 
     }
 
+    /**
+     * 将字符串解析为LocalDateTime形式的时间
+     *
+     * @param timeStr  需要解析的字符串
+     * @param patterns 解析规则，当未填写解析规则时使用默认的解析规则
+     * @return LocalDateTime形式的时间
+     */
+    public static LocalDateTime parse(String timeStr, String... patterns) {
+        if (StringUtils.isBlank(timeStr)) {
+            return null;
+        }
+
+        String trimmedTimeStr = timeStr.trim();
+
+        // 默认支持的日期时间格式
+        String[] defaultPatterns = {
+                "yyyy-MM-dd HH:mm:ss",  // 标准日期时间格式
+                "yyyy-MM-dd HH:mm",     // 简化的日期时间格式
+                "yyyy-MM-dd",           // 标准日期格式
+                "yyyy/MM/dd HH:mm:ss",  // 斜杠分隔的日期时间格式
+                "yyyy/MM/dd HH:mm",     // 斜杠分隔的简化日期时间格式
+                "yyyy/MM/dd",           // 斜杠分隔的日期格式
+                "yyyy-MM-dd'T'HH:mm:ss.SSSZ",  // ISO格式
+                "yyyy-MM-dd'T'HH:mm:ss",      // 简化的ISO格式
+                "yyyyMMddHHmmss",       // 紧凑格式
+                "yyyyMMdd"              // 紧凑日期格式
+        };
+
+        // 如果用户提供了自定义格式，则使用用户提供的格式
+        String[] formatPatterns = (patterns != null && patterns.length > 0) ?
+                patterns : defaultPatterns;
+
+        // 尝试使用每种格式进行解析
+        for (String pattern : formatPatterns) {
+            try {
+                java.time.format.DateTimeFormatter formatter =
+                        java.time.format.DateTimeFormatter.ofPattern(pattern);
+
+                // 根据格式类型决定解析方式
+                if (pattern.contains("HH") || pattern.contains("mm") || pattern.contains("ss")) {
+                    // 包含时间部分的格式，解析为LocalDateTime
+                    return LocalDateTime.parse(trimmedTimeStr, formatter);
+                } else {
+                    // 只包含日期部分的格式，解析为LocalDate然后转换为LocalDateTime
+                    java.time.LocalDate date = java.time.LocalDate.parse(trimmedTimeStr, formatter);
+                    return date.atStartOfDay();
+                }
+            } catch (java.time.format.DateTimeParseException e) {
+                // 当前格式解析失败，尝试下一种格式
+                continue;
+            }
+        }
+
+        // 所有格式都尝试失败，返回null
+        return null;
+    }
 }

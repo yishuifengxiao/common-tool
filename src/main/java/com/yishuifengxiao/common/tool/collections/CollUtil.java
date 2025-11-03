@@ -6,9 +6,7 @@ package com.yishuifengxiao.common.tool.collections;
 import com.yishuifengxiao.common.tool.entity.Page;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -31,6 +29,49 @@ import java.util.stream.Stream;
  * @since 1.0.0
  */
 public final class CollUtil {
+
+    /**
+     * 将可变参数转换为Map对象
+     * 参数必须成对出现，每对参数中第一个作为key，第二个作为value
+     *
+     * @param vals 可变参数列表，必须为偶数个，格式为[key1, value1, key2, value2, ...]
+     * @return 包含所有键值对的HashMap对象
+     * @throws IllegalArgumentException 当参数个数为奇数时抛出异常
+     */
+    public static Map toMap(Object... vals) {
+        if (null == vals || vals.length == 0) {
+            return new HashMap<>();
+        }
+        if (vals.length % 2 != 0) {
+            throw new IllegalArgumentException("vals must be an even number, but got length: " + vals.length);
+        }
+        // 计算初始容量，避免频繁扩容
+        int capacity = (int) Math.ceil(vals.length / 2.0 * 1.5);
+        Map<Object, Object> map = new LinkedHashMap<>(capacity);
+        int len = vals.length;
+        // 遍历参数数组，每隔两个元素组成一个键值对
+        for (int i = 0; i < len; i += 2) {
+            map.put(vals[i], vals[i + 1]);
+        }
+        return map;
+    }
+
+
+    /**
+     * 创建一个安全的Stream，如果输入为null则返回空Stream
+     *
+     * @param data 输入的Stream数据
+     * @param <T>  Stream元素类型
+     * @return 如果data不为null，返回原Stream；否则返回空Stream
+     */
+    public static <T> Stream<T> stream(Stream<T> data) {
+        if (null == data) {
+            return Stream.empty();
+        }
+        return data;
+    }
+
+
     /**
      * 将数据安全地转换成串行流Stream
      *
@@ -40,10 +81,11 @@ public final class CollUtil {
      */
     public static <T> Stream<T> stream(Collection<T> data) {
         if (null == data) {
-            data = new ArrayList<>();
+            return Stream.empty();
         }
         return data.stream();
     }
+
 
     /**
      * 将数据安全地转换成串行流Stream
@@ -54,7 +96,7 @@ public final class CollUtil {
      */
     public static <T> Stream<T> stream(T[] data) {
         if (null == data) {
-            return new ArrayList<T>().stream();
+            return Stream.empty();
         }
         return Arrays.stream(data);
     }
@@ -71,8 +113,25 @@ public final class CollUtil {
         if (null == objs) {
             return new ArrayList<>();
         }
-        return Arrays.asList(objs).stream().collect(Collectors.toList());
+        return new ArrayList<>(Arrays.asList(objs));
     }
+
+
+        /**
+     * 将集合转换为数组
+     *
+     * @param vals 要转换的集合，可以为null
+     * @return 转换后的数组，如果输入为null则返回空数组
+     */
+    public static <T> T[] toArray(Collection<T> vals) {
+        // 处理null输入情况，返回空数组
+        if (null == vals) {
+            return (T[]) new Object[0];
+        }
+        // 使用集合的toArray方法转换为数组
+        return vals.toArray((T[]) new Object[0]);
+    }
+
 
 
     /**
@@ -86,8 +145,9 @@ public final class CollUtil {
         if (null == objs) {
             return new HashSet<>();
         }
-        return Arrays.asList(objs).stream().collect(Collectors.toSet());
+        return new HashSet<>(Arrays.asList(objs));
     }
+
 
     /**
      * 取出数组的第一个元素, 若数组为空则返回null
@@ -97,9 +157,11 @@ public final class CollUtil {
      * @return 数组的第一个元素
      */
     public static <T> Optional<T> first(T[] data) {
+        // 检查数组是否为空或长度为0
         if (data == null || data.length == 0) {
             return Optional.empty();
         }
+        // 返回数组第一个元素的Optional包装
         return Optional.ofNullable(data[0]);
     }
 
@@ -112,7 +174,7 @@ public final class CollUtil {
      * @return 集合里的第一个元素
      */
     public static <T> Optional<T> first(Collection<T> data) {
-        if (data == null || data.size() == 0) {
+        if (data == null || data.isEmpty()) {
             return Optional.empty();
         }
         Iterator<T> it = data.iterator();
@@ -121,15 +183,15 @@ public final class CollUtil {
 
 
     /**
-     * 取出List中的最后一个非空元素,如果Stream为空则返回null
+     * 取出List中的最后一个元素,如果List为空则返回empty Optional
      *
      * @param <T>  List里的数据的类型
      * @param data 链表
-     * @return List中的第一个非空元素
+     * @return List中的最后一个元素的Optional包装
      */
     public static <T> Optional<T> last(List<T> data) {
-        if (data == null || data.size() == 0) {
-            return null;
+        if (data == null || data.isEmpty()) {
+            return Optional.empty();
         }
         return Optional.ofNullable(data.get(data.size() - 1));
     }
@@ -142,47 +204,56 @@ public final class CollUtil {
      * @param a   需要转换的数据
      * @return 转换后的list
      */
-    @SafeVarargs
     public static <T> List<T> asList(T... a) {
         if (null == a || a.length == 0) {
             return new ArrayList<>();
         }
-        List<T> list = new ArrayList<>(a.length);
-        for (int i = 0; i < a.length; i++) {
-            list.add(a[i]);
-        }
-        return list;
+        return new ArrayList<>(Arrays.asList(a));
     }
+
 
     /**
      * 将不定参数转为数组
      *
-     * @param vals 不定参数
+     * @param vals 不定参数，不能为null
      * @param <T>  参数类型
-     * @return 数组
+     * @return 数组，返回的数组是传入参数的直接引用，修改数组会影响原始参数
+     * @throws IllegalArgumentException if vals is null
      */
     public static <T> T[] asArray(T... vals) {
+        if (vals == null) {
+            throw new IllegalArgumentException("参数vals不能为null");
+        }
         return vals;
     }
+
 
     /**
      * 将多个链表合并成一个链表
      *
-     * @param list 待合并的链表
-     * @param <T>  数据类型
+     * @param collections 待合并的链表
+     * @param <T>         数据类型
      * @return 合并后的链表
      */
-    @SuppressWarnings("unchecked")
-    public static <T> List<T> merge(Collection<T>... list) {
-        if (null == list) {
+    public static <T> List<T> merge(Collection<T>... collections) {
+        if (null == collections) {
             return Collections.emptyList();
         }
-        List<T> result = new ArrayList<>();
-        for (Collection<T> data : list) {
-            if (null == data) {
+
+        // 预估初始容量以减少扩容
+        int initialCapacity = 0;
+        for (Collection<T> collection : collections) {
+            if (collection != null) {
+                initialCapacity += collection.size();
+            }
+        }
+
+        List<T> result = new ArrayList<>(initialCapacity > 0 ? initialCapacity : 10);
+        for (Collection<T> collection : collections) {
+            if (null == collection) {
                 continue;
             }
-            result.addAll(data);
+            result.addAll(collection);
         }
         return result;
     }
@@ -200,11 +271,7 @@ public final class CollUtil {
         if (null == a || a.length == 0) {
             return new HashSet<>();
         }
-        Set<T> list = new HashSet<>(a.length);
-        for (int i = 0; i < a.length; i++) {
-            list.add(a[i]);
-        }
-        return list;
+        return new HashSet<>(Arrays.asList(a));
     }
 
 
@@ -217,11 +284,12 @@ public final class CollUtil {
      * @return 链表为空或index超过容量时返回为null
      */
     public static <T> Optional<T> get(List<T> data, int index) {
-        if (null == data || data.size() <= index) {
+        if (null == data || index < 0 || index >= data.size()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(data.get(index));
+        return Optional.of(data.get(index));
     }
+
 
     /**
      * 获取数组里的第index个元素
@@ -232,11 +300,12 @@ public final class CollUtil {
      * @return 数组为空或index超过容量时返回为null
      */
     public static <T> Optional<T> get(T[] data, int index) {
-        if (null == data || data.length <= index) {
+        if (null == data || index < 0 || data.length <= index) {
             return Optional.empty();
         }
         return Optional.ofNullable(data[index]);
     }
+
 
     /**
      * 遍历一个集合
@@ -249,9 +318,12 @@ public final class CollUtil {
         if (null == collection || collection.isEmpty()) {
             return;
         }
-        AtomicLong atomic = new AtomicLong(0L);
-        collection.stream().forEach(v -> consumer.accept(atomic.getAndIncrement(), v));
+        long index = 0L;
+        for (T item : collection) {
+            consumer.accept(index++, item);
+        }
     }
+
 
     /**
      * 判断分页对象是否为空
@@ -261,16 +333,9 @@ public final class CollUtil {
      * @return 如果是空返回为true，否则为false
      */
     public static <T> boolean isEmpty(Page<T> page) {
-
-        if (page == null) {
-            return true;
-        }
-        if (page.getData() == null || page.getData().size() == 0) {
-            return true;
-        }
-        return false;
-
+        return page == null || page.getData() == null || page.getData().isEmpty();
     }
+
 
     /**
      * 判断分页对象是否不为空
@@ -357,33 +422,41 @@ public final class CollUtil {
         return Arrays.stream(collections).allMatch(CollUtil::isEmpty);
     }
 
+
     /**
      * 是否有一个集合为空或null
      *
      * @param collections 待判断的集合
      * @return 只要有一个集合为空或者null则返回为true, 否则为false
      */
-    @SuppressWarnings({"rawtypes"})
     public static boolean isAnyEmpty(Collection... collections) {
         if (null == collections) {
-            return false;
+            return true;
         }
         return Arrays.stream(collections).anyMatch(CollUtil::isEmpty);
     }
+
 
     /**
      * 是否所有的集合均不为空或者null
      *
      * @param collections 待判断的集合
-     * @return 只要有一个集合为空或者null则返回为true, 否则为false
+     * @return 只要有一个集合为空或者null则返回为false, 否则为true
      */
     @SuppressWarnings({"rawtypes"})
     public static boolean isNoneEmpty(Collection... collections) {
         if (null == collections) {
             return false;
         }
-        return !isAnyEmpty(collections);
+
+        for (Collection collection : collections) {
+            if (collection == null || collection.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
+
 
     /**
      * 判断集合是否不为空

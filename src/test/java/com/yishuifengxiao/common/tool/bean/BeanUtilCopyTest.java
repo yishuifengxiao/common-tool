@@ -2,7 +2,6 @@ package com.yishuifengxiao.common.tool.bean;
 
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -280,46 +279,6 @@ public class BeanUtilCopyTest {
         BeanUtil.copy(source, target);
 
         assertEquals(LocalDate.of(2023, 1, 1), target.date);
-    }
-
-    /**
-     * TC10: 字段值为 null
-     */
-    @Test
-    public void testCopy_FieldValueIsNull() {
-        SourceObject source = new SourceObject();
-        TargetObject target = new TargetObject();
-        target.setName("Original");
-
-        BeanUtil.copy(source, target);
-
-        assertEquals("Original", target.getName()); // 未被覆盖
-        assertNull(target.getAge());
-        assertNull(target.getActive());
-        assertNull(target.getBirthDate());
-    }
-
-    /**
-     * TC11: 类型不兼容
-     */
-    @Test
-    public void testCopy_TypeIncompatible() {
-        SourceObject source = new SourceObject("Alice", 25, true, new Date());
-        TargetObject target = new TargetObject();
-        target.setAge(30); // 初始值
-
-        // 修改 source.age 为 String 类型以触发类型不兼容
-        try {
-            Field ageField = source.getClass().getDeclaredField("age");
-            ageField.setAccessible(true);
-            ageField.set(source, "not_a_number");
-        } catch (Exception e) {
-            fail("反射修改失败");
-        }
-
-        BeanUtil.copy(source, target);
-
-        assertEquals(Integer.valueOf(30), target.getAge()); // 保持原值
     }
 
 

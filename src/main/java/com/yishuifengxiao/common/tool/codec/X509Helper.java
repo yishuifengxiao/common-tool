@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.text.HexUtil;
+import com.yishuifengxiao.common.tool.lang.HexUtil;
 import com.yishuifengxiao.common.tool.text.OIDConverter;
 import com.yishuifengxiao.common.tool.text.TLVUtil;
 import lombok.AllArgsConstructor;

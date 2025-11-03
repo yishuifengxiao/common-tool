@@ -9,12 +9,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * <p>
@@ -158,28 +161,30 @@ public final class DateTimeUtil {
      * @param patterns 解析规则 当未填写解析规则时使用默认的解析规则
      * @return Date形式的时间
      */
-    public synchronized static Date parseDate(String timeStr, String... patterns) {
+    public static Date parseDate(String timeStr, String... patterns) {
         if (StringUtils.isBlank(timeStr)) {
             return null;
         }
         try {
-            patterns = (null != patterns && patterns.length > 0) ? patterns :
-                    new String[]{DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT,
-                            SIMPLE_DATETIME_FORMAT, DEFAULT_FULL_DATE_FORMAT,
-                            DEFAULT_SLASH_DATE_FORMAT};
-            return DateUtils.parseDate(timeStr.trim(), patterns);
-        } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("There was a problem parsing the time from the string {} according to "
-                                + "the parsing rule {}, " +
-                                "and " +
-                                "the reason for the problem is {}", patterns, timeStr,
-                        e);
+            if (null == patterns || patterns.length == 0) {
+                patterns = new String[]{DEFAULT_DATETIME_FORMAT, DEFAULT_DATE_FORMAT,
+                        SIMPLE_DATETIME_FORMAT, DEFAULT_FULL_DATE_FORMAT,
+                        DEFAULT_SLASH_DATE_FORMAT};
+            } else {
+                // 过滤掉 null 元素
+                patterns = Arrays.stream(patterns).filter(Objects::nonNull).toArray(String[]::new);
             }
-
+            return DateUtils.parseDate(timeStr.trim(), patterns);
+        } catch (ParseException e) {
+            if (log.isDebugEnabled()) {
+                log.debug("There was a problem parsing the time from the string {} according to " +
+                                "the parsing rule {}, and the reason for the problem is {}",
+                        timeStr, Arrays.toString(patterns), e);
+            }
             throw new UncheckedException(e);
         }
     }
+
 
     /**
      * 将LocalDateTime形式的时间格式化为yyyy-MM-dd HH:mm:ss格式的字符串
