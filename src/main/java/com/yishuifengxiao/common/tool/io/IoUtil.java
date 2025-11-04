@@ -200,16 +200,14 @@ public class IoUtil {
 
     }
 
+
     /**
-     * <p>
-     * Copy the contents of the given InputStream to the given OutputStream. Closes
-     * both streams when done.
-     * </p>
+     * 将输入流的数据复制到输出流中
      *
-     * @param in  the stream to copy from
-     * @param out the stream to copy to
-     * @return the number of bytes copied
-     * @throws IOException 转换时出现问题
+     * @param in  输入流，提供要复制的数据
+     * @param out 输出流，接收复制的数据
+     * @return 返回复制的字节总数
+     * @throws IOException 当读取或写入过程中发生I/O错误时抛出
      */
     public static int copy(InputStream in, OutputStream out) throws IOException {
         try {
@@ -218,6 +216,7 @@ public class IoUtil {
             int bufferSize = Math.min(Math.max(DEFAULT_BUFFER_SIZE, in.available()), MAX_BUFFER_SIZE);
             byte[] buffer = new byte[bufferSize];
             int bytesRead = -1;
+            // 循环读取输入流数据并写入输出流，直到读取完毕
             while ((bytesRead = in.read(buffer)) != -1) {
                 out.write(buffer, 0, bytesRead);
                 byteCount += bytesRead;
@@ -229,20 +228,20 @@ public class IoUtil {
         }
     }
 
+
     /**
-     * <p>
-     * 将字符串复制到指定的文件中
-     * </p>
+     * 将文本内容写入指定文件
      *
-     * @param text 待输入的字符串
-     * @param file 目标文件
-     * @return 目标文件
-     * @throws IOException 转换时出现问题
+     * @param text 要写入的文本内容，如果为空或空白字符则不执行写入操作
+     * @param file 目标文件对象，不能为null
+     * @return 返回写入的文件对象
+     * @throws IOException 当文件写入过程中发生IO异常时抛出
      */
-    public static File string2File(String text, @NotNull File file) throws IOException {
+    public static File writeToFile(String text, @NotNull File file) throws IOException {
         if (StringUtils.isBlank(text) || null == file) {
             return file;
         }
+        // 使用缓冲写入器将文本写入文件
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
             bw.write(text);
             bw.flush();
@@ -250,36 +249,37 @@ public class IoUtil {
         return file;
     }
 
+
     /**
-     * 将文件按照utf-8编码转换为字符串
+     * 将指定文件的内容读取为字符串
      *
-     * @param file 待转换的文件
-     * @return 转换后的字符串
-     * @throws IOException 转换时出现问题
+     * @param file 要读取的文件，不能为空
+     * @return 文件内容的字符串表示
+     * @throws IOException 当文件读取过程中发生IO异常时抛出
      */
-    public static String file2String(@NotNull File file) throws IOException {
+    public static String readFileAsString(@NotNull File file) throws IOException {
         return inputStream2String(new FileInputStream(file), StandardCharsets.UTF_8.name());
     }
 
+
     /**
-     * 将文件按照指定的编码转换为字符串
+     * 将文件内容读取为字符串
      *
-     * @param file        待转换的文件
-     * @param charsetName 编码
-     * @return 转换后的字符串
-     * @throws IOException 转换时出现问题
+     * @param file        文件对象，不能为空
+     * @param charsetName 字符集名称，用于指定文件内容的编码格式
+     * @return 返回文件内容的字符串表示
+     * @throws IOException 当文件读取过程中发生IO异常时抛出
      */
-    public static String file2String(@NotNull File file, String charsetName) throws IOException {
+    public static String readFileAsString(@NotNull File file, String charsetName) throws IOException {
         return inputStream2String(new FileInputStream(file), charsetName);
     }
 
+
     /**
-     * <p>
-     * 将base64字符串转换成文件
-     * </p>
+     * 将Base64编码的文件数据转换为临时文件
      *
-     * @param base64File base64格式的文件
-     * @return 转换后的文件
+     * @param base64File Base64编码的文件数据字符串
+     * @return 转换后的文件对象
      */
     public static File base64ToFile(String base64File) {
         File file = new File(IdWorker.uuid());
@@ -287,6 +287,7 @@ public class IoUtil {
         BufferedOutputStream bos = null;
         FileOutputStream fos = null;
         try {
+            // 解码Base64数据并写入文件
             byte[] bytes = Base64.getDecoder().decode(base64File);
             fos = new FileOutputStream(file);
             bos = new BufferedOutputStream(fos);
@@ -300,20 +301,25 @@ public class IoUtil {
         return file;
     }
 
+
+
     /**
-     * <p>
-     * 将文件转换成base64字符串
-     * </p>
+     * 将指定文件读取并转换为Base64编码字符串
      *
-     * @param file 待转换的文件
-     * @return 转换后的base64字符串
-     * @throws IOException 转换时发生异常
+     * @param file 要读取的文件对象
+     * @return 文件内容的Base64编码字符串
+     * @throws IOException 当文件读取过程中发生IO异常时抛出
      */
-    public static String file2Base64(File file) throws IOException {
+    public static String readFileToBase64(File file) throws IOException {
+        // 使用try-with-resources确保文件流正确关闭
         try (FileInputStream inputFile = new FileInputStream(file)) {
+            // 创建与文件大小相同的字节数组缓冲区
             byte[] buffer = new byte[(int) file.length()];
+            // 将文件内容读取到缓冲区中
             inputFile.read(buffer);
+            // 将字节数组编码为Base64字符串并返回
             return Base64.getEncoder().encodeToString(buffer);
         }
     }
+
 }
