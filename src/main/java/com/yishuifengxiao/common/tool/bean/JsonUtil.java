@@ -456,7 +456,7 @@ public final class JsonUtil {
     static {
         try {
             default_mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-            // 反序列化时候遇到不匹配的属性并不抛出异常
+            // 反序列化时候遇到不匹配的属性并不抛出异常 忽略未知属性
             default_mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             //默认情况下ObjectMapper序列化没有属性的空对象时会抛异常。可以通过SerializationFeature
             // .FAIL_ON_EMPTY_BEANS设置当对象没有属性时，让其序列化能成功，不抛异常
@@ -493,6 +493,9 @@ public final class JsonUtil {
             // 需要设置Feature.ALLOW_UNQUOTED_FIELD_NAMES属性来处理这种没有双引号的json串。
             //开启属性名没有双引号的非标准json字符串
             default_mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+            // 允许没有默认构造函数
+            default_mapper.configure(MapperFeature.USE_GETTERS_AS_SETTERS, false);
+            default_mapper.configure(MapperFeature.INFER_PROPERTY_MUTATORS, false);
 
             with_class_mapper = default_mapper.copy();
             // 启用反序列化所需的类型信息,在属性中添加@class

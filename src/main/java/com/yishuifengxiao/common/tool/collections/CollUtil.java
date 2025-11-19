@@ -117,7 +117,7 @@ public final class CollUtil {
     }
 
 
-        /**
+    /**
      * 将集合转换为数组
      *
      * @param vals 要转换的集合，可以为null
@@ -131,7 +131,6 @@ public final class CollUtil {
         // 使用集合的toArray方法转换为数组
         return vals.toArray((T[]) new Object[0]);
     }
-
 
 
     /**
@@ -222,7 +221,7 @@ public final class CollUtil {
      */
     public static <T> T[] asArray(T... vals) {
         if (vals == null) {
-            throw new IllegalArgumentException("参数vals不能为null");
+            return (T[]) new Object[0];
         }
         return vals;
     }

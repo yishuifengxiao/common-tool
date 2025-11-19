@@ -4,6 +4,8 @@
 package com.yishuifengxiao.common.tool.bean;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,7 +13,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,8 +59,7 @@ public final class BeanUtil {
         List<Field> sourceFields = ClassUtil.fields(source.getClass(), true);
 
         // 构建source字段映射表用于快速查找
-        Map<String, Field> sourceFieldMap = sourceFields.stream()
-                .collect(Collectors.toMap(Field::getName, f -> f, (existing, replacement) -> existing));
+        Map<String, Field> sourceFieldMap = sourceFields.stream().collect(Collectors.toMap(Field::getName, f -> f, (existing, replacement) -> existing));
 
         for (Field targetField : targetFields) {
             String fieldName = targetField.getName();
@@ -240,8 +243,7 @@ public final class BeanUtil {
                     return convertToDateTime(value, targetType);
                 }
                 // 处理复杂对象类型的递归转换
-                else if (!targetType.isEnum() && !targetType.isArray() &&
-                        !targetType.isPrimitive() && !targetType.getPackage().getName().startsWith("java.lang")) {
+                else if (!targetType.isEnum() && !targetType.isArray() && !targetType.isPrimitive() && !targetType.getPackage().getName().startsWith("java.lang")) {
                     // 尝试创建目标对象并递归复制属性
                     try {
                         T targetInstance = targetType.getDeclaredConstructor().newInstance();
@@ -277,8 +279,7 @@ public final class BeanUtil {
             Class<?> targetComponentType = targetArrayType.getComponentType();
 
             // 先将Iterable转换为List以便获取长度
-            List<?> list = StreamSupport.stream(iterable.spliterator(), false)
-                    .collect(Collectors.toList());
+            List<?> list = StreamSupport.stream(iterable.spliterator(), false).collect(Collectors.toList());
 
             int length = list.size();
             // 创建目标数组
@@ -308,9 +309,7 @@ public final class BeanUtil {
      * 判断是否为日期时间类型
      */
     private static boolean isDateTimeType(Class<?> type) {
-        return java.util.Date.class.isAssignableFrom(type) ||
-                java.time.temporal.TemporalAccessor.class.isAssignableFrom(type) ||
-                java.time.Instant.class.isAssignableFrom(type);
+        return java.util.Date.class.isAssignableFrom(type) || java.time.temporal.TemporalAccessor.class.isAssignableFrom(type) || java.time.Instant.class.isAssignableFrom(type);
     }
 
     /**
@@ -332,8 +331,7 @@ public final class BeanUtil {
             if (targetType == Boolean.class || targetType == boolean.class) {
                 // 增强：支持更多的布尔值表示
                 String lowerValue = value.trim().toLowerCase();
-                return (T) Boolean.valueOf("true".equals(lowerValue) || "yes".equals(lowerValue) ||
-                        "y".equals(lowerValue) || "1".equals(lowerValue));
+                return (T) Boolean.valueOf("true".equals(lowerValue) || "yes".equals(lowerValue) || "y".equals(lowerValue) || "1".equals(lowerValue));
             }
 
             // 处理数字类型
@@ -439,7 +437,7 @@ public final class BeanUtil {
                         if (java.util.Date.class.isAssignableFrom(targetType)) {
                             return (T) new java.util.Date(timestamp);
                         } else if (targetType == java.time.LocalDateTime.class) {
-                            return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(timestamp), java.time.ZoneId.systemDefault());
+return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(timestamp), java.time.ZoneId.systemDefault());
                         } else if (targetType == java.time.Instant.class) {
                             return (T) java.time.Instant.ofEpochMilli(timestamp);
                         }
@@ -525,7 +523,7 @@ public final class BeanUtil {
 
             // 获取源数组的长度
             int length = java.lang.reflect.Array.getLength(sourceArray);
-            // 创建目标数组
+// 创建目标数组
             Object targetArray = java.lang.reflect.Array.newInstance(targetComponentType, length);
 
             // 遍历源数组，转换每个元素
@@ -657,16 +655,161 @@ public final class BeanUtil {
      *
      * @param <T>   目标对象的类型
      * @param map   原始的map对象数据
-     * @param clazz 目标对象
-     * @return 转换后的java对象
+     * @param clazz 目标对象的Class类型
+     * @return 转换后的java对象，如果输入map为null则返回null
      */
     @SuppressWarnings({"rawtypes"})
     public static <T> T mapToBean(Map map, Class<T> clazz) {
         if (null == map) {
             return null;
         }
-        return JsonUtil.str2Bean(JsonUtil.toJSONString(map), clazz);
+        ObjectMapper mapper = JsonUtil.mapper();
+        try {
+            // 使用Jackson的convertValue方法进行转换
+            return mapper.convertValue(map, clazz);
+        } catch (IllegalArgumentException e) {
+            // 如果转换失败，尝试使用备用方法
+            return (T) mapToBeanWithFallback(mapper, map, clazz);
+        }
     }
+
+
+    /**
+     * 备用转换方法（处理没有默认构造函数的情况）
+     *
+     * @param mapper ObjectMapper实例，用于JSON序列化和反序列化
+     * @param map 包含属性键值对的Map对象
+     * @param clazz 目标Bean类的Class对象
+     * @return 转换后的Bean实例
+     */
+    private static <T> T mapToBeanWithFallback(ObjectMapper mapper, Map<String, Object> map, Class<T> clazz) {
+        try {
+            // 方法1: 通过JSON字符串转换
+            String json = mapper.writeValueAsString(map);
+            return mapper.readValue(json, clazz);
+        } catch (Exception e1) {
+            try {
+                // 方法2: 尝试使用第一个可用的构造函数
+                return tryConstructors(mapper, map, clazz);
+            } catch (Exception e2) {
+                throw new UncheckedException("无法创建 " + clazz.getName() + " 的实例: " + e1.getMessage() + ", " + e2.getMessage());
+            }
+        }
+    }
+
+
+    /**
+     * 尝试使用构造函数创建实例
+     *
+     * @param mapper ObjectMapper对象，用于处理JSON映射
+     * @param map    包含字段名和对应值的映射表
+     * @param clazz  要创建实例的目标类
+     * @return 创建的实例对象
+     */
+    private static <T> T tryConstructors(ObjectMapper mapper, Map<String, Object> map, Class<T> clazz) {
+        Constructor<?>[] constructors = clazz.getDeclaredConstructors();
+
+        // 按参数数量排序，优先尝试参数少的构造函数
+        Arrays.sort(constructors, (c1, c2) -> Integer.compare(c1.getParameterCount(), c2.getParameterCount()));
+
+        // 遍历所有声明的构造函数
+        for (Constructor<?> constructor : constructors) {
+            try {
+                constructor.setAccessible(true);
+                
+                // 对于无参构造函数
+                if (constructor.getParameterCount() == 0) {
+                    T instance = (T) constructor.newInstance();
+                    // 使用反射设置字段值
+                    setFieldsFromMap(mapper, instance, map);
+                    return instance;
+                }
+                // 对于带参数的构造函数
+                else {
+                    // 获取构造函数参数
+                    Class<?>[] paramTypes = constructor.getParameterTypes();
+                    Parameter[] parameters = constructor.getParameters();
+                    Object[] args = new Object[paramTypes.length];
+                    
+                    // 尝试从map中获取参数值
+                    boolean allParamsFound = true;
+                    for (int i = 0; i < parameters.length; i++) {
+                        String paramName = parameters[i].getName();
+                        Object value = map.get(paramName);
+                        
+                        if (value == null) {
+                            // 如果参数名在map中不存在，尝试使用字段名（去掉set/get前缀）
+                            String fieldName = paramName;
+                            if (paramName.startsWith("arg")) {
+                                // 对于编译生成的参数名（如arg0, arg1），尝试使用字段名
+                                List<Field> fields = ClassUtil.fields(clazz);
+                                if (i < fields.size()) {
+                                    fieldName = fields.get(i).getName();
+                                    value = map.get(fieldName);
+                                }
+                            } else {
+                                value = map.get(fieldName);
+                            }
+                        }
+                        
+                        if (value != null) {
+                            // 类型转换
+                            if (!paramTypes[i].isAssignableFrom(value.getClass())) {
+                                value = mapper.convertValue(value, paramTypes[i]);
+                            }
+                            args[i] = value;
+                        } else {
+                            allParamsFound = false;
+                            break;
+                        }
+                    }
+                    
+                    if (allParamsFound) {
+                        return (T) constructor.newInstance(args);
+                    }
+                }
+            } catch (Exception e) {
+                // 继续尝试下一个构造函数
+                if (log.isDebugEnabled()) {
+                    log.debug("尝试构造函数失败: {}", constructor, e);
+                }
+            }
+        }
+        throw new UncheckedException("没有找到可用的构造函数");
+    }
+
+
+    /**
+     * 使用反射设置字段值
+     * 该方法通过反射机制，将Map中的键值对映射到目标对象的对应字段上。
+     * 支持自动类型转换，当Map中的值类型与目标字段类型不匹配时，
+     * 会使用ObjectMapper进行类型转换。
+     *
+     * @param mapper   ObjectMapper实例，用于类型转换
+     * @param instance 目标对象实例，需要被设置字段值的对象
+     * @param map      包含字段名和对应值的映射表
+     * @throws Exception 当反射操作或类型转换过程中发生错误时抛出异常
+     */
+    private static <T> void setFieldsFromMap(ObjectMapper mapper, T instance, Map<String, Object> map) throws Exception {
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            try {
+                // 获取目标字段并设置可访问性
+                java.lang.reflect.Field field = instance.getClass().getDeclaredField(entry.getKey());
+                field.setAccessible(true);
+
+                Object value = entry.getValue();
+                // 类型转换处理
+                if (value != null && !field.getType().isAssignableFrom(value.getClass())) {
+                    value = mapper.convertValue(value, field.getType());
+                }
+
+                field.set(instance, value);
+            } catch (NoSuchFieldException e) {
+                // 忽略不存在的字段
+            }
+        }
+    }
+
 
     /**
      * 将java对象转换为Map
@@ -679,7 +822,13 @@ public final class BeanUtil {
         if (null == data) {
             return Collections.EMPTY_MAP;
         }
-        return JsonUtil.json2Map(JsonUtil.toJSONString(data));
+        try {
+            return JsonUtil.mapper().convertValue(data, new TypeReference<Map<String, Object>>() {
+            });
+        } catch (Exception e) {
+            log.warn("Bean转Map失败: ", e);
+        }
+        return Collections.EMPTY_MAP;
     }
 
     /**
