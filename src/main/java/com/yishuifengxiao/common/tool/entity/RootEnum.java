@@ -58,5 +58,13 @@ public interface RootEnum extends Serializable {
         return Objects.equals(val, code);
     }
 
+    /**
+     * 根据编码获取枚举值
+     *
+     * @param code 枚举值的编码
+     * @return 枚举值
+     */
+    RootEnum of(Object code);
+
 
 }
