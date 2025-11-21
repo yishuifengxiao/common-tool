@@ -1,10 +1,12 @@
 package com.yishuifengxiao.common.tool.codec;
 
 import com.yishuifengxiao.common.tool.lang.HexUtil;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.spec.SecretKeySpec;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
@@ -20,6 +22,7 @@ import java.util.regex.Pattern;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class ECC {
 
     /**
@@ -250,6 +253,33 @@ public class ECC {
     }
 
     /**
+     * 验证证书与私钥是否匹配
+     *
+     * @param certVal       证书值
+     * @param privateKeyVal 私钥值
+     * @return 如果验证成功返回true，否则返回false
+     */
+    public static boolean verifyMatch(String certVal, String privateKeyVal) {
+        try {
+            // 准备测试数据
+            String data = "0123456789ABCDEF";
+            // 从证书中提取公钥
+            PublicKey publicKey = X509Helper.extractPublicKey(certVal);
+            // 解析EC私钥
+            PrivateKey privateKey = parseECPrivateKey(privateKeyVal);
+            // 使用私钥对数据进行签名
+            byte[] signData = signData(data.getBytes(StandardCharsets.UTF_8), privateKey);
+            // 使用公钥验证签名是否有效
+            return verifySignature(data.getBytes(StandardCharsets.UTF_8), signData, publicKey);
+        } catch (Exception e) {
+            // 记录异常日志
+            log.warn("verifyMatch error: ", e);
+        }
+        // 默认返回false
+        return false;
+    }
+
+    /**
      * 验证密钥组件是否正确
      *
      * @param keyPair                包含公钥和私钥的密钥对对象
@@ -257,7 +287,8 @@ public class ECC {
      * @param expectedPrivateKeyDHex 期望的私钥D值十六进制字符串表示
      * @throws Exception 当验证过程中发生错误时抛出异常
      */
-    public static void verifyKeyComponents(KeyPair keyPair, String expectedPublicKeyHex, String expectedPrivateKeyDHex) throws Exception {
+    public static void verifyKeyComponents(KeyPair keyPair, String expectedPublicKeyHex,
+                                           String expectedPrivateKeyDHex) throws Exception {
         ECPublicKey ecPublicKey = (ECPublicKey) keyPair.getPublic();
         ECPrivateKey ecPrivateKey = (ECPrivateKey) keyPair.getPrivate();
 
@@ -694,7 +725,24 @@ public class ECC {
      */
     private static ECPrivateKey parsePEMPrivateKey(String pemData) throws Exception {
         String processedPem = pemData;
+        // 先移除EC PARAMETERS部分（如果有）
+        int beginParamsIndex = processedPem.indexOf("-----BEGIN EC PARAMETERS-----");
+        int endParamsIndex = processedPem.indexOf("-----END EC PARAMETERS-----");
 
+        if (beginParamsIndex != -1 && endParamsIndex != -1) {
+            // 找到EC PARAMETERS结束标记后的换行符位置
+            int endIndex = processedPem.indexOf("\n", endParamsIndex);
+            if (endIndex == -1) {
+                // 如果没找到换行符，则结束位置就是END PARAMETERS标记的末尾
+                endIndex = endParamsIndex + "-----END EC PARAMETERS-----".length();
+            } else {
+                // 包含换行符
+                endIndex += 1;
+            }
+            // 移除整个EC PARAMETERS部分
+            processedPem = processedPem.substring(0, beginParamsIndex) +
+                    processedPem.substring(endIndex);
+        }
         // 检测PEM类型并确保有正确的头部
         String pemUpper = pemData.toUpperCase();
         boolean hasPemHeader = pemUpper.contains("-----BEGIN");
@@ -1087,7 +1135,8 @@ public class ECC {
      * @return 派生出的共享密钥的十六进制字符串表示
      * @throws Exception 当密钥协商或哈希计算过程中发生错误时抛出
      */
-    public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex, String sShareInfo, int iKeyLen) throws Exception {
+    public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex,
+                                         String sShareInfo, int iKeyLen) throws Exception {
 
 
         // 执行ECC密钥协商，获取原始共享密钥数据
