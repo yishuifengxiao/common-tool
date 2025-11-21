@@ -634,8 +634,7 @@ public class X509Helper {
                 while (iterator.hasNext()) {
                     List<?> alternativeName = iterator.next();
                     // 检查备用名称列表是否有效且包含足够的元素，同时判断是否为OID类型(类型标识为8)
-                    if (alternativeName != null && alternativeName.size() >= 2 &&
-                            "8".equals(String.valueOf(alternativeName.get(0)))) {
+                    if (alternativeName != null && alternativeName.size() >= 2 && "8".equals(String.valueOf(alternativeName.get(0)))) {
                         oid = String.valueOf(alternativeName.get(1));
                         break;
                     }
@@ -659,13 +658,30 @@ public class X509Helper {
         }
     }
 
+
     /**
-     * 仅提取公钥
+     * 从X509证书中提取公钥
+     *
+     * @param certificate X509证书对象，可以为null
+     * @return 返回证书中的公钥，如果证书为null则返回null
      */
     public static PublicKey extractPublicKey(X509Certificate certificate) {
+        // 使用三元运算符，如果证书不为null则返回其公钥，否则返回null
         return certificate != null ? certificate.getPublicKey() : null;
     }
 
+    /**
+     * 从证书字符串中提取公钥
+     *
+     * @param certificate 证书字符串，通常是PEM或DER格式的证书内容
+     * @return 返回提取的公钥对象，如果证书解析失败则返回null
+     * @throws CertificateException 当证书格式无效或解析过程中出现错误时抛出此异常
+     */
+    public static PublicKey extractPublicKey(String certificate) throws CertificateException {
+        // 使用三元运算符判断证书是否解析成功，成功则返回公钥，失败则返回null
+        X509Certificate x509Certificate = parseCert(certificate);
+        return x509Certificate != null ? x509Certificate.getPublicKey() : null;
+    }
 
     /**
      * 从证书数据中提取公钥值
