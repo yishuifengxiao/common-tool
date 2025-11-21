@@ -32,7 +32,8 @@ public class X509Helper {
 
     private static final String PEM_HEADER = "-----BEGIN CERTIFICATE-----";
     private static final String PEM_FOOTER = "-----END CERTIFICATE-----";
-    private static final Pattern PEM_PATTERN = Pattern.compile("-----BEGIN CERTIFICATE-----.*-----END CERTIFICATE-----", Pattern.DOTALL);
+    private static final Pattern PEM_PATTERN = Pattern.compile("-----BEGIN CERTIFICATE-----.*-----END " +
+            "CERTIFICATE-----", Pattern.DOTALL);
 
     private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9A-Fa-f]+$");
 
@@ -182,11 +183,11 @@ public class X509Helper {
         /**
          * Not Before（生效时间） 形式为 Mon Aug 18 17:26:25 CST 2025
          */
-        private String notBefore;
+        private Date notBefore;
         /**
          * Not After（失效时间） 形式为 Mon Aug 18 17:26:25 CST 2025
          */
-        private String notAfter;
+        private Date notAfter;
         /**
          * X.509版本号从v1开始计数，但ASN.1编码中版本号从0开始：
          * v1 → 0（通常省略）
@@ -197,14 +198,21 @@ public class X509Helper {
         private int version;
         /**
          * 算法OID： 位置1：tbsCertificate.signature - 表示CA用来签署证书的算法，例如 ecdsa-with-SHA256。
-         * 位置2：tbsCertificate.subjectPublicKeyInfo.algorithm - 这里的算法OID是 ecPublicKey (1.2.840.10045.2.1)。这告诉你这个公钥是基于ECC的。
+         * 位置2：tbsCertificate.subjectPublicKeyInfo.algorithm - 这里的算法OID是 ecPublicKey (1.2.840.10045.2.1)
+         * 。这告诉你这个公钥是基于ECC的。
          */
         private String sigAlgOID;
         /**
          * 算法名称
          */
         private String sigAlgName;
+        /**
+         * 公钥
+         */
         private PublicKey publicKey;
+        /**
+         * 公钥算法
+         */
         private String publicKeyAlgorithm;
         /**
          * 公钥的原始字节值（十六进制）
@@ -222,6 +230,9 @@ public class X509Helper {
          * Object Identifier from Subject Alternative Names
          */
         private String oid;
+        /**
+         * Subject Alternative Names
+         */
         private List<String> subjectAlternativeNames;
         /**
          * Authority Key Identifier
@@ -237,6 +248,20 @@ public class X509Helper {
          */
         String algid;
 
+    }
+
+    /**
+     * 从证书字符串中提取完整证书信息
+     *
+     * @param certificate 证书字符串，通常为PEM或DER格式
+     * @return 包含完整证书信息的Cert对象
+     * @throws CertificateException 如果证书解析失败或格式不正确
+     */
+    public static Cert extractFullInfo(String certificate) throws CertificateException {
+        // 将证书字符串解析为X509Certificate对象
+        X509Certificate x509Certificate = parseCert(certificate);
+        // 调用重载方法，使用X509Certificate对象提取证书信息
+        return extractFullInfo(x509Certificate);
     }
 
     /**
@@ -256,8 +281,8 @@ public class X509Helper {
         info.setSubject(certificate.getSubjectX500Principal().getName());
         info.setIssuer(certificate.getIssuerX500Principal().getName());
         info.setSerialNumber(certificate.getSerialNumber().toString(16).toUpperCase());
-        info.setNotBefore(certificate.getNotBefore().toString());
-        info.setNotAfter(certificate.getNotAfter().toString());
+        info.setNotBefore(certificate.getNotBefore());
+        info.setNotAfter(certificate.getNotAfter());
         info.setVersion(certificate.getVersion());
         info.setIsValid(certificate.getNotBefore().before(new Date()) && certificate.getNotAfter().after(new Date()));
 
@@ -433,7 +458,7 @@ public class X509Helper {
      * @param certData 证书数据字符串，用于解析和提取SKID信息
      * @return 返回提取到的CIPKID值，如果提取失败则返回null
      */
-    public String extractCipkid(String certData) {
+    public static String extractCipkid(String certData) {
         try {
             // 解析证书数据获取X509证书对象
             X509Certificate certificate = parseCert(certData);
