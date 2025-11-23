@@ -198,9 +198,10 @@ public class X509Helper {
          */
         private int version;
         /**
+         * 定义如何签名和验证,签名算法字段。
          * 算法OID： 位置1：tbsCertificate.signature - 表示CA用来签署证书的算法，例如 ecdsa-with-SHA256。
          * 位置2：tbsCertificate.subjectPublicKeyInfo.algorithm - 这里的算法OID是 ecPublicKey (1.2.840.10045.2.1)
-         * 。这告诉你这个公钥是基于ECC的。
+         * 。这告诉你这个公钥是基于ECC的。 在证书中通常出现在签名算法字段
          */
         private String sigAlgOID;
         /**
@@ -245,7 +246,12 @@ public class X509Helper {
          */
         private Boolean isValid;
         /**
-         * 使用ECC算法时曲线的OID
+         * 使用ECC算法时曲线的OID.
+         * 椭圆曲线参数标识符：指定使用NIST P-256椭圆曲线
+         * <p>
+         * 定义椭圆曲线的数学参数
+         * <p>
+         * 在证书中通常出现在公钥参数字段
          */
         String algid;
 
