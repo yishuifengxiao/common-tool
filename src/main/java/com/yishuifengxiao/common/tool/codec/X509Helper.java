@@ -1,5 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.HexUtil;
 import com.yishuifengxiao.common.tool.text.OIDConverter;
 import com.yishuifengxiao.common.tool.text.TLVUtil;
@@ -285,7 +286,6 @@ public class X509Helper {
         info.setNotAfter(certificate.getNotAfter());
         info.setVersion(certificate.getVersion());
         info.setIsValid(certificate.getNotBefore().before(new Date()) && certificate.getNotAfter().after(new Date()));
-
 
         info.setSigAlgOID(certificate.getSigAlgOID());
         info.setSigAlgName(certificate.getSigAlgName());
@@ -797,6 +797,125 @@ public class X509Helper {
             log.debug("  - 无");
         }
         log.debug("==============================================");
+    }
+
+    /**
+     * <p>
+     * 判断证书B是否由证书A签发
+     * </p>
+     * <p>
+     * 该方法通过验证证书B的签发者信息是否与证书A的主体信息匹配来判断签发关系。
+     * 使用Java原生方法进行证书验证。
+     * </p>
+     *
+     * @param issuerCert  签发者证书A
+     * @param subjectCert 被签发证书B
+     * @return true表示证书B由证书A签发，false表示不是
+     */
+    public static boolean isIssuedBy(X509Certificate issuerCert, X509Certificate subjectCert) {
+        if (issuerCert == null || subjectCert == null) {
+            throw new UncheckedException("证书对象不能为空");
+        }
+
+        try {
+            // 验证签发者证书的主体名称是否与被签发证书的签发者名称匹配
+            String issuerDN = issuerCert.getSubjectX500Principal().getName();
+            String subjectIssuerDN = subjectCert.getIssuerX500Principal().getName();
+
+            if (!issuerDN.equals(subjectIssuerDN)) {
+                if (log.isDebugEnabled()) {
+                    log.debug("签发者DN不匹配 - 签发者证书DN: {}, 被签发证书的签发者DN: {}", issuerDN, subjectIssuerDN);
+                }
+                return false;
+            }
+
+            // 使用Java原生方法验证签名
+            // 如果证书B确实由证书A签发，那么使用证书A的公钥应该能验证证书B的签名
+            subjectCert.verify(issuerCert.getPublicKey());
+            return true;
+
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("证书签发关系验证失败，签发者证书: {}, 被签发证书: {}, 错误信息: {}",
+                        issuerCert.getSubjectX500Principal(),
+                        subjectCert.getSubjectX500Principal(),
+                        e.getMessage());
+            }
+            return false;
+        }
+    }
+
+    /**
+     * <p>
+     * 验证证书链的完整性
+     * </p>
+     * <p>
+     * 验证证书链中每个证书是否由前一个证书签发，形成完整的信任链。
+     * </p>
+     *
+     * @param certificateChain 证书链，按顺序排列（从终端证书到根证书）
+     * @return true表示证书链完整有效，false表示不完整
+     */
+    public static boolean validateCertificateChain(X509Certificate[] certificateChain) {
+        if (certificateChain == null || certificateChain.length < 2) {
+            throw new UncheckedException("证书链至少需要包含两个证书");
+        }
+
+        for (int i = 0; i < certificateChain.length - 1; i++) {
+            X509Certificate issuer = certificateChain[i + 1];
+            X509Certificate subject = certificateChain[i];
+
+            if (!isIssuedBy(issuer, subject)) {
+                if (log.isWarnEnabled()) {
+                    log.warn("证书链验证失败，第{}个证书不是由第{}个证书签发", i, i + 1);
+                }
+                return false;
+            }
+        }
+
+        // 验证根证书是否自签名
+        X509Certificate rootCert = certificateChain[certificateChain.length - 1];
+        if (!isSelfSigned(rootCert)) {
+            if (log.isWarnEnabled()) {
+                log.warn("根证书不是自签名证书");
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * <p>
+     * 判断证书是否自签名
+     * </p>
+     *
+     * @param cert 要检查的证书
+     * @return true表示自签名，false表示不是
+     */
+    public static boolean isSelfSigned(X509Certificate cert) {
+        if (cert == null) {
+            return false;
+        }
+
+        try {
+            // 自签名证书的签发者和主体名称相同
+            String issuerDN = cert.getIssuerX500Principal().getName();
+            String subjectDN = cert.getSubjectX500Principal().getName();
+
+            if (!issuerDN.equals(subjectDN)) {
+                return false;
+            }
+
+            // 验证签名（使用自己的公钥验证自己的签名）
+            cert.verify(cert.getPublicKey());
+            return true;
+        } catch (Exception e) {
+            if (log.isDebugEnabled()) {
+                log.debug("自签名验证失败，证书: {}, 错误信息: {}", cert.getSubjectX500Principal(), e.getMessage());
+            }
+            return false;
+        }
     }
 
 }
