@@ -120,7 +120,7 @@ public class ECC {
     /**
      * 根据OID获取椭圆曲线参数
      *
-     * @param oid 椭圆曲线的OID标识符
+     * @param oid 椭圆曲线的OID标识符.例如1.2.840.10045.3.1.7或secp256r1
      * @return ECParameterSpec 椭圆曲线参数规范
      * @throws Exception 当无法根据OID获取椭圆曲线参数时抛出异常
      */
@@ -245,7 +245,7 @@ public class ECC {
      * @return boolean 如果签名验证成功则返回true，否则返回false
      * @throws Exception 当验证过程中发生错误时抛出异常
      */
-    public static boolean verifySignature(PublicKey publicKey,byte[] data, byte[] signature) throws Exception {
+    public static boolean verifySignature(PublicKey publicKey, byte[] data, byte[] signature) throws Exception {
         Signature verifySignature = Signature.getInstance("SHA256withECDSA");
         verifySignature.initVerify(publicKey);
         verifySignature.update(data);
@@ -270,7 +270,7 @@ public class ECC {
             // 使用私钥对数据进行签名
             byte[] signData = signData(privateKey, data.getBytes(StandardCharsets.UTF_8));
             // 使用公钥验证签名是否有效
-            return verifySignature(publicKey,data.getBytes(StandardCharsets.UTF_8), signData);
+            return verifySignature(publicKey, data.getBytes(StandardCharsets.UTF_8), signData);
         } catch (Exception e) {
             // 记录异常日志
             log.warn("verifyMatch error: ", e);
@@ -287,8 +287,7 @@ public class ECC {
      * @param expectedPrivateKeyDHex 期望的私钥D值十六进制字符串表示
      * @throws Exception 当验证过程中发生错误时抛出异常
      */
-    public static void verifyKeyComponents(KeyPair keyPair, String expectedPublicKeyHex,
-                                           String expectedPrivateKeyDHex) throws Exception {
+    public static void verifyKeyComponents(KeyPair keyPair, String expectedPublicKeyHex, String expectedPrivateKeyDHex) throws Exception {
         ECPublicKey ecPublicKey = (ECPublicKey) keyPair.getPublic();
         ECPrivateKey ecPrivateKey = (ECPrivateKey) keyPair.getPrivate();
 
@@ -298,9 +297,7 @@ public class ECC {
         BigInteger privateKeyD = ecPrivateKey.getS();
 
         // 构建实际的公钥十六进制字符串
-        String actualPublicKeyHex = "04" +
-                toPaddedHex(publicKeyX, 64) +
-                toPaddedHex(publicKeyY, 64);
+        String actualPublicKeyHex = "04" + toPaddedHex(publicKeyX, 64) + toPaddedHex(publicKeyY, 64);
 
         // 构建实际的私钥十六进制字符串
         String actualPrivateKeyHex = toPaddedHex(privateKeyD, 64);
@@ -337,18 +334,17 @@ public class ECC {
     /**
      * 使用提供的密钥对数据进行签名
      *
-     * @param data           需要签名的数据字符串
      * @param curveOID       椭圆曲线OID标识符
-     * @param publicKeyHex   公钥的十六进制字符串表示
      * @param privateKeyDHex 私钥D值的十六进制字符串表示
+     * @param data           需要签名的数据字符串
      * @return 签名结果的Base64编码字符串
      * @throws Exception 当密钥创建或签名过程中发生错误时抛出
      */
-    public static String sign(String data, String curveOID, String publicKeyHex, String privateKeyDHex) throws Exception {
+    public static String sign(String curveOID, String privateKeyDHex, String data) throws Exception {
         // 根据提供的组件创建密钥对
-        KeyPair keyPair = createKeyPairFromComponents(curveOID, publicKeyHex, privateKeyDHex);
+        ECPrivateKey ecPrivateKey = parsePrivateKeyFromHex(curveOID, privateKeyDHex);
         // 使用私钥对数据进行签名
-        byte[] signature = signData(keyPair.getPrivate(), data.getBytes(StandardCharsets.UTF_8));
+        byte[] signature = signData(ecPrivateKey, data.getBytes(StandardCharsets.UTF_8));
         // 将签名结果进行Base64编码并返回
         return Base64.getEncoder().encodeToString(signature);
     }
@@ -357,21 +353,21 @@ public class ECC {
     /**
      * 验证签名
      *
-     * @param data            待验证的数据字符串
-     * @param signatureBase64 Base64编码的签名值
      * @param curveOID        椭圆曲线OID标识符
      * @param publicKeyHex    十六进制格式的公钥字符串
+     * @param data            待验证的数据字符串
+     * @param signatureBase64 Base64编码的签名值
      * @return 验证成功返回true，验证失败返回false
      * @throws Exception 验证过程中可能抛出的异常
      */
-    public static boolean verify(String data, String signatureBase64, String curveOID, String publicKeyHex) throws Exception {
+    public static boolean verify(String curveOID, String publicKeyHex, String data, String signatureBase64) throws Exception {
         // 创建一个虚拟私钥来构建密钥对
         String dummyPrivateKey = "0000000000000000000000000000000000000000000000000000000000000001";
         KeyPair keyPair = createKeyPairFromComponents(curveOID, publicKeyHex, dummyPrivateKey);
 
         // 解码Base64签名并验证签名有效性
         byte[] signature = Base64.getDecoder().decode(signatureBase64);
-        return verifySignature(keyPair.getPublic(),data.getBytes(StandardCharsets.UTF_8), signature);
+        return verifySignature(keyPair.getPublic(), data.getBytes(StandardCharsets.UTF_8), signature);
     }
 
 
@@ -410,15 +406,11 @@ public class ECC {
             } else {
                 endIndex += 1; // 包含换行符
             }
-            keyData = keyData.substring(0, beginParamsIndex) +
-                    keyData.substring(endIndex);
+            keyData = keyData.substring(0, beginParamsIndex) + keyData.substring(endIndex);
         }
 
         // 然后处理 EC PRIVATE KEY 部分
-        keyData = keyData
-                .replace("-----BEGIN EC PRIVATE KEY-----", "")
-                .replace("-----END EC PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
+        keyData = keyData.replace("-----BEGIN EC PRIVATE KEY-----", "").replace("-----END EC PRIVATE KEY-----", "").replaceAll("\\s", "");
 
         // 使用优化的parseECPrivateKey函数解析私钥
         ECPrivateKey privateKey = parseECPrivateKey(keyData);
@@ -535,14 +527,7 @@ public class ECC {
      */
     private static byte[] parseBase64String(String base64String) {
         // 移除可能的PEM头部和尾部（如果存在）
-        String cleanBase64 = base64String
-                .replace(PEM_HEADER_EC, "")
-                .replace(PEM_FOOTER_EC, "")
-                .replace(PEM_HEADER_PKCS8, "")
-                .replace(PEM_FOOTER_PKCS8, "")
-                .replace(PEM_HEADER_PKCS8_ENC, "")
-                .replace(PEM_FOOTER_PKCS8_ENC, "")
-                .replaceAll("\\s", "");
+        String cleanBase64 = base64String.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replaceAll("\\s", "");
 
         try {
             // 尝试标准Base64解码
@@ -740,8 +725,7 @@ public class ECC {
                 endIndex += 1;
             }
             // 移除整个EC PARAMETERS部分
-            processedPem = processedPem.substring(0, beginParamsIndex) +
-                    processedPem.substring(endIndex);
+            processedPem = processedPem.substring(0, beginParamsIndex) + processedPem.substring(endIndex);
         }
         // 检测PEM类型并确保有正确的头部
         String pemUpper = pemData.toUpperCase();
@@ -771,14 +755,7 @@ public class ECC {
      */
     private static String extractBase64FromPEM(String pemData) {
         // 移除所有PEM头部和尾部
-        String cleanData = pemData
-                .replace(PEM_HEADER_EC, "")
-                .replace(PEM_FOOTER_EC, "")
-                .replace(PEM_HEADER_PKCS8, "")
-                .replace(PEM_FOOTER_PKCS8, "")
-                .replace(PEM_HEADER_PKCS8_ENC, "")
-                .replace(PEM_FOOTER_PKCS8_ENC, "")
-                .replaceAll("\\s", "");
+        String cleanData = pemData.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replaceAll("\\s", "");
 
         return cleanData;
     }
@@ -851,8 +828,7 @@ public class ECC {
         BigInteger h = BigInteger.ONE;
 
         // 构造椭圆曲线对象，基于素数域p，并设置曲线方程中的a和b系数
-        java.security.spec.EllipticCurve curve = new java.security.spec.EllipticCurve(
-                new java.security.spec.ECFieldFp(p), a, b);
+        java.security.spec.EllipticCurve curve = new java.security.spec.EllipticCurve(new java.security.spec.ECFieldFp(p), a, b);
 
         // 设置基点G的坐标(x, y)
         java.security.spec.ECPoint g = new java.security.spec.ECPoint(x, y);
@@ -935,12 +911,7 @@ public class ECC {
      * 私钥格式枚举
      */
     public enum KeyFormat {
-        HEX,
-        BASE64,
-        PEM_EC,
-        PEM_PKCS8,
-        PEM_PKCS8_ENCRYPTED,
-        UNKNOWN
+        HEX, BASE64, PEM_EC, PEM_PKCS8, PEM_PKCS8_ENCRYPTED, UNKNOWN
     }
 
     /**
@@ -951,8 +922,7 @@ public class ECC {
      * @return 协商生成的共享密钥字节数组
      * @throws Exception 如果密钥协商过程中发生错误
      */
-    public static byte[] performKeyAgreement(PrivateKey privateKey, PublicKey publicKey)
-            throws Exception {
+    public static byte[] performKeyAgreement(PrivateKey privateKey, PublicKey publicKey) throws Exception {
         // 创建ECDH密钥协商实例
         KeyAgreement keyAgreement = KeyAgreement.getInstance("ECDH");
         // 初始化密钥协商对象，设置本地私钥
@@ -1076,53 +1046,6 @@ public class ECC {
         }
     }
 
-    /**
-     * 对hex字符串进行左侧填充到指定字节数
-     *
-     * @param hexString   原始hex字符串
-     * @param targetBytes 目标字节数
-     * @return 填充后的hex字符串（保持原始的前缀格式）
-     */
-    public static String padHexLeft(String hexString, int targetBytes) {
-        if (hexString == null || targetBytes <= 0) {
-            throw new IllegalArgumentException("参数不能为空且目标字节数必须大于0");
-        }
-
-        // 处理前缀（0x或0X）
-        String prefix = "";
-        String cleanHex = hexString;
-
-        if (cleanHex.startsWith("0x") || cleanHex.startsWith("0X")) {
-            prefix = cleanHex.substring(0, 2); // 保留原始的大小写格式
-            cleanHex = cleanHex.substring(2);
-        }
-
-        // 移除可能存在的空格
-        cleanHex = cleanHex.replaceAll("\\s+", "");
-
-        // 验证是否为有效的hex字符串
-        if (!cleanHex.matches("[0-9a-fA-F]+")) {
-            throw new IllegalArgumentException("无效的hex字符串: " + hexString);
-        }
-
-        int targetLength = targetBytes * 2; // 每个字节对应2个hex字符
-        int currentLength = cleanHex.length();
-
-        // 如果已经达到或超过目标长度，直接返回
-        if (currentLength >= targetLength) {
-            return prefix + cleanHex;
-        }
-
-        // 左侧填充0
-        int zerosToAdd = targetLength - currentLength;
-        StringBuilder padded = new StringBuilder();
-        for (int i = 0; i < zerosToAdd; i++) {
-            padded.append('0');
-        }
-        padded.append(cleanHex);
-
-        return prefix + padded.toString();
-    }
 
     /**
      * 执行ECC密钥协商算法，生成共享密钥
@@ -1135,8 +1058,7 @@ public class ECC {
      * @return 派生出的共享密钥的十六进制字符串表示
      * @throws Exception 当密钥协商或哈希计算过程中发生错误时抛出
      */
-    public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex,
-                                         String sShareInfo, int iKeyLen) throws Exception {
+    public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex, String sShareInfo, int iKeyLen) throws Exception {
 
 
         // 执行ECC密钥协商，获取原始共享密钥数据
