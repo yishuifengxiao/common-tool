@@ -108,10 +108,10 @@ public class ECC {
         ECParameterSpec ecParameterSpec = getECParameterSpecFromOID(curveOID);
 
         // 解析公钥
-        ECPublicKey publicKey = parsePublicKeyFromHex(publicKeyHex, ecParameterSpec);
+        ECPublicKey publicKey = parsePublicKeyFromHex(ecParameterSpec, publicKeyHex);
 
         // 解析私钥
-        ECPrivateKey privateKey = parsePrivateKeyFromHex(privateKeyDHex, ecParameterSpec);
+        ECPrivateKey privateKey = parsePrivateKeyFromHex(ecParameterSpec, privateKeyDHex);
 
         return new KeyPair(publicKey, privateKey);
     }
@@ -124,7 +124,7 @@ public class ECC {
      * @return ECParameterSpec 椭圆曲线参数规范
      * @throws Exception 当无法根据OID获取椭圆曲线参数时抛出异常
      */
-    private static ECParameterSpec getECParameterSpecFromOID(String oid) throws Exception {
+    public static ECParameterSpec getECParameterSpecFromOID(String oid) throws Exception {
         // 使用KeyPairGenerator来获取标准曲线的参数
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
 
@@ -148,7 +148,7 @@ public class ECC {
      * @return ECPublicKey 解析后的公钥对象
      * @throws Exception 当解析过程中发生错误时抛出异常
      */
-    public static ECPublicKey parsePublicKeyFromHex(String publicKeyHex, ECParameterSpec ecParameterSpec) throws Exception {
+    public static ECPublicKey parsePublicKeyFromHex(ECParameterSpec ecParameterSpec, String publicKeyHex) throws Exception {
         // 移除可能的前缀
         if (publicKeyHex.startsWith("04")) {
             publicKeyHex = publicKeyHex.substring(2);
@@ -185,7 +185,7 @@ public class ECC {
      */
     public static ECPublicKey parsePublicKeyFromHex(String curveOID, String publicKeyHex) throws Exception {
         ECParameterSpec parameterSpec = getECParameterSpecFromOID(curveOID);
-        return parsePublicKeyFromHex(publicKeyHex, parameterSpec);
+        return parsePublicKeyFromHex(parameterSpec, publicKeyHex);
     }
 
 
@@ -197,7 +197,7 @@ public class ECC {
      * @return ECPrivateKey 解析后的私钥对象
      * @throws Exception 当解析过程中发生错误时抛出异常
      */
-    public static ECPrivateKey parsePrivateKeyFromHex(String privateKeyDHex, ECParameterSpec ecParameterSpec) throws Exception {
+    public static ECPrivateKey parsePrivateKeyFromHex(ECParameterSpec ecParameterSpec, String privateKeyDHex) throws Exception {
         BigInteger privateKeyD = new BigInteger(privateKeyDHex, 16);
 
         // 构建私钥
@@ -217,7 +217,7 @@ public class ECC {
     public static ECPrivateKey parsePrivateKeyFromHex(String curveOID, String privateKeyDHex) throws Exception {
 
         ECParameterSpec parameterSpec = getECParameterSpecFromOID(curveOID);
-        return parsePrivateKeyFromHex(privateKeyDHex, parameterSpec);
+        return parsePrivateKeyFromHex(parameterSpec, privateKeyDHex);
     }
 
 
@@ -229,7 +229,7 @@ public class ECC {
      * @return byte[] 签名数据的字节数组
      * @throws Exception 当签名过程中发生错误时抛出异常
      */
-    public static byte[] signData(byte[] data, PrivateKey privateKey) throws Exception {
+    public static byte[] signData(PrivateKey privateKey, byte[] data) throws Exception {
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initSign(privateKey);
         signature.update(data);
@@ -245,7 +245,7 @@ public class ECC {
      * @return boolean 如果签名验证成功则返回true，否则返回false
      * @throws Exception 当验证过程中发生错误时抛出异常
      */
-    public static boolean verifySignature(byte[] data, byte[] signature, PublicKey publicKey) throws Exception {
+    public static boolean verifySignature(PublicKey publicKey,byte[] data, byte[] signature) throws Exception {
         Signature verifySignature = Signature.getInstance("SHA256withECDSA");
         verifySignature.initVerify(publicKey);
         verifySignature.update(data);
@@ -268,9 +268,9 @@ public class ECC {
             // 解析EC私钥
             PrivateKey privateKey = parseECPrivateKey(privateKeyVal);
             // 使用私钥对数据进行签名
-            byte[] signData = signData(data.getBytes(StandardCharsets.UTF_8), privateKey);
+            byte[] signData = signData(privateKey, data.getBytes(StandardCharsets.UTF_8));
             // 使用公钥验证签名是否有效
-            return verifySignature(data.getBytes(StandardCharsets.UTF_8), signData, publicKey);
+            return verifySignature(publicKey,data.getBytes(StandardCharsets.UTF_8), signData);
         } catch (Exception e) {
             // 记录异常日志
             log.warn("verifyMatch error: ", e);
@@ -348,7 +348,7 @@ public class ECC {
         // 根据提供的组件创建密钥对
         KeyPair keyPair = createKeyPairFromComponents(curveOID, publicKeyHex, privateKeyDHex);
         // 使用私钥对数据进行签名
-        byte[] signature = signData(data.getBytes("UTF-8"), keyPair.getPrivate());
+        byte[] signature = signData(keyPair.getPrivate(), data.getBytes(StandardCharsets.UTF_8));
         // 将签名结果进行Base64编码并返回
         return Base64.getEncoder().encodeToString(signature);
     }
@@ -371,7 +371,7 @@ public class ECC {
 
         // 解码Base64签名并验证签名有效性
         byte[] signature = Base64.getDecoder().decode(signatureBase64);
-        return verifySignature(data.getBytes("UTF-8"), signature, keyPair.getPublic());
+        return verifySignature(keyPair.getPublic(),data.getBytes(StandardCharsets.UTF_8), signature);
     }
 
 

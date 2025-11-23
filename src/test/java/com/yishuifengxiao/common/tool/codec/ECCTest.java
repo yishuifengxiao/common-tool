@@ -3,6 +3,7 @@ package com.yishuifengxiao.common.tool.codec;
 import com.yishuifengxiao.common.tool.lang.HexUtil;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.security.KeyPair;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -29,18 +30,18 @@ public class ECCTest {
             System.out.println("使用的曲线OID: " + curveOID);
 
             // 2. 使用私钥签名
-            byte[] signature = ECC.signData(originalData.getBytes("UTF-8"), privateKey);
+            byte[] signature = ECC.signData(privateKey, originalData.getBytes(StandardCharsets.UTF_8));
             String signatureBase64 = Base64.getEncoder().encodeToString(signature);
             System.out.println("签名结果 (Base64): " + signatureBase64);
             System.out.println("签名结果 (Hex): " + HexUtil.bytesToHex(signature));
 
             // 3. 使用公钥验签
-            boolean isValid = ECC.verifySignature(originalData.getBytes("UTF-8"), signature, publicKey);
+            boolean isValid = ECC.verifySignature(publicKey,originalData.getBytes(StandardCharsets.UTF_8), signature);
             System.out.println("签名验证结果: " + isValid);
 
             // 4. 测试篡改数据的情况
             String tamperedData = "这是被篡改的数据";
-            boolean isTamperedValid = ECC.verifySignature(tamperedData.getBytes("UTF-8"), signature, publicKey);
+            boolean isTamperedValid = ECC.verifySignature(publicKey,tamperedData.getBytes(StandardCharsets.UTF_8), signature);
             System.out.println("篡改数据验证结果: " + isTamperedValid);
 
             // 5. 验证密钥组件
@@ -74,9 +75,9 @@ public class ECCTest {
                     System.out.println("\n测试曲线OID: " + oid);
                     KeyPair keyPair = ECC.createKeyPairFromComponents(oid, publicKeyHex, privateKeyDHex);
 
-                    // 尝试签名
-                    byte[] signature = ECC.signData(data.getBytes("UTF-8"), keyPair.getPrivate());
-                    boolean isValid = ECC.verifySignature(data.getBytes("UTF-8"), signature, keyPair.getPublic());
+                    // 尝试签名和验证
+                    byte[] signature = ECC.signData(keyPair.getPrivate(), data.getBytes(StandardCharsets.UTF_8));
+                    boolean isValid = ECC.verifySignature(keyPair.getPublic(), data.getBytes(StandardCharsets.UTF_8), signature);
 
                     System.out.println("使用OID " + oid + " 的签名验证: " + isValid);
                 } catch (Exception e) {
