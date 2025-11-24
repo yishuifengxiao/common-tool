@@ -122,7 +122,8 @@ public class HexUtil {
         if (base64String == null || base64String.isEmpty()) {
             return "";
         }
-
+        // 修复：移除所有空白字符（包括换行符、空格、制表符等）
+        base64String = base64String.replaceAll("\\s", "");
         byte[] bytes = Base64.getDecoder().decode(base64String);
         return HexUtil.bytesToHex(bytes);
     }
