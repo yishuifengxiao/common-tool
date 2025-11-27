@@ -437,7 +437,7 @@ public final class BeanUtil {
                         if (java.util.Date.class.isAssignableFrom(targetType)) {
                             return (T) new java.util.Date(timestamp);
                         } else if (targetType == java.time.LocalDateTime.class) {
-return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(timestamp), java.time.ZoneId.systemDefault());
+                            return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(timestamp), java.time.ZoneId.systemDefault());
                         } else if (targetType == java.time.Instant.class) {
                             return (T) java.time.Instant.ofEpochMilli(timestamp);
                         }
@@ -678,8 +678,8 @@ return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(time
      * 备用转换方法（处理没有默认构造函数的情况）
      *
      * @param mapper ObjectMapper实例，用于JSON序列化和反序列化
-     * @param map 包含属性键值对的Map对象
-     * @param clazz 目标Bean类的Class对象
+     * @param map    包含属性键值对的Map对象
+     * @param clazz  目标Bean类的Class对象
      * @return 转换后的Bean实例
      */
     private static <T> T mapToBeanWithFallback(ObjectMapper mapper, Map<String, Object> map, Class<T> clazz) {
@@ -716,7 +716,7 @@ return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(time
         for (Constructor<?> constructor : constructors) {
             try {
                 constructor.setAccessible(true);
-                
+
                 // 对于无参构造函数
                 if (constructor.getParameterCount() == 0) {
                     T instance = (T) constructor.newInstance();
@@ -730,13 +730,13 @@ return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(time
                     Class<?>[] paramTypes = constructor.getParameterTypes();
                     Parameter[] parameters = constructor.getParameters();
                     Object[] args = new Object[paramTypes.length];
-                    
+
                     // 尝试从map中获取参数值
                     boolean allParamsFound = true;
                     for (int i = 0; i < parameters.length; i++) {
                         String paramName = parameters[i].getName();
                         Object value = map.get(paramName);
-                        
+
                         if (value == null) {
                             // 如果参数名在map中不存在，尝试使用字段名（去掉set/get前缀）
                             String fieldName = paramName;
@@ -751,7 +751,7 @@ return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(time
                                 value = map.get(fieldName);
                             }
                         }
-                        
+
                         if (value != null) {
                             // 类型转换
                             if (!paramTypes[i].isAssignableFrom(value.getClass())) {
@@ -763,7 +763,7 @@ return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(time
                             break;
                         }
                     }
-                    
+
                     if (allParamsFound) {
                         return (T) constructor.newInstance(args);
                     }
@@ -820,15 +820,18 @@ return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(time
     @SuppressWarnings("rawtypes")
     public static Map beanToMap(Object data) {
         if (null == data) {
-            return Collections.EMPTY_MAP;
+            return new HashMap();
+        }
+        if (data instanceof Map) {
+            return new HashMap((Map) data);
         }
         try {
-            return JsonUtil.mapper().convertValue(data, new TypeReference<Map<String, Object>>() {
-            });
+            return new HashMap(JsonUtil.mapper().convertValue(data, new TypeReference<Map<String, Object>>() {
+            }));
         } catch (Exception e) {
             log.warn("Bean转Map失败: ", e);
         }
-        return Collections.EMPTY_MAP;
+        return new HashMap();
     }
 
     /**
