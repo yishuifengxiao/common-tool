@@ -33,8 +33,7 @@ public class X509Helper {
 
     private static final String PEM_HEADER = "-----BEGIN CERTIFICATE-----";
     private static final String PEM_FOOTER = "-----END CERTIFICATE-----";
-    private static final Pattern PEM_PATTERN = Pattern.compile("-----BEGIN CERTIFICATE-----.*-----END " +
-            "CERTIFICATE-----", Pattern.DOTALL);
+    private static final Pattern PEM_PATTERN = Pattern.compile("-----BEGIN CERTIFICATE-----.*-----END " + "CERTIFICATE-----", Pattern.DOTALL);
 
     private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9A-Fa-f]+$");
 
@@ -912,10 +911,7 @@ public class X509Helper {
 
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-                log.debug("证书签发关系验证失败，签发者证书: {}, 被签发证书: {}, 错误信息: {}",
-                        issuerCert.getSubjectX500Principal(),
-                        subjectCert.getSubjectX500Principal(),
-                        e.getMessage());
+                log.debug("证书签发关系验证失败，签发者证书: {}, 被签发证书: {}, 错误信息: {}", issuerCert.getSubjectX500Principal(), subjectCert.getSubjectX500Principal(), e.getMessage());
             }
             return false;
         }
@@ -991,6 +987,416 @@ public class X509Helper {
                 log.debug("自签名验证失败，证书: {}, 错误信息: {}", cert.getSubjectX500Principal(), e.getMessage());
             }
             return false;
+        }
+    }
+
+    /**
+     * 将X509Certificate对象转换为PEM格式字符串
+     *
+     * @param certificate X.509证书对象
+     * @return PEM格式的证书字符串
+     * @throws CertificateException 当证书编码失败时抛出此异常
+     */
+    public static String toPemFormat(X509Certificate certificate) throws CertificateException {
+        if (certificate == null) {
+            throw new CertificateException("Certificate cannot be null");
+        }
+
+        try {
+            byte[] certBytes = certificate.getEncoded();
+            String base64Cert = Base64.getEncoder().encodeToString(certBytes);
+
+            // 格式化PEM字符串，每64个字符换行
+            StringBuilder pemBuilder = new StringBuilder();
+            pemBuilder.append(PEM_HEADER).append("\n");
+
+            for (int i = 0; i < base64Cert.length(); i += 64) {
+                int endIndex = Math.min(i + 64, base64Cert.length());
+                pemBuilder.append(base64Cert.substring(i, endIndex)).append("\n");
+            }
+
+            pemBuilder.append(PEM_FOOTER).append("\n");
+            return pemBuilder.toString();
+        } catch (Exception e) {
+            throw new CertificateException("Failed to convert certificate to PEM format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 将X509Certificate对象转换为十六进制格式字符串
+     *
+     * @param certificate X.509证书对象
+     * @return 十六进制格式的证书字符串
+     * @throws CertificateException 当证书编码失败时抛出此异常
+     */
+    public static String toHexFormat(X509Certificate certificate) throws CertificateException {
+        if (certificate == null) {
+            throw new CertificateException("Certificate cannot be null");
+        }
+
+        try {
+            byte[] certBytes = certificate.getEncoded();
+            return HexUtil.bytesToHex(certBytes).toUpperCase();
+        } catch (Exception e) {
+            throw new CertificateException("Failed to convert certificate to HEX format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 将证书字符串转换为PEM格式
+     *
+     * @param certData 证书数据字符串，可以是十六进制、base64编码或PEM格式
+     * @return PEM格式的证书字符串
+     * @throws CertificateException 当证书解析或转换失败时抛出此异常
+     */
+    public static String convertToPem(String certData) throws CertificateException {
+        X509Certificate certificate = parseCert(certData);
+        return toPemFormat(certificate);
+    }
+
+    /**
+     * 将证书字符串转换为十六进制格式
+     *
+     * @param certData 证书数据字符串，可以是十六进制、base64编码或PEM格式
+     * @return 十六进制格式的证书字符串
+     * @throws CertificateException 当证书解析或转换失败时抛出此异常
+     */
+    public static String convertToHex(String certData) throws CertificateException {
+        X509Certificate certificate = parseCert(certData);
+        return toHexFormat(certificate);
+    }
+
+    /**
+     * 将PublicKey对象转换为PEM格式字符串
+     *
+     * @param publicKey 公钥对象
+     * @return PEM格式的公钥字符串
+     * @throws CertificateException 当公钥编码失败时抛出此异常
+     */
+    public static String publicKeyToPem(PublicKey publicKey) throws CertificateException {
+        if (publicKey == null) {
+            throw new CertificateException("PublicKey cannot be null");
+        }
+
+        try {
+            byte[] keyBytes = publicKey.getEncoded();
+            String base64Key = Base64.getEncoder().encodeToString(keyBytes);
+
+            // 根据公钥类型确定PEM头部和尾部
+            String pemHeader = getPublicKeyPemHeader(publicKey);
+            String pemFooter = getPublicKeyPemFooter(publicKey);
+
+            // 格式化PEM字符串，每64个字符换行
+            StringBuilder pemBuilder = new StringBuilder();
+            pemBuilder.append(pemHeader).append("\n");
+
+            for (int i = 0; i < base64Key.length(); i += 64) {
+                int endIndex = Math.min(i + 64, base64Key.length());
+                pemBuilder.append(base64Key.substring(i, endIndex)).append("\n");
+            }
+
+            pemBuilder.append(pemFooter).append("\n");
+            return pemBuilder.toString();
+        } catch (Exception e) {
+            throw new CertificateException("Failed to convert public key to PEM format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 将PublicKey对象转换为十六进制格式字符串
+     *
+     * @param publicKey 公钥对象
+     * @return 十六进制格式的公钥字符串
+     * @throws CertificateException 当公钥编码失败时抛出此异常
+     */
+    public static String publicKeyToHex(PublicKey publicKey) throws CertificateException {
+        if (publicKey == null) {
+            throw new CertificateException("PublicKey cannot be null");
+        }
+
+        try {
+            byte[] keyBytes = publicKey.getEncoded();
+            return HexUtil.bytesToHex(keyBytes).toUpperCase();
+        } catch (Exception e) {
+            throw new CertificateException("Failed to convert public key to HEX format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 根据公钥类型获取对应的PEM头部
+     *
+     * @param publicKey 公钥对象
+     * @return 对应的PEM头部字符串
+     */
+    private static String getPublicKeyPemHeader(PublicKey publicKey) {
+        String algorithm = publicKey.getAlgorithm().toUpperCase();
+        switch (algorithm) {
+            case "RSA":
+                return "-----BEGIN RSA PUBLIC KEY-----";
+            case "EC":
+            case "ECDSA":
+                return "-----BEGIN EC PUBLIC KEY-----";
+            case "DSA":
+                return "-----BEGIN DSA PUBLIC KEY-----";
+            default:
+                return "-----BEGIN PUBLIC KEY-----";
+        }
+    }
+
+    /**
+     * 根据公钥类型获取对应的PEM尾部
+     *
+     * @param publicKey 公钥对象
+     * @return 对应的PEM尾部字符串
+     */
+    private static String getPublicKeyPemFooter(PublicKey publicKey) {
+        String algorithm = publicKey.getAlgorithm().toUpperCase();
+        switch (algorithm) {
+            case "RSA":
+                return "-----END RSA PUBLIC KEY-----";
+            case "EC":
+            case "ECDSA":
+                return "-----END EC PUBLIC KEY-----";
+            case "DSA":
+                return "-----END DSA PUBLIC KEY-----";
+            default:
+                return "-----END PUBLIC KEY-----";
+        }
+    }
+
+    /**
+     * 解析公钥字符串，支持PEM格式和HEX格式
+     *
+     * @param publicKey 公钥字符串，可以是PEM格式或HEX格式
+     * @return 解析成功的PublicKey对象
+     * @throws CertificateException 当公钥解析失败时抛出此异常
+     */
+    public static PublicKey parsePublicKey(String publicKey) throws CertificateException {
+        try {
+            return parsePublicKeyFromPem(publicKey);
+        } catch (CertificateException e) {
+            // 记录PEM格式解析失败的日志，便于调试
+            return parsePublicKeyFromHex(publicKey);
+        } catch (Exception e) {
+            // 捕获其他可能的解析异常，转换为统一的CertificateException
+            throw new CertificateException("Failed to parse public key", e);
+        }
+    }
+
+
+    /**
+     * 从PEM格式的公钥字符串生成PublicKey对象
+     *
+     * @param pemPublicKey PEM格式的公钥字符串
+     * @return 解析得到的PublicKey对象
+     * @throws CertificateException 当公钥解析失败时抛出此异常
+     */
+    public static PublicKey parsePublicKeyFromPem(String pemPublicKey) throws CertificateException {
+        if (pemPublicKey == null || pemPublicKey.trim().isEmpty()) {
+            throw new CertificateException("PEM public key cannot be null or empty");
+        }
+
+        try {
+            // 移除PEM头部和尾部，提取Base64部分
+            String cleanedPem = pemPublicKey.trim();
+
+            // 定义可能的PEM头部模式
+            String[] pemHeaders = {"-----BEGIN RSA PUBLIC KEY-----", "-----BEGIN EC PUBLIC KEY-----", "-----BEGIN DSA PUBLIC KEY-----", "-----BEGIN PUBLIC KEY-----"};
+
+            String[] pemFooters = {"-----END RSA PUBLIC KEY-----", "-----END EC PUBLIC KEY-----", "-----END DSA PUBLIC KEY-----", "-----END PUBLIC KEY-----"};
+
+            // 移除所有可能的PEM头部和尾部
+            for (String header : pemHeaders) {
+                cleanedPem = cleanedPem.replace(header, "");
+            }
+            for (String footer : pemFooters) {
+                cleanedPem = cleanedPem.replace(footer, "");
+            }
+
+            // 移除空白字符
+            cleanedPem = cleanedPem.replaceAll("\\s", "");
+
+            if (cleanedPem.isEmpty()) {
+                throw new CertificateException("No Base64 data found in PEM public key");
+            }
+
+            // 解码Base64数据
+            byte[] keyBytes = Base64.getDecoder().decode(cleanedPem);
+
+            // 使用KeyFactory解析公钥
+            return parsePublicKeyFromBytes(keyBytes);
+
+        } catch (Exception e) {
+            throw new CertificateException("Failed to parse public key from PEM format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 从十六进制格式的公钥字符串生成PublicKey对象
+     *
+     * @param hexPublicKey 十六进制格式的公钥字符串
+     * @return 解析得到的PublicKey对象
+     * @throws CertificateException 当公钥解析失败时抛出此异常
+     */
+    public static PublicKey parsePublicKeyFromHex(String hexPublicKey) throws CertificateException {
+        if (hexPublicKey == null || hexPublicKey.trim().isEmpty()) {
+            throw new CertificateException("HEX public key cannot be null or empty");
+        }
+
+        try {
+            // 清理十六进制字符串（移除空格、0x前缀等）
+            String cleanHex = hexPublicKey.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
+
+            if (!HEX_PATTERN.matcher(cleanHex).matches() || cleanHex.length() % 2 != 0) {
+                throw new CertificateException("Invalid HEX format for public key");
+            }
+
+            // 将十六进制字符串转换为字节数组
+            byte[] keyBytes = new byte[cleanHex.length() / 2];
+            for (int i = 0; i < cleanHex.length(); i += 2) {
+                String byteStr = cleanHex.substring(i, i + 2);
+                keyBytes[i / 2] = (byte) Integer.parseInt(byteStr, 16);
+            }
+
+            // 使用KeyFactory解析公钥
+            return parsePublicKeyFromBytes(keyBytes);
+
+        } catch (Exception e) {
+            throw new CertificateException("Failed to parse public key from HEX format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 从字节数组解析PublicKey对象
+     *
+     * @param keyBytes 公钥的字节数组表示
+     * @return 解析得到的PublicKey对象
+     * @throws CertificateException 当公钥解析失败时抛出此异常
+     */
+    private static PublicKey parsePublicKeyFromBytes(byte[] keyBytes) throws CertificateException {
+        if (keyBytes == null || keyBytes.length == 0) {
+            throw new CertificateException("Key bytes cannot be null or empty");
+        }
+
+        try {
+            // 尝试使用X.509编码格式解析（标准公钥格式）
+            try {
+                java.security.spec.X509EncodedKeySpec keySpec = new java.security.spec.X509EncodedKeySpec(keyBytes);
+
+                // 尝试RSA算法
+                try {
+                    java.security.KeyFactory rsaFactory = java.security.KeyFactory.getInstance("RSA");
+                    return rsaFactory.generatePublic(keySpec);
+                } catch (Exception e) {
+                    // 继续尝试其他算法
+                }
+
+                // 尝试EC算法
+                try {
+                    java.security.KeyFactory ecFactory = java.security.KeyFactory.getInstance("EC");
+                    return ecFactory.generatePublic(keySpec);
+                } catch (Exception e) {
+                    // 继续尝试其他算法
+                }
+
+                // 尝试DSA算法
+                try {
+                    java.security.KeyFactory dsaFactory = java.security.KeyFactory.getInstance("DSA");
+                    return dsaFactory.generatePublic(keySpec);
+                } catch (Exception e) {
+                    // 继续尝试其他算法
+                }
+            } catch (Exception e) {
+                // 如果X.509格式失败，尝试PKCS#1格式（RSA专用）
+                try {
+                    // 对于RSA公钥，可能需要使用PKCS#1格式
+                    if (keyBytes.length > 0 && (keyBytes[0] & 0xFF) == 0x30) {
+                        // 可能是DER编码的RSA公钥
+                        java.security.KeyFactory rsaFactory = java.security.KeyFactory.getInstance("RSA");
+                        java.security.spec.RSAPublicKeySpec rsaSpec = parseRSAPublicKeyFromDER(keyBytes);
+                        if (rsaSpec != null) {
+                            return rsaFactory.generatePublic(rsaSpec);
+                        }
+                    }
+                } catch (Exception ex) {
+                    // 继续尝试其他方法
+                }
+            }
+
+            throw new CertificateException("Unable to determine public key algorithm from bytes");
+
+        } catch (Exception e) {
+            throw new CertificateException("Failed to parse public key from bytes: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 从DER编码的字节数组解析RSA公钥规范
+     *
+     * @param derBytes DER编码的RSA公钥字节数组
+     * @return RSAPublicKeySpec对象，如果解析失败则返回null
+     */
+    private static java.security.spec.RSAPublicKeySpec parseRSAPublicKeyFromDER(byte[] derBytes) {
+        try {
+            // 简单的DER解析：SEQUENCE { INTEGER (modulus), INTEGER (exponent) }
+            if (derBytes.length < 10 || derBytes[0] != 0x30) {
+                return null;
+            }
+
+            int pos = 1;
+            int sequenceLength = derBytes[pos] & 0xFF;
+            pos++;
+
+            // 处理不定长度
+            if (sequenceLength == 0x81) {
+                sequenceLength = derBytes[pos] & 0xFF;
+                pos++;
+            } else if (sequenceLength == 0x82) {
+                sequenceLength = ((derBytes[pos] & 0xFF) << 8) | (derBytes[pos + 1] & 0xFF);
+                pos += 2;
+            }
+
+            // 读取模数（第一个INTEGER）
+            if (derBytes[pos] != 0x02) {
+                return null;
+            }
+            pos++;
+
+            int modulusLength = derBytes[pos] & 0xFF;
+            pos++;
+
+            // 处理不定长度
+            if (modulusLength == 0x81) {
+                modulusLength = derBytes[pos] & 0xFF;
+                pos++;
+            } else if (modulusLength == 0x82) {
+                modulusLength = ((derBytes[pos] & 0xFF) << 8) | (derBytes[pos + 1] & 0xFF);
+                pos += 2;
+            }
+
+            byte[] modulusBytes = new byte[modulusLength];
+            System.arraycopy(derBytes, pos, modulusBytes, 0, modulusLength);
+            pos += modulusLength;
+
+            // 读取指数（第二个INTEGER）
+            if (derBytes[pos] != 0x02) {
+                return null;
+            }
+            pos++;
+
+            int exponentLength = derBytes[pos] & 0xFF;
+            pos++;
+
+            byte[] exponentBytes = new byte[exponentLength];
+            System.arraycopy(derBytes, pos, exponentBytes, 0, exponentLength);
+
+            BigInteger modulus = new BigInteger(1, modulusBytes);
+            BigInteger exponent = new BigInteger(1, exponentBytes);
+
+            return new java.security.spec.RSAPublicKeySpec(modulus, exponent);
+
+        } catch (Exception e) {
+            return null;
         }
     }
 

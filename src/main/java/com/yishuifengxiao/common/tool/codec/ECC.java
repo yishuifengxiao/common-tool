@@ -1151,4 +1151,482 @@ public class ECC {
         return hashSb.toString().substring(0, iKeyLen * 2).toUpperCase();
     }
 
+    /**
+     * 将ECPublicKey对象转换为PEM格式字符串
+     *
+     * @param ecPublicKey ECPublicKey对象
+     * @return PEM格式的公钥字符串
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String ecPublicKeyToPem(ECPublicKey ecPublicKey) throws Exception {
+        if (ecPublicKey == null) {
+            throw new IllegalArgumentException("ECPublicKey cannot be null");
+        }
+
+        // 获取公钥的DER编码
+        byte[] encodedKey = ecPublicKey.getEncoded();
+        if (encodedKey == null) {
+            throw new Exception("Failed to encode ECPublicKey");
+        }
+
+        // Base64编码
+        String base64Key = Base64.getEncoder().encodeToString(encodedKey);
+
+        // 格式化为PEM格式（每64个字符换行）
+        StringBuilder pemBuilder = new StringBuilder();
+        pemBuilder.append("-----BEGIN PUBLIC KEY-----\n");
+
+        int lineLength = 64;
+        for (int i = 0; i < base64Key.length(); i += lineLength) {
+            int end = Math.min(i + lineLength, base64Key.length());
+            pemBuilder.append(base64Key.substring(i, end)).append("\n");
+        }
+
+        pemBuilder.append("-----END PUBLIC KEY-----\n");
+        return pemBuilder.toString();
+    }
+
+    /**
+     * 将ECPublicKey对象转换为十六进制格式字符串
+     *
+     * @param ecPublicKey ECPublicKey对象
+     * @return 十六进制格式的公钥字符串
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String ecPublicKeyToHex(ECPublicKey ecPublicKey) throws Exception {
+        if (ecPublicKey == null) {
+            throw new IllegalArgumentException("ECPublicKey cannot be null");
+        }
+
+        // 获取公钥的DER编码
+        byte[] encodedKey = ecPublicKey.getEncoded();
+        if (encodedKey == null) {
+            throw new Exception("Failed to encode ECPublicKey");
+        }
+
+        // 转换为十六进制
+        return HexUtil.bytesToHex(encodedKey).toUpperCase();
+    }
+
+    /**
+     * 将EC公钥字符串转换为PEM格式
+     *
+     * @param publicKeyData 公钥数据字符串（可以是十六进制、Base64或PEM格式）
+     * @return PEM格式的公钥字符串
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String convertECPublicKeyToPem(String publicKeyData) throws Exception {
+        if (publicKeyData == null || publicKeyData.trim().isEmpty()) {
+            throw new IllegalArgumentException("Public key data cannot be null or empty");
+        }
+
+        // 首先尝试解析为ECPublicKey对象
+        ECPublicKey ecPublicKey = parseECPublicKey(publicKeyData);
+        if (ecPublicKey != null) {
+            return ecPublicKeyToPem(ecPublicKey);
+        }
+
+        // 如果无法解析为ECPublicKey，尝试直接处理
+        String cleanData = publicKeyData.trim();
+
+        // 检查是否已经是PEM格式
+        if (cleanData.contains("-----BEGIN PUBLIC KEY-----")) {
+            return cleanData; // 已经是PEM格式，直接返回
+        }
+
+        // 尝试解析为十六进制或Base64格式
+        byte[] keyBytes = null;
+
+        // 检查是否为十六进制格式
+        String testHex = cleanData.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
+        if (HEX_PATTERN.matcher(testHex).matches() && testHex.length() % 2 == 0) {
+            keyBytes = HexUtil.hexToBytes(testHex);
+        } else {
+            // 尝试Base64解码
+            try {
+                keyBytes = Base64.getDecoder().decode(cleanData);
+            } catch (Exception e) {
+                // 尝试MIME类型的Base64解码
+                try {
+                    keyBytes = Base64.getMimeDecoder().decode(cleanData);
+                } catch (Exception e2) {
+                    throw new Exception("Unable to parse public key data: not valid hex or base64 format");
+                }
+            }
+        }
+
+        // 将字节数组转换为PEM格式
+        String base64Key = Base64.getEncoder().encodeToString(keyBytes);
+
+        StringBuilder pemBuilder = new StringBuilder();
+        pemBuilder.append("-----BEGIN PUBLIC KEY-----\n");
+
+        int lineLength = 64;
+        for (int i = 0; i < base64Key.length(); i += lineLength) {
+            int end = Math.min(i + lineLength, base64Key.length());
+            pemBuilder.append(base64Key.substring(i, end)).append("\n");
+        }
+
+        pemBuilder.append("-----END PUBLIC KEY-----\n");
+        return pemBuilder.toString();
+    }
+
+    /**
+     * 将EC公钥字符串转换为十六进制格式
+     *
+     * @param publicKeyData 公钥数据字符串（可以是十六进制、Base64或PEM格式）
+     * @return 十六进制格式的公钥字符串
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String convertECPublicKeyToHex(String publicKeyData) throws Exception {
+        if (publicKeyData == null || publicKeyData.trim().isEmpty()) {
+            throw new IllegalArgumentException("Public key data cannot be null or empty");
+        }
+
+        // 首先尝试解析为ECPublicKey对象
+        ECPublicKey ecPublicKey = parseECPublicKey(publicKeyData);
+        if (ecPublicKey != null) {
+            return ecPublicKeyToHex(ecPublicKey);
+        }
+
+        // 如果无法解析为ECPublicKey，尝试直接处理
+        String cleanData = publicKeyData.trim();
+
+        // 检查是否已经是十六进制格式
+        String testHex = cleanData.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
+        if (HEX_PATTERN.matcher(testHex).matches() && testHex.length() % 2 == 0) {
+            return testHex.toUpperCase(); // 已经是十六进制格式，直接返回大写形式
+        }
+
+        // 移除PEM头部和尾部（如果存在）
+        cleanData = cleanData.replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "")
+                .replaceAll("\\s", "");
+
+        // 尝试Base64解码
+        byte[] keyBytes;
+        try {
+            keyBytes = Base64.getDecoder().decode(cleanData);
+        } catch (Exception e) {
+            // 尝试MIME类型的Base64解码
+            try {
+                keyBytes = Base64.getMimeDecoder().decode(cleanData);
+            } catch (Exception e2) {
+                throw new Exception("Unable to parse public key data: not valid base64 format");
+            }
+        }
+
+        // 转换为十六进制
+        return HexUtil.bytesToHex(keyBytes).toUpperCase();
+    }
+
+    /**
+     * 解析EC公钥数据，支持多种格式的输入
+     *
+     * @param publicKeyData 公钥数据字符串，可以是十六进制、base64编码或PEM格式
+     * @return 解析成功的ECPublicKey对象
+     * @throws Exception 解析过程中发生的错误
+     */
+    public static ECPublicKey parseECPublicKey(String publicKeyData) throws Exception {
+        if (publicKeyData == null || publicKeyData.trim().isEmpty()) {
+            throw new IllegalArgumentException("Public key data cannot be null or empty");
+        }
+
+        String cleanData = publicKeyData.trim();
+
+        // 尝试作为PEM格式解析
+        if (cleanData.contains("-----BEGIN PUBLIC KEY-----")) {
+            return parsePEMPublicKey(cleanData);
+        }
+
+        // 尝试作为十六进制字符串解析
+        try {
+            byte[] hexKey = parseHexString(cleanData);
+            if (hexKey != null) {
+                return parseECPublicKeyFromBytes(hexKey);
+            }
+        } catch (Exception e) {
+            // 继续尝试其他格式
+        }
+
+        // 尝试作为base64字符串解析
+        try {
+            byte[] base64Key = parseBase64String(cleanData);
+            if (base64Key != null) {
+                return parseECPublicKeyFromBytes(base64Key);
+            }
+        } catch (Exception e) {
+            // 继续尝试其他格式
+        }
+
+        throw new Exception("Unable to parse public key from provided data");
+    }
+
+    /**
+     * 从字节数组解析EC公钥
+     *
+     * @param keyBytes 公钥字节数组
+     * @return 解析成功的ECPublicKey对象
+     * @throws Exception 当无法识别公钥格式或解析失败时抛出异常
+     */
+    private static ECPublicKey parseECPublicKeyFromBytes(byte[] keyBytes) throws Exception {
+        if (keyBytes == null || keyBytes.length == 0) {
+            return null;
+        }
+
+        try {
+            // 创建EC算法的密钥工厂
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
+            X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+            PublicKey publicKey = keyFactory.generatePublic(keySpec);
+
+            // 验证并转换公钥类型
+            if (publicKey instanceof ECPublicKey) {
+                return (ECPublicKey) publicKey;
+            } else {
+                throw new Exception("Public key is not an EC public key");
+            }
+        } catch (Exception e) {
+            throw new Exception("Failed to parse EC public key from bytes: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 解析PEM格式公钥
+     *
+     * @param pemData PEM格式的公钥字符串数据
+     * @return 解析后的ECPublicKey对象
+     * @throws Exception 当解析失败或数据格式不正确时抛出异常
+     */
+    private static ECPublicKey parsePEMPublicKey(String pemData) throws Exception {
+        // 提取Base64部分
+        String base64Part = extractBase64FromPEM(pemData);
+        if (base64Part.isEmpty()) {
+            throw new Exception("No Base64 data found in PEM format");
+        }
+
+        byte[] keyBytes = Base64.getDecoder().decode(base64Part);
+        return parseECPublicKeyFromBytes(keyBytes);
+    }
+
+    /**
+     * 将ECPrivateKey对象转换为PEM格式字符串
+     *
+     * @param ecPrivateKey ECPrivateKey对象
+     * @return PEM格式的私钥字符串
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String ecPrivateKeyToPem(ECPrivateKey ecPrivateKey) throws Exception {
+        if (ecPrivateKey == null) {
+            throw new IllegalArgumentException("ECPrivateKey cannot be null");
+        }
+
+        // 获取私钥的DER编码
+        byte[] encodedKey = ecPrivateKey.getEncoded();
+        if (encodedKey == null) {
+            throw new Exception("Failed to encode ECPrivateKey");
+        }
+
+        // Base64编码
+        String base64Key = Base64.getEncoder().encodeToString(encodedKey);
+
+        // 格式化为PEM格式（每64个字符换行）
+        StringBuilder pemBuilder = new StringBuilder();
+        pemBuilder.append("-----BEGIN EC PRIVATE KEY-----\n");
+
+        int lineLength = 64;
+        for (int i = 0; i < base64Key.length(); i += lineLength) {
+            int end = Math.min(i + lineLength, base64Key.length());
+            pemBuilder.append(base64Key.substring(i, end)).append("\n");
+        }
+
+        pemBuilder.append("-----END EC PRIVATE KEY-----\n");
+        return pemBuilder.toString();
+    }
+
+    /**
+     * 将ECPrivateKey对象转换为十六进制格式字符串
+     *
+     * @param ecPrivateKey ECPrivateKey对象
+     * @return 十六进制格式的私钥字符串
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String ecPrivateKeyToHex(ECPrivateKey ecPrivateKey) throws Exception {
+        if (ecPrivateKey == null) {
+            throw new IllegalArgumentException("ECPrivateKey cannot be null");
+        }
+
+        // 获取私钥的DER编码
+        byte[] encodedKey = ecPrivateKey.getEncoded();
+        if (encodedKey == null) {
+            throw new Exception("Failed to encode ECPrivateKey");
+        }
+
+        // 转换为十六进制
+        return HexUtil.bytesToHex(encodedKey).toUpperCase();
+    }
+
+    /**
+     * 将ECPrivateKey对象转换为仅包含D值的十六进制字符串
+     *
+     * @param ecPrivateKey ECPrivateKey对象
+     * @return 仅包含私钥D值的十六进制字符串（64个字符）
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String ecPrivateKeyToDHex(ECPrivateKey ecPrivateKey) throws Exception {
+        if (ecPrivateKey == null) {
+            throw new IllegalArgumentException("ECPrivateKey cannot be null");
+        }
+
+        // 获取私钥的D值
+        BigInteger d = ecPrivateKey.getS();
+        String dHex = d.toString(16).toUpperCase();
+
+        // 确保长度为64个字符（32字节）
+        if (dHex.length() < 64) {
+            dHex = String.format("%64s", dHex).replace(' ', '0');
+        } else if (dHex.length() > 64) {
+            throw new Exception("Invalid private key D value length: expected 64 hex characters, got " + dHex.length());
+        }
+
+        return dHex;
+    }
+
+    /**
+     * 将EC私钥字符串转换为PEM格式
+     *
+     * @param privateKeyData 私钥数据字符串（可以是十六进制、Base64或PEM格式）
+     * @return PEM格式的私钥字符串
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String convertECPrivateKeyToPem(String privateKeyData) throws Exception {
+        if (privateKeyData == null || privateKeyData.trim().isEmpty()) {
+            throw new IllegalArgumentException("Private key data cannot be null or empty");
+        }
+
+        // 首先尝试解析为ECPrivateKey对象
+        ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyData);
+        if (ecPrivateKey != null) {
+            return ecPrivateKeyToPem(ecPrivateKey);
+        }
+
+        // 如果无法解析为ECPrivateKey，尝试直接处理
+        String cleanData = privateKeyData.trim();
+
+        // 检查是否已经是PEM格式
+        if (cleanData.contains("-----BEGIN EC PRIVATE KEY-----") ||
+                cleanData.contains("-----BEGIN PRIVATE KEY-----")) {
+            return cleanData; // 已经是PEM格式，直接返回
+        }
+
+        // 尝试解析为十六进制或Base64格式
+        byte[] keyBytes = null;
+
+        // 检查是否为十六进制格式
+        String testHex = cleanData.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
+        if (HEX_PATTERN.matcher(testHex).matches() && testHex.length() % 2 == 0) {
+            keyBytes = HexUtil.hexToBytes(testHex);
+        } else {
+            // 尝试Base64解码
+            try {
+                keyBytes = Base64.getDecoder().decode(cleanData);
+            } catch (Exception e) {
+                // 尝试MIME类型的Base64解码
+                try {
+                    keyBytes = Base64.getMimeDecoder().decode(cleanData);
+                } catch (Exception e2) {
+                    throw new Exception("Unable to parse private key data: not valid hex or base64 format");
+                }
+            }
+        }
+
+        // 将字节数组转换为PEM格式
+        String base64Key = Base64.getEncoder().encodeToString(keyBytes);
+
+        StringBuilder pemBuilder = new StringBuilder();
+        pemBuilder.append("-----BEGIN EC PRIVATE KEY-----\n");
+
+        int lineLength = 64;
+        for (int i = 0; i < base64Key.length(); i += lineLength) {
+            int end = Math.min(i + lineLength, base64Key.length());
+            pemBuilder.append(base64Key.substring(i, end)).append("\n");
+        }
+
+        pemBuilder.append("-----END EC PRIVATE KEY-----\n");
+        return pemBuilder.toString();
+    }
+
+    /**
+     * 将EC私钥字符串转换为十六进制格式
+     *
+     * @param privateKeyData 私钥数据字符串（可以是十六进制、Base64或PEM格式）
+     * @return 十六进制格式的私钥字符串
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String convertECPrivateKeyToHex(String privateKeyData) throws Exception {
+        if (privateKeyData == null || privateKeyData.trim().isEmpty()) {
+            throw new IllegalArgumentException("Private key data cannot be null or empty");
+        }
+
+        // 首先尝试解析为ECPrivateKey对象
+        ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyData);
+        if (ecPrivateKey != null) {
+            return ecPrivateKeyToHex(ecPrivateKey);
+        }
+
+        // 如果无法解析为ECPrivateKey，尝试直接处理
+        String cleanData = privateKeyData.trim();
+
+        // 检查是否已经是十六进制格式
+        String testHex = cleanData.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
+        if (HEX_PATTERN.matcher(testHex).matches() && testHex.length() % 2 == 0) {
+            return testHex.toUpperCase(); // 已经是十六进制格式，直接返回大写形式
+        }
+
+        // 移除PEM头部和尾部（如果存在）
+        cleanData = cleanData.replace("-----BEGIN EC PRIVATE KEY-----", "")
+                .replace("-----END EC PRIVATE KEY-----", "")
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
+
+        // 尝试Base64解码
+        byte[] keyBytes;
+        try {
+            keyBytes = Base64.getDecoder().decode(cleanData);
+        } catch (Exception e) {
+            // 尝试MIME类型的Base64解码
+            try {
+                keyBytes = Base64.getMimeDecoder().decode(cleanData);
+            } catch (Exception e2) {
+                throw new Exception("Unable to parse private key data: not valid base64 format");
+            }
+        }
+
+        // 转换为十六进制
+        return HexUtil.bytesToHex(keyBytes).toUpperCase();
+    }
+
+    /**
+     * 将EC私钥字符串转换为仅包含D值的十六进制格式
+     *
+     * @param privateKeyData 私钥数据字符串（可以是十六进制、Base64或PEM格式）
+     * @return 仅包含私钥D值的十六进制字符串（64个字符）
+     * @throws Exception 当转换过程中发生错误时抛出异常
+     */
+    public static String convertECPrivateKeyToDHex(String privateKeyData) throws Exception {
+        if (privateKeyData == null || privateKeyData.trim().isEmpty()) {
+            throw new IllegalArgumentException("Private key data cannot be null or empty");
+        }
+
+        // 解析为ECPrivateKey对象
+        ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyData);
+        if (ecPrivateKey == null) {
+            throw new Exception("Failed to parse EC private key from provided data");
+        }
+
+        // 转换为D值十六进制
+        return ecPrivateKeyToDHex(ecPrivateKey);
+    }
+
 }
