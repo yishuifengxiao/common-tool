@@ -446,7 +446,8 @@ public class ECC {
     private static final String PEM_FOOTER_PKCS8 = "-----END PRIVATE KEY-----";
     private static final String PEM_HEADER_PKCS8_ENC = "-----BEGIN ENCRYPTED PRIVATE KEY-----";
     private static final String PEM_FOOTER_PKCS8_ENC = "-----END ENCRYPTED PRIVATE KEY-----";
-
+    private static final String PEM_HEADER_PUBLIC = "-----BEGIN PUBLIC KEY-----";
+    private static final String PEM_FOOTER_PUBLIC = "-----END PUBLIC KEY-----";
     /**
      * 从EC私钥数据中提取私钥的D值
      *
@@ -593,7 +594,7 @@ public class ECC {
      * @param base64String 需要解析的Base64字符串，可能包含PEM格式的头部和尾部
      * @return 解码后的字节数组，如果解码失败则返回null
      */
-    private static byte[] parseBase64String(String base64String) {
+    public static byte[] parseBase64String(String base64String) {
         // 移除可能的PEM头部和尾部（如果存在）
         String cleanBase64 = base64String.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replaceAll("\\s", "");
 
@@ -618,7 +619,7 @@ public class ECC {
      * @return 解析成功的ECPrivateKey对象
      * @throws Exception 当无法识别私钥格式或解析失败时抛出异常
      */
-    private static ECPrivateKey parseECPrivateKeyFromBytes(byte[] keyBytes) throws Exception {
+    public static ECPrivateKey parseECPrivateKeyFromBytes(byte[] keyBytes) throws Exception {
         if (keyBytes == null || keyBytes.length == 0) {
             return null;
         }
@@ -776,7 +777,7 @@ public class ECC {
      * @return 解析后的ECPrivateKey对象
      * @throws Exception 当解析失败或数据格式不正确时抛出异常
      */
-    private static ECPrivateKey parsePEMPrivateKey(String pemData) throws Exception {
+    public static ECPrivateKey parsePEMPrivateKey(String pemData) throws Exception {
         String processedPem = pemData;
         // 先移除EC PARAMETERS部分（如果有）
         int beginParamsIndex = processedPem.indexOf("-----BEGIN EC PARAMETERS-----");
@@ -823,7 +824,11 @@ public class ECC {
      */
     private static String extractBase64FromPEM(String pemData) {
         // 移除所有PEM头部和尾部
-        String cleanData = pemData.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replaceAll("\\s", "");
+        String cleanData = pemData.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "")
+                .replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "")
+                .replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "")
+                .replace(PEM_HEADER_PUBLIC, "").replace(PEM_FOOTER_PUBLIC, "")
+                .replaceAll("\\s", "");
 
         return cleanData;
     }
@@ -1369,7 +1374,7 @@ public class ECC {
      * @return 解析成功的ECPublicKey对象
      * @throws Exception 当无法识别公钥格式或解析失败时抛出异常
      */
-    private static ECPublicKey parseECPublicKeyFromBytes(byte[] keyBytes) throws Exception {
+    public static ECPublicKey parseECPublicKeyFromBytes(byte[] keyBytes) throws Exception {
         if (keyBytes == null || keyBytes.length == 0) {
             return null;
         }
@@ -1398,7 +1403,7 @@ public class ECC {
      * @return 解析后的ECPublicKey对象
      * @throws Exception 当解析失败或数据格式不正确时抛出异常
      */
-    private static ECPublicKey parsePEMPublicKey(String pemData) throws Exception {
+    public static ECPublicKey parsePEMPublicKey(String pemData) throws Exception {
         // 提取Base64部分
         String base64Part = extractBase64FromPEM(pemData);
         if (base64Part.isEmpty()) {
@@ -1628,5 +1633,6 @@ public class ECC {
         // 转换为D值十六进制
         return ecPrivateKeyToDHex(ecPrivateKey);
     }
+
 
 }

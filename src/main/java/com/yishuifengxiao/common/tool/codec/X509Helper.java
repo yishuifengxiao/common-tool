@@ -110,7 +110,7 @@ public class X509Helper {
      * @param base64String Base64编码的证书字符串，可能包含PEM头部和尾部
      * @return 解析得到的字节数组，如果解析失败则返回null
      */
-    private static byte[] parseBase64String(String base64String) {
+    public static byte[] parseBase64String(String base64String) {
         // 移除可能的PEM头部和尾部（如果存在）
         String cleanBase64 = base64String.replace(PEM_HEADER, "").replace(PEM_FOOTER, "").replaceAll("\\s", "");
 
