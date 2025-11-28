@@ -351,6 +351,74 @@ public class ECC {
 
 
     /**
+     * 使用EC私钥对证书数据进行签名
+     *
+     * @param privateKeyCertificate 私钥证书字符串，用于解析出EC私钥
+     * @param data                  待签名的数据
+     * @return 返回Base64编码后的签名结果
+     * @throws Exception 当私钥解析或签名过程中发生错误时抛出异常
+     */
+    public static String sign(String privateKeyCertificate, String data) throws Exception {
+        ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyCertificate);
+        // 使用私钥对数据进行签名
+        byte[] signature = signData(ecPrivateKey, data.getBytes(StandardCharsets.UTF_8));
+        // 将签名结果进行Base64编码并返回
+        return Base64.getEncoder().encodeToString(signature);
+    }
+
+    /**
+     * 使用私钥对十六进制格式的数据进行签名
+     *
+     * @param privateKeyCertificate 私钥证书字符串，用于解析出EC私钥
+     * @param hexData               待签名的十六进制格式数据
+     * @return 签名结果的十六进制字符串表示
+     * @throws Exception 当私钥解析失败或签名过程出现错误时抛出异常
+     */
+    public static String signHex(String privateKeyCertificate, String hexData) throws Exception {
+        ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyCertificate);
+        // 使用私钥对数据进行签名
+        byte[] data = HexUtil.hexToBytes(hexData);
+        byte[] signature = signData(ecPrivateKey, data);
+        // 将签名结果进行Base64编码并返回
+        return HexUtil.bytesToHex(signature);
+    }
+
+
+    /**
+     * 验证数字签名的有效性
+     *
+     * @param certData        包含公钥信息的证书数据字符串
+     * @param data            待验证签名的原始数据
+     * @param signatureBase64 经过Base64编码的签名数据
+     * @return 签名验证结果，true表示签名有效，false表示签名无效
+     * @throws Exception 当证书解析失败或签名验证过程中发生错误时抛出异常
+     */
+    public static boolean verify(String certData, String data, String signatureBase64) throws Exception {
+        PublicKey publicKey = X509Helper.extractPublicKey(certData);
+        // 解码Base64签名并验证签名有效性
+        byte[] signature = Base64.getDecoder().decode(signatureBase64);
+        return verifySignature(publicKey, data.getBytes(StandardCharsets.UTF_8), signature);
+    }
+
+    /**
+     * 验证十六进制数据的签名有效性
+     *
+     * @param certData     包含公钥的证书数据字符串
+     * @param hexData      待验证的十六进制数据字符串
+     * @param signatureHex 十六进制格式的签名字符串
+     * @return 签名验证结果，有效返回true，无效返回false
+     * @throws Exception 当证书解析、数据解码或签名验证过程中发生错误时抛出异常
+     */
+    public static boolean verifyHex(String certData, String hexData, String signatureHex) throws Exception {
+        PublicKey publicKey = X509Helper.extractPublicKey(certData);
+        // 解码十六进制签名并验证签名有效性
+        byte[] signature = HexUtil.hexToBytes(signatureHex);
+        byte[] data = HexUtil.hexToBytes(hexData);
+        return verifySignature(publicKey, data, signature);
+    }
+
+
+    /**
      * 验证签名
      *
      * @param curveOID        椭圆曲线OID标识符
