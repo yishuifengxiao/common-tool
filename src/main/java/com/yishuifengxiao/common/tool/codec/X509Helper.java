@@ -81,7 +81,10 @@ public class X509Helper {
     }
 
     /**
-     * 解析十六进制字符串
+     * 解析十六进制字符串为字节数组
+     *
+     * @param hexString 十六进制编码的证书字符串，可能包含空格、0x或0X前缀
+     * @return 解析得到的字节数组，如果字符串格式错误则返回null
      */
     private static byte[] parseHexString(String hexString) {
         String cleanHex = hexString.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
@@ -103,7 +106,10 @@ public class X509Helper {
     }
 
     /**
-     * 解析Base64字符串
+     * 解析Base64字符串为字节数组
+     *
+     * @param base64String Base64编码的证书字符串，可能包含PEM头部和尾部
+     * @return 解析得到的字节数组，如果解析失败则返回null
      */
     private static byte[] parseBase64String(String base64String) {
         // 移除可能的PEM头部和尾部（如果存在）
@@ -128,7 +134,11 @@ public class X509Helper {
     }
 
     /**
-     * 解析PEM格式证书
+     * 解析PEM格式证书字符串
+     *
+     * @param pemData PEM格式的证书字符串，包含BEGIN和END标签
+     * @return 解析得到的X509Certificate对象
+     * @throws CertificateException 当PEM格式证书解析失败时抛出此异常
      */
     private static X509Certificate parsePemCertificate(String pemData) throws CertificateException {
         String processedPem = pemData;
@@ -150,16 +160,22 @@ public class X509Helper {
     }
 
     /**
-     * 从字节数组解析证书
+     * 从字节数组解析证书对象
+     *
+     * @param certBytes 证书的字节数组表示
+     * @return 解析得到的X509Certificate对象
+     * @throws CertificateException 当证书解析失败时抛出此异常
      */
     private static X509Certificate parseCertificateBytes(byte[] certBytes) throws CertificateException {
         try {
+            // 创建X.509证书工厂并解析证书
             CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(certBytes));
         } catch (CertificateException e) {
             throw new CertificateException("Failed to parse certificate from bytes: " + e.getMessage(), e);
         }
     }
+
 
     /**
      * 证书信息完整类
@@ -316,7 +332,10 @@ public class X509Helper {
     }
 
     /**
-     * 提取公钥信息
+     * 提取证书中的公钥信息并设置到Cert对象中
+     *
+     * @param certificate X509证书对象，用于提取公钥信息
+     * @param info        Cert信息对象，用于存储提取的公钥信息
      */
     private static void extractPublicKeyInfo(X509Certificate certificate, Cert info) {
         PublicKey publicKey = certificate.getPublicKey();
@@ -357,6 +376,14 @@ public class X509Helper {
         }
     }
 
+
+    /**
+     * 从公钥编码中提取曲线OID
+     *
+     * @param encoded 公钥的字节编码数组
+     * @return 曲线OID的点分十进制表示字符串
+     * @throws IllegalArgumentException 当公钥编码格式不正确或长度不足时抛出
+     */
     public static String getCurveOIDFromPublicKeyEncoding(byte[] encoded) {
         // 定位第二个OID的内容
         if (encoded.length < 23) {
@@ -366,7 +393,7 @@ public class X509Helper {
         if (encoded[0] != 0x30 || encoded[2] != 0x30 || encoded[4] != 0x06 || encoded[13] != 0x06) {
             throw new IllegalArgumentException("非预期的公钥编码结构");
         }
-        // 第二个OID的长度
+        // 提取第二个OID的数据
         int oidLength = encoded[14];
         if (oidLength != 8) {
             throw new IllegalArgumentException("非预期的OID长度");
@@ -378,8 +405,12 @@ public class X509Helper {
         return notation;
     }
 
+
     /**
      * 提取RSA公钥的十六进制表示
+     *
+     * @param publicKey RSA公钥对象，用于提取编码
+     * @return RSA公钥的十六进制表示字符串
      */
     public static String extractRSAPublicKeyHex(RSAPublicKey publicKey) {
         try {
@@ -394,6 +425,9 @@ public class X509Helper {
 
     /**
      * 提取ECDSA公钥的十六进制表示（未压缩格式）
+     *
+     * @param publicKey ECPublicKey对象，用于提取公钥点坐标
+     * @return ECDSA公钥的十六进制表示字符串（未压缩格式）
      */
     public static String extractECDSAPublicKeyHex(ECPublicKey publicKey) {
         try {
@@ -438,9 +472,13 @@ public class X509Helper {
 
     /**
      * 提取主题密钥标识符（SKID）
+     *
+     * @param certificate X509证书对象，用于提取SKID扩展信息
+     * @param info        证书信息对象，用于存储提取到的SKID值
      */
     private static void extractSubjectKeyIdentifier(X509Certificate certificate, Cert info) {
         try {
+            // 获取Subject Key Identifier扩展值，OID为2.5.29.14
             byte[] skidExtension = certificate.getExtensionValue("2.5.29.14"); // Subject Key Identifier OID
             if (skidExtension != null) {
                 // SKID扩展值是OCTET STRING包装的，需要解析
@@ -454,9 +492,18 @@ public class X509Helper {
         }
     }
 
+
+    /**
+     * 从X509证书中提取CIPKID信息
+     *
+     * @param certificate X509证书对象，用于获取证书信息
+     * @param info        证书信息对象，用于存储提取的CIPKID值
+     */
     private static void extractCipkid(X509Certificate certificate, Cert info) {
+        // 从TLV格式的SKID中提取标签为"04"的值作为CIPKID
         info.setCipkid(TLVUtil.fetchValueFromTlv("04", info.getSkid()));
     }
+
 
     /**
      * 从证书数据中提取CIPKID（Certificate Issuer Public Key Identifier）
@@ -487,7 +534,10 @@ public class X509Helper {
 
 
     /**
-     * 从Authority Key Identifier扩展中提取Key Identifier
+     * 从Authority Key Identifier扩展中提取Key Identifier（OID: 2.5.29.35）
+     *
+     * @param akidExtension Authority Key Identifier扩展值，用于提取Key Identifier
+     * @return 返回提取到的Key Identifier值，如果提取失败则返回null
      */
     private static byte[] extractKeyIdentifierFromAKID(byte[] akidExtension) {
         try {
@@ -531,7 +581,10 @@ public class X509Helper {
     }
 
     /**
-     * 解析OCTET STRING类型的扩展值
+     * 解析OCTET STRING类型的扩展值，提取实际的字节数组
+     *
+     * @param extensionValue OCTET STRING类型的扩展值，包含包装的实际数据
+     * @return 返回解析后的实际字节数组，如果解析失败则返回null
      */
     private static byte[] parseOctetStringExtension(byte[] extensionValue) {
         if (extensionValue == null || extensionValue.length < 2) {
@@ -573,7 +626,10 @@ public class X509Helper {
     }
 
     /**
-     * 提取授权密钥标识符（AKID）
+     * 提取授权密钥标识符（AKID），并将其转换为十六进制字符串存储在证书信息对象中
+     *
+     * @param certificate X509证书对象，用于获取扩展值
+     * @param info        证书信息对象，用于存储提取的AKID值
      */
     private static void extractAuthorityKeyIdentifier(X509Certificate certificate, Cert info) {
         try {
@@ -590,7 +646,10 @@ public class X509Helper {
     }
 
     /**
-     * 提取OID和主题备用名称
+     * 提取OID和主题备用名称（SAN），并将其存储在证书信息对象中
+     *
+     * @param certificate X509证书对象，用于获取扩展值
+     * @param info        证书信息对象，用于存储提取的OID和SAN值
      */
     private static void extractOidAndAlternativeNames(X509Certificate certificate, Cert info) {
         List<String> alternativeNames = new ArrayList<>();
@@ -653,6 +712,12 @@ public class X509Helper {
     }
 
 
+    /**
+     * 从证书数据中提取OID标识符
+     *
+     * @param certData 证书数据字符串，用于解析和提取OID
+     * @return 返回提取到的OID字符串，如果提取失败则返回null
+     */
     public static String extractOid(String certData) {
         try {
             // 解析证书数据并提取公钥值
@@ -746,7 +811,10 @@ public class X509Helper {
     }
 
     /**
-     * 仅提取CIPKID
+     * 仅提取CIPKID（证书颁发者公钥标识符），如果SKID为空则尝试从AKID获取
+     *
+     * @param certificate X509证书对象，用于提取CIPKID
+     * @return 返回提取到的CIPKID字符串，如果提取失败则返回null
      */
     public static String extractCipkid(X509Certificate certificate) {
         try {
@@ -770,7 +838,9 @@ public class X509Helper {
 
 
     /**
-     * 打印证书详细信息
+     * 打印证书详细信息，包括主题、颁发者、序列号、有效期、版本、公钥算法、公钥值、SKID、CIPKID、AKID、OID和主题备用名称
+     *
+     * @param certificate X509证书对象，用于提取和打印详细信息
      */
     public static void printCertificateDetails(X509Certificate certificate) {
         if (certificate == null) {

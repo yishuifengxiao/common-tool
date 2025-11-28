@@ -60,4 +60,25 @@ public class HexUtilBase64ToHexTest {
             HexUtil.base64ToHex(illegalBase64);
         });
     }
+
+    @Test
+    public void testBase64ToHex_SpecialCharacters() {
+        String base64Str = """
+                MIICTDCCAfGgAwIBAgIBATAKBggqhkjOPQQDAjBJMRUwEwYDVQQDDAxHU01BIFRl
+                c3QgQ0kxETAPBgNVBAsMCFRFU1RDRVJUMRAwDgYDVQQKDAdSU1BURVNUMQswCQYD
+                VQQGEwJJVDAeFw0xODAzMjAxMDQwMjJaFw0xOTAzMjAxMDQwMjJaMEkxFTATBgNV
+                BAMMDEdTTUEgVGVzdCBDSTERMA8GA1UECwwIVEVTVENFUlQxEDAOBgNVBAoMB1JT
+                UFRFU1QxCzAJBgNVBAYTAklUMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEA/PB
+                6uvmm6S81GX7+3TAgku+4mjU+YqaeONdVFFoc4PnCvtGXstiXwq3qXT/yy3JeDo9
+                dp58nVQdQz1AfEVUsaOByTCBxjAdBgNVHQ4EFgQUAMOLTWNfZq1jcHrDNOWGqckM
+                IgAwDwYDVR0TAQH/BAUwAwEB/zAXBgNVHSABAf8EDTALMAkGB2eBEgECAQAwDgYD
+                VR0PAQH/BAQDAgEGMA4GA1UdEQQHMAWIA4g3ATBbBgNVHR8EVDBSMCegJaAjhiFo
+                dHRwOi8vY2kudGVzdC5nc21hLmNvbS9DUkwtQS5jcmwwJ6AloCOGIWh0dHA6Ly9j
+                aS50ZXN0LmdzbWEuY29tL0NSTC1CLmNybDAKBggqhkjOPQQDAgNJADBGAiEA49aD
+                cyVvfVGH+1ezy0gT10M/oMgYStBXZjs62HG2dD0CIQCprPpRh8qwNl4toPVr159G
+                GT+il8g1UqapmvFJb/jOsg==
+                """.trim();
+        String hex = HexUtil.base64ToHex(base64Str);
+        System.out.println(hex);
+    }
 }
