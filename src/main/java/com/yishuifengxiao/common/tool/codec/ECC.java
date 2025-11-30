@@ -448,6 +448,7 @@ public class ECC {
     private static final String PEM_FOOTER_PKCS8_ENC = "-----END ENCRYPTED PRIVATE KEY-----";
     private static final String PEM_HEADER_PUBLIC = "-----BEGIN PUBLIC KEY-----";
     private static final String PEM_FOOTER_PUBLIC = "-----END PUBLIC KEY-----";
+
     /**
      * 从EC私钥数据中提取私钥的D值
      *
@@ -598,17 +599,7 @@ public class ECC {
         // 移除可能的PEM头部和尾部（如果存在）
         String cleanBase64 = base64String.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replaceAll("\\s", "");
 
-        try {
-            // 尝试标准Base64解码
-            return Base64.getDecoder().decode(cleanBase64);
-        } catch (IllegalArgumentException e) {
-            // 尝试MIME类型的Base64解码（可能包含换行符）
-            try {
-                return Base64.getMimeDecoder().decode(cleanBase64);
-            } catch (IllegalArgumentException e2) {
-                return null;
-            }
-        }
+        return X509Helper.parseBase64String(cleanBase64);
     }
 
 

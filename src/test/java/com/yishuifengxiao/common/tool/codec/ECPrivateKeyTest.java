@@ -33,6 +33,8 @@ public class ECPrivateKeyTest {
     public void test_ecPrivateKeyToHex() throws Exception {
         String hex = ECC.ecPrivateKeyToHex(privateKey);
         System.out.println(hex);
+        String dValue = ECC.extractPrivateDValue(hex);
+        System.out.println(dValue.length() + " : " + dValue);
     }
 
     @Test
@@ -41,4 +43,5 @@ public class ECPrivateKeyTest {
         ECPrivateKey eCPrivateKey2 = ECC.parseECPrivateKey(ECC.ecPrivateKeyToHex(privateKey));
         assertTrue(eCPrivateKey1.equals(eCPrivateKey2));
     }
+
 }
