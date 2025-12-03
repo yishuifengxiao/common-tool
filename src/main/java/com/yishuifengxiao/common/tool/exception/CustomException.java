@@ -5,6 +5,8 @@ package com.yishuifengxiao.common.tool.exception;
 
 import com.yishuifengxiao.common.tool.entity.RootEnum;
 
+import java.util.Objects;
+
 /**
  * <p>
  * 自定义异常基类
@@ -62,7 +64,7 @@ public class CustomException extends Exception {
      * @param rootEnum 异常信息
      */
     public CustomException(RootEnum rootEnum) {
-        super(null == rootEnum ? null : rootEnum.description());
+        super(null==rootEnum?null: Objects.toString(rootEnum));
         this.code = null == rootEnum ? null : rootEnum.code();
     }
 

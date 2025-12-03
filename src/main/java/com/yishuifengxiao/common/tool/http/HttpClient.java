@@ -508,7 +508,7 @@ public class HttpClient {
         Assert.isNotBlank(this.url, "The requested URL cannot be empty");
         String userAgent = this.userAgent;
         if (this.autoUserAgent && StringUtils.isBlank(this.userAgent)) {
-            userAgent = UserAgent.USER_AGENT_EDGE_VERSION_110_0.description();
+            userAgent = UserAgent.USER_AGENT_EDGE_VERSION_110_0.getDescription();
         }
         String url = this.url.trim();
         // 如果是Https请求

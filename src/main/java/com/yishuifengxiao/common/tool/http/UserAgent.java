@@ -4,9 +4,8 @@
 package com.yishuifengxiao.common.tool.http;
 
 import com.yishuifengxiao.common.tool.entity.RootEnum;
+import lombok.Getter;
 import org.apache.commons.lang3.RandomUtils;
-
-import java.util.Arrays;
 
 /**
  * 浏览器标识集合
@@ -15,6 +14,7 @@ import java.util.Arrays;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Getter
 public enum UserAgent implements RootEnum {
     /**
      * EDGE浏览器标识，默认为 110.0
@@ -249,33 +249,5 @@ public enum UserAgent implements RootEnum {
         return this.code;
     }
 
-    @Override
-    public String enumName() {
-        return this.name;
-    }
-
-    /**
-     * 获取描述
-     *
-     * @return 描述
-     */
-    @Override
-    public java.lang.String description() {
-        return this.description;
-    }
-
-    /**
-     * 根据代码值查找对应的枚举实例
-     * @param code 要查找的代码值，可以是任意类型
-     * @return 返回与代码值匹配的枚举实例，如果未找到匹配项或代码值为null则返回null
-     */
-    @Override
-    public RootEnum of(Object code) {
-        if (null == code) {
-            return null;
-        }
-        // 使用Stream API遍历所有枚举值，查找第一个代码值匹配的枚举实例
-        return Arrays.stream(values()).filter(e -> e.equalCode(code)).findFirst().orElse(null);
-    }
 
 }

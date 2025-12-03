@@ -2,6 +2,7 @@ package com.yishuifengxiao.common.tool.entity;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * 自定义枚举类接口
@@ -10,34 +11,14 @@ import java.util.Objects;
  * @version 1.0.0
  * @since 1.0.0
  */
-public interface RootEnum extends Serializable {
+public interface RootEnum<T> extends Serializable {
 
     /**
      * 枚举值的编码
      *
      * @return 枚举值的编码
      */
-    default Object code() {
-        return null;
-    }
-
-
-    /**
-     * 枚举值的名称
-     *
-     * @return 枚举值的名称
-     */
-    default String enumName() {
-        return null;
-    }
-
-
-    /**
-     * 枚举值的描述
-     *
-     * @return 枚举值的描述
-     */
-    default String description() {
+    default T code() {
         return null;
     }
 
@@ -58,13 +39,21 @@ public interface RootEnum extends Serializable {
         return Objects.equals(val, code);
     }
 
-    /**
-     * 根据编码获取枚举值
-     *
-     * @param code 枚举值的编码
-     * @return 枚举值
-     */
-    RootEnum of(Object code);
 
+    static <T, E extends RootEnum<T>> Optional<E> of(Class<E> clazz, T code) {
+        if (null == clazz || null == code || !clazz.isEnum()) {
+            return Optional.empty();
+        }
+        try {
+            for (E item : clazz.getEnumConstants()) {
+                if (item.equalCode(code)) {
+                    return Optional.of(item);
+                }
+            }
+        } catch (Exception e) {
+        }
+
+        return Optional.empty();
+    }
 
 }

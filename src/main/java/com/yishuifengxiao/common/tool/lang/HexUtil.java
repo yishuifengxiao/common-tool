@@ -122,10 +122,51 @@ public class HexUtil {
         if (base64String == null || base64String.isEmpty()) {
             return "";
         }
-        // 修复：移除所有空白字符（包括换行符、空格、制表符等）
-        base64String = base64String.replaceAll("\\s", "");
-        byte[] bytes = Base64.getDecoder().decode(base64String);
+        byte[] bytes = parseBase64String(base64String);
         return HexUtil.bytesToHex(bytes);
+    }
+
+    /**
+     * 解析Base64编码的字符串并返回对应的字节数组
+     *
+     * @param base64String Base64编码的字符串，可以是标准、URL安全或MIME类型的Base64编码
+     * @return 解码后的字节数组，如果输入为空则返回空数组，如果解码失败则返回null
+     */
+    public static byte[] parseBase64String(String base64String) {
+        if (base64String == null || base64String.isEmpty()) {
+            return new byte[0]; // 输入为空返回空数组
+        }
+
+        // 提前排除全是空白字符的情况
+        if (base64String.trim().isEmpty()) {
+            return null; // 视作无效输入
+        }
+
+        // 第一次尝试 MIME 解码器（兼容含换行等空白字符）
+        try {
+            return Base64.getMimeDecoder().decode(base64String);
+        } catch (Exception ignored) {
+            // 忽略首次失败，继续尝试其他方式
+        }
+
+        // 第二次尝试标准 Base64 解码（去除空白后再试）
+        try {
+            String cleaned = base64String.replaceAll("\\s", "");
+            if (cleaned.isEmpty()) {
+                return null; // 清除后为空，视作无效输入
+            }
+            return Base64.getDecoder().decode(cleaned);
+        } catch (Exception ignored) {
+            // 忽略第二次失败
+        }
+
+        // 最后尝试 URL 安全的 Base64 解码
+        try {
+            return Base64.getUrlDecoder().decode(base64String);
+        } catch (Exception ignored) {
+            // 所有方式均失败，返回 null 表示无法解析
+            return null;
+        }
     }
 
 
@@ -549,8 +590,7 @@ public class HexUtil {
         } else if (number instanceof Double || number instanceof Float) {
             throw new IllegalArgumentException("Floating point numbers are not supported.");
         } else {
-            throw new IllegalArgumentException("Unsupported number type: " + number.getClass().getSimpleName()
-                    + ". Supported types: Integer, Long, Short, Byte.");
+            throw new IllegalArgumentException("Unsupported number type: " + number.getClass().getSimpleName() + ". Supported types: Integer, Long, Short, Byte.");
         }
 
         // 统一大写

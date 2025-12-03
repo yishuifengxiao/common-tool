@@ -58,31 +58,6 @@ public enum BoolStat implements RootEnum {
         return this.code;
     }
 
-    /**
-     * 获取枚举值的描述
-     *
-     * @return 枚举值的描述
-     */
-    @Override
-    public String description() {
-        return null;
-    }
-
-    /**
-     * 根据代码值查找对应的枚举实例
-     *
-     * @param code 要查找的代码值，可以是任意类型
-     * @return 返回匹配的RootEnum枚举实例，如果未找到匹配项或code为null则返回null
-     */
-    @Override
-    public RootEnum of(Object code) {
-        if (null == code) {
-            return null;
-        }
-        // 使用Stream API遍历所有枚举值，查找第一个代码值匹配的枚举实例
-        return Arrays.stream(values()).filter(e -> e.equalCode(code)).findFirst().orElse(null);
-    }
-
 
     /**
      * 枚举状态值是否对应的布尔值true

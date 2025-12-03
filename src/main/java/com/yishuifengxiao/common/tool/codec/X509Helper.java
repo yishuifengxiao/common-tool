@@ -114,22 +114,7 @@ public class X509Helper {
         // 移除可能的PEM头部和尾部（如果存在）
         String cleanBase64 = base64String.replace(PEM_HEADER, "").replace(PEM_FOOTER, "").replaceAll("\\s", "");
 
-        try {
-            // 尝试标准Base64解码
-            return Base64.getDecoder().decode(cleanBase64);
-        } catch (IllegalArgumentException e) {
-            // 尝试URL安全的Base64解码
-            try {
-                return Base64.getUrlDecoder().decode(cleanBase64);
-            } catch (IllegalArgumentException e2) {
-                // 尝试MIME类型的Base64解码（可能包含换行符）
-                try {
-                    return Base64.getMimeDecoder().decode(cleanBase64);
-                } catch (IllegalArgumentException e3) {
-                    return null;
-                }
-            }
-        }
+        return HexUtil.parseBase64String(cleanBase64);
     }
 
     /**
