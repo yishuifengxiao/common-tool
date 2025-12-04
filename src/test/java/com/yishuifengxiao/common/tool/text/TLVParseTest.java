@@ -102,7 +102,7 @@ public class TLVParseTest {
         assertEquals("6F380102", firstTlv.getRemainingData(), "剩余数据应为第二段");
 
         // 再次解析剩余数据
-        TLV secondTlv = firstTlv.parse("6F38");
+        TLV secondTlv = firstTlv.parseRemaining("6F38");
         assertTrue(secondTlv.isSuccess(), "第二次也应解析成功");
         assertEquals("02", secondTlv.getValue(), "第二次value应为'02'");
         assertEquals("", secondTlv.getRemainingData(), "最后无剩余数据");

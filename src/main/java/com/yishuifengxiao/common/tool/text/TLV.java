@@ -75,11 +75,6 @@ public class TLV implements Serializable {
      */
     // 统一的解析方法 - 支持链式调用
     public TLV parse(String tag) {
-        // 如果已经解析过且有剩余数据，则使用剩余数据继续解析
-        if (success && !remainingData.isEmpty() && !this.data.equals(remainingData)) {
-            this.data = remainingData;
-        }
-
         // 重置状态（保留data）
         resetState();
         this.tag = tag == null ? "" : cleanData(tag);
@@ -111,6 +106,22 @@ public class TLV implements Serializable {
             setError("解析错误: " + e.getMessage());
             return this;
         }
+    }
+
+    /**
+     * 使用剩余数据创建新的TLV对象进行解析
+     * <p>
+     * 该方法用于在解析完成后，使用剩余数据创建新的TLV对象进行后续解析，
+     * 避免修改原始对象的data字段
+     *
+     * @param tag 要解析的标签
+     * @return 新的TLV对象，包含解析结果
+     */
+    public TLV parseRemaining(String tag) {
+        if (!success || remainingData.isEmpty()) {
+            throw new IllegalStateException("没有剩余数据可用于解析");
+        }
+        return new TLV(remainingData).parse(tag);
     }
 
 
