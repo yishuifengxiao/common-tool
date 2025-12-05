@@ -24,6 +24,13 @@ public class TLV implements Serializable {
      */
     private TLV(String data) {
         this.data = cleanData(data);
+        // 修复：初始化所有字段，避免null值
+        this.tag = "";
+        this.value = "";
+        this.remainingData = "";
+        this.valueLength = 0;
+        this.error = "";
+        this.success = false;
     }
 
     /**
@@ -75,6 +82,11 @@ public class TLV implements Serializable {
      */
     // 统一的解析方法 - 支持链式调用
     public TLV parse(String tag) {
+        // 如果当前对象已经成功解析并且有值部分，则从值部分继续解析（链式解析）
+        if (success && !value.isEmpty()) {
+            return new TLV(value).parse(tag);
+        }
+        
         // 重置状态（保留data）
         resetState();
         this.tag = tag == null ? "" : cleanData(tag);
@@ -82,17 +94,23 @@ public class TLV implements Serializable {
         // 验证数据有效性
         if (!isValidHex(data)) {
             setError("无效的Hex数据");
+            this.remainingData = data; // 修复：解析失败时保留原始数据
+            this.value = ""; // 修复：确保value字段不为null
             return this;
         }
 
         if (data.isEmpty()) {
             setError("数据为空");
+            this.remainingData = data; // 修复：解析失败时保留原始数据
+            this.value = ""; // 修复：确保value字段不为null
             return this;
         }
 
         // 检查是否以tag开头（tag不为空时）
         if (!this.tag.isEmpty() && !data.startsWith(this.tag)) {
             setError("数据不以指定标签开头");
+            this.remainingData = data; // 修复：解析失败时保留原始数据
+            this.value = ""; // 修复：确保value字段不为null
             return this;
         }
 
@@ -104,46 +122,11 @@ public class TLV implements Serializable {
             return this;
         } catch (Exception e) {
             setError("解析错误: " + e.getMessage());
+            this.remainingData = data; // 修复：解析失败时保留原始数据
+            this.value = ""; // 修复：确保value字段不为null
             return this;
         }
     }
-
-    /**
-     * 在已解析的值部分继续解析（链式解析）
-     * <p>
-     * 该方法用于在已经解析的TLV对象的值部分继续解析嵌套的TLV结构
-     *
-     * @param tag 要解析的标签
-     * @return 返回TLV对象本身，支持链式调用
-     */
-    public TLV parseValue(String tag) {
-        // 如果当前对象还没有成功解析，则无法进行链式解析
-        if (!success) {
-            setError("当前TLV对象解析失败，无法进行链式解析");
-            return this;
-        }
-
-        // 如果值部分为空，则无法进行链式解析
-        if (value.isEmpty()) {
-            setError("当前TLV对象的值部分为空，无法进行链式解析");
-            return this;
-        }
-
-        // 使用值部分创建新的TLV对象进行解析
-        TLV nestedTlv = new TLV(value);
-        TLV result = nestedTlv.parse(tag);
-
-        // 将解析结果复制到当前对象
-        this.tag = result.tag;
-        this.value = result.value;
-        this.remainingData = result.remainingData;
-        this.valueLength = result.valueLength;
-        this.error = result.error;
-        this.success = result.success;
-
-        return this;
-    }
-
 
     /**
      * 使用剩余数据创建新的TLV对象进行解析
@@ -156,7 +139,12 @@ public class TLV implements Serializable {
      */
     public TLV parseRemaining(String tag) {
         if (!success || remainingData.isEmpty()) {
-            throw new IllegalStateException("没有剩余数据可用于解析");
+            // 修复：当无法解析剩余数据时，返回一个新的失败TLV对象而不是当前对象
+            TLV failedTlv = new TLV(remainingData);
+            failedTlv.setError("没有剩余数据可用于解析");
+            failedTlv.remainingData = this.remainingData; // 确保remainingData正确传递
+            failedTlv.value = ""; // 修复：确保value字段不为null
+            return failedTlv;
         }
         return new TLV(remainingData).parse(tag);
     }
@@ -207,7 +195,7 @@ public class TLV implements Serializable {
         if (!isValidHex(firstByte)) {
             return null;
         }
-        
+
         int firstLength = Integer.parseInt(firstByte, 16);
 
         // 处理单字节长度标识（长度小于等于0x7F）

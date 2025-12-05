@@ -2,6 +2,7 @@ package com.yishuifengxiao.common.tool.text;
 
 import org.junit.Test;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -32,11 +33,65 @@ public class TLV_parse_Test {
         String data = "9F07053003A00101";
         TLV tlv1 = TLV.of(data).parse("9F07");
         assertEquals("3003A00101", tlv1.getValue());
-        TLV tlv2 = tlv1.parseValue("30");  // 使用parseValue进行链式解析
+        TLV tlv2 = tlv1.parse("30");  // 使用parseValue进行链式解析
         assertEquals("A00101", tlv2.getValue());
-        TLV tlv3 = tlv2.parseValue("A0");  // 使用parseValue进行链式解析
+        TLV tlv3 = tlv2.parse("A0");  // 使用parseValue进行链式解析
         assertEquals("01", tlv3.getValue());
     }
 
+    @Test
+    public void test_not_found() {
+        String data = "9F07053003A00101";
+        TLV tlv1 = TLV.of(data).parse("9F06");
+        assertEquals(data, tlv1.getRemainingData());
+        assertEquals("", tlv1.getValue());
+        assertTrue(tlv1.getError().contains("数据不以指定标签开头"));
+        assertFalse(tlv1.isSuccess());
+        TLV tlv2 = tlv1.parseRemaining("9F09");
+        assertEquals(data, tlv2.getRemainingData());
+        assertEquals("", tlv2.getValue());
+        assertEquals("没有剩余数据可用于解析", tlv2.getError());
+        assertFalse(tlv2.isSuccess());
+        TLV tlv3 = tlv2.parse("9F07");
+        assertEquals("", tlv3.getRemainingData());
+        assertEquals("3003A00101", tlv3.getValue());
+        assertTrue(tlv3.isSuccess());
+        assertTrue(tlv3.getError().trim().isEmpty());
+    }
 
+    static String text = """
+            30 81DF
+                80 08 57DE2525FC07CD79
+                83 24 687474703A2F2F3139322E3136382E3132342E31383A383630302F706572736F6E6B6974
+                84 00
+                BF22 6D
+                    81 03 020301
+                    82 03 020200
+                    83 03 040200
+                    84 0D
+                        81 01 00
+                        82 04 00052950
+                        83 02 401D
+                    85 05 06FD321BC0
+                    86 03 090200
+                    87 03 020300
+                    88 02 0490
+                    A9 16
+                        04 14 C7D3E3846D27A5C0C1371E99D36438E70DEC7AFD
+                    AA 16
+                        04 14 C7D3E3846D27A5C0C1371E99D36438E70DEC7AFD
+                    8B 01 00
+                    99 00
+                    04 03
+                        00 01 01
+                A0 3B
+                    80 17 43383838312D33444433342D31463431362D3542313233
+                    A1 1C
+                        80 04 68535950
+                        A1 05
+                            85 03 090000
+                        82 08 685359506415000F
+                        85 03 07E580
+                    82 02 0780
+            """.replaceAll("\\s", "").trim();
 }
