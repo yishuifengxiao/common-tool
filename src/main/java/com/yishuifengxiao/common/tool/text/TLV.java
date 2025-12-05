@@ -109,6 +109,43 @@ public class TLV implements Serializable {
     }
 
     /**
+     * 在已解析的值部分继续解析（链式解析）
+     * <p>
+     * 该方法用于在已经解析的TLV对象的值部分继续解析嵌套的TLV结构
+     *
+     * @param tag 要解析的标签
+     * @return 返回TLV对象本身，支持链式调用
+     */
+    public TLV parseValue(String tag) {
+        // 如果当前对象还没有成功解析，则无法进行链式解析
+        if (!success) {
+            setError("当前TLV对象解析失败，无法进行链式解析");
+            return this;
+        }
+
+        // 如果值部分为空，则无法进行链式解析
+        if (value.isEmpty()) {
+            setError("当前TLV对象的值部分为空，无法进行链式解析");
+            return this;
+        }
+
+        // 使用值部分创建新的TLV对象进行解析
+        TLV nestedTlv = new TLV(value);
+        TLV result = nestedTlv.parse(tag);
+
+        // 将解析结果复制到当前对象
+        this.tag = result.tag;
+        this.value = result.value;
+        this.remainingData = result.remainingData;
+        this.valueLength = result.valueLength;
+        this.error = result.error;
+        this.success = result.success;
+
+        return this;
+    }
+
+
+    /**
      * 使用剩余数据创建新的TLV对象进行解析
      * <p>
      * 该方法用于在解析完成后，使用剩余数据创建新的TLV对象进行后续解析，
@@ -166,6 +203,11 @@ public class TLV implements Serializable {
         if (data.length() < 2) return null;
 
         String firstByte = data.substring(0, 2);
+        // 验证第一个字节是否为有效十六进制
+        if (!isValidHex(firstByte)) {
+            return null;
+        }
+        
         int firstLength = Integer.parseInt(firstByte, 16);
 
         // 处理单字节长度标识（长度小于等于0x7F）
@@ -174,13 +216,25 @@ public class TLV implements Serializable {
         }
         // 处理多字节长度标识（第一个字节标识后续长度字节数）
         else if (firstLength == 0x81 && data.length() >= 4) {
-            int length = Integer.parseInt(data.substring(2, 4), 16);
+            String lengthStr = data.substring(2, 4);
+            if (!isValidHex(lengthStr)) {
+                return null;
+            }
+            int length = Integer.parseInt(lengthStr, 16);
             return new LengthInfo(length, 4);
         } else if (firstLength == 0x82 && data.length() >= 6) {
-            int length = Integer.parseInt(data.substring(2, 6), 16);
+            String lengthStr = data.substring(2, 6);
+            if (!isValidHex(lengthStr)) {
+                return null;
+            }
+            int length = Integer.parseInt(lengthStr, 16);
             return new LengthInfo(length, 6);
         } else if (firstLength == 0x83 && data.length() >= 8) {
-            int length = Integer.parseInt(data.substring(2, 8), 16);
+            String lengthStr = data.substring(2, 8);
+            if (!isValidHex(lengthStr)) {
+                return null;
+            }
+            int length = Integer.parseInt(lengthStr, 16);
             return new LengthInfo(length, 8);
         }
 
