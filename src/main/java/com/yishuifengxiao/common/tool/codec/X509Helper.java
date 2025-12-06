@@ -253,7 +253,12 @@ public class X509Helper {
          * <p>
          * 在证书中通常出现在公钥参数字段
          */
-        String algid;
+        private String algid;
+
+        /**
+         * 证书序列号(Extensions字段中的serialNumber 对应的oid为2.5.4.5)
+         */
+        private String serialNumberInExtensions;
 
     }
 
@@ -312,6 +317,8 @@ public class X509Helper {
         // 提取AKID（Authority Key Identifier）
         extractAuthorityKeyIdentifier(certificate, info);
 
+        String serialNumberFromExtensions = extractSerialNumberFromExtensions(certificate);
+        info.setSerialNumberInExtensions(serialNumberFromExtensions);
         return info;
     }
 
@@ -377,7 +384,7 @@ public class X509Helper {
         if (encoded[0] != 0x30 || encoded[2] != 0x30 || encoded[4] != 0x06 || encoded[13] != 0x06) {
             throw new IllegalArgumentException("非预期的公钥编码结构");
         }
-        // 提取第二个OID的数据
+// 提取第二个OID的数据
         int oidLength = encoded[14];
         if (oidLength != 8) {
             throw new IllegalArgumentException("非预期的OID长度");
@@ -628,6 +635,128 @@ public class X509Helper {
             log.info("Failed to extract Authority Key Identifier: " + e.getMessage());
         }
     }
+
+    /**
+     * 从证书的扩展字段里提取出oid为2.5.4.5的扩展属性的值
+     *
+     * @param certificate X509证书对象
+     * @return OID为2.5.4.5的扩展属性值，如果不存在或解析失败则返回null
+     */
+    public static String extractSerialNumberFromExtensions(X509Certificate certificate) {
+        if (certificate == null) {
+            return null;
+        }
+
+        try {
+            // 首先尝试从主题DN中提取序列号属性
+            String subject = certificate.getSubjectX500Principal().getName();
+
+            // 尝试多种可能的序列号属性名称
+            String[] possibleNames = {"SERIALNUMBER", "SERIAL NUMBER", "SERIALNUMBER=", "SERIAL NUMBER=",
+                    "serialNumber", "serial number", "serialNumber=", "serial number=",
+                    "2.5.4.5"};
+
+            // 使用多种分隔符分割主题DN
+            String[] subjectParts = subject.split("[,;]");
+            for (String part : subjectParts) {
+                String trimmedPart = part.trim();
+
+                // 检查所有可能的序列号属性名称
+                for (String name : possibleNames) {
+                    if (trimmedPart.toUpperCase().startsWith(name.toUpperCase())) {
+                        // 提取属性值
+                        String valuePart = trimmedPart.substring(name.length()).trim();
+
+                        // 如果属性值以等号开头，去掉等号
+                        if (valuePart.startsWith("=")) {
+                            valuePart = valuePart.substring(1).trim();
+                        }
+
+                        // 处理可能的转义字符和引号
+                        if (valuePart.startsWith("\"") && valuePart.endsWith("\"")) {
+                            valuePart = valuePart.substring(1, valuePart.length() - 1);
+                        }
+
+                        // 处理ASN.1编码的十六进制字符串格式 (#13203839...)
+                        if (valuePart.startsWith("#")) {
+                            // 移除#前缀
+                            String hexData = valuePart.substring(1);
+                            // 解析ASN.1编码的数据，提取实际的序列号
+                            String decoded = decodeAsn1HexString(hexData);
+                            if (decoded != null) {
+                                return decoded;
+                            }
+                        }
+
+                        if (!valuePart.isEmpty()) {
+                            return valuePart;
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.info("Failed to extract serial number from extensions: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * 解析ASN.1编码的十六进制字符串，提取实际数据
+     *
+     * @param hexString ASN.1编码的十六进制字符串
+     * @return 解析后的实际字符串，如果解析失败则返回null
+     */
+    private static String decodeAsn1HexString(String hexString) {
+        try {
+            // 示例格式: 13203839303031313232333334343535363637373838393941414242434344444545
+            // 其中: 13 = UTF8String tag, 20 = 长度(32字节), 后面是实际数据
+            if (hexString.length() < 4) {
+                return null;
+            }
+
+            // 提取tag (第一个字节)
+            String tag = hexString.substring(0, 2);
+            // 提取长度字节
+            int lengthByteIndex = 2;
+            String lengthByte = hexString.substring(lengthByteIndex, lengthByteIndex + 2);
+            int length = Integer.parseInt(lengthByte, 16);
+
+            // 计算实际数据的起始位置
+            int dataStartIndex = lengthByteIndex + 2;
+
+            // 如果长度字节表示的是长格式(大于127)
+            if ((length & 0x80) != 0) {
+                int lengthBytesCount = length & 0x7F;
+                int actualLength = 0;
+                for (int i = 0; i < lengthBytesCount; i++) {
+                    String lenByte = hexString.substring(dataStartIndex + i * 2, dataStartIndex + (i + 1) * 2);
+                    actualLength = (actualLength << 8) | Integer.parseInt(lenByte, 16);
+                }
+                dataStartIndex += lengthBytesCount * 2;
+                length = actualLength;
+            }
+
+            // 提取实际数据
+            if (dataStartIndex + length * 2 <= hexString.length()) {
+                String dataHex = hexString.substring(dataStartIndex, dataStartIndex + length * 2);
+
+                // 将十六进制字符串转换为ASCII字符串
+                StringBuilder result = new StringBuilder();
+                for (int i = 0; i < dataHex.length(); i += 2) {
+                    String hexPair = dataHex.substring(i, i + 2);
+                    int charValue = Integer.parseInt(hexPair, 16);
+                    result.append((char) charValue);
+                }
+                return result.toString();
+            }
+        } catch (Exception e) {
+            log.info("Failed to decode ASN.1 hex string: " + e.getMessage());
+        }
+        return null;
+    }
+
+
 
     /**
      * 提取OID和主题备用名称（SAN），并将其存储在证书信息对象中
