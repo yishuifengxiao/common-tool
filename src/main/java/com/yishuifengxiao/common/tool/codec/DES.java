@@ -48,7 +48,7 @@ public class DES {
      */
     public static final String encrypt(String key, String data) {
         try {
-            return HexUtil.byte2hex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
+            return HexUtil.byteTohex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
                 log.info("There is a problem encrypting data {}  with a key, and the reason for the problem is {}", data, e);
@@ -76,7 +76,7 @@ public class DES {
      */
     public static final String decrypt(String key, String data) {
         try {
-            return new String(decrypt(HexUtil.hex2byte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
+            return new String(decrypt(HexUtil.hexTobyte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
                 log.info("There was a problem decrypting data {} using the key, and the reason " + "for the problem is {}", data, e);
@@ -206,7 +206,7 @@ public class DES {
         // 如果密钥为空或空白字符，则使用默认密钥
         key = StringUtils.isBlank(key) ? PASSWORD_CRYPT_KEY : key;
         // 将十六进制数据转换为字节数组并解密，然后转换为字符串返回
-        return new String(decrypt(HexUtil.hex2byte(data.getBytes()), key.getBytes()));
+        return new String(decrypt(HexUtil.hexTobyte(data.getBytes()), key.getBytes()));
     }
 
 
@@ -234,7 +234,7 @@ public class DES {
         // 如果密钥为空，则使用默认密钥
         key = StringUtils.isBlank(key) ? PASSWORD_CRYPT_KEY : key;
         // 对数据进行加密并转换为十六进制字符串
-        return HexUtil.byte2hex(encrypt(data.getBytes(), key.getBytes()));
+        return HexUtil.byteTohex(encrypt(data.getBytes(), key.getBytes()));
     }
 
     /**
@@ -260,7 +260,7 @@ public class DES {
      */
     public static String mac(String key, String data) throws Exception {
         // 将十六进制数据转换为字节数组
-        byte[] planData = HexUtil.hex2byte(data.getBytes());
+        byte[] planData = HexUtil.hexTobyte(data.getBytes());
         final int dataLength = planData.length;
         final int lastLength = dataLength % 8;
         final int lastBlockLength = lastLength == 0 ? 8 : lastLength;
@@ -281,7 +281,7 @@ public class DES {
         }
 
         // 将最终结果转换为十六进制字符串并截取前16位作为MAC值
-        return HexUtil.byte2hex(desXor).substring(0, 16);
+        return HexUtil.byteTohex(desXor).substring(0, 16);
     }
 
 

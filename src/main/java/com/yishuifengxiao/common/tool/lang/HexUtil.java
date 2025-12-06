@@ -404,6 +404,41 @@ public class HexUtil {
     }
 
     /**
+     * 将十六进制字符串转换为BitSet
+     *
+     * @param hexString 十六进制字符串，可以为null或空字符串
+     * @return 转换后的BitSet对象，如果输入为null或空则返回空的BitSet
+     */
+    public static BitSet hexToBitSet(String hexString) {
+        // 处理空值情况，返回空的BitSet
+        if (hexString == null || hexString.isEmpty()) {
+            return new BitSet();
+        }
+
+        // 将十六进制字符串转换为字节数组，再转换为BitSet
+        byte[] bytes = hexTobyte(hexString.getBytes());
+        return byteArrayToBitSet(bytes);
+    }
+
+    /**
+     * 将BitSet转换为十六进制字符串
+     *
+     * @param bitSet 要转换的BitSet对象，可以为null
+     * @return 转换后的十六进制字符串，如果输入为null则返回空字符串
+     */
+    public static String bitSetToHex(BitSet bitSet) {
+        if (bitSet == null) {
+            return "";
+        }
+
+        // 将BitSet转换为字节数组，然后转换为十六进制字符串
+        byte[] bytes = bitSetToByteArray(bitSet);
+        return byteTohex(bytes);
+    }
+
+
+
+    /**
      * 将byte数组转换为BitSet
      *
      * @param bytes 要转换的byte数组
@@ -445,7 +480,7 @@ public class HexUtil {
      * @return 转换后的字节数组，长度为输入数组的一半
      * @throws UncheckedException 当输入数组长度不是偶数时抛出异常
      */
-    public static byte[] hex2byte(byte[] b) {
+    public static byte[] hexTobyte(byte[] b) {
         if ((b.length % 2) != 0) throw new UncheckedException("长度不是偶数");
         byte[] b2 = new byte[b.length / 2];
         // 每两个字符组成一个十六进制数进行转换
@@ -462,7 +497,7 @@ public class HexUtil {
      * @param b 待转换的字节数组
      * @return 转换后的十六进制字符串（大写）
      */
-    public static String byte2hex(byte[] b) {
+    public static String byteTohex(byte[] b) {
         String hs = "";
         String tmp = "";
         // 遍历字节数组，将每个字节转换为两位十六进制字符串
