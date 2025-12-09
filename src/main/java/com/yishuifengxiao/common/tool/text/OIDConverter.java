@@ -79,6 +79,23 @@ public class OIDConverter {
 
     /**
      * 将点分十进制格式的OID字符串转换为大写十六进制字符串。
+     * <p>节点值在允许范围内：OID标准规定，每个节点值可以是 0 到 2^32-1（约43亿）之间的整数。2、999 和 10 都在这个范围内。
+     * <p>
+     * 前两个节点的规则：
+     * <p>
+     * 第一个节点只能取 0、1、2 三个值，分别代表：
+     * <p>
+     * 0： ITU-T
+     * <p>
+     * 1： ISO
+     * <p>
+     * 2： 联合体（ISO/ITU-T）
+     * <p>
+     * 第二个节点的值取决于第一个节点：
+     * <p>
+     * 如果第一节点是 0 或 1，则第二节点必须在 0 到 39 之间。
+     * <p>
+     * 如果第一节点是 2，则第二节点可以是 0 到 2^32-1 之间的任何值，没有39的限制。</p>
      *
      * @param dotStr 点分十进制格式的OID字符串，例如 "1.2.3.4"
      * @return 转换后的大写十六进制字符串
@@ -124,8 +141,8 @@ public class OIDConverter {
         List<Byte> resultBytes = new ArrayList<>();
 
         // 编码前两个数字（特殊处理）
-        if (components.get(0) > 2 || components.get(1) >= 40) {
-            throw new IllegalArgumentException("invalid OID: first component must be 0-2, second 0-39");
+        if (components.get(0) > 2) {
+//            throw new IllegalArgumentException("invalid OID: first component must be 0-2");
         }
 
         byte firstByte = (byte) (components.get(0) * 40 + components.get(1));

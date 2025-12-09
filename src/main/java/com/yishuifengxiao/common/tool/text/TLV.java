@@ -18,6 +18,18 @@ public class TLV implements Serializable {
     private boolean success;
 
     /**
+     * 将给定的标签和输入字符串转换为标签-长度-值（TLV）格式的字符串。
+     * 该函数根据输入字符串的长度（以字节为单位）选择合适的长度编码方式。
+     *
+     * @param tag   表示 TLV 格式中的标签部分，为字符串类型
+     * @param input 表示 TLV 格式中的值部分，应为十六进制字符串，每两个字符代表一个字节
+     * @return 返回一个符合 TLV 格式的字符串
+     */
+    public static String toTLV(String tag, String input) {
+        return TLVUtil.toTLV(tag, input);
+    }
+
+    /**
      * 构造方法
      *
      * @param data 待处理的原始数据字符串，可能包含空白字符和换行符
@@ -86,7 +98,7 @@ public class TLV implements Serializable {
         if (success && !value.isEmpty()) {
             return new TLV(value).parse(tag);
         }
-        
+
         // 重置状态（保留data）
         resetState();
         this.tag = tag == null ? "" : cleanData(tag);

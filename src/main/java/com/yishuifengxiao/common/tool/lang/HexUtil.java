@@ -305,22 +305,6 @@ public class HexUtil {
         return bytes;
     }
 
-    /**
-     * 将BitSet转换为十六进制字符串
-     *
-     * @param bitSet 要转换的BitSet
-     * @return 十六进制字符串
-     */
-    public static String bitSetToHexString(BitSet bitSet) {
-        byte[] bytes = bitSetToByteArray(bitSet, false);
-        StringBuilder hexString = new StringBuilder();
-
-        for (byte b : bytes) {
-            hexString.append(String.format("%02X", b));
-        }
-
-        return hexString.toString();
-    }
 
     /**
      * 从十六进制字符串创建BitSet
@@ -435,7 +419,6 @@ public class HexUtil {
         byte[] bytes = bitSetToByteArray(bitSet);
         return byteTohex(bytes);
     }
-
 
 
     /**
