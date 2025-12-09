@@ -21,7 +21,7 @@ public class SHA256 {
      */
     public static String calculateSHA256FromHex(String hex) {
         // 将十六进制字符串转换为字节数组，再转换回十六进制字符串
-        return HexUtil.bytesToHex(HexUtil.hexToBytes(hex));
+        return calculateSHA256(HexUtil.hexToBytes(hex));
     }
 
 
@@ -44,7 +44,8 @@ public class SHA256 {
     public static String calculateSHA256(byte[] input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input);
+            digest.update(input);
+            byte[] hash = digest.digest();
             return HexUtil.bytesToHex(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 算法不可用", e);
