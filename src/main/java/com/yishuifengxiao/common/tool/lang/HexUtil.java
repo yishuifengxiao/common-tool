@@ -25,7 +25,27 @@ public class HexUtil {
     }
 
     /**
+     * 将字符串编码成16进制数字,适用于所有字符（包括中文）
+     *
+     * @param str 传入字符串
+     * @return 将字符串编码成16进制数字
+     */
+    public static String toHexString(String str) {
+        // 根据默认编码获取字节数组
+        byte[] bytes = str.getBytes();
+        final String hexString = "0123456789abcdef";
+        StringBuilder sb = new StringBuilder(bytes.length * 2);
+        // 将字节数组中每个字节拆解成2位16进制整数
+        for (byte aByte : bytes) {
+            sb.append(hexString.charAt((aByte & 0xf0) >> 4));
+            sb.append(hexString.charAt((aByte & 0x0f) >> 0));
+        }
+        return sb.toString();
+    }
+
+    /**
      * 将字符串转换为十六进制格式
+     * 如果字符串已经符合十六进制格式，则直接返回，确保长度为偶数
      *
      * @param val 待转换的字符串，可以为null
      * @return 转换后的十六进制字符串，如果输入为null则返回null
