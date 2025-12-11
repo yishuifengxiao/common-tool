@@ -2,9 +2,9 @@ package com.yishuifengxiao.common.tool.lang;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 import java.nio.charset.StandardCharsets;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Hex工具类的单元测试
@@ -17,15 +17,15 @@ public class Hex_toHexString_Test {
     @Test
     public void testToHexStringWithAscii() {
         // 测试空字符串
-        assertEquals("", Hex.toHexString(""));
+        assertEquals("", Hex.utf8TextToHexString(""));
 
         // 测试单个字符
-        assertEquals("61", Hex.toHexString("a"));
-        assertEquals("41", Hex.toHexString("A"));
+        assertEquals("61", Hex.utf8TextToHexString("a"));
+        assertEquals("41", Hex.utf8TextToHexString("A"));
 
         // 测试多个字符
-        assertEquals("68656c6c6f", Hex.toHexString("hello"));
-        assertEquals("48656c6c6f20576f726c64", Hex.toHexString("Hello World"));
+        assertEquals("68656c6c6f", Hex.utf8TextToHexString("hello"));
+        assertEquals("48656c6c6f20576f726c64", Hex.utf8TextToHexString("Hello World"));
     }
 
     /**
@@ -36,12 +36,12 @@ public class Hex_toHexString_Test {
         // 测试中文字符
         String chinese = "你好";
         String expected = bytesToHex(chinese.getBytes(StandardCharsets.UTF_8));
-        assertEquals(expected, Hex.toHexString(chinese));
+        assertEquals(expected, Hex.utf8TextToHexString(chinese));
 
         // 测试中英文混合
         String mixed = "Hello你好World";
         String expectedMixed = bytesToHex(mixed.getBytes(StandardCharsets.UTF_8));
-        assertEquals(expectedMixed, Hex.toHexString(mixed));
+        assertEquals(expectedMixed, Hex.utf8TextToHexString(mixed));
     }
 
     /**
@@ -52,12 +52,12 @@ public class Hex_toHexString_Test {
         // 测试特殊字符
         String special = "!@#$%^&*()";
         String expected = bytesToHex(special.getBytes(StandardCharsets.UTF_8));
-        assertEquals(expected, Hex.toHexString(special));
+        assertEquals(expected, Hex.utf8TextToHexString(special));
 
         // 测试数字
         String numbers = "123456789";
         String expectedNumbers = bytesToHex(numbers.getBytes(StandardCharsets.UTF_8));
-        assertEquals(expectedNumbers, Hex.toHexString(numbers));
+        assertEquals(expectedNumbers, Hex.utf8TextToHexString(numbers));
     }
 
     /**

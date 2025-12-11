@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.lang;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.math.BigInteger;
@@ -13,6 +15,7 @@ import java.util.regex.Pattern;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class Hex {
     /**
      * 正则表达式模式，用于匹配有效的十六进制字符串
@@ -31,7 +34,7 @@ public class Hex {
      * @param str 传入字符串
      * @return 将字符串编码成16进制数字
      */
-    public static String toHexString(String str) {
+    public static String utf8TextToHexString(String str) {
         if (null == str) {
             return null;
         }
@@ -44,7 +47,7 @@ public class Hex {
             sb.append(hexString.charAt((aByte & 0xf0) >> 4));
             sb.append(hexString.charAt((aByte & 0x0f) >> 0));
         }
-        return sb.toString();
+        return sb.toString().toUpperCase();
     }
 
     /**
@@ -97,7 +100,7 @@ public class Hex {
 
         // 检查十六进制字符串长度是否为偶数
         if (!isHex(hex)) {
-            throw new IllegalArgumentException("十六进制字符串长度必须为偶数");
+            return null;
         }
 
         int len = hex.length();
@@ -133,7 +136,7 @@ public class Hex {
      */
     public static byte[] parseBase64String(String base64String) {
         if (base64String == null || base64String.isEmpty()) {
-            return new byte[0]; // 输入为空返回空数组
+            return null;
         }
 
         // 提前排除全是空白字符的情况
@@ -185,7 +188,8 @@ public class Hex {
 
         // 确保十六进制字符串长度为偶数
         if (!isHex(hexString)) {
-            throw new IllegalArgumentException("Invalid hex string length");
+            log.warn("Invalid hex string: {}", hexString);
+            return null;
         }
 
         byte[] bytes = new byte[hexString.length() / 2];
@@ -194,7 +198,7 @@ public class Hex {
             int secondDigit = Character.digit(hexString.charAt(i + 1), 16);
 
             if (firstDigit == -1 || secondDigit == -1) {
-                throw new IllegalArgumentException("Invalid hex character");
+                return null;
             }
 
             bytes[i / 2] = (byte) ((firstDigit << 4) + secondDigit);
@@ -211,8 +215,9 @@ public class Hex {
      * @return 填充后的hex字符串（保持原始的前缀格式）
      */
     public static String padHexLeft(String hexString, int targetBytes) {
-        if (hexString == null || targetBytes <= 0) {
-            throw new IllegalArgumentException("参数不能为空且目标字节数必须大于0");
+        if (!isHex(hexString)) {
+            log.warn("Invalid hex string: {}", hexString);
+            return null;
         }
 
         // 处理前缀（0x或0X）
@@ -260,17 +265,16 @@ public class Hex {
      * @return 创建的BitSet
      */
     public static BitSet hexToBitSet(String hexString) {
-        if (hexString == null || hexString.isEmpty()) {
-            return new BitSet();
+        if (!isHex(hexString)) {
+            log.warn("Invalid hex string: {}", hexString);
+            return null;
         }
 
         int len = hexString.length();
         byte[] bytes = new byte[len / 2];
 
         for (int i = 0; i < len; i += 2) {
-            bytes[i / 2] =
-                    (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i + 1)
-                            , 16));
+            bytes[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i + 1), 16));
         }
 
         return bytesToBitSet(bytes);
@@ -354,10 +358,13 @@ public class Hex {
         return tXor;
     }
 
-    // SwapPairs 交换字符串中相邻的字符
-    // abcdef 输出 bacfde ；abcde 输出 badce
-    // 参数 s: 输入的字符串
-    // 返回值: 交换相邻字符后得到的新字符串
+    /**
+     * 交换字符串中相邻的字符
+     * <p>该方法将字符串中的每对相邻字符进行交换，例如："abcdef" 输出 "bacfde"；"abcde" 输出 "badce"</p>
+     *
+     * @param s 输入的字符串
+     * @return 交换相邻字符后得到的新字符串
+     */
     public static String swapPairs(String s) {
         // 将字符串转换为字符数组，便于操作
         char[] chars = s.toCharArray();
@@ -382,7 +389,7 @@ public class Hex {
      * @param byteNum 转换后的字节数，例如byteNum为2时表示最短的字符数为 2*2
      * @return 16进制字符串
      */
-    public static String toHexString(Number number, Integer byteNum) {
+    public static String numberToHexString(Number number, Integer byteNum) {
         if (number == null) {
             return "";
         }
@@ -483,8 +490,8 @@ public class Hex {
      * @param number 待转换的数字
      * @return 16进制字符串
      */
-    public static String toHexString(Number number) {
-        return toHexString(number, null);
+    public static String numberToHexString(Number number) {
+        return numberToHexString(number, null);
     }
 
     /**
@@ -516,4 +523,42 @@ public class Hex {
         String valString = val.toString(16).toUpperCase();
         return valString.length() % 2 == 0 ? valString : "0" + valString;
     }
+
+    /**
+     * 将十进制数转换为十六进制字符串，默认大端表示
+     *
+     * @param num 10进制数
+     * @param len 几个字节表示
+     * @return String 16进制字符串
+     */
+    public static String itoa(int num, int len) {
+        String target = Integer.toHexString(num);
+        // 检查目标长度是否超过指定字节数能表示的范围或数值是否为负数
+        if (target.length() > len * 2 || num < 0) {
+            throw new UncheckedException("参数非法");
+        }
+        StringBuilder builder = new StringBuilder();
+        int paddCount = 2 * len - target.length();
+        // 在字符串前补0以达到指定的字节长度
+        for (int i = 0; i < paddCount; i++) {
+            builder.append("0");
+        }
+        builder.append(target.toUpperCase());
+        return builder.toString().toUpperCase();
+    }
+
+    /**
+     * 将十六进制字符串转换为十进制整数
+     *
+     * @param s 16进制字符串
+     * @return int 10进制数
+     */
+
+    public static Integer atoi(String s) {
+        if (StringUtils.isBlank(s)) {
+            return null;
+        }
+        return Integer.valueOf(s.trim(), 16);
+    }
+
 }

@@ -225,7 +225,7 @@ public class TLVUtil {
      * @return TLV格式字符串
      */
     public static String stringToTLV(String tag, String text) {
-        String hexValue = Hex.isHex(text) ? text : Hex.toHexString(text);
+        String hexValue = Hex.isHex(text) ? text : Hex.utf8TextToHexString(text);
         return toTLV(tag, hexValue);
     }
 
