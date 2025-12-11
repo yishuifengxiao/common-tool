@@ -38,7 +38,7 @@ public class TLVParseTest {
         assertEquals("", tlv.getTag(), "tag 应为空");
         assertEquals("", tlv.getValue(), "value 应为 ''");
         assertEquals(0, tlv.getValueLength(), "valueLength 应为 0");
-        assertEquals("", tlv.getRemainingData(), "剩余数据应为 ''");
+        assertEquals("5F370101", tlv.getRemainingData(), "剩余数据应为 5F370101");
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.lang.HexUtil;
+import com.yishuifengxiao.common.tool.lang.Hex;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -21,7 +21,7 @@ public class SHA256 {
      */
     public static String calculateSHA256FromHex(String hex) {
         // 将十六进制字符串转换为字节数组，再转换回十六进制字符串
-        return calculateSHA256(HexUtil.hexToBytes(hex));
+        return calculateSHA256(Hex.hexToBytes(hex));
     }
 
 
@@ -46,7 +46,7 @@ public class SHA256 {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             digest.update(input);
             byte[] hash = digest.digest();
-            return HexUtil.bytesToHex(hash);
+            return Hex.bytesToHex(hash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 算法不可用", e);
         }

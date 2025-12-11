@@ -1,7 +1,8 @@
 package com.yishuifengxiao.common.tool.lang;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.BitSet;
@@ -12,7 +13,7 @@ import java.util.regex.Pattern;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class HexUtil {
+public class Hex {
     /**
      * 正则表达式模式，用于匹配有效的十六进制字符串
      * 匹配任意长度的十六进制字符（大小写字母和数字）
@@ -31,8 +32,11 @@ public class HexUtil {
      * @return 将字符串编码成16进制数字
      */
     public static String toHexString(String str) {
+        if (null == str) {
+            return null;
+        }
         // 根据默认编码获取字节数组
-        byte[] bytes = str.getBytes();
+        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
         final String hexString = "0123456789abcdef";
         StringBuilder sb = new StringBuilder(bytes.length * 2);
         // 将字节数组中每个字节拆解成2位16进制整数
@@ -44,48 +48,23 @@ public class HexUtil {
     }
 
     /**
-     * 将字符串转换为十六进制格式
-     * 如果字符串已经符合十六进制格式，则直接返回，确保长度为偶数
+     * 将十六进制字符串转换为UTF-8编码的字符串
      *
-     * @param val 待转换的字符串，可以为null
-     * @return 转换后的十六进制字符串，如果输入为null则返回null
+     * @param hexStr 输入的十六进制字符串，每两个字符表示一个字节
+     * @return 转换后的UTF-8编码字符串
      */
-    public static String toHex(String val) {
-        // 如果输入字符串为null，直接返回null
-        if (val == null) {
-            return val;
+    public static String hexStringToUtf8Text(String hexStr) {
+        if (null == hexStr) {
+            return null;
+        }
+        byte[] resultBytes = new byte[hexStr.length() / 2];
+        // 将十六进制字符串按每两位分割并转换为字节数组
+        for (int i = 0; i < hexStr.length(); i += 2) {
+            String hexPair = hexStr.substring(i, i + 2);
+            resultBytes[i / 2] = (byte) Integer.parseInt(hexPair, 16);
         }
 
-        // 如果字符串已经符合十六进制格式，则直接返回，确保长度为偶数
-        if (HEX_PATTERN.matcher(val).matches()) {
-            return val.length() % 2 == 0 ? val : "0" + val;
-        }
-
-        // 将普通字符串转换为十六进制格式
-        return stringToHex(val);
-    }
-
-
-    /**
-     * 将字符串转换为十六进制字符串（使用UTF-8编码）
-     *
-     * @param str 原始字符串
-     * @return 十六进制字符串，每两个字符代表一个字节
-     */
-    public static String stringToHex(String str) {
-        byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
-        return bytesToHex(bytes);
-    }
-
-    /**
-     * 将十六进制字符串转换为原始字符串（使用UTF-8编码）
-     *
-     * @param hex 十六进制字符串
-     * @return 原始字符串
-     */
-    public static String hexToString(String hex) {
-        byte[] bytes = hexToBytes(hex);
-        return new String(bytes, StandardCharsets.UTF_8);
+        return new String(resultBytes, StandardCharsets.UTF_8);
     }
 
     /**
@@ -117,7 +96,7 @@ public class HexUtil {
         hex = hex.replaceAll("\\s", "");
 
         // 检查十六进制字符串长度是否为偶数
-        if (hex.length() % 2 != 0) {
+        if (!isHex(hex)) {
             throw new IllegalArgumentException("十六进制字符串长度必须为偶数");
         }
 
@@ -143,7 +122,7 @@ public class HexUtil {
             return "";
         }
         byte[] bytes = parseBase64String(base64String);
-        return HexUtil.bytesToHex(bytes);
+        return Hex.bytesToHex(bytes);
     }
 
     /**
@@ -205,7 +184,7 @@ public class HexUtil {
         hexString = hexString.replaceAll("\\s", "").replace("0x", "");
 
         // 确保十六进制字符串长度为偶数
-        if (hexString.length() % 2 != 0) {
+        if (!isHex(hexString)) {
             throw new IllegalArgumentException("Invalid hex string length");
         }
 
@@ -273,58 +252,6 @@ public class HexUtil {
         return prefix + padded.toString();
     }
 
-    /**
-     * 将byte数组转换为BitSet（支持指定字节序）
-     *
-     * @param bytes     要转换的byte数组
-     * @param bigEndian 是否使用大端序
-     * @return 转换后的BitSet
-     */
-    public static BitSet byteArrayToBitSet(byte[] bytes, boolean bigEndian) {
-        if (bytes == null) {
-            return new BitSet();
-        }
-
-        BitSet bitSet = new BitSet(bytes.length * 8);
-
-        for (int i = 0; i < bytes.length * 8; i++) {
-            int byteIndex = i / 8;
-            int bitIndex = bigEndian ? (7 - (i % 8)) : (i % 8);
-
-            if ((bytes[byteIndex] & (1 << bitIndex)) != 0) {
-                bitSet.set(i);
-            }
-        }
-
-        return bitSet;
-    }
-
-    /**
-     * 将BitSet转换为byte数组（支持指定字节序）
-     *
-     * @param bitSet    要转换的BitSet
-     * @param bigEndian 是否使用大端序（true: 高位在前, false: 低位在前）
-     * @return 转换后的byte数组
-     */
-    public static byte[] bitSetToByteArray(BitSet bitSet, boolean bigEndian) {
-        if (bitSet == null) {
-            return new byte[0];
-        }
-
-        int byteCount = (bitSet.length() + 7) / 8;
-        byte[] bytes = new byte[byteCount];
-
-        for (int i = 0; i < bitSet.length(); i++) {
-            if (bitSet.get(i)) {
-                int byteIndex = i / 8;
-                int bitIndex = bigEndian ? (7 - (i % 8)) : (i % 8);
-                bytes[byteIndex] |= (1 << bitIndex);
-            }
-        }
-
-        return bytes;
-    }
-
 
     /**
      * 从十六进制字符串创建BitSet
@@ -332,7 +259,7 @@ public class HexUtil {
      * @param hexString 十六进制字符串
      * @return 创建的BitSet
      */
-    public static BitSet hexStringToBitSet(String hexString) {
+    public static BitSet hexToBitSet(String hexString) {
         if (hexString == null || hexString.isEmpty()) {
             return new BitSet();
         }
@@ -341,40 +268,35 @@ public class HexUtil {
         byte[] bytes = new byte[len / 2];
 
         for (int i = 0; i < len; i += 2) {
-            bytes[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i + 1), 16));
+            bytes[i / 2] =
+                    (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i + 1)
+                            , 16));
         }
 
-        return byteArrayToBitSet(bytes, false);
+        return bytesToBitSet(bytes);
     }
 
     /**
-     * 获取BitSet的二进制字符串表示
+     * 将BitSet转换为十六进制字符串
+     *
+     * @param bitSet 要转换的BitSet
+     * @return 十六进制字符串表示
      */
-    public static String toBinaryString(BitSet bitSet) {
-        if (bitSet == null) return "";
-
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bitSet.length(); i++) {
-            sb.append(bitSet.get(i) ? '1' : '0');
-        }
-        return sb.toString();
-    }
-
-    /**
-     * 从二进制字符串创建BitSet
-     */
-    public static BitSet fromBinaryString(String binaryString) {
-        if (binaryString == null || binaryString.isEmpty()) {
-            return new BitSet();
+    public static String bitSetToHex(BitSet bitSet) {
+        if (bitSet == null) {
+            return "";
         }
 
-        BitSet bitSet = new BitSet(binaryString.length());
-        for (int i = 0; i < binaryString.length(); i++) {
-            if (binaryString.charAt(i) == '1') {
-                bitSet.set(i);
-            }
+        // 如果BitSet为空，返回空字符串
+        if (bitSet.length() == 0) {
+            return "";
         }
-        return bitSet;
+
+        // 先将BitSet转换为byte数组
+        byte[] bytes = bitSetToBytes(bitSet);
+
+        // 再将byte数组转换为十六进制字符串
+        return bytesToHex(bytes);
     }
 
     /**
@@ -383,61 +305,11 @@ public class HexUtil {
      * @param bitSet 要转换的BitSet
      * @return 转换后的byte数组
      */
-    public static byte[] bitSetToByteArray(BitSet bitSet) {
+    public static byte[] bitSetToBytes(BitSet bitSet) {
         if (bitSet == null) {
             return new byte[0];
         }
-
-        // 如果BitSet为空，返回空数组
-        if (bitSet.length() == 0) {
-            return new byte[0];
-        }
-
-        // 计算需要的字节数
-        int byteCount = (bitSet.length() + 7) / 8;
-        byte[] bytes = new byte[byteCount];
-
-        // 遍历所有设置的位
-        for (int bitIndex = bitSet.nextSetBit(0); bitIndex >= 0; bitIndex = bitSet.nextSetBit(bitIndex + 1)) {
-            int byteIndex = bitIndex / 8;
-            int bitOffset = bitIndex % 8;
-            bytes[byteIndex] |= (1 << bitOffset);
-        }
-
-        return bytes;
-    }
-
-    /**
-     * 将十六进制字符串转换为BitSet
-     *
-     * @param hexString 十六进制字符串，可以为null或空字符串
-     * @return 转换后的BitSet对象，如果输入为null或空则返回空的BitSet
-     */
-    public static BitSet hexToBitSet(String hexString) {
-        // 处理空值情况，返回空的BitSet
-        if (hexString == null || hexString.isEmpty()) {
-            return new BitSet();
-        }
-
-        // 将十六进制字符串转换为字节数组，再转换为BitSet
-        byte[] bytes = hexTobyte(hexString.getBytes());
-        return byteArrayToBitSet(bytes);
-    }
-
-    /**
-     * 将BitSet转换为十六进制字符串
-     *
-     * @param bitSet 要转换的BitSet对象，可以为null
-     * @return 转换后的十六进制字符串，如果输入为null则返回空字符串
-     */
-    public static String bitSetToHex(BitSet bitSet) {
-        if (bitSet == null) {
-            return "";
-        }
-
-        // 将BitSet转换为字节数组，然后转换为十六进制字符串
-        byte[] bytes = bitSetToByteArray(bitSet);
-        return byteTohex(bytes);
+        return bitSet.toByteArray();
     }
 
 
@@ -447,24 +319,13 @@ public class HexUtil {
      * @param bytes 要转换的byte数组
      * @return 转换后的BitSet
      */
-    public static BitSet byteArrayToBitSet(byte[] bytes) {
+    public static BitSet bytesToBitSet(byte[] bytes) {
         if (bytes == null) {
             return new BitSet();
         }
-
-        BitSet bitSet = new BitSet(bytes.length * 8);
-
-        for (int i = 0; i < bytes.length * 8; i++) {
-            int byteIndex = i / 8;
-            int bitIndex = i % 8;
-
-            if ((bytes[byteIndex] & (1 << bitIndex)) != 0) {
-                bitSet.set(i);
-            }
-        }
-
-        return bitSet;
+        return BitSet.valueOf(bytes);
     }
+
 
     /**
      * 比较两个BitSet的内容是否相同
@@ -476,41 +337,6 @@ public class HexUtil {
         return bitSet1.equals(bitSet2);
     }
 
-    /**
-     * 将十六进制字节数组转换为字节数组
-     *
-     * @param b 输入的十六进制字节数组，长度必须为偶数
-     * @return 转换后的字节数组，长度为输入数组的一半
-     * @throws UncheckedException 当输入数组长度不是偶数时抛出异常
-     */
-    public static byte[] hexTobyte(byte[] b) {
-        if ((b.length % 2) != 0) throw new UncheckedException("长度不是偶数");
-        byte[] b2 = new byte[b.length / 2];
-        // 每两个字符组成一个十六进制数进行转换
-        for (int n = 0; n < b.length; n += 2) {
-            String item = new String(b, n, 2);
-            b2[n / 2] = (byte) Integer.parseInt(item, 16);
-        }
-        return b2;
-    }
-
-    /**
-     * 将字节数组转换为十六进制字符串
-     *
-     * @param b 待转换的字节数组
-     * @return 转换后的十六进制字符串（大写）
-     */
-    public static String byteTohex(byte[] b) {
-        String hs = "";
-        String tmp = "";
-        // 遍历字节数组，将每个字节转换为两位十六进制字符串
-        for (int n = 0; n < b.length; n++) {
-            tmp = (java.lang.Integer.toHexString(b[n] & 0XFF));
-            if (tmp.length() == 1) hs = hs + "0" + tmp;
-            else hs = hs + tmp;
-        }
-        return hs.toUpperCase();
-    }
 
     /**
      * 对两个字节数组进行异或运算
@@ -628,7 +454,7 @@ public class HexUtil {
         } else if (number instanceof Double || number instanceof Float) {
             throw new IllegalArgumentException("Floating point numbers are not supported.");
         } else {
-            throw new IllegalArgumentException("Unsupported number type: " + number.getClass().getSimpleName() + ". Supported types: Integer, Long, Short, Byte.");
+            throw new IllegalArgumentException("Unsupported number type: " + number.getClass().getSimpleName() + ". " + "Supported types: Integer, Long, Short, Byte.");
         }
 
         // 统一大写
@@ -659,5 +485,35 @@ public class HexUtil {
      */
     public static String toHexString(Number number) {
         return toHexString(number, null);
+    }
+
+    /**
+     * 将十六进制字符串转换为二进制字符串
+     *
+     * @param hexString 输入的十六进制字符串
+     * @return 对应的二进制字符串表示
+     */
+    public static String hexStringToBinaryString(String hexString) {
+        if (StringUtils.isBlank(hexString)) {
+            return null;
+        }
+        BigInteger val = new BigInteger(hexString.trim(), 16);
+        String valString = val.toString(2);
+        return valString.length() % 2 == 0 ? valString : "0" + valString;
+    }
+
+    /**
+     * 将二进制字符串转换为十六进制字符串
+     *
+     * @param binaryString 输入的二进制字符串
+     * @return 对应的十六进制字符串表示，如果输入为空或空白字符串则返回null
+     */
+    public static String binaryStringToHexString(String binaryString) {
+        if (StringUtils.isBlank(binaryString)) {
+            return null;
+        }
+        BigInteger val = new BigInteger(binaryString.trim(), 2);
+        String valString = val.toString(16).toUpperCase();
+        return valString.length() % 2 == 0 ? valString : "0" + valString;
     }
 }

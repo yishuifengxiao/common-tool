@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.text;
 
-import com.yishuifengxiao.common.tool.lang.HexUtil;
+import com.yishuifengxiao.common.tool.lang.Hex;
 
 /**
  * TLV工具类
@@ -196,7 +196,7 @@ public class TLVUtil {
         }
 
         // 将标签与构建好的长度和值部分拼接起来
-        return tag + sb.toString();
+        return tag + sb;
     }
 
     /**
@@ -225,7 +225,7 @@ public class TLVUtil {
      * @return TLV格式字符串
      */
     public static String stringToTLV(String tag, String text) {
-        String hexValue = HexUtil.stringToHex(text);
+        String hexValue = Hex.isHex(text) ? text : Hex.toHexString(text);
         return toTLV(tag, hexValue);
     }
 
@@ -237,11 +237,9 @@ public class TLVUtil {
      * @return TLV格式字符串
      */
     public static String bytesToTLV(String tag, byte[] bytes) {
-        String hexValue = HexUtil.bytesToHex(bytes);
+        String hexValue = Hex.bytesToHex(bytes);
         return toTLV(tag, hexValue);
     }
-
-
 
 
 }

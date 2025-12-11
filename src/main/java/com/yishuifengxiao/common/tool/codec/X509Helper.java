@@ -1,7 +1,7 @@
 package com.yishuifengxiao.common.tool.codec;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.lang.HexUtil;
+import com.yishuifengxiao.common.tool.lang.Hex;
 import com.yishuifengxiao.common.tool.text.OIDConverter;
 import com.yishuifengxiao.common.tool.text.TLVUtil;
 import lombok.AllArgsConstructor;
@@ -114,7 +114,7 @@ public class X509Helper {
         // 移除可能的PEM头部和尾部（如果存在）
         String cleanBase64 = base64String.replace(PEM_HEADER, "").replace(PEM_FOOTER, "").replaceAll("\\s", "");
 
-        return HexUtil.parseBase64String(cleanBase64);
+        return Hex.parseBase64String(cleanBase64);
     }
 
     /**
@@ -351,7 +351,7 @@ public class X509Helper {
             } else {
                 // 其他类型的公钥，使用完整编码
                 byte[] publicKeyBytes = publicKey.getEncoded();
-                publicKeyValue = HexUtil.bytesToHex(publicKeyBytes);
+                publicKeyValue = Hex.bytesToHex(publicKeyBytes);
             }
 
             info.setPublicKeyValue(publicKeyValue.toUpperCase());
@@ -360,7 +360,7 @@ public class X509Helper {
             // 如果提取失败，使用完整编码作为后备
             try {
                 byte[] publicKeyBytes = publicKey.getEncoded();
-                info.setPublicKeyValue(HexUtil.bytesToHex(publicKeyBytes).toUpperCase());
+                info.setPublicKeyValue(Hex.bytesToHex(publicKeyBytes).toUpperCase());
             } catch (Exception ex) {
                 log.warn("Failed to extract public key encoded value: " + ex.getMessage());
             }
@@ -391,7 +391,7 @@ public class X509Helper {
         }
         byte[] oidBytes = new byte[oidLength];
         System.arraycopy(encoded, 15, oidBytes, 0, oidLength);
-        String hex = HexUtil.bytesToHex(oidBytes);
+        String hex = Hex.bytesToHex(oidBytes);
         String notation = OIDConverter.hexToDotNotation(hex);
         return notation;
     }
@@ -407,7 +407,7 @@ public class X509Helper {
         try {
             // 将RSA公钥编码为DER格式
             byte[] publicKeyDER = publicKey.getEncoded();
-            return HexUtil.bytesToHex(publicKeyDER);
+            return Hex.bytesToHex(publicKeyDER);
         } catch (Exception e) {
             log.info("Failed to extract RSA public key: " + e.getMessage());
             return "";
@@ -454,7 +454,7 @@ public class X509Helper {
                 System.arraycopy(yBytes, yBytes.length - keySize, buf, 1 + keySize, keySize);
             }
 
-            return HexUtil.bytesToHex(buf);
+            return Hex.bytesToHex(buf);
         } catch (Exception e) {
             log.info("Failed to extract ECDSA public key: " + e.getMessage());
             return "";
@@ -475,7 +475,7 @@ public class X509Helper {
                 // SKID扩展值是OCTET STRING包装的，需要解析
                 byte[] skidValue = parseOctetStringExtension(skidExtension);
                 if (skidValue != null) {
-                    info.setSkid(HexUtil.bytesToHex(skidValue));
+                    info.setSkid(Hex.bytesToHex(skidValue));
                 }
             }
         } catch (Exception e) {
@@ -512,7 +512,7 @@ public class X509Helper {
                 // SKID扩展值是OCTET STRING包装的，需要解析
                 byte[] skidValue = parseOctetStringExtension(skidExtension);
                 if (skidValue != null) {
-                    String skid = HexUtil.bytesToHex(skidValue);
+                    String skid = Hex.bytesToHex(skidValue);
                     // 从TLV格式数据中提取值
                     return TLVUtil.fetchValueFromTlv("04", skid);
                 }
@@ -628,7 +628,7 @@ public class X509Helper {
             if (akidExtension != null) {
                 byte[] keyIdentifier = extractKeyIdentifierFromAKID(akidExtension);
                 if (keyIdentifier != null) {
-                    info.setAkid(HexUtil.bytesToHex(keyIdentifier));
+                    info.setAkid(Hex.bytesToHex(keyIdentifier));
                 }
             }
         } catch (Exception e) {
@@ -899,7 +899,7 @@ public class X509Helper {
         try {
             // 获取证书公钥的编码字节数组并转换为十六进制字符串
             byte[] publicKeyBytes = certificate.getPublicKey().getEncoded();
-            return HexUtil.bytesToHex(publicKeyBytes);
+            return Hex.bytesToHex(publicKeyBytes);
         } catch (Exception e) {
             log.info("Failed to extract public key value: " + e.getMessage());
             return null;
@@ -915,7 +915,7 @@ public class X509Helper {
             byte[] skidExtension = certificate.getExtensionValue("2.5.29.14");
             if (skidExtension != null) {
                 byte[] skidValue = parseOctetStringExtension(skidExtension);
-                return skidValue != null ? HexUtil.bytesToHex(skidValue) : null;
+                return skidValue != null ? Hex.bytesToHex(skidValue) : null;
             }
         } catch (Exception e) {
             log.info("Failed to extract SKID: " + e.getMessage());
@@ -941,7 +941,7 @@ public class X509Helper {
             byte[] akidExtension = certificate.getExtensionValue("2.5.29.35");
             if (akidExtension != null) {
                 byte[] keyIdentifier = extractKeyIdentifierFromAKID(akidExtension);
-                return keyIdentifier != null ? HexUtil.bytesToHex(keyIdentifier) : null;
+                return keyIdentifier != null ? Hex.bytesToHex(keyIdentifier) : null;
             }
         } catch (Exception e) {
             log.info("Failed to extract CIPKID: " + e.getMessage());
@@ -1150,7 +1150,7 @@ public class X509Helper {
 
         try {
             byte[] certBytes = certificate.getEncoded();
-            return HexUtil.bytesToHex(certBytes).toUpperCase();
+            return Hex.bytesToHex(certBytes).toUpperCase();
         } catch (Exception e) {
             throw new CertificateException("Failed to convert certificate to HEX format: " + e.getMessage(), e);
         }
@@ -1230,7 +1230,7 @@ public class X509Helper {
 
         try {
             byte[] keyBytes = publicKey.getEncoded();
-            return HexUtil.bytesToHex(keyBytes).toUpperCase();
+            return Hex.bytesToHex(keyBytes).toUpperCase();
         } catch (Exception e) {
             throw new CertificateException("Failed to convert public key to HEX format: " + e.getMessage(), e);
         }

@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.lang.HexUtil;
+import com.yishuifengxiao.common.tool.lang.Hex;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,10 +48,11 @@ public class DES {
      */
     public static final String encrypt(String key, String data) {
         try {
-            return HexUtil.byteTohex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
+            return Hex.bytesToHex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
-                log.info("There is a problem encrypting data {}  with a key, and the reason for the problem is {}", data, e);
+                log.info("There is a problem encrypting data {}  with a key, and the reason for the problem is {}",
+                        data, e);
             }
         }
         return null;
@@ -76,10 +77,11 @@ public class DES {
      */
     public static final String decrypt(String key, String data) {
         try {
-            return new String(decrypt(HexUtil.hexTobyte(data.getBytes("utf-8")), keyValidate(key).getBytes("utf-8")));
+            return new String(decrypt(Hex.hexToBytes(data), keyValidate(key).getBytes("utf-8")));
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
-                log.info("There was a problem decrypting data {} using the key, and the reason " + "for the problem is {}", data, e);
+                log.info("There was a problem decrypting data {} using the key, and the reason " + "for the problem " +
+                        "is {}", data, e);
             }
         }
         return null;
@@ -206,7 +208,7 @@ public class DES {
         // 如果密钥为空或空白字符，则使用默认密钥
         key = StringUtils.isBlank(key) ? PASSWORD_CRYPT_KEY : key;
         // 将十六进制数据转换为字节数组并解密，然后转换为字符串返回
-        return new String(decrypt(HexUtil.hexTobyte(data.getBytes()), key.getBytes()));
+        return new String(decrypt(Hex.hexToBytes(data), key.getBytes()));
     }
 
 
@@ -234,7 +236,7 @@ public class DES {
         // 如果密钥为空，则使用默认密钥
         key = StringUtils.isBlank(key) ? PASSWORD_CRYPT_KEY : key;
         // 对数据进行加密并转换为十六进制字符串
-        return HexUtil.byteTohex(encrypt(data.getBytes(), key.getBytes()));
+        return Hex.bytesToHex(encrypt(data.getBytes(), key.getBytes()));
     }
 
     /**
@@ -253,14 +255,14 @@ public class DES {
     /**
      * 计算数据的MAC(Message Authentication Code)值
      *
-     * @param key 用于加密的密钥字符串
+     * @param key  用于加密的密钥字符串
      * @param data 待计算MAC的数据字符串(十六进制格式)
      * @return 返回计算得到的MAC值(16位十六进制字符串)
      * @throws Exception 当加密过程发生错误时抛出异常
      */
     public static String mac(String key, String data) throws Exception {
         // 将十六进制数据转换为字节数组
-        byte[] planData = HexUtil.hexTobyte(data.getBytes());
+        byte[] planData = Hex.hexToBytes(data);
         final int dataLength = planData.length;
         final int lastLength = dataLength % 8;
         final int lastBlockLength = lastLength == 0 ? 8 : lastLength;
@@ -276,14 +278,13 @@ public class DES {
         // 执行MAC计算：异或后DES加密，循环处理所有数据块
         byte[] desXor = new byte[8];
         for (int i = 0; i < blockCount; i++) {
-            byte[] tXor = HexUtil.xOr(desXor, dataBlock[i]);
+            byte[] tXor = Hex.xOr(desXor, dataBlock[i]);
             desXor = encrypt(tXor, key.getBytes());
         }
 
         // 将最终结果转换为十六进制字符串并截取前16位作为MAC值
-        return HexUtil.byteTohex(desXor).substring(0, 16);
+        return Hex.bytesToHex(desXor).substring(0, 16);
     }
-
 
 
 }

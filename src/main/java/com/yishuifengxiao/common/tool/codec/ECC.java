@@ -1,6 +1,6 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.lang.HexUtil;
+import com.yishuifengxiao.common.tool.lang.Hex;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.KeyAgreement;
@@ -379,7 +379,7 @@ public class ECC {
     public static String signHex(String privateKeyCertificate, String hexData) throws Exception {
         ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyCertificate);
         // 使用私钥对数据进行签名
-        byte[] data = HexUtil.hexToBytes(hexData);
+        byte[] data = Hex.hexToBytes(hexData);
         byte[] signature = signData(ecPrivateKey, data);
 
         // 将DER编码的签名转换为固定长度的128字符格式
@@ -480,7 +480,7 @@ public class ECC {
         PublicKey publicKey = X509Helper.extractPublicKey(certData);
         // 将固定长度签名转换为DER编码
         byte[] signature = convertFixedLengthToDER(signatureHex);
-        byte[] data = HexUtil.hexToBytes(hexData);
+        byte[] data = Hex.hexToBytes(hexData);
         return verifySignature(publicKey, data, signature);
     }
 
@@ -1067,7 +1067,7 @@ public class ECC {
         }
 
         // 转换为十六进制
-        return HexUtil.bytesToHex(encodedKey).toUpperCase();
+        return Hex.bytesToHex(encodedKey).toUpperCase();
     }
 
 
@@ -1272,10 +1272,10 @@ public class ECC {
 
         // 执行ECC密钥协商，获取原始共享密钥数据
         byte[] bytes = performKeyAgreement(curveOID, privateKeyDHex, publicKeyHex);
-        String hex = HexUtil.bytesToHex(bytes);
+        String hex = Hex.bytesToHex(bytes);
 
         // 对原始密钥数据进行左填充，确保长度为32字节
-        String result = HexUtil.padHexLeft(hex, 32);
+        String result = Hex.padHexLeft(hex, 32);
 
 
         // 计算需要进行哈希运算的次数
@@ -1286,7 +1286,7 @@ public class ECC {
         // 通过迭代哈希运算派生最终的密钥
         StringBuilder hashSb = new StringBuilder();
         for (int i = 1; i <= hlen; i++) {
-            String counter = HexUtil.padHexLeft(Integer.toHexString(i), 4);
+            String counter = Hex.padHexLeft(Integer.toHexString(i), 4);
             hashSb.append(SHA256.calculateSHA256FromHex(result + counter + sShareInfo));
         }
         return hashSb.toString().substring(0, iKeyLen * 2).toUpperCase();
@@ -1346,7 +1346,7 @@ public class ECC {
         }
 
         // 转换为十六进制
-        return HexUtil.bytesToHex(encodedKey).toUpperCase();
+        return Hex.bytesToHex(encodedKey).toUpperCase();
     }
 
     /**
@@ -1381,7 +1381,7 @@ public class ECC {
         // 检查是否为十六进制格式
         String testHex = cleanData.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
         if (HEX_PATTERN.matcher(testHex).matches() && testHex.length() % 2 == 0) {
-            keyBytes = HexUtil.hexToBytes(testHex);
+            keyBytes = Hex.hexToBytes(testHex);
         } else {
             // 尝试Base64解码
             try {
@@ -1457,7 +1457,7 @@ public class ECC {
         }
 
         // 转换为十六进制
-        return HexUtil.bytesToHex(keyBytes).toUpperCase();
+        return Hex.bytesToHex(keyBytes).toUpperCase();
     }
 
     /**
@@ -1603,7 +1603,7 @@ public class ECC {
         }
 
         // 转换为十六进制
-        return HexUtil.bytesToHex(encodedKey).toUpperCase();
+        return Hex.bytesToHex(encodedKey).toUpperCase();
     }
 
     /**
@@ -1664,7 +1664,7 @@ public class ECC {
         // 检查是否为十六进制格式
         String testHex = cleanData.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
         if (HEX_PATTERN.matcher(testHex).matches() && testHex.length() % 2 == 0) {
-            keyBytes = HexUtil.hexToBytes(testHex);
+            keyBytes = Hex.hexToBytes(testHex);
         } else {
             // 尝试Base64解码
             try {
@@ -1741,7 +1741,7 @@ public class ECC {
         }
 
         // 转换为十六进制
-        return HexUtil.bytesToHex(keyBytes).toUpperCase();
+        return Hex.bytesToHex(keyBytes).toUpperCase();
     }
 
     /**
