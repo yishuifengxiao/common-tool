@@ -22,11 +22,11 @@ public class TLV implements Serializable {
      * 该函数根据输入字符串的长度（以字节为单位）选择合适的长度编码方式。
      *
      * @param tag   表示 TLV 格式中的标签部分，为字符串类型
-     * @param input 表示 TLV 格式中的值部分，应为十六进制字符串，每两个字符代表一个字节
+     * @param value 表示 TLV 格式中的值部分，应为十六进制字符串，每两个字符代表一个字节
      * @return 返回一个符合 TLV 格式的字符串
      */
-    public static String toTLV(String tag, String input) {
-        return TLVUtil.toTLV(tag, input);
+    public static String toTLV(String tag, String value) {
+        return TLVUtil.toTLV(tag, value);
     }
 
     /**

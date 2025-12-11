@@ -162,13 +162,13 @@ public class TLVUtil {
      * 该函数根据输入字符串的长度（以字节为单位）选择合适的长度编码方式。
      *
      * @param tag   表示 TLV 格式中的标签部分，为字符串类型
-     * @param input 表示 TLV 格式中的值部分，应为十六进制字符串，每两个字符代表一个字节
+     * @param value 表示 TLV 格式中的值部分，应为十六进制字符串，每两个字符代表一个字节
      * @return 返回一个符合 TLV 格式的字符串
      */
-    public static String toTLV(String tag, String input) {
+    public static String toTLV(String tag, String value) {
         tag = null == tag ? "" : tag.trim();
         // 计算输入字符串的字节长度，由于输入是十六进制字符串，每两个字符代表一个字节
-        int inputLen = input.length() / 2;
+        int inputLen = value.length() / 2;
         StringBuilder sb = new StringBuilder();
 
         // 将输入长度转换为十六进制字符串
@@ -178,21 +178,21 @@ public class TLVUtil {
             // 当输入长度大于 65535 时，使用标签 83 表示长度为 3 字节
             sb.append("83");
             sb.append(strInputLenString);
-            sb.append(input);
+            sb.append(value);
         } else if (inputLen > 255) {
             // 当输入长度大于 255 且不超过 65535 时，使用标签 82 表示长度为 2 字节
             sb.append("82");
             sb.append(strInputLenString);
-            sb.append(input);
+            sb.append(value);
         } else if (inputLen > 127) {
             // 当输入长度大于 127 且不超过 255 时，使用标签 81 表示长度为 1 字节
             sb.append("81");
             sb.append(strInputLenString);
-            sb.append(input);
+            sb.append(value);
         } else {
             // 当输入长度不超过 127 时，直接使用长度值
             sb.append(strInputLenString);
-            sb.append(input);
+            sb.append(value);
         }
 
         // 将标签与构建好的长度和值部分拼接起来
