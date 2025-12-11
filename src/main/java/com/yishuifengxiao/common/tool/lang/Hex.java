@@ -254,7 +254,31 @@ public class Hex {
         }
         padded.append(cleanHex);
 
-        return prefix + padded.toString();
+        return (prefix + padded).toUpperCase();
+    }
+
+    /**
+     * 补零辅助方法
+     * 在字符串左侧填充零字符，使其达到指定长度
+     *
+     * @param str 需要补零的原始字符串
+     * @param len 目标长度
+     * @return 补零后的字符串，如果原字符串长度已达到或超过目标长度则返回原字符串
+     */
+    public static String paddingZero(String str, int len) {
+        str = str.trim();
+        if (str.length() >= len) {
+            return str;
+        }
+        // 构建补零后的字符串
+        StringBuilder sb = new StringBuilder(len);
+        // 添加所需数量的零字符
+        for (int i = 0; i < len - str.length(); i++) {
+            sb.append('0');
+        }
+        // 追加原始字符串
+        sb.append(str);
+        return sb.toString().toUpperCase();
     }
 
 

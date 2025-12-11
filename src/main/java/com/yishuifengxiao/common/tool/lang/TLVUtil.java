@@ -1,6 +1,6 @@
-package com.yishuifengxiao.common.tool.text;
+package com.yishuifengxiao.common.tool.lang;
 
-import com.yishuifengxiao.common.tool.lang.Hex;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * TLV工具类
@@ -166,7 +166,7 @@ public class TLVUtil {
      * @return 返回一个符合 TLV 格式的字符串
      */
     public static String toTLV(String tag, String value) {
-        tag = null == tag ? "" : tag.trim();
+        tag = StringUtils.isBlank(tag) ? "" : tag.trim();
         // 计算输入字符串的字节长度，由于输入是十六进制字符串，每两个字符代表一个字节
         int inputLen = value.length() / 2;
         StringBuilder sb = new StringBuilder();

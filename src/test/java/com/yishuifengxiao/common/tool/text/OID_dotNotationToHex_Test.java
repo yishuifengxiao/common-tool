@@ -1,10 +1,11 @@
 package com.yishuifengxiao.common.tool.text;
 
+import com.yishuifengxiao.common.tool.lang.OID;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class OIDConverter_dotNotationToHex_Test {
+public class OID_dotNotationToHex_Test {
 
     /**
      * 测试正常场景：标准OID转换
@@ -14,7 +15,7 @@ public class OIDConverter_dotNotationToHex_Test {
     public void testDotNotationToHex_StandardOID() {
         String input = "1.2.840.113549";
         String expected = "2A864886F70D";
-        String result = OIDConverter.dotNotationToHex(input);
+        String result = OID.dotNotationToHex(input);
         assertEquals(expected, result);
     }
 
@@ -26,7 +27,7 @@ public class OIDConverter_dotNotationToHex_Test {
     public void testDotNotationToHex_MinValidOID() {
         String input = "0.0";
         String expected = "00";
-        String result = OIDConverter.dotNotationToHex(input);
+        String result = OID.dotNotationToHex(input);
         assertEquals(expected, result);
     }
 
@@ -38,7 +39,7 @@ public class OIDConverter_dotNotationToHex_Test {
     public void testDotNotationToHex_MaxValidOID() {
         String input = "2.39";
         String expected = "77";
-        String result = OIDConverter.dotNotationToHex(input);
+        String result = OID.dotNotationToHex(input);
         assertEquals(expected, result);
     }
 
@@ -48,7 +49,7 @@ public class OIDConverter_dotNotationToHex_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDotNotationToHex_EmptyInput() {
-        OIDConverter.dotNotationToHex("");
+        OID.dotNotationToHex("");
     }
 
     /**
@@ -57,7 +58,7 @@ public class OIDConverter_dotNotationToHex_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDotNotationToHex_NullInput() {
-        OIDConverter.dotNotationToHex(null);
+        OID.dotNotationToHex(null);
     }
 
     /**
@@ -66,7 +67,7 @@ public class OIDConverter_dotNotationToHex_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDotNotationToHex_SingleComponent() {
-        OIDConverter.dotNotationToHex("1");
+        OID.dotNotationToHex("1");
     }
 
     /**
@@ -75,7 +76,7 @@ public class OIDConverter_dotNotationToHex_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDotNotationToHex_EmptyComponent() {
-        OIDConverter.dotNotationToHex("1..2");
+        OID.dotNotationToHex("1..2");
     }
 
     /**
@@ -84,7 +85,7 @@ public class OIDConverter_dotNotationToHex_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDotNotationToHex_NegativeComponent() {
-        OIDConverter.dotNotationToHex("1.-2");
+        OID.dotNotationToHex("1.-2");
     }
 
     /**
@@ -93,7 +94,7 @@ public class OIDConverter_dotNotationToHex_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDotNotationToHex_InvalidNumberComponent() {
-        OIDConverter.dotNotationToHex("1.abc");
+        OID.dotNotationToHex("1.abc");
     }
 
     /**
@@ -102,7 +103,7 @@ public class OIDConverter_dotNotationToHex_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDotNotationToHex_InvalidFirstComponent() {
-        OIDConverter.dotNotationToHex("3.1");
+        OID.dotNotationToHex("3.1");
     }
 
     /**
@@ -111,6 +112,6 @@ public class OIDConverter_dotNotationToHex_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testDotNotationToHex_InvalidSecondComponent() {
-        OIDConverter.dotNotationToHex("1.40");
+        OID.dotNotationToHex("1.40");
     }
 }

@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.text;
+package com.yishuifengxiao.common.tool.lang;
 
 import java.io.Serializable;
 
@@ -27,6 +27,16 @@ public class TLV implements Serializable {
      */
     public static String toTLV(String tag, String value) {
         return TLVUtil.toTLV(tag, value);
+    }
+
+    /**
+     * 将给定的值转换为TLV格式的字符串，不包含标签部分
+     *
+     * @param value 表示 TLV 格式中的值部分，应为十六进制字符串，每两个字符代表一个字节
+     * @return 返回一个符合 TLV 格式的字符串，不包含标签部分
+     */
+    public static String toTLV(String value) {
+        return TLVUtil.toTLV(null, value);
     }
 
     /**

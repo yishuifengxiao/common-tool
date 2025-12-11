@@ -1,6 +1,5 @@
-package com.yishuifengxiao.common.tool.text;
+package com.yishuifengxiao.common.tool.lang;
 
-import com.yishuifengxiao.common.tool.lang.Hex;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigInteger;

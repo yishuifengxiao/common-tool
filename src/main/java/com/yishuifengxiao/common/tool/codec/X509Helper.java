@@ -2,8 +2,8 @@ package com.yishuifengxiao.common.tool.codec;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.Hex;
-import com.yishuifengxiao.common.tool.text.OIDConverter;
-import com.yishuifengxiao.common.tool.text.TLVUtil;
+import com.yishuifengxiao.common.tool.lang.OID;
+import com.yishuifengxiao.common.tool.lang.TLVUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -392,7 +392,7 @@ public class X509Helper {
         byte[] oidBytes = new byte[oidLength];
         System.arraycopy(encoded, 15, oidBytes, 0, oidLength);
         String hex = Hex.bytesToHex(oidBytes);
-        String notation = OIDConverter.hexToDotNotation(hex);
+        String notation = OID.hexToDotNotation(hex);
         return notation;
     }
 

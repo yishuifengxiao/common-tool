@@ -1,4 +1,5 @@
 package com.yishuifengxiao.common.tool.lang;
+import com.yishuifengxiao.common.tool.text.TextUtil;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

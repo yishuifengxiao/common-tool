@@ -1,10 +1,11 @@
 package com.yishuifengxiao.common.tool.text;
 
+import com.yishuifengxiao.common.tool.lang.OID;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class OIDConverter_hexToDotNotation_Test {
+public class OID_hexToDotNotation_Test {
 
     /**
      * 测试正常场景：有效的十六进制字符串转换为点分十进制
@@ -15,7 +16,7 @@ public class OIDConverter_hexToDotNotation_Test {
         String hexStr = "2B0601040181C31F03";
         String expected = "1.3.6.1.4.1.24991.3";
         
-        String result = OIDConverter.hexToDotNotation(hexStr);
+        String result = OID.hexToDotNotation(hexStr);
         
         assertEquals(expected, result);
     }
@@ -29,7 +30,7 @@ public class OIDConverter_hexToDotNotation_Test {
         String hexStr = "2B 06 01 04 01 81 C3 1F 03";
         String expected = "1.3.6.1.4.1.24991.3";
         
-        String result = OIDConverter.hexToDotNotation(hexStr);
+        String result = OID.hexToDotNotation(hexStr);
         
         assertEquals(expected, result);
     }
@@ -43,7 +44,7 @@ public class OIDConverter_hexToDotNotation_Test {
         String hexStr = "2B0601040181C31F03";
         String expected = "1.3.6.1.4.1.24991.3";
         
-        String result = OIDConverter.hexToDotNotation(hexStr);
+        String result = OID.hexToDotNotation(hexStr);
         
         assertEquals(expected, result);
     }
@@ -57,7 +58,7 @@ public class OIDConverter_hexToDotNotation_Test {
         String hexStr = "28";
         String expected = "1.0";
         
-        String result = OIDConverter.hexToDotNotation(hexStr);
+        String result = OID.hexToDotNotation(hexStr);
         
         assertEquals(expected, result);
     }
@@ -68,7 +69,7 @@ public class OIDConverter_hexToDotNotation_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHexToDotNotation_NullInput() {
-        OIDConverter.hexToDotNotation(null);
+        OID.hexToDotNotation(null);
     }
 
     /**
@@ -77,7 +78,7 @@ public class OIDConverter_hexToDotNotation_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHexToDotNotation_EmptyString() {
-        OIDConverter.hexToDotNotation("");
+        OID.hexToDotNotation("");
     }
 
     /**
@@ -86,7 +87,7 @@ public class OIDConverter_hexToDotNotation_Test {
      */
     @Test(expected = IllegalArgumentException.class)
     public void testHexToDotNotation_InvalidHexChars() {
-        OIDConverter.hexToDotNotation("2G");
+        OID.hexToDotNotation("2G");
     }
 
 

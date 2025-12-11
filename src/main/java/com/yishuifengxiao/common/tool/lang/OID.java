@@ -1,4 +1,4 @@
-package com.yishuifengxiao.common.tool.text;
+package com.yishuifengxiao.common.tool.lang;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class OIDConverter {
+public class OID {
 
     /**
      * 将十六进制字符串转换为点分十进制表示法（OID格式）
