@@ -59,9 +59,7 @@ public final class HtmlExtract {
             });
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
-                log.info("There was a problem extracting {} using the CSS rules. The extraction parameters were " +
-                                "cssLlector={}, attrName={}, and the problem was {}", html, cssSelector, attrName,
-                        e.getMessage());
+                log.info("There was a problem extracting {} using the CSS rules. The extraction parameters were " + "cssLlector={}, attrName={}, and the problem was {}", html, cssSelector, attrName, e.getMessage());
             }
 
         }
@@ -137,8 +135,7 @@ public final class HtmlExtract {
             });
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
-                log.info("There was a problem extracting {} using the CSS Text Rules. The extraction parameter is " +
-                        "cssLlector={}, and the problem is {}", html, cssSelector, e.getMessage());
+                log.info("There was a problem extracting {} using the CSS Text Rules. The extraction parameter is " + "cssLlector={}, and the problem is {}", html, cssSelector, e.getMessage());
             }
 
         }
@@ -240,8 +237,12 @@ public final class HtmlExtract {
     private static org.dom4j.Document parseWithJsoup(String html) {
         // 使用jsoup解析并返回格式良好的XHTML
         org.jsoup.nodes.Document jsoupDoc = Jsoup.parse(html);
+        // 使用XML语法
         jsoupDoc.outputSettings().syntax(org.jsoup.nodes.Document.OutputSettings.Syntax.xml);
+        // XHTML转义
         jsoupDoc.outputSettings().escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
+        // 将jsoup文档输出为格式良好的XML/XHTML
+        jsoupDoc.outputSettings().prettyPrint(false);  // 不美化输出
 
         String xhtml = jsoupDoc.html();
 
