@@ -13,7 +13,6 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.xml.sax.SAXException;
 
-import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -201,24 +200,11 @@ public final class HtmlExtract {
         if (StringUtils.isBlank(xml)) {
             return null;
         }
-        org.dom4j.Document doc = null;
-        try {
-            SAXReader reader = new SAXReader();
-            reader.setValidation(false);
-            try {
-                reader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            } catch (SAXException e) {
-                log.error("配置SAXReader安全特性失败", e);
-            }
-            //修复属性引号
-            String content = xml.replaceAll("<(\\w+)(\\s+\\w+)=(?![\\\"'])([^\\s>]+)", "<$1$2=\"$3\"");
-            doc = reader.read((new ByteArrayInputStream(content.trim().getBytes("UTF-8"))));
-        } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("There was a problem parsing XML [{}], the problem is {}", xml, e.getMessage());
-            }
-            doc = parseWithJsoup(xml);
-
+        //修复属性引号
+        String content = xml.replaceAll("<(\\w+)(\\s+\\w+)=(?![\\\"'])([^\\s>]+)", "<$1$2=\"$3\"");
+        org.dom4j.Document doc = parseXhtml(content);
+        if (null == doc) {
+            doc = parseXhtml(preprocessHtml(xml));
         }
         if (null == doc) {
             return null;
@@ -234,21 +220,18 @@ public final class HtmlExtract {
      * @param html 待解析的HTML字符串
      * @return 解析后的org.dom4j.Document对象，如果解析失败则返回null
      */
-    private static org.dom4j.Document parseWithJsoup(String html) {
-        // 使用jsoup解析并返回格式良好的XHTML
-        org.jsoup.nodes.Document jsoupDoc = Jsoup.parse(html);
-        // 使用XML语法
-        jsoupDoc.outputSettings().syntax(org.jsoup.nodes.Document.OutputSettings.Syntax.xml);
-        // XHTML转义
-        jsoupDoc.outputSettings().escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
-        // 将jsoup文档输出为格式良好的XML/XHTML
-        jsoupDoc.outputSettings().prettyPrint(false);  // 不美化输出
+    private static org.dom4j.Document parseXhtml(String html) {
 
-        String xhtml = jsoupDoc.html();
 
         try {
+            String xhtml = preprocessHtml(html);
             SAXReader reader = new SAXReader();
             reader.setValidation(false);
+            try {
+                reader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+            } catch (SAXException e) {
+                log.error("配置SAXReader安全特性失败", e);
+            }
             return reader.read(new StringReader(xhtml));
         } catch (Exception e) {
             log.error("There was a problem parsing HTML [{}], the problem is ", html, e);
@@ -256,4 +239,34 @@ public final class HtmlExtract {
         return null;
     }
 
+    /**
+     * 预处理HTML内容，将其转换为格式良好的XHTML
+     * 此方法使用Jsoup解析HTML，然后将其转换为XHTML格式
+     *
+     * @param html 待预处理的HTML字符串
+     * @return 格式良好的XHTML字符串，如果处理失败则返回原HTML
+     */
+    public static String preprocessHtml(String html) {
+        // 处理边界条件：如果输入为null或空字符串，直接返回
+        if (html == null || html.isEmpty()) {
+            return html;
+        }
+
+        try {
+            // 使用jsoup解析HTML并创建文档对象
+            org.jsoup.nodes.Document jsoupDoc = Jsoup.parse(html);
+            // 设置输出语法为XML格式
+            jsoupDoc.outputSettings().syntax(org.jsoup.nodes.Document.OutputSettings.Syntax.xml);
+            // 设置XHTML转义模式
+            jsoupDoc.outputSettings().escapeMode(org.jsoup.nodes.Entities.EscapeMode.xhtml);
+            // 设置不美化输出，保持紧凑格式
+            jsoupDoc.outputSettings().prettyPrint(false);
+
+            String xhtml = jsoupDoc.html();
+            return xhtml;
+        } catch (Exception e) {
+            // 发生异常时返回原始HTML，保持原有行为
+            return html;
+        }
+    }
 }

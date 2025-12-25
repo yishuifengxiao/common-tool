@@ -1,11 +1,11 @@
 package com.yishuifengxiao.common.tool.text;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * <p>
@@ -60,12 +60,14 @@ public final class TextExtract {
      * @return 提取后的内容
      */
     public String extract(String html) {
+        String result = null;
         try {
-            return this.parse(html);
+            html = HtmlExtract.preprocessHtml(html);
+            result = this.parse(html);
         } catch (Exception e) {
 
         }
-        return null;
+        return result;
     }
 
     /**
