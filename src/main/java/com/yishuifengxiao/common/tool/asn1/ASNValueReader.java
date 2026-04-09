@@ -1,23 +1,18 @@
 /*******************************************************************************
  * Copyright (C) 2023 Fred D7e (https://github.com/yafred)
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+ * Software.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
 package com.yishuifengxiao.common.tool.asn1;
 
@@ -31,356 +26,356 @@ import java.util.List;
 
 public class ASNValueReader {
 
-	static private String skipChars = " \t\r\n";
-	static private String tokens = ",{}:";
-	private Reader reader;
-	private String putAsideToken = "";
-	public  int line = 1;
-	public ASNValueReader(InputStream in) {
-		reader = new BufferedReader(new InputStreamReader(in));
-	}
+    static private String skipChars = " \t\r\n";
+    static private String tokens = ",{}:";
+    private Reader reader;
+    private String putAsideToken = "";
+    public int line = 1;
 
-	public String lookAheadToken() throws Exception {
-		String ret = "";
+    public ASNValueReader(InputStream in) {
+        reader = new BufferedReader(new InputStreamReader(in));
+    }
 
-		if (!putAsideToken.contentEquals("")) {
-			ret = putAsideToken;
-		} else {
-			reader.mark(1000);
+    public String lookAheadToken() throws Exception {
+        String ret = "";
 
-			int c;
-			// find first significant character
-			do {
-				c = reader.read();
-				if (c == -1)
-					return ""; // end of stream
-			} while (-1 != skipChars.indexOf(c));
+        if (!putAsideToken.contentEquals("")) {
+            ret = putAsideToken;
+        } else {
+            reader.mark(1000);
 
-			ret = ret + (char) c;
+            int c;
+            // find first significant character
+            do {
+                c = reader.read();
+                if (c == -1)
+                    return ""; // end of stream
+            } while (-1 != skipChars.indexOf(c));
 
-			reader.reset();
-		}
+            ret = ret + (char)c;
 
-		return ret;
-	}
+            reader.reset();
+        }
 
-	public String readToken() throws Exception {
-		String token = "";
+        return ret;
+    }
 
-		if (!putAsideToken.contentEquals("")) {
-			token = putAsideToken;
-			putAsideToken = "";
-		} else {
-			int c;
-			// find first significant character
-			do {
-				c = reader.read();
-				if (c=='\n'){
-					line ++;
-				}
-				if (c == -1)
-					return ""; // end of stream
-			} while (-1 != skipChars.indexOf(c));
+    public String readToken() throws Exception {
+        String token = "";
 
-			if (-1 == tokens.indexOf(c)) {
-				throw new Exception("Expecting a token, read '" + (char) c + "'");
-			}
-			token = token + (char) c;
-		}
+        if (!putAsideToken.contentEquals("")) {
+            token = putAsideToken;
+            putAsideToken = "";
+        } else {
+            int c;
+            // find first significant character
+            do {
+                c = reader.read();
+                if (c == '\n') {
+                    line++;
+                }
+                if (c == -1)
+                    return ""; // end of stream
+            } while (-1 != skipChars.indexOf(c));
 
-		return token;
-	}
+            if (-1 == tokens.indexOf(c)) {
+                throw new Exception("Expecting a token, read '" + (char)c + "'");
+            }
+            token = token + (char)c;
+        }
 
-	public String lookAheadIdentifier() throws Exception {
-		StringBuffer stringBuffer = new StringBuffer();
-		int c = -1;
+        return token;
+    }
 
-		reader.mark(1000);
+    public String lookAheadIdentifier() throws Exception {
+        StringBuffer stringBuffer = new StringBuffer();
+        int c = -1;
 
-		// find first significant character
-		do {
-			c = reader.read();
-			if (c == -1)
-				return ""; // end of stream
-		} while (-1 != skipChars.indexOf(c));
+        reader.mark(1000);
 
-		// read until space or token
-		while (-1 == skipChars.indexOf(c) && -1 == tokens.indexOf(c) && c != -1) {
-			stringBuffer.append((char) c);
-			c = reader.read();
-		}
+        // find first significant character
+        do {
+            c = reader.read();
+            if (c == -1)
+                return ""; // end of stream
+        } while (-1 != skipChars.indexOf(c));
 
-		reader.reset();
+        // read until space or token
+        while (-1 == skipChars.indexOf(c) && -1 == tokens.indexOf(c) && c != -1) {
+            stringBuffer.append((char)c);
+            c = reader.read();
+        }
 
-		return stringBuffer.toString();
-	}
+        reader.reset();
 
-	public String readIdentifier() throws Exception {
-		StringBuffer stringBuffer = new StringBuffer();
-		int c = -1;
+        return stringBuffer.toString();
+    }
 
-		// find first significant character
-		do {
-			c = reader.read();
-			if (c=='\n'){
-				line ++;
-			}
-			if (c == -1)
-				return ""; // end of stream
-		} while (-1 != skipChars.indexOf(c));
+    public String readIdentifier() throws Exception {
+        StringBuffer stringBuffer = new StringBuffer();
+        int c = -1;
 
-		// read until space or token
-		while (-1 == skipChars.indexOf(c) && -1 == tokens.indexOf(c) && c != -1) {
-			stringBuffer.append((char) c);
-			c = reader.read();
-			if (c=='\n'){
-				line ++;
-			}
-		}
+        // find first significant character
+        do {
+            c = reader.read();
+            if (c == '\n') {
+                line++;
+            }
+            if (c == -1)
+                return ""; // end of stream
+        } while (-1 != skipChars.indexOf(c));
 
-		// keep token if one was found
-		if (-1 != tokens.indexOf(c)) {
-			putAsideToken = "" + (char) c;
-		}
+        // read until space or token
+        while (-1 == skipChars.indexOf(c) && -1 == tokens.indexOf(c) && c != -1) {
+            stringBuffer.append((char)c);
+            c = reader.read();
+            if (c == '\n') {
+                line++;
+            }
+        }
 
-		return stringBuffer.toString();
-	}
+        // keep token if one was found
+        if (-1 != tokens.indexOf(c)) {
+            putAsideToken = "" + (char)c;
+        }
 
-	public Byte readByte() throws Exception {
-		String integerAsString = readIdentifier();
-		return Byte.valueOf(integerAsString);
-	}
+        return stringBuffer.toString();
+    }
 
-	public Short readShort() throws Exception {
-		String integerAsString = readIdentifier();
-		return Short.valueOf(integerAsString);
-	}
+    public Byte readByte() throws Exception {
+        String integerAsString = readIdentifier();
+        return Byte.valueOf(integerAsString);
+    }
 
-	public Integer readInteger() throws Exception {
-		String integerAsString = readIdentifier();
-		return Integer.valueOf(integerAsString);
-	}
+    public Short readShort() throws Exception {
+        String integerAsString = readIdentifier();
+        return Short.valueOf(integerAsString);
+    }
 
-	public Long readLong() throws Exception {
-		String integerAsString = readIdentifier();
-		return Long.valueOf(integerAsString);
-	}
+    public Integer readInteger() throws Exception {
+        String integerAsString = readIdentifier();
+        return Integer.valueOf(integerAsString);
+    }
 
-	public java.math.BigInteger readBigInteger() throws Exception {
-		String integerAsString = readIdentifier();
-		return new java.math.BigInteger(integerAsString);
-	}
+    public Long readLong() throws Exception {
+        String integerAsString = readIdentifier();
+        return Long.valueOf(integerAsString);
+    }
 
-	// readBitString assumes 'xxx'B or 'xxx'H is in the reader
-	// lookAheadToken must be used to evacuate { bit1, bit3 } notation
-	public BitSet readBitString() throws Exception {
-		BitSet ret = null;
+    public java.math.BigInteger readBigInteger() throws Exception {
+        String integerAsString = readIdentifier();
+        return new java.math.BigInteger(integerAsString);
+    }
 
-		StringBuffer stringBuffer = new StringBuffer();
-		int c = -1;
+    // readBitString assumes 'xxx'B or 'xxx'H is in the reader
+    // lookAheadToken must be used to evacuate { bit1, bit3 } notation
+    public BitSet readBitString() throws Exception {
+        BitSet ret = null;
 
-		// find first significant character
-		do {
-			c = reader.read();
-			if (c == -1)
-				return null; // end of stream
-		} while (-1 != skipChars.indexOf(c));
+        StringBuffer stringBuffer = new StringBuffer();
+        int c = -1;
 
-		// must be a ' (single quote)
-		if ((char) c != '\'') {
-			throw new Exception("BITSTRING value must start with \'");
-		}
+        // find first significant character
+        do {
+            c = reader.read();
+            if (c == -1)
+                return null; // end of stream
+        } while (-1 != skipChars.indexOf(c));
 
-		// read until ' (single quote)
-		c = reader.read();
-		while (c != '\'' && c != -1) {
-			stringBuffer.append((char) c);
-			c = reader.read();
-		}
+        // must be a ' (single quote)
+        if ((char)c != '\'') {
+            throw new Exception("BITSTRING value must start with \'");
+        }
 
-		if ((char) c != '\'') {
-			throw new Exception("BITSTRING value must end with \'H or \'B");
-		}
+        // read until ' (single quote)
+        c = reader.read();
+        while (c != '\'' && c != -1) {
+            stringBuffer.append((char)c);
+            c = reader.read();
+        }
 
-		c = reader.read();
-		switch ((char) c) {
-			case 'B':
-				ret = bitStringToBitSet(stringBuffer.toString());
-				break;
+        if ((char)c != '\'') {
+            throw new Exception("BITSTRING value must end with \'H or \'B");
+        }
 
-			case 'H':
-				ret = octetStringToBitSet(stringBuffer.toString());
-				break;
+        c = reader.read();
+        switch ((char)c) {
+            case 'B':
+                ret = bitStringToBitSet(stringBuffer.toString());
+                break;
 
-			default:
-				throw new Exception("BITSTRING value must end with \'H or \'B");
-		}
+            case 'H':
+                ret = octetStringToBitSet(stringBuffer.toString());
+                break;
 
-		return ret;
-	}
+            default:
+                throw new Exception("BITSTRING value must end with \'H or \'B");
+        }
 
-	public Boolean readBoolean() throws Exception {
-		Boolean ret = null;
-		String booleanAsString = readIdentifier();
-		switch (booleanAsString) {
-			case "TRUE":
-				ret = Boolean.TRUE;
-				break;
-			case "FALSE":
-				ret = Boolean.FALSE;
-				break;
-			default:
-				throw new Exception("Boolean must be either TRUE or FALSE");
-		}
-		return ret;
-	}
+        return ret;
+    }
 
-	public Object readNull() throws Exception {
-		Object ret = null;
-		String NullAsTring = readIdentifier();
-		switch (NullAsTring) {
-			case "NULL":
-				ret = new Object();
-				break;
-			default:
-				throw new Exception("Expected NULL");
-		}
-		return ret;
-	}
+    public Boolean readBoolean() throws Exception {
+        Boolean ret = null;
+        String booleanAsString = readIdentifier();
+        switch (booleanAsString) {
+            case "TRUE":
+                ret = Boolean.TRUE;
+                break;
+            case "FALSE":
+                ret = Boolean.FALSE;
+                break;
+            default:
+                throw new Exception("Boolean must be either TRUE or FALSE");
+        }
+        return ret;
+    }
 
-	public String readRestrictedCharacterString() throws Exception {
-		StringBuffer stringBuffer = new StringBuffer();
-		int c = -1;
+    public Object readNull() throws Exception {
+        Object ret = null;
+        String NullAsTring = readIdentifier();
+        switch (NullAsTring) {
+            case "NULL":
+                ret = new Object();
+                break;
+            default:
+                throw new Exception("Expected NULL");
+        }
+        return ret;
+    }
 
-		// find first significant character
-		do {
-			c = reader.read();
-			if (c == -1)
-				return ""; // end of stream
-		} while (-1 != skipChars.indexOf(c));
+    public String readRestrictedCharacterString() throws Exception {
+        StringBuffer stringBuffer = new StringBuffer();
+        int c = -1;
 
-		// must be a " (double quote)
-		if ((char) c != '"') {
-			throw new Exception("String value must start with \"");
-		}
+        // find first significant character
+        do {
+            c = reader.read();
+            if (c == -1)
+                return ""; // end of stream
+        } while (-1 != skipChars.indexOf(c));
 
-		// read until " (double quote)
-		c = reader.read();
-		while (c != '"' && c != -1) {
-			stringBuffer.append((char) c);
-			c = reader.read();
-		}
+        // must be a " (double quote)
+        if ((char)c != '"') {
+            throw new Exception("String value must start with \"");
+        }
 
-		if ((char) c != '"') {
-			throw new Exception("String value must end with \"");
-		}
+        // read until " (double quote)
+        c = reader.read();
+        while (c != '"' && c != -1) {
+            stringBuffer.append((char)c);
+            c = reader.read();
+        }
 
-		return stringBuffer.toString();
-	}
+        if ((char)c != '"') {
+            throw new Exception("String value must end with \"");
+        }
 
-	public byte[] readOctetString() throws Exception {
-		StringBuffer stringBuffer = new StringBuffer();
-		int c = -1;
+        return stringBuffer.toString();
+    }
 
-		// find first significant character
-		do {
-			c = reader.read();
-			if (c == -1)
-				return null; // end of stream
-		} while (-1 != skipChars.indexOf(c));
+    public byte[] readOctetString() throws Exception {
+        StringBuffer stringBuffer = new StringBuffer();
+        int c = -1;
 
-		// must be a ' (single quote)
-		if ((char) c != '\'') {
-			throw new Exception("OCTET STRING value must start with \'");
-		}
+        // find first significant character
+        do {
+            c = reader.read();
+            if (c == -1)
+                return null; // end of stream
+        } while (-1 != skipChars.indexOf(c));
 
-		// read until ' (single quote)拜
-		c = reader.read();
-		while (c != '\'' && c != -1) {
-			if (-1 != skipChars.indexOf(c)){
-//				throw new Exception("OCTET STRING value contains space");
-			}else{
-				stringBuffer.append((char) c);
-			}
-			c = reader.read();
-			//=== zc add
+        // must be a ' (single quote)
+        if ((char)c != '\'') {
+            throw new Exception("OCTET STRING value must start with \'");
+        }
 
-			//=== zc add end
-		}
+        // read until ' (single quote)拜
+        c = reader.read();
+        while (c != '\'' && c != -1) {
+            if (-1 != skipChars.indexOf(c)) {
+                // throw new Exception("OCTET STRING value contains space");
+            } else {
+                stringBuffer.append((char)c);
+            }
+            c = reader.read();
+            // === zc add
 
-		if ((char) c != '\'') {
-			throw new Exception("OCTET STRING value must end with \'H");
-		}
+            // === zc add end
+        }
 
-		c = reader.read();
-		if ((char) c != 'H') {
-			throw new Exception("OCTET STRING value must end with \'H");
-		}
+        if ((char)c != '\'') {
+            throw new Exception("OCTET STRING value must end with \'H");
+        }
 
-		return hexStringToByteArray(stringBuffer.toString());
-	}
+        c = reader.read();
+        if ((char)c != 'H') {
+            throw new Exception("OCTET STRING value must end with \'H");
+        }
 
-	public long[] readObjectIdentifier() throws Exception {
-		String start = lookAheadToken();
-		if (start.equals("{")) {
-			readToken();
-		} else {
-			throw new Exception("ObjectIdentifier must start with '{'. Found '" + start + "' instead.");
-		}
+        return hexStringToByteArray(stringBuffer.toString());
+    }
 
-		List<Long> list = new ArrayList<Long>();
-		while (!"}".equals(lookAheadToken())) {
-			list.add(readLong());
-		}
-		readToken();
-		long[] ret = new long[list.size()];
-		int i = 0;
-		for (Long e : list)
-			ret[i++] = e;
-		return ret;
-	}
+    public long[] readObjectIdentifier() throws Exception {
+        String start = lookAheadToken();
+        if (start.equals("{")) {
+            readToken();
+        } else {
+            throw new Exception("ObjectIdentifier must start with '{'. Found '" + start + "' instead.");
+        }
 
-	public long[] readRelativeOID() throws Exception {
-		return readObjectIdentifier();
-	}
+        List<Long> list = new ArrayList<Long>();
+        while (!"}".equals(lookAheadToken())) {
+            list.add(readLong());
+        }
+        readToken();
+        long[] ret = new long[list.size()];
+        int i = 0;
+        for (Long e : list)
+            ret[i++] = e;
+        return ret;
+    }
 
-	static private byte[] hexStringToByteArray(String s) {
-		// we should get rid of spaces before
-		int len = s.length();
-		byte[] data = new byte[len / 2];
-		for (int i = 0; i < len; i += 2) {
-			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-					+ Character.digit(s.charAt(i + 1), 16));
-		}
-		return data;
-	}
+    public long[] readRelativeOID() throws Exception {
+        return readObjectIdentifier();
+    }
 
-	static private BitSet bitStringToBitSet(String binary) {
-		// we should get rid of spaces before
-		BitSet bitset = new BitSet(binary.length());
-		for (int i = 0; i < binary.length(); i++) {
-			if (binary.charAt(i) == '1') {
-				bitset.set(i);
-			}
-		}
-		return bitset;
-	}
+    static private byte[] hexStringToByteArray(String s) {
+        // we should get rid of spaces before
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte)((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
+    }
 
-	static private BitSet octetStringToBitSet(String hexString) {
-		// we should get rid of spaces before
-		BitSet bitset = new BitSet(4 * hexString.length());
-		for (int i = 0; i < hexString.length(); i++) {
-			byte aByte = Byte.parseByte(hexString.substring(i, i + 1), 16);
-			if ((aByte & 0x08) != 0x00)
-				bitset.set(4 * i);
-			if ((aByte & 0x04) != 0x00)
-				bitset.set(4 * i + 1);
-			if ((aByte & 0x02) != 0x00)
-				bitset.set(4 * i + 2);
-			if ((aByte & 0x01) != 0x00)
-				bitset.set(4 * i + 3);
-		}
-		return bitset;
-	}
+    static private BitSet bitStringToBitSet(String binary) {
+        // we should get rid of spaces before
+        BitSet bitset = new BitSet(binary.length());
+        for (int i = 0; i < binary.length(); i++) {
+            if (binary.charAt(i) == '1') {
+                bitset.set(i);
+            }
+        }
+        return bitset;
+    }
+
+    static private BitSet octetStringToBitSet(String hexString) {
+        // we should get rid of spaces before
+        BitSet bitset = new BitSet(4 * hexString.length());
+        for (int i = 0; i < hexString.length(); i++) {
+            byte aByte = Byte.parseByte(hexString.substring(i, i + 1), 16);
+            if ((aByte & 0x08) != 0x00)
+                bitset.set(4 * i);
+            if ((aByte & 0x04) != 0x00)
+                bitset.set(4 * i + 1);
+            if ((aByte & 0x02) != 0x00)
+                bitset.set(4 * i + 2);
+            if ((aByte & 0x01) != 0x00)
+                bitset.set(4 * i + 3);
+        }
+        return bitset;
+    }
 
 }

@@ -1,23 +1,18 @@
 /*******************************************************************************
  * Copyright (C) 2023 Fred D7e (https://github.com/yafred)
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+ * Software.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
 package com.yishuifengxiao.common.tool.asn1;
 
@@ -27,10 +22,8 @@ import java.util.BitSet;
 import java.util.List;
 
 public class ASNValueWriter {
-    static byte[] bitMask = new byte[] {
-            (byte) 0x80, (byte) 0x40, (byte) 0x20, (byte) 0x10, (byte) 0x08, (byte) 0x04,
-            (byte) 0x02, (byte) 0x01
-        };
+    static byte[] bitMask =
+        new byte[] {(byte)0x80, (byte)0x40, (byte)0x20, (byte)0x10, (byte)0x08, (byte)0x04, (byte)0x02, (byte)0x01};
 
     private PrintWriter writer;
     private ArrayList<Sequence> sequences = new ArrayList<Sequence>();
@@ -39,7 +32,7 @@ public class ASNValueWriter {
     public ASNValueWriter(PrintWriter writer) {
         this.writer = writer;
     }
-    
+
     public void beginArray(String elementName) {
         indentValue();
         sequences.add(new Sequence(sequences.size() + 1, true, elementName));
@@ -70,19 +63,18 @@ public class ASNValueWriter {
     }
 
     public void writeSelection(String selectionName) {
- 
-        if ((sequences.size() != 0) &&
-                ((Sequence) sequences.get(sequences.size() - 1)).isArray &&
-                !isWaitingForChoiceValue) {
-        	// we indent only in SEQUENCE OF and SET OF
+
+        if ((sequences.size() != 0) && ((Sequence)sequences.get(sequences.size() - 1)).isArray
+            && !isWaitingForChoiceValue) {
+            // we indent only in SEQUENCE OF and SET OF
             indentComponent();
         }
 
         if (sequences.size() != 0) {
-            Sequence sequence = (Sequence) sequences.get(sequences.size() - 1);
+            Sequence sequence = (Sequence)sequences.get(sequences.size() - 1);
 
             if (sequence.isArray() && !sequence.getElementName().equals("")) {
-            	writer.print(sequence.getElementName() + " ");
+                writer.print(sequence.getElementName() + " ");
             }
         }
 
@@ -150,61 +142,59 @@ public class ASNValueWriter {
     public void writeOctetString(byte[] value) {
         indentValue();
         writer.print("'" + bytesToString(value) + "'H");
-        //writer.print("  -- \"" + new String(value) + "\"");
+        // writer.print(" -- \"" + new String(value) + "\"");
         writer.println();
     }
 
     public void writeBitString(BitSet value) {
-    	indentValue();
-    	
+        indentValue();
+
         int size = value.length();
         StringBuffer buffer = new StringBuffer();
         buffer.append("'");
 
-        if(size < 16) { // if bitset is small (this could be configured)
-	        for (int i = 0; i < size; i++) {
-	            buffer.append(value.get(i) ? "1" : "0");
-	        }
-	
-	        buffer.append("'B");
-        }
-        else {
-        	buffer.append(bytesToString(bitSetToBytes(value)));
-	        buffer.append("'H");       	
+        if (size < 16) { // if bitset is small (this could be configured)
+            for (int i = 0; i < size; i++) {
+                buffer.append(value.get(i) ? "1" : "0");
+            }
+
+            buffer.append("'B");
+        } else {
+            buffer.append(bytesToString(bitSetToBytes(value)));
+            buffer.append("'H");
         }
         writer.println(buffer.toString());
     }
-    
+
     public void writeBitString(List<String> bitList) {
-    	indentValue();
-    	
-    	boolean isFirst = true;
-    	writer.print("{ ");
-    	for(String bit : bitList) {
-    		if(isFirst) {
-    			isFirst = false;
-    		}
-    		else {
-    			writer.print(", ");
-    		}
-    		writer.print(bit);
-    	}
-    	writer.println(" }");
-    }
-    
-    public void writeObjectIdentifier(long[] value) {
-        //== zc add begin
         indentValue();
-        //== zc add end
+
+        boolean isFirst = true;
         writer.print("{ ");
-        for(long arc : value) {
+        for (String bit : bitList) {
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                writer.print(", ");
+            }
+            writer.print(bit);
+        }
+        writer.println(" }");
+    }
+
+    public void writeObjectIdentifier(long[] value) {
+        // == zc add begin
+        indentValue();
+        // == zc add end
+        writer.print("{ ");
+        for (long arc : value) {
             writer.print(arc + " ");
         }
         writer.println("}");
     }
-    
+
     public void writeRelativeOID(long[] value) {
-    	writeObjectIdentifier(value);
+        writeObjectIdentifier(value);
     }
 
     public void flush() {
@@ -213,13 +203,13 @@ public class ASNValueWriter {
 
     private void indent() {
         if (sequences.size() != 0) {
-            writer.print(((Sequence) sequences.get(sequences.size() - 1)).getIndent());
+            writer.print(((Sequence)sequences.get(sequences.size() - 1)).getIndent());
         }
     }
 
     private void indentComponent() {
         if (sequences.size() != 0) {
-            Sequence sequence = (Sequence) sequences.get(sequences.size() - 1);
+            Sequence sequence = (Sequence)sequences.get(sequences.size() - 1);
 
             if (sequence.isEmpty) {
                 writer.print(sequence.getIndent());
@@ -234,7 +224,7 @@ public class ASNValueWriter {
 
     private void indentValue() {
         if (sequences.size() != 0) {
-            Sequence sequence = (Sequence) sequences.get(sequences.size() - 1);
+            Sequence sequence = (Sequence)sequences.get(sequences.size() - 1);
 
             if (sequence.isArray() && !isWaitingForChoiceValue) {
                 if (sequence.isEmpty) {
@@ -243,8 +233,8 @@ public class ASNValueWriter {
                     writer.print(",");
                     writer.print(sequence.getIndent().substring(1));
                 }
-                if(!sequence.getElementName().equals("")) {
-                	writer.print(sequence.getElementName() + " ");
+                if (!sequence.getElementName().equals("")) {
+                    writer.print(sequence.getElementName() + " ");
                 }
 
                 sequence.setEmpty(false);
@@ -258,22 +248,21 @@ public class ASNValueWriter {
         String text = "";
 
         for (int i = 0; i < buffer.length; i++) {
-            String byteText = Integer.toHexString((int) buffer[i]);
+            String byteText = Integer.toHexString((int)buffer[i]);
 
             switch (byteText.length()) {
-            case 1:
-                byteText = "0" + byteText;
+                case 1:
+                    byteText = "0" + byteText;
 
-                break;
+                    break;
 
-            case 2:
-                break;
+                case 2:
+                    break;
 
-            default:
-                byteText = byteText.substring(byteText.length() - 2,
-                        byteText.length());
+                default:
+                    byteText = byteText.substring(byteText.length() - 2, byteText.length());
 
-                break;
+                    break;
             }
 
             if (i == 0) {
@@ -285,7 +274,7 @@ public class ASNValueWriter {
 
         return text.toUpperCase();
     }
-    
+
     /*
      * BitSet is not the best way to hold a bitstring
      * We have to scan all the bits of the BitSet
@@ -296,7 +285,7 @@ public class ASNValueWriter {
 
         // count number of bytes
         int nBytes = 0;
-        int nPadding = 0; // bit string is left aligned 
+        int nPadding = 0; // bit string is left aligned
 
         if (significantBitNumber == 0) {
             nBytes = 0;
@@ -336,7 +325,7 @@ public class ASNValueWriter {
         private boolean isEmpty = true;
         private String elementName = "";
 
-		private String indent = "";
+        private String indent = "";
 
         public Sequence(int rank, boolean isArray, String elementName) {
             for (int i = 0; i < rank; i++) {
@@ -366,10 +355,10 @@ public class ASNValueWriter {
         public boolean isArray() {
             return isArray;
         }
-        
+
         public String getElementName() {
-			return elementName;
-		}
+            return elementName;
+        }
 
     }
 }

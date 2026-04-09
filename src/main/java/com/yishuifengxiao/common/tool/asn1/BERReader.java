@@ -1,25 +1,23 @@
 /*******************************************************************************
  * Copyright (C) 2023 Fred D7e (https://github.com/yafred)
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  * 
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+ * Software.
  * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
 package com.yishuifengxiao.common.tool.asn1;
+
+
+import com.yishuifengxiao.common.tool.lang.Hex;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -27,10 +25,8 @@ import java.util.ArrayList;
 import java.util.BitSet;
 
 public class BERReader {
-    private static byte[] bitMask = new byte[] {
-            (byte) 0x80, (byte) 0x40, (byte) 0x20, (byte) 0x10, (byte) 0x08,
-            (byte) 0x04, (byte) 0x02, (byte) 0x01
-        };
+    private static byte[] bitMask =
+        new byte[] {(byte)0x80, (byte)0x40, (byte)0x20, (byte)0x10, (byte)0x08, (byte)0x04, (byte)0x02, (byte)0x01};
     private java.io.InputStream in = null;
 
     /**
@@ -46,7 +42,7 @@ public class BERReader {
     private int tagNumBytes;
     private byte[] tagBuffer = new byte[10];
     private boolean tagMatched = true;
-    
+
     /**
      * Trace
      */
@@ -75,7 +71,7 @@ public class BERReader {
 
         if (isTraceBufferEnabled) {
             checkTraceBufferSize();
-            traceBuffer[traceIndex] = (byte) value;
+            traceBuffer[traceIndex] = (byte)value;
         }
 
         traceIndex++;
@@ -83,55 +79,50 @@ public class BERReader {
         return value;
     }
 
+    public void mustMatchTag(byte[] tag) throws Exception {
+        if (tagNumBytes != tag.length) {
+            throw new Exception("Expected size: " + tag.length + ", actual: " + tagNumBytes);
+        }
+        for (int i = 0; i < tag.length; i++) {
+            if (tag[i] != tagBuffer[i]) {
+                throw new Exception("Unexpected byte (expected: " + tag[i] + ", actual: " + tagBuffer[i]);
+            }
+        }
+        this.tagMatched = true;
+    }
 
-    public void mustMatchTag(byte[]tag) throws Exception {
-    	if(tagNumBytes != tag.length) {
-    		throw new Exception("Expected size: " + tag.length +
-                    ", actual: " + tagNumBytes);
-    	}
-    	for(int i=0; i<tag.length; i++) {
-			if(tag[i] != tagBuffer[i]) {
-				throw new Exception("Unexpected byte (expected: " + tag[i] +
-		                ", actual: " + tagBuffer[i]);
-			}
-		}
-    	this.tagMatched = true;
+    public boolean lookAheadTag(byte[][] tags) {
+        boolean foundMatch = false;
+
+        for (int k = 0; k < tags.length && !foundMatch; k++) {
+            byte[] tag = tags[k];
+            foundMatch = false;
+            if (tagNumBytes == tag.length) {
+                foundMatch = true;
+                for (int i = 0; i < tag.length; i++) {
+                    if (tag[i] != tagBuffer[i]) {
+                        foundMatch = false;
+                        break;
+                    }
+                }
+            }
+        }
+
+        return foundMatch;
     }
-    
-    
-    public boolean lookAheadTag(byte[][]tags) {
-    	boolean foundMatch = false;
-    	
-    	for(int k=0; k<tags.length && !foundMatch; k++) {
-    		byte[]tag = tags[k];
-    		foundMatch = false;
-        	if(tagNumBytes == tag.length) {
-        		foundMatch = true;
-        		for(int i=0; i<tag.length; i++) {
-        			if(tag[i] != tagBuffer[i]) {
-        				foundMatch = false;
-        				break;
-        			}
-        		}
-        	}
-    	}
-    	
-    	return foundMatch;
-    }
-    
-    
-    public boolean matchTag(byte[]tag)  {
-    	tagMatched = false;
-    	if(tagNumBytes == tag.length) {
-        	tagMatched = true;
-    		for(int i=0; i<tag.length; i++) {
-    			if(tag[i] != tagBuffer[i]) {
-    				tagMatched = false;
-    				break;
-    			}
-    		}
-    	}
-     	return tagMatched;
+
+    public boolean matchTag(byte[] tag) {
+        tagMatched = false;
+        if (tagNumBytes == tag.length) {
+            tagMatched = true;
+            for (int i = 0; i < tag.length; i++) {
+                if (tag[i] != tagBuffer[i]) {
+                    tagMatched = false;
+                    break;
+                }
+            }
+        }
+        return tagMatched;
     }
 
     /**
@@ -139,29 +130,29 @@ public class BERReader {
      * @throws IOException
      */
     public void readTag() throws IOException {
-     	
+
         boolean isLastByte = false;
         tagNumBytes = 1;
 
         // read first byte
-        tagBuffer[0] = (byte) readChar();
+        tagBuffer[0] = (byte)readChar();
 
         if ((tagBuffer[0] & 0x1F) != 0x1F) { // short form
             isLastByte = true;
         }
 
         for (int i = 1; !isLastByte; i++) {
-            tagBuffer[i] = (byte) readChar();
+            tagBuffer[i] = (byte)readChar();
             tagNumBytes++;
 
             if ((tagBuffer[i] & 0x80) == 0) {
                 isLastByte = true;
             }
         }
-        
+
         // switch toggle (will be set again when length is read ... meaning that tag has been matched)
-        tagMatched = false;   
-     }
+        tagMatched = false;
+    }
 
     /**
      *
@@ -183,27 +174,26 @@ public class BERReader {
     }
 
     public void mustReadZeroLength() throws Exception {
-    	readLength();
-    	if(getLengthLength() != 1 || getLengthValue() != 0) {
-    		throw new Exception("Expecting 0 length here");
-    	}
+        readLength();
+        if (getLengthLength() != 1 || getLengthValue() != 0) {
+            throw new Exception("Expecting 0 length here");
+        }
     }
-   
-    
+
     /**
      * @throws IOException
      */
     public void readLength() throws IOException {
-     	// if we read a length, this means that preceding tag has been recognized
-    	tagMatched = true;
-    	
+        // if we read a length, this means that preceding tag has been recognized
+        tagMatched = true;
+
         lengthLength = 0; // length of length
         lengthValue = 0; // value of length
 
         int lengthBufferIndex = 0;
         int aByte = readChar();
         lengthBuffer[lengthBufferIndex++] = (byte)aByte;
- 
+
         if (aByte == 0x80) {
             lengthLength = 1;
             lengthValue = -1;
@@ -213,8 +203,7 @@ public class BERReader {
                 int nBytes = (aByte & 0x7f);
 
                 if (nBytes > 4) {
-                    throw new RuntimeException(
-                        "Length over 4 bytes not supported");
+                    throw new RuntimeException("Length over 4 bytes not supported");
                 }
 
                 lengthLength = nBytes + 1;
@@ -237,28 +226,28 @@ public class BERReader {
     // short 16 bits
     // int 32 bits
     // long 64 bits
-    public Byte readByte(int nBytes)  throws IOException {
+    public Byte readByte(int nBytes) throws IOException {
         if (nBytes > 1) {
             throw new RuntimeException("Size of Byte cannot be " + nBytes);
         }
         return readBigInteger(nBytes).byteValue();
     }
 
-    public Short readShort(int nBytes)  throws IOException {
+    public Short readShort(int nBytes) throws IOException {
         if (nBytes > 2) {
             throw new RuntimeException("Size of Short cannot be " + nBytes);
         }
         return readBigInteger(nBytes).shortValue();
     }
 
-    public Integer readInteger(int nBytes)  throws IOException {
-        if (nBytes > 4) {
+    public Integer readInteger(int nBytes) throws IOException {
+        if (nBytes > 5) {
             throw new RuntimeException("Size of Integer cannot be " + nBytes);
         }
         return readBigInteger(nBytes).intValue();
     }
 
-    public Long readLong(int nBytes)  throws IOException {
+    public Long readLong(int nBytes) throws IOException {
         if (nBytes > 8) {
             throw new RuntimeException("Size of Long cannot be " + nBytes);
         }
@@ -273,29 +262,37 @@ public class BERReader {
         byte[] buffer = new byte[nBytes];
 
         for (int i = 0; i < nBytes; i++) {
-            buffer[i] = (byte) readChar();
+            buffer[i] = (byte)readChar();
         }
 
         return new String(buffer);
+    }
+
+    public String readHexString(int nBytes) throws IOException {
+        byte[] buffer = new byte[nBytes];
+
+        return Hex.bytesToHex(buffer);
     }
 
     /**
      * Reads a bitstring encoded as primitive value
      */
     public BitSet readBitString(int nBytes) throws IOException {
-//        if (nBytes < 1) {
-//            throw new RuntimeException(
-//                "Length of a bitstring cannot be less than one");
-//        }
+        if (nBytes < 1) {
+            throw new RuntimeException("Length of a bitstring cannot be less than one");
+        }
 
-        if (nBytes <= 1) {
-            return new BitSet(0);
+        if (nBytes == 1) {
+            byte b = (byte) readChar();
+            byte[] byteArray = {b};
+            return BitSet.valueOf(byteArray);
+//            return new BitSet(0);
         }
 
         byte[] copy = new byte[nBytes];
 
         for (int i = 0; i < nBytes; i++) {
-            copy[i] = (byte) readChar();
+            copy[i] = (byte)readChar();
         }
 
         // first byte is number of padding bits
@@ -324,76 +321,72 @@ public class BERReader {
 
         return result;
     }
-    
+
     public long[] readObjectIdentifier(int nBytes) throws IOException {
-    	ArrayList<Long> objectIdentifier = new ArrayList<Long>();
-    	byte[] buffer = readOctetString(nBytes);
-    	long arc = -1;
-    	long mult = 1;
-        for (int i = nBytes-1; i >= 0; i--) {	
-            if((buffer[i] & 0x80) == 0x00) {
-            	if(arc != -1) {
-            		objectIdentifier.add(0, Long.valueOf(arc));
-            	}
-            	arc = buffer[i];
-            	mult = 1;
-            }
-            else {
-              	// mult *= 128;
-            	mult = Math.multiplyExact(mult, 128);
-            	// arc += mult * (buffer[i] & 0x7F);
-            	arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F))); // detect overflow
+        ArrayList<Long> objectIdentifier = new ArrayList<Long>();
+        byte[] buffer = readOctetString(nBytes);
+        long arc = -1;
+        long mult = 1;
+        for (int i = nBytes - 1; i >= 0; i--) {
+            if ((buffer[i] & 0x80) == 0x00) {
+                if (arc != -1) {
+                    objectIdentifier.add(0, Long.valueOf(arc));
+                }
+                arc = buffer[i];
+                mult = 1;
+            } else {
+                // mult *= 128;
+                mult = Math.multiplyExact(mult, 128);
+                // arc += mult * (buffer[i] & 0x7F);
+                arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F))); // detect overflow
             }
         }
-        if(arc < 40) {
+        if (arc < 40) {
             objectIdentifier.add(0, Long.valueOf(arc));
-            objectIdentifier.add(0, Long.valueOf(0));                  	
+            objectIdentifier.add(0, Long.valueOf(0));
+        } else if (arc < 80) {
+            objectIdentifier.add(0, Long.valueOf(arc - 40));
+            objectIdentifier.add(0, Long.valueOf(1));
+        } else {
+            objectIdentifier.add(0, Long.valueOf(arc - 80));
+            objectIdentifier.add(0, Long.valueOf(2));
         }
-        else if(arc < 80) {
-            objectIdentifier.add(0, Long.valueOf(arc-40));
-            objectIdentifier.add(0, Long.valueOf(1));                  	
-        }
-        else {
-            objectIdentifier.add(0, Long.valueOf(arc-80));
-            objectIdentifier.add(0, Long.valueOf(2));                  	
-        }    
-        
+
         long[] ret = new long[objectIdentifier.size()];
-        int i=0;
-        for(Long arcAsLong : objectIdentifier) {
-        	ret[i] = arcAsLong.longValue();
-        	i++;
+        int i = 0;
+        for (Long arcAsLong : objectIdentifier) {
+            ret[i] = arcAsLong.longValue();
+            i++;
         }
         return ret;
     }
-    
+
     public long[] readRelativeOID(int nBytes) throws IOException {
-    	ArrayList<Long> objectIdentifier = new ArrayList<Long>();
-    	byte[] buffer = readOctetString(nBytes);
-    	long arc = -1;
-    	long mult = 1;
-        for (int i = nBytes-1; i >= 0; i--) {	
-            if((buffer[i] & 0x80) == 0x00) {
-            	if(arc != -1) {
-            		objectIdentifier.add(0, Long.valueOf(arc));
-            	}
-            	arc = buffer[i];
-            	mult = 1;
-            }
-            else {
-              	// mult *= 128;
-            	mult = Math.multiplyExact(mult, 128);
-            	// arc += mult * (buffer[i] & 0x7F);
-            	arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F))); // detect overflow
+        ArrayList<Long> objectIdentifier = new ArrayList<Long>();
+        byte[] buffer = readOctetString(nBytes);
+        long arc = -1;
+        long mult = 1;
+        for (int i = nBytes - 1; i >= 0; i--) {
+            if ((buffer[i] & 0x80) == 0x00) {
+                if (arc != -1) {
+                    objectIdentifier.add(0, Long.valueOf(arc));
+                }
+                arc = buffer[i];
+                mult = 1;
+            } else {
+                // mult *= 128;
+                mult = Math.multiplyExact(mult, 128);
+                // arc += mult * (buffer[i] & 0x7F);
+                arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F))); // detect overflow
             }
         }
         objectIdentifier.add(0, Long.valueOf(arc));
-        
+
         long[] ret = new long[objectIdentifier.size()];
-        int i=0;
-        for(Long arcAsLong : objectIdentifier) {
-        	ret[i] = arcAsLong.longValue();
-        	i++;
+        int i = 0;
+        for (Long arcAsLong : objectIdentifier) {
+            ret[i] = arcAsLong.longValue();
+            i++;
         }
         return ret;
     }
@@ -411,7 +404,7 @@ public class BERReader {
         byte[] result = new byte[nBytes];
 
         for (int i = 0; i < nBytes; i++) {
-            result[i] = (byte) readChar();
+            result[i] = (byte)readChar();
         }
 
         return result;
@@ -428,16 +421,15 @@ public class BERReader {
     }
 
     /**
-     * Enables bufferization for trace purposes.
-     * Keeps all bytes received until reset() is called.
+     * Enables bufferization for trace purposes. Keeps all bytes received until reset() is called.
      */
     public void setTraceBufferEnabled(boolean state) {
         this.isTraceBufferEnabled = state;
     }
 
     /**
-     * Provides a buffer containing all the bytes that have been received since enableTraceBuffer(true) or reset() was called.
-     * Returns null if nothing has been traced.
+     * Provides a buffer containing all the bytes that have been received since enableTraceBuffer(true) or reset() was
+     * called. Returns null if nothing has been traced.
      */
     public byte[] getTraceBuffer() {
         byte[] copy = null;
@@ -491,12 +483,12 @@ public class BERReader {
      * False when a tag has just been read
      * True when a length has been read or a match method has been successful
      */
-	public boolean isTagMatched() {
-		return tagMatched;
-	}
-	
-	public void setTagMatched(boolean tagMatched) {
-		this.tagMatched = tagMatched;
-	}
+    public boolean isTagMatched() {
+        return tagMatched;
+    }
+
+    public void setTagMatched(boolean tagMatched) {
+        this.tagMatched = tagMatched;
+    }
 
 }
