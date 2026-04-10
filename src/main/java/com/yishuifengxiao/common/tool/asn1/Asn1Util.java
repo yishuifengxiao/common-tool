@@ -3,6 +3,7 @@ package com.yishuifengxiao.common.tool.asn1;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.Hex;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -62,7 +63,7 @@ public class Asn1Util {
      */
     public static String toHexString(Object object) throws Exception {
         if (object == null) {
-            throw new IllegalArgumentException("object参数不能为null");
+            throw new UncheckedException("object参数不能为null");
         }
 
         try (ByteArrayOutputStream bufferOut = new ByteArrayOutputStream()) {
@@ -74,7 +75,7 @@ public class Asn1Util {
                     method.setAccessible(true);
                     return method;
                 } catch (NoSuchMethodException e) {
-                    throw new IllegalArgumentException(String.format("类%s中不存在writePdu方法", key.getName()), e);
+                    throw new UncheckedException(String.format("类%s中不存在writePdu方法", key.getName()), e);
                 }
             });
 
@@ -88,7 +89,7 @@ public class Asn1Util {
             }
 
             return Hex.bytesToHex(bytes);
-        } catch (IllegalArgumentException e) {
+        } catch (UncheckedException e) {
             throw new UncheckedException(String.format("参数验证失败，对象类型: %s", object.getClass()), e);
         } catch (IllegalAccessException e) {
             throw new UncheckedException(String.format("无法访问%s的writePdu方法", object.getClass()), e);
@@ -127,10 +128,10 @@ public class Asn1Util {
      */
     public static <T> T toObject(Class<T> clazz, String hex) {
         if (clazz == null) {
-            throw new IllegalArgumentException("类对象不能为null");
+            throw new UncheckedException("类对象不能为null");
         }
         if (hex == null || hex.isEmpty()) {
-            throw new IllegalArgumentException("十六进制字符串不能为null或空");
+            throw new UncheckedException("十六进制字符串不能为null或空");
         }
 
         try {
@@ -140,19 +141,19 @@ public class Asn1Util {
                 try {
                     Method method = key.getMethod("readPdu", BERReader.class);
                     if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
-                        throw new IllegalArgumentException("readPdu方法必须是静态方法");
+                        throw new UncheckedException("readPdu方法必须是静态方法");
                     }
                     method.setAccessible(true);
                     return method;
                 } catch (NoSuchMethodException e) {
-                    throw new IllegalArgumentException(String.format("类%s中不存在readPdu(BERReader)静态方法", key.getName()),
+                    throw new UncheckedException(String.format("类%s中不存在readPdu(BERReader)静态方法", key.getName()),
                             e);
                 }
             });
 
             @SuppressWarnings("unchecked") T obj = (T) readPduMethod.invoke(null, reader);
             return obj;
-        } catch (IllegalArgumentException e) {
+        } catch (UncheckedException e) {
             throw new UncheckedException(String.format("参数验证失败，类: %s, 十六进制: %s", clazz, hex), e);
         } catch (InvocationTargetException e) {
             Throwable targetException = e.getTargetException();
@@ -161,6 +162,95 @@ public class Asn1Util {
         } catch (Exception e) {
             throw new UncheckedException(String.format("无法将十六进制字符串转换为对象，类: %s, 十六进制: %s", clazz, hex), e);
         }
+    }
+
+    /**
+     * 根据Luhn算法生成校验位
+     * <p>
+     * Luhn算法是一种简单的校验和公式，常用于验证身份证号码、信用卡号码等数字序列的有效性。
+     * 该方法对输入的数字字符串进行计算，返回一个校验位数字（0-9）。
+     * </p>
+     *
+     * @param strdata 输入的数字字符串，不能为null或空字符串，必须全部由数字字符组成
+     * @return 计算得到的校验位数字字符串（0-9）
+     * @throws UncheckedException 当输入为null、空字符串或包含非数字字符时抛出异常
+     */
+    public static String generateLuhn(String strdata) {
+        if (strdata == null || strdata.isEmpty()) {
+            throw new UncheckedException("输入数据不能为空");
+        }
+        char[] strDataChars = strdata.toCharArray();
+        int len = strDataChars.length;
+        int total = 0;
+        boolean doubleDigit = true;
+
+        for (int i = len - 1; i >= 0; i--) {
+            int digit = strDataChars[i] - '0';
+
+            if (doubleDigit) {
+                digit *= 2;
+                if (digit >= 10) {
+                    digit = digit / 10 + digit % 10;
+                }
+            }
+
+            total += digit;
+            doubleDigit = !doubleDigit;
+        }
+
+        int checkDigit = (total % 10 == 0) ? 0 : (10 - total % 10);
+        return String.format("%d", checkDigit);
+    }
+
+    /**
+     * 根据ICCID长度计算并补充校验位
+     * <p>
+     * ICCID（Integrated Circuit Card Identifier）是集成电路卡标识符，该方法根据不同长度的ICCID进行相应处理：
+     * <ul>
+     *   <li>20位：已是完整格式，直接返回</li>
+     *   <li>19位：补充1位Luhn校验位，形成20位ICCID</li>
+     *   <li>18位：补充1位Luhn校验位和字母"F"，形成20位ICCID</li>
+     * </ul>
+     * </p>
+     *
+     * @param iccid 集成电路卡标识符，长度必须为18、19或20位，可以为null或空字符串
+     * @return 处理后的ICCID字符串
+     * <ul>
+     *   <li>输入为null或空时，返回原值</li>
+     *   <li>20位时，返回原值</li>
+     *   <li>19位时，返回补充Luhn校验位后的20位ICCID</li>
+     *   <li>18位时，返回补充Luhn校验位和"F"后的20位ICCID</li>
+     * </ul>
+     * @throws UncheckedException 当ICCID长度不是18、19或20位，或包含非数字字符时抛出异常
+     */
+    public static String validateIccid(String iccid) {
+        if (StringUtils.isBlank(iccid)) {
+            return iccid;
+        }
+        iccid = iccid.trim();
+        int length = iccid.length();
+
+        if (length == 20) {
+            return iccid;
+        }
+
+        if (length == 18) {
+            try {
+                return iccid + generateLuhn(iccid) + "F";
+            } catch (UncheckedException e) {
+                throw new UncheckedException("ICCID包含非数字字符，无法计算校验位: " + iccid, e);
+            }
+        }
+
+        if (length == 19) {
+            try {
+                return iccid + generateLuhn(iccid);
+            } catch (UncheckedException e) {
+                throw new UncheckedException("ICCID包含非数字字符，无法计算校验位: " + iccid, e);
+            }
+        }
+
+        throw new UncheckedException("ICCID长度必须为18、19或20位，当前长度: " + length);
     }
 
 }
