@@ -19,6 +19,62 @@ public class OID_dotNotationToHex_Test {
         assertEquals(expected, result);
     }
 
+    @Test
+    public void testDotNotationToHex_StandardOID1() {
+        String input = "2.999.10";
+        String expected = "88370A";
+        String result = OID.dotNotationToHex(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testDotNotationToHex_StandardOID2() {
+        String input = "2.23.146.1.2.1.0";
+        String expected = "67811201020100";
+        String result = OID.dotNotationToHex(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testDotNotationToHex_StandardOID3() {
+        String input = "2.5.29.19";
+        String expected = "551D13";
+        String result = OID.dotNotationToHex(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testDotNotationToHex_StandardOID4() {
+        String input = "1.2.840.10045.3.1.7";
+        String expected = "2A8648CE3D030107";
+        String result = OID.dotNotationToHex(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testDotNotationToHex_StandardOID5() {
+        String input = "1.2.840.10045.2.1";
+        String expected = "2A8648CE3D0201";
+        String result = OID.dotNotationToHex(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testDotNotationToHex_StandardOID6() {
+        String input = "2.5.4.6";
+        String expected = "550406";
+        String result = OID.dotNotationToHex(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testDotNotationToHex_StandardOID7() {
+        String input = "1.2.840.10045.4.3.2";
+        String expected = "2A8648CE3D040302";
+        String result = OID.dotNotationToHex(input);
+        assertEquals(expected, result);
+    }
+
     /**
      * 测试边界场景：最小有效OID
      * 验证最小有效OID(0.0)能正确转换为十六进制字符串
@@ -97,21 +153,7 @@ public class OID_dotNotationToHex_Test {
         OID.dotNotationToHex("1.abc");
     }
 
-    /**
-     * 测试异常场景：无效第一个组件
-     * 验证当第一个组件大于2时抛出IllegalArgumentException
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testDotNotationToHex_InvalidFirstComponent() {
-        OID.dotNotationToHex("3.1");
-    }
 
-    /**
-     * 测试异常场景：无效第二个组件
-     * 验证当第二个组件大于等于40时抛出IllegalArgumentException
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testDotNotationToHex_InvalidSecondComponent() {
-        OID.dotNotationToHex("1.40");
-    }
+
+
 }

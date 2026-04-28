@@ -20,7 +20,6 @@ public class OID {
      * @throws IllegalArgumentException 转换过程中可能出现的错误，如无效的十六进制字符串或空字符串
      */
     public static String hexToDotNotation(String hexStr) {
-        // 清理输入字符串
         if (hexStr == null) {
             throw new IllegalArgumentException("hex string cannot be null");
         }
@@ -30,7 +29,6 @@ public class OID {
             throw new IllegalArgumentException("empty hex string");
         }
 
-        // 解码十六进制字符串
         byte[] data;
         try {
             data = hexStringToByteArray(hexStr);
@@ -42,34 +40,58 @@ public class OID {
             throw new IllegalArgumentException("empty hex string");
         }
 
-        // 解析OID组件
         List<String> components = new ArrayList<>();
 
-        // 第一个字节的特殊处理：X * 40 + Y
-        byte firstByte = data[0];
-        components.add(String.valueOf((firstByte & 0xFF) / 40));
-        components.add(String.valueOf((firstByte & 0xFF) % 40));
+        long firstValue = 0;
+        int firstByteIndex = 0;
+        
+        while (firstByteIndex < data.length) {
+            byte b = data[firstByteIndex];
+            firstValue = (firstValue << 7) | (b & 0x7F);
+            firstByteIndex++;
+            
+            if ((b & 0x80) == 0) {
+                break;
+            }
+        }
+        
+        if (firstByteIndex > data.length) {
+            throw new IllegalArgumentException("incomplete base128 encoding for first component");
+        }
+        
+        long firstComponent;
+        long secondComponent;
+        
+        if (firstValue < 40) {
+            firstComponent = 0;
+            secondComponent = firstValue;
+        } else if (firstValue < 80) {
+            firstComponent = 1;
+            secondComponent = firstValue - 40;
+        } else {
+            firstComponent = 2;
+            secondComponent = firstValue - 80;
+        }
+        
+        components.add(String.valueOf(firstComponent));
+        components.add(String.valueOf(secondComponent));
 
-        // 处理剩余的字节（base128编码）
         long currentValue = 0;
-        boolean expectingMoreBytes = false; // 新增：标记是否期望更多字节
+        boolean expectingMoreBytes = false;
 
-        for (int i = 1; i < data.length; i++) {
+        for (int i = firstByteIndex; i < data.length; i++) {
             byte b = data[i];
             currentValue = (currentValue << 7) | (b & 0x7F);
 
-            // 如果最高位为1，表示还有更多字节
             if ((b & 0x80) != 0) {
                 expectingMoreBytes = true;
             } else {
-                // 最高位为0，表示这个数字结束
                 components.add(String.valueOf(currentValue));
                 currentValue = 0;
                 expectingMoreBytes = false;
             }
         }
 
-        // 检查是否有未结束的数字或不完整的base128编码
         if (currentValue != 0 || expectingMoreBytes) {
             throw new IllegalArgumentException("incomplete base128 encoding");
         }
@@ -111,21 +133,17 @@ public class OID {
             throw new IllegalArgumentException("OID must have at least 2 components");
         }
 
-        // 解析点分十进制为数字
         List<Long> components = new ArrayList<>();
         for (String part : parts) {
-            // 检查空部分（如 ".1.2" 或 "1..2"）
             String trimmedPart = part.trim();
             if (trimmedPart.isEmpty()) {
                 throw new IllegalArgumentException("incomplete format: empty component");
             }
 
-            // 检查负数
             if (trimmedPart.startsWith("-")) {
                 throw new IllegalArgumentException("negative number not allowed");
             }
 
-            // 解析数字
             try {
                 long val = Long.parseLong(trimmedPart);
                 if (val < 0) {
@@ -137,26 +155,32 @@ public class OID {
             }
         }
 
-        // 编码为十六进制
         List<Byte> resultBytes = new ArrayList<>();
 
         // 编码前两个数字（特殊处理）
-        if (components.get(0) > 2) {
-//            throw new IllegalArgumentException("invalid OID: first component must be 0-2");
+        long firstComponent = components.get(0);
+        long secondComponent = components.get(1);
+        
+        if (firstComponent > 2) {
+            throw new IllegalArgumentException("invalid OID: first component must be 0-2");
+        }
+        
+        if (firstComponent < 2 && secondComponent > 39) {
+            throw new IllegalArgumentException("invalid OID: when first component is 0 or 1, second component must be 0-39");
         }
 
-        byte firstByte = (byte) (components.get(0) * 40 + components.get(1));
-        resultBytes.add(firstByte);
+        byte[] encoded = encodeBase128(firstComponent * 40 + secondComponent);
+        for (byte b : encoded) {
+            resultBytes.add(b);
+        }
 
-        // 编码剩余的数字（使用base128编码）
         for (int i = 2; i < components.size(); i++) {
-            byte[] encoded = encodeBase128(components.get(i));
-            for (byte b : encoded) {
+            byte[] encodedComponent = encodeBase128(components.get(i));
+            for (byte b : encodedComponent) {
                 resultBytes.add(b);
             }
         }
 
-        // 转换为字节数组
         byte[] resultArray = new byte[resultBytes.size()];
         for (int i = 0; i < resultBytes.size(); i++) {
             resultArray[i] = resultBytes.get(i);

@@ -7,6 +7,62 @@ import static org.junit.Assert.assertEquals;
 
 public class OID_hexToDotNotation_Test {
 
+    @Test
+    public void testhexToDotNotation_StandardOID1() {
+        String expected = "2.999.10";
+        String input = "88370A";
+        String result = OID.hexToDotNotation(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testhexToDotNotation_StandardOID2() {
+        String expected = "2.23.146.1.2.1.0";
+        String input = "67811201020100";
+        String result = OID.hexToDotNotation(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testhexToDotNotation_StandardOID3() {
+        String expected = "2.5.29.19";
+        String input = "551D13";
+        String result = OID.hexToDotNotation(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testhexToDotNotation_StandardOID4() {
+        String expected = "1.2.840.10045.3.1.7";
+        String input = "2A8648CE3D030107";
+        String result = OID.hexToDotNotation(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testhexToDotNotation_StandardOID5() {
+        String expected = "1.2.840.10045.2.1";
+        String input = "2A8648CE3D0201";
+        String result = OID.hexToDotNotation(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testhexToDotNotation_StandardOID6() {
+        String expected = "2.5.4.6";
+        String input = "550406";
+        String result = OID.hexToDotNotation(input);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testhexToDotNotation_StandardOID7() {
+        String expected = "1.2.840.10045.4.3.2";
+        String input = "2A8648CE3D040302";
+        String result = OID.hexToDotNotation(input);
+        assertEquals(expected, result);
+    }
+
     /**
      * 测试正常场景：有效的十六进制字符串转换为点分十进制
      * 目的：验证标准输入的正确转换功能
