@@ -1,19 +1,17 @@
 package com.yishuifengxiao.common.tool.lang;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+import org.apache.commons.lang3.StringUtils;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
 
 /**
  * <p>TLV解析工具类</p>
@@ -60,31 +58,27 @@ public class TLVUtil {
         if (tag == null || tlv == null || tlv.isEmpty()) {
             return new TlvResult().setException(new UncheckedException("illegal data"));
         }
-        
-        tag = tag.trim();
-        tlv = tlv.trim();
-        
+
+        tag = tag.toUpperCase().trim();
+        tlv = tlv.toUpperCase().trim();
+
         if (tag.isEmpty() || !Hex.isHex(tlv) || !Hex.isHex(tag)) {
-            return new TlvResult().setException(new UncheckedException("illegal data"));
+            return new TlvResult().setException(new UncheckedException("illegal data")).setRemain(tlv);
         }
-        
-        tag = tag.toUpperCase();
-        tlv = tlv.toUpperCase();
-        
         if (!tlv.startsWith(tag)) {
             return new TlvResult().setException(new UncheckedException(
-                String.format("The data does not start with TAG %s", tag)));
+                    String.format("The data does not start with TAG %s", tag))).setRemain(tlv);
         }
-        
+
         String remain = tlv.substring(tag.length());
         if (remain.length() < 2) {
-            return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
+            return new TlvResult().setException(new UncheckedException("Not valid TLV data")).setRemain(tlv);
         }
 
         // 解析长度字段
         LengthParseResult lengthResult = parseLengthField(remain);
         if (lengthResult.exception != null) {
-            return new TlvResult().setException(lengthResult.exception);
+            return new TlvResult().setException(lengthResult.exception).setRemain(tlv);
         }
 
         int startPos = lengthResult.startPos;
@@ -92,12 +86,12 @@ public class TLVUtil {
 
         // 允许长度为0（空值）
         if (length < 0) {
-            return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
+            return new TlvResult().setException(new UncheckedException("Not valid TLV data")).setRemain(tlv);
         }
 
         int valueEndPos = startPos + length * 2;
         if (valueEndPos > remain.length()) {
-            return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
+            return new TlvResult().setException(new UncheckedException("Not valid TLV data")).setRemain(tlv);
         }
 
         String val = remain.substring(startPos, valueEndPos);
@@ -114,7 +108,7 @@ public class TLVUtil {
 
         String firstByte = data.substring(0, 2);
         int firstByteValue;
-        
+
         try {
             firstByteValue = Integer.parseInt(firstByte, 16);
         } catch (NumberFormatException e) {
@@ -128,30 +122,30 @@ public class TLVUtil {
         } else {
             // 长格式：低7位表示后续长度字节数
             int numLengthBytes = firstByteValue & 0x7F;
-            
+
             if (numLengthBytes == 0) {
                 //  indefinite length，不支持
                 return new LengthParseResult(0, 0, new UncheckedException("Indefinite length not supported"));
             }
-            
+
             if (numLengthBytes > 3) {
                 return new LengthParseResult(0, 0, new UncheckedException("Length bytes exceed maximum"));
             }
-            
+
             int requiredLength = 2 + numLengthBytes * 2;
             if (data.length() < requiredLength) {
                 return new LengthParseResult(0, 0, new UncheckedException("Not valid TLV data"));
             }
-            
+
             String lengthStr = data.substring(2, requiredLength);
             int length;
-            
+
             try {
                 length = Integer.parseInt(lengthStr, 16);
             } catch (NumberFormatException e) {
                 return new LengthParseResult(0, 0, new UncheckedException("Not valid TLV data"));
             }
-            
+
             // startPos是长度字段的总字节数（包括前缀字节）
             return new LengthParseResult(requiredLength, length, null);
         }
@@ -195,13 +189,10 @@ public class TLVUtil {
         String remain = tlv;
         for (String tag : tags) {
             TlvResult result = extract(tag, remain);
-            if (null != result.getException()) {
-                tlvResult.setException(result.getException());
-                break;
-            }
             remain = result.getRemain();
-            String val = result.getVal(tag);
-            tlvResult.putVal(tag, val);
+            if (null == result.getException()) {
+                tlvResult.putVal(tag, result.getVal(tag));
+            }
         }
         return tlvResult;
     }
@@ -254,7 +245,7 @@ public class TLVUtil {
 
         List<String> list = new ArrayList<>();
         String remain = tlv;
-        
+
         while (StringUtils.isNotBlank(remain)) {
             TlvResult result = extract(tag, remain);
             if (result.getException() != null) {
@@ -264,7 +255,7 @@ public class TLVUtil {
             list.add(result.getVal(tag));
             remain = result.getRemain();
         }
-        
+
         return list;
     }
 
