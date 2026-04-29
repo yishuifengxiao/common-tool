@@ -26,6 +26,16 @@ public class TLVUtilTest {
         assertEquals("9F0306000000000000", result.getRemain());
     }
 
+    @Test
+    public void testExtract_ShortFormat_Success1() {
+        String tlv = "A000";
+        TLVUtil.TlvResult result = TLVUtil.extract("A0", tlv);
+
+        assertTrue(result.isSuccess());
+        assertEquals("", result.getVal("A0"));
+        assertEquals("", result.getRemain());
+    }
+
     /**
      * 测试正常场景：提取长度为0的TLV数据（空值）
      */
@@ -191,12 +201,12 @@ public class TLVUtilTest {
     @Test
     public void testTlvResult_GetResultsReturnsCopy() {
         TLVUtil.TlvResult result = TLVUtil.extract("9F02", "9F0206000000000500");
-        
+
         java.util.Map<String, String> results1 = result.getResults();
         java.util.Map<String, String> results2 = result.getResults();
-        
+
         assertNotSame(results1, results2);
-        
+
         results1.put("TEST", "VALUE");
         assertNull(results2.get("TEST"));
     }
@@ -207,7 +217,7 @@ public class TLVUtilTest {
     @Test
     public void testTlvResult_GetValWithNullOrEmptyTag() {
         TLVUtil.TlvResult result = TLVUtil.extract("9F02", "9F0206000000000500");
-        
+
         assertEquals("", result.getVal(null));
         assertEquals("", result.getVal(""));
         assertEquals("", result.getVal("   "));
@@ -232,11 +242,11 @@ public class TLVUtilTest {
      */
     @Test
     public void testExtract_EMVData_Success() {
-        String emvTLV = 
-            "9F0206000000000500" +
-            "9F0306000000000000" +
-            "9F1A020156" +
-            "5F2A020156";
+        String emvTLV =
+                "9F0206000000000500" +
+                        "9F0306000000000000" +
+                        "9F1A020156" +
+                        "5F2A020156";
 
         TLVUtil.TlvResult result1 = TLVUtil.extract("9F02", emvTLV);
         assertTrue(result1.isSuccess());
@@ -253,16 +263,16 @@ public class TLVUtilTest {
     @Test
     public void testExtract_ConsecutiveTLVs_Success() {
         String tlv = "9F02060000000005009F03060000000000009F1A020156";
-        
+
         TLVUtil.TlvResult result1 = TLVUtil.extract("9F02", tlv);
         assertTrue(result1.isSuccess());
-        
+
         TLVUtil.TlvResult result2 = TLVUtil.extract("9F03", result1.getRemain());
         assertTrue(result2.isSuccess());
-        
+
         TLVUtil.TlvResult result3 = TLVUtil.extract("9F1A", result2.getRemain());
         assertTrue(result3.isSuccess());
-        
+
         assertEquals("0156", result3.getVal("9F1A"));
         assertEquals("", result3.getRemain());
     }
