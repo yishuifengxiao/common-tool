@@ -1,16 +1,21 @@
 package com.yishuifengxiao.common.tool.context;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
- * <p>
- * 全局存储工具
- * </p>
- * 该工具主要是一个基于内存的KV键值对存储工具。
+ * <p>本地缓存工具类</p>
+ * <p>基于内存的线程安全KV键值对存储工具，提供全局数据共享能力。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>线程安全的并发访问</li>
+ * <li>支持懒加载缓存机制</li>
+ * <li>支持按类型自动生成key</li>
+ * <li>提供完整的CRUD操作</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

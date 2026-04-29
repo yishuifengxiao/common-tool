@@ -3,10 +3,19 @@ package com.yishuifengxiao.common.tool.lang;
 import java.io.Serializable;
 
 /**
- * TLV解析工具类
+ * <p>TLV数据结构封装类</p>
+ * <p>提供TLV（Tag-Length-Value）格式数据的解析和构建功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持BER-TLV编码格式解析</li>
+ * <li>支持链式解析嵌套TLV结构</li>
+ * <li>提供TLV格式构建方法</li>
+ * <li>自动处理长度字段的多种编码方式</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
+ * @since 1.0.0
  */
 public class TLV implements Serializable {
     private String data;

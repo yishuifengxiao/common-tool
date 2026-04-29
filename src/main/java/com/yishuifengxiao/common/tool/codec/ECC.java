@@ -1,25 +1,52 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.lang.Hex;
-import lombok.extern.slf4j.Slf4j;
-
-import javax.crypto.KeyAgreement;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.KeyFactory;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.MessageDigest;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Signature;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.*;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.ECPublicKeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.regex.Pattern;
 
+import javax.crypto.KeyAgreement;
+import javax.crypto.spec.SecretKeySpec;
+
+import com.yishuifengxiao.common.tool.lang.Hex;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * ECC 签名算法工具
+ * <p>ECC椭圆曲线加密工具类</p>
+ * <p>提供椭圆曲线密码学（ECC）的完整实现，包括密钥对生成、签名/验签、密钥协商等功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持多种椭圆曲线（secp256r1、secp384r1、secp521r1等）</li>
+ * <li>支持多种密钥格式（PEM、PKCS8、SEC1、十六进制、Base64）</li>
+ * <li>实现ECDSA签名和验证</li>
+ * <li>支持ECDH密钥协商</li>
+ * <li>支持DER与固定长度签名格式互转</li>
+ * </ul>
  *
- * @author shi
+ * @author yishui
  * @version 1.0.0
  * @since 1.0.0
  */
@@ -681,7 +708,7 @@ public class ECC {
 
         // 尝试作为base64字符串直接解析
         try {
-            byte[] base64Key = parseBase64String(keyData);
+            byte[] base64Key = base64ToBytes(keyData);
             if (base64Key != null) {
                 ECPrivateKey privateKey = parseECPrivateKeyFromBytes(base64Key);
                 if (privateKey != null) {
@@ -740,12 +767,12 @@ public class ECC {
      * @param base64String 需要解析的Base64字符串，可能包含PEM格式的头部和尾部
      * @return 解码后的字节数组，如果解码失败则返回null
      */
-    public static byte[] parseBase64String(String base64String) {
+    public static byte[] base64ToBytes(String base64String) {
         // 移除可能的PEM头部和尾部（如果存在）
         String cleanBase64 =
                 base64String.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replaceAll("\\s", "");
 
-        return X509Helper.parseBase64String(cleanBase64);
+        return X509Helper.base64ToBytes(cleanBase64);
     }
 
 
@@ -1491,7 +1518,7 @@ public class ECC {
 
         // 尝试作为base64字符串解析
         try {
-            byte[] base64Key = parseBase64String(cleanData);
+            byte[] base64Key = base64ToBytes(cleanData);
             if (base64Key != null) {
                 return parseECPublicKeyFromBytes(base64Key);
             }

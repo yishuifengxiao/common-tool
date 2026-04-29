@@ -16,8 +16,8 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_NullInput() {
-        Optional<BigDecimal> result = NumberUtil.parse(null);
+    public void testParseToBigDecimal_NullInput() {
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(null);
         assertFalse(result.isPresent());
     }
 
@@ -26,8 +26,8 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_EmptyString() {
-        Optional<BigDecimal> result = NumberUtil.parse("");
+    public void testParseToBigDecimal_EmptyString() {
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal("");
         assertFalse(result.isPresent());
     }
 
@@ -36,8 +36,8 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_BlankString() {
-        Optional<BigDecimal> result = NumberUtil.parse("   ");
+    public void testParseToBigDecimal_BlankString() {
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal("   ");
         assertFalse(result.isPresent());
     }
 
@@ -46,9 +46,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回包含相同值的Optional
      */
     @Test
-    public void testParse_BigDecimalInput() {
+    public void testParseToBigDecimal_BigDecimalInput() {
         BigDecimal input = new BigDecimal("123.456");
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertTrue(result.isPresent());
         assertEquals(input, result.get());
     }
@@ -58,9 +58,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回包含正确BigDecimal值的Optional
      */
     @Test
-    public void testParse_IntegerInput() {
+    public void testParseToBigDecimal_IntegerInput() {
         Integer input = 123;
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertTrue(result.isPresent());
         assertEquals(new BigDecimal("123"), result.get());
     }
@@ -70,9 +70,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回包含正确BigDecimal值的Optional
      */
     @Test
-    public void testParse_LongInput() {
+    public void testParseToBigDecimal_LongInput() {
         Long input = 123456789L;
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertTrue(result.isPresent());
         assertEquals(new BigDecimal("123456789"), result.get());
     }
@@ -82,9 +82,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回包含正确BigDecimal值的Optional
      */
     @Test
-    public void testParse_ValidDoubleInput() {
+    public void testParseToBigDecimal_ValidDoubleInput() {
         Double input = 123.456;
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertTrue(result.isPresent());
         assertEquals(BigDecimal.valueOf(123.456), result.get());
     }
@@ -94,9 +94,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_NaN_DoubleInput() {
+    public void testParseToBigDecimal_NaN_DoubleInput() {
         Double input = Double.NaN;
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertFalse(result.isPresent());
     }
 
@@ -105,9 +105,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_InfiniteDoubleInput() {
+    public void testParseToBigDecimal_InfiniteDoubleInput() {
         Double input = Double.POSITIVE_INFINITY;
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertFalse(result.isPresent());
     }
 
@@ -116,9 +116,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回包含正确BigDecimal值的Optional
      */
     @Test
-    public void testParse_ValidFloatInput() {
+    public void testParseToBigDecimal_ValidFloatInput() {
         Float input = 123.456f;
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertTrue(result.isPresent());
         assertEquals(BigDecimal.valueOf(123.456f), result.get());
     }
@@ -128,9 +128,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_NaN_FloatInput() {
+    public void testParseToBigDecimal_NaN_FloatInput() {
         Float input = Float.NaN;
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertFalse(result.isPresent());
     }
 
@@ -139,9 +139,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_InfiniteFloatInput() {
+    public void testParseToBigDecimal_InfiniteFloatInput() {
         Float input = Float.POSITIVE_INFINITY;
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertFalse(result.isPresent());
     }
 
@@ -150,9 +150,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回包含正确BigDecimal值的Optional
      */
     @Test
-    public void testParse_ValidNumberString() {
+    public void testParseToBigDecimal_ValidNumberString() {
         String input = "123.456";
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertTrue(result.isPresent());
         assertEquals(new BigDecimal("123.456"), result.get());
     }
@@ -162,9 +162,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回包含正确BigDecimal值的Optional（逗号被移除）
      */
     @Test
-    public void testParse_NumberStringWithCommas() {
+    public void testParseToBigDecimal_NumberStringWithCommas() {
         String input = "1,234,567.89";
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertTrue(result.isPresent());
         assertEquals(new BigDecimal("1234567.89"), result.get());
     }
@@ -174,9 +174,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_InvalidNumberString() {
+    public void testParseToBigDecimal_InvalidNumberString() {
         String input = "abc123";
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertFalse(result.isPresent());
     }
 
@@ -185,9 +185,9 @@ public class NumberUtil_parse_Test {
      * 预期结果：返回空的Optional
      */
     @Test
-    public void testParse_OtherTypeInput() {
+    public void testParseToBigDecimal_OtherTypeInput() {
         Object input = new Object();
-        Optional<BigDecimal> result = NumberUtil.parse(input);
+        Optional<BigDecimal> result = NumberUtil.parseToBigDecimal(input);
         assertFalse(result.isPresent());
     }
 }

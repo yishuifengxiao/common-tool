@@ -1,32 +1,26 @@
 package com.yishuifengxiao.common.tool.datetime;
 
-import com.yishuifengxiao.common.tool.utils.OsUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yishuifengxiao.common.tool.utils.OsUtils;
+
 /**
- * <p>
- * 基于LocalDateTime数据类型的日期时间偏移工具
- * </p>
- * 该工具的主要目的是计算距离当前日期、时间指定偏移量的时间点，主要功能如下：
- * <ol>
- * <li>获取今天的开始时间点(00:00:00)</li>
- * <li>获取昨天的开始时间点(00:00:00)和结束时间点(23:59:59)</li>
- * <li>获取前天的开始时间点(00:00:00)</li>
- * <li>获取7天前的那个时间的开始时间点(00:00:00)</li>
- * <li>获取14天前的那个时间的开始时间点(00:00:00)</li>
- * <li>获取本周一的那个时间的开始时间点(00:00:00)</li>
- * <li>获取上周一的那个时间的开始时间点(00:00:00)</li>
- * <li>获取过去指定时间的那个时间的开始时间点(00:00:00)</li>
- * <li>获取本月1号的那个时间的开始时间点(00:00:00)</li>
- * <li>获取过去指定月份的那个月份的1号的开始时间点(00:00:00)</li>
- * <li>获取过去指定年份的那个时间的1月1号的那个时间的开始时间点(00:00:00)</li>
- * </ol>
+ * <p>LocalDateTime日期时间偏移工具类</p>
+ * <p>基于LocalDateTime类型提供日期时间偏移计算功能，用于获取特定时间点。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>获取某天的开始(00:00:00)和结束(23:59:59)时间</li>
+ * <li>支持日期偏移计算(昨天、前天、7天前等)</li>
+ * <li>支持周偏移计算(本周一、上周一等)</li>
+ * <li>支持月偏移计算(本月初、上月初等)</li>
+ * <li>支持年偏移计算(年初时间)</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -101,7 +95,7 @@ public class LocalDateTimeUtil {
      * </p>
      * 例如当前时间为2020-10-15 12:12:12 则返回时间为 2020-10-01 00:00:00
      *
-     * @return 7天前0时0分0秒这个时间
+     * @return 14天前0时0分0秒这个时间
      */
     public static LocalDateTime last14DayStart() {
         return dayStart(14L);
@@ -140,7 +134,7 @@ public class LocalDateTimeUtil {
      * @return 上上周的周一的开始时间
      */
     public static LocalDateTime last2MondayStart() {
-        return mondayStart(1);
+        return mondayStart(2);
     }
 
     /**
@@ -154,10 +148,10 @@ public class LocalDateTimeUtil {
      * @return 上几周的周一的开始时间
      */
     public static LocalDateTime mondayStart(int offsetWeeks) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(DateTimeUtil.localDateTime2Date(getMondayStart(new Date())));
-        cal.add(Calendar.DATE, -7 * offsetWeeks);
-        return DateTimeUtil.date2LocalDateTime(cal.getTime());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(DateTimeUtil.localDateTime2Date(getMondayStart(new Date())));
+        calendar.add(Calendar.DATE, -7 * offsetWeeks);
+        return DateTimeUtil.date2LocalDateTime(calendar.getTime());
     }
 
     /**
@@ -170,20 +164,20 @@ public class LocalDateTimeUtil {
      * @return 给定时间所在那一周的周一
      */
     public static LocalDateTime getMonday(Date date) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
         // 获得当前日期是一个星期的第几天
-        int dayWeek = cal.get(Calendar.DAY_OF_WEEK);
-        if (1 == dayWeek) {
-            cal.add(Calendar.DAY_OF_MONTH, -1);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        if (1 == dayOfWeek) {
+            calendar.add(Calendar.DAY_OF_MONTH, -1);
         }
         // 设置一个星期的第一天，按中国的习惯一个星期的第一天是星期一
-        cal.setFirstDayOfWeek(Calendar.MONDAY);
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
         // 获得当前日期是一个星期的第几天
-        int day = cal.get(Calendar.DAY_OF_WEEK);
+        int currentDayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
         // 根据日历的规则，给当前日期减去星期几与一个星期第一天的差值
-        cal.add(Calendar.DATE, cal.getFirstDayOfWeek() - day);
-        return DateTimeUtil.date2LocalDateTime(cal.getTime());
+        calendar.add(Calendar.DATE, calendar.getFirstDayOfWeek() - currentDayOfWeek);
+        return DateTimeUtil.date2LocalDateTime(calendar.getTime());
     }
 
     /**
@@ -219,7 +213,7 @@ public class LocalDateTimeUtil {
      * 例如当前时间为2020-10-10 12:12:12 , offsetDays 为1 , 则返回时间为 2020-10-09 23:59:59
      *
      * @param offsetDays 过去的天数，从1开始计数，1表示是昨天
-     * @return 过去指定天数的0时0分0秒
+     * @return 过去指定天数的23时59分59秒
      */
     public static LocalDateTime dayEnd(long offsetDays) {
         return getDayEnd(LocalDateTime.now().minusDays(offsetDays));
@@ -256,7 +250,7 @@ public class LocalDateTimeUtil {
      * </p>
      * 例如当前时间为2020-10-10 12:12:12 则返回时间为 2020-09-01 00:00:00
      *
-     * @return 本月1号0时0分0秒这个时间
+     * @return 上个月1号0时0分0秒这个时间
      */
     public static LocalDateTime lastMonthStart() {
         return getMonthStart(LocalDateTime.now().minusMonths(1L));
@@ -268,7 +262,7 @@ public class LocalDateTimeUtil {
      * </p>
      * 例如当前时间为2020-10-10 12:12:12 则返回时间为 2020-08-01 00:00:00
      *
-     * @return 7天前0时0分0秒这个时间
+     * @return 上上月1号0时0分0秒这个时间
      */
     public static LocalDateTime last2MonthStart() {
         return getDayStart(LocalDateTime.now().minusMonths(2L).withDayOfMonth(1));
@@ -297,7 +291,7 @@ public class LocalDateTimeUtil {
      * 例如输入时间为2020-10-10 12:12:12 则返回时间为 2020-10-10 23:59:59
      *
      * @param dateTime 输入日期
-     * @return 输入日期的0时0分0秒
+     * @return 输入日期的23时59分59秒
      */
     public static LocalDateTime getDayEnd(LocalDateTime dateTime) {
         if (null == dateTime) {
@@ -330,7 +324,7 @@ public class LocalDateTimeUtil {
      * 例如输入时间为2020-10-10 12:12:12 则返回时间为 2020-1-1 00:00:00
      *
      * @param dateTime 输入日期
-     * @return 输入日期的当月1号0时0分0秒
+     * @return 输入日期的当年1月1号0时0分0秒
      */
     public static LocalDateTime getYearStart(LocalDateTime dateTime) {
         if (null == dateTime) {

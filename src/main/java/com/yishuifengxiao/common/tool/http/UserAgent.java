@@ -3,12 +3,23 @@
  */
 package com.yishuifengxiao.common.tool.http;
 
-import com.yishuifengxiao.common.tool.entity.RootEnum;
-import lombok.Getter;
 import org.apache.commons.lang3.RandomUtils;
 
+import com.yishuifengxiao.common.tool.entity.RootEnum;
+
+import lombok.Getter;
+
 /**
- * 浏览器标识集合
+ * <p>浏览器标识(User-Agent)集合</p>
+ * <p>提供多种主流浏览器的User-Agent标识，支持随机获取。</p>
+ * <p>支持的浏览器：</p>
+ * <ul>
+ * <li>Chrome/Edge系列浏览器</li>
+ * <li>Firefox浏览器</li>
+ * <li>Safari浏览器</li>
+ * <li>IE浏览器</li>
+ * <li>国内浏览器（QQ、360、搜狗、UC等）</li>
+ * </ul>
  *
  * @author qingteng
  * @version 1.0.0

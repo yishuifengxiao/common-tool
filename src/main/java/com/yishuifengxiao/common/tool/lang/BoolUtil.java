@@ -4,12 +4,13 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * <p>布尔工具</p>
- * <p>主要功能如下</p>
+ * <p>布尔工具类</p>
+ * <p>提供布尔值相关的判断、转换和解析功能。</p>
+ * <p>特性：</p>
  * <ul>
- * <li>判断字符串是否为‘true’或‘false’对应的文本以及转换后的布尔值</li>
- * <li>将布尔值转换为数字</li>
- *
+ * <li>判断字符串是否为true/false文本（忽略大小写和空格）</li>
+ * <li>支持多种类型数据转换为布尔值</li>
+ * <li>支持布尔值与数字之间的转换</li>
  * </ul>
  *
  * @author yishui
@@ -76,8 +77,8 @@ public final class BoolUtil {
      * @param value boolean值
      * @return value为true时返回1，否则为0
      */
-    public static int bool2Int(Boolean value) {
-        return bool2Int(value, 1, 0).intValue();
+    public static int boolToInt(Boolean value) {
+        return boolToInt(value, 1, 0).intValue();
     }
 
 
@@ -89,7 +90,7 @@ public final class BoolUtil {
      * @param falseVal boolean值不为true时返回的值
      * @return 转换后的值
      */
-    public static Number bool2Int(Boolean bool, Number trueVal, Number falseVal) {
+    public static Number boolToInt(Boolean bool, Number trueVal, Number falseVal) {
         return BooleanUtils.isTrue(bool) ? trueVal : falseVal;
     }
 
@@ -127,7 +128,7 @@ public final class BoolUtil {
         }
 
         try {
-            Number decimal = NumberUtil.parse(text).orElse(null);
+            Number decimal = NumberUtil.parseToBigDecimal(text).orElse(null);
             if (null == decimal) {
                 return null;
             }

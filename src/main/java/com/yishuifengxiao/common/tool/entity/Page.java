@@ -3,20 +3,26 @@
  */
 package com.yishuifengxiao.common.tool.entity;
 
-import com.yishuifengxiao.common.tool.collections.CollUtil;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.yishuifengxiao.common.tool.collections.CollUtil;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
- * <p>
- * 通用分页对象
- * </p>
- * 统一分页数据的返回形式
+ * <p>通用分页对象</p>
+ * <p>统一分页数据的返回形式，继承自Slice类，包含分页数据、总记录数和总分页数。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持分页参数（页码、每页大小）</li>
+ * <li>包含总记录数和总分页数</li>
+ * <li>支持数据类型转换</li>
+ * <li>支持空分页对象创建</li>
+ * </ul>
  *
  * @param <S> 分页里数据的数据类型
  * @author yishui

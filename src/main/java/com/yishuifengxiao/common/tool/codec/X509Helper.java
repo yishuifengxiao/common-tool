@@ -1,15 +1,5 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.lang.Hex;
-import com.yishuifengxiao.common.tool.lang.OID;
-import com.yishuifengxiao.common.tool.lang.TLVUtil;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -21,12 +11,40 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECPoint;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.lang.Hex;
+import com.yishuifengxiao.common.tool.lang.OID;
+import com.yishuifengxiao.common.tool.lang.TLVUtil;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * X.509证书解析工具类
- * 支持十六进制、Base64和PEM格式的证书数据
+ * <p>X.509证书解析工具类</p>
+ * <p>提供X.509证书的解析、信息提取和格式转换等功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持多种证书格式解析（十六进制、Base64、PEM）</li>
+ * <li>提取证书完整信息（主题、颁发者、序列号、有效期等）</li>
+ * <li>提取公钥及其算法信息</li>
+ * <li>支持证书链验证和自签名检测</li>
+ * <li>支持格式互转（PEM、十六进制）</li>
+ * </ul>
+ *
+ * @author yishui
+ * @version 1.0.0
+ * @since 1.0.0
  */
 @Slf4j
 public class X509Helper {
@@ -63,7 +81,7 @@ public class X509Helper {
 
         // 尝试作为base64字符串直接解析
         try {
-            byte[] base64Bytes = parseBase64String(certData);
+            byte[] base64Bytes = base64ToBytes(certData);
             if (base64Bytes != null) {
                 return parseCertificateBytes(base64Bytes);
             }
@@ -110,11 +128,11 @@ public class X509Helper {
      * @param base64String Base64编码的证书字符串，可能包含PEM头部和尾部
      * @return 解析得到的字节数组，如果解析失败则返回null
      */
-    public static byte[] parseBase64String(String base64String) {
+    public static byte[] base64ToBytes(String base64String) {
         // 移除可能的PEM头部和尾部（如果存在）
         String cleanBase64 = base64String.replace(PEM_HEADER, "").replace(PEM_FOOTER, "").replaceAll("\\s", "");
 
-        return Hex.parseBase64String(cleanBase64);
+        return Hex.base64ToBytes(cleanBase64);
     }
 
     /**
@@ -492,7 +510,7 @@ public class X509Helper {
      */
     private static void extractCipkid(X509Certificate certificate, Cert info) {
         // 从TLV格式的SKID中提取标签为"04"的值作为CIPKID
-        info.setCipkid(TLVUtil.extractValue("04", info.getSkid()));
+        info.setCipkid(TLVUtil.extractVal("04", info.getSkid()));
     }
 
 
@@ -514,7 +532,7 @@ public class X509Helper {
                 if (skidValue != null) {
                     String skid = Hex.bytesToHex(skidValue);
                     // 从TLV格式数据中提取值
-                    return TLVUtil.extractValue("04", skid);
+                    return TLVUtil.extractVal("04", skid);
                 }
             }
         } catch (Exception e) {

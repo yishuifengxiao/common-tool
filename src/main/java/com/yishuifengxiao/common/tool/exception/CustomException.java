@@ -3,15 +3,20 @@
  */
 package com.yishuifengxiao.common.tool.exception;
 
-import com.yishuifengxiao.common.tool.entity.RootEnum;
-
 import java.util.Objects;
 
+import com.yishuifengxiao.common.tool.entity.RootEnum;
+
 /**
- * <p>
- * 自定义异常基类
- * </p>
- * 所有程序中自定义异常的基类
+ * <p>自定义异常基类</p>
+ * <p>所有程序中自定义异常的基类，支持错误码和附加信息。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持自定义错误码</li>
+ * <li>支持携带附加上下文信息</li>
+ * <li>支持通过RootEnum创建异常</li>
+ * <li>继承自Exception，属于检查型异常</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

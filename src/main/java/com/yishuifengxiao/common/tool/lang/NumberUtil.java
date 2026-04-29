@@ -1,25 +1,23 @@
 package com.yishuifengxiao.common.tool.lang;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * <p>
- * 数字转换与操作比较工具
- * </p>
- * 该工具主要是将给定的数字与0进行比较和将数字转换成boolean以及将字符串解析成数字。该工具的主要功能如下：
- * <ol>
- * <li>判断给定的数字是否小于或等于0</li>
- * <li>判断给定的数字是否小于0</li>
- * <li>将数字转换成boolean值</li>
- * <li>将boolean值转换成数字</li>
- * <li>获取封装数据类型里的数据，防止出现NPE</li>
- * <li>将字符串解析为数字</li>
- * </ol>
+ * <p>数字转换与比较工具类</p>
+ * <p>提供数字解析、比较、转换等功能，支持多种数字类型。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>字符串到各种数字类型的解析（Integer、Long、Double、Float）</li>
+ * <li>数字大小比较（大于、小于、等于、大于等于、小于等于）</li>
+ * <li>数字与0的比较判断</li>
+ * <li>十六进制字符串解析</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -78,7 +76,7 @@ public final class NumberUtil {
      * @return 解析成功则返回Double的数据，否则为null
      */
     public static Double parseDouble(String str) {
-        return parse(str).map(BigDecimal::doubleValue).orElse(null);
+        return parseToBigDecimal(str).map(BigDecimal::doubleValue).orElse(null);
     }
 
     /**
@@ -100,7 +98,7 @@ public final class NumberUtil {
      * @return 解析成功则返回Float的数据，否则为null
      */
     public static Float parseFloat(String str) {
-        return parse(str).map(BigDecimal::floatValue).orElse(null);
+        return parseToBigDecimal(str).map(BigDecimal::floatValue).orElse(null);
     }
 
     /**
@@ -122,7 +120,7 @@ public final class NumberUtil {
      * @return 解析成功则返回Integer的数据，否则为null
      */
     public static Integer parseInt(String str) {
-        return parse(str).map(BigDecimal::intValue).orElse(null);
+        return parseToBigDecimal(str).map(BigDecimal::intValue).orElse(null);
     }
 
     /**
@@ -144,7 +142,7 @@ public final class NumberUtil {
      * @return 解析成功则返回Long的数据，否则为null
      */
     public static Long parseLong(String str) {
-        return parse(str).map(BigDecimal::longValue).orElse(null);
+        return parseToBigDecimal(str).map(BigDecimal::longValue).orElse(null);
     }
 
     /**
@@ -163,9 +161,9 @@ public final class NumberUtil {
      * 将输入值转换为 BigDecimal
      *
      * @param val 输入值
-     * @return 转换后的 BigDecimal ，若转换失败则返回为null
+     * @return 转换后的 BigDecimal ，若转换失败则返回Optional.empty()
      */
-    public static Optional<BigDecimal> parse(Object val) {
+    public static Optional<BigDecimal> parseToBigDecimal(Object val) {
         if (val == null || StringUtils.isBlank(val.toString())) {
             return Optional.empty();
         }

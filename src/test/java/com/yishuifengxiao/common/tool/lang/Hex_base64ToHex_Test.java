@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Hex工具类中base64ToHex和parseBase64String方法的单元测试
+ * Hex工具类中base64ToHex和base64ToBytes方法的单元测试
  */
 public class Hex_base64ToHex_Test {
 
@@ -61,37 +61,37 @@ public class Hex_base64ToHex_Test {
     }
 
     /**
-     * 测试parseBase64String方法 - 空或null输入
+     * 测试base64ToBytes方法 - 空或null输入
      */
     @Test
-    public void testParseBase64StringWithNullAndEmptyInput() {
+    public void testBase64ToBytesWithNullAndEmptyInput() {
         // 测试null输入
-        assertArrayEquals(new byte[0], Hex.parseBase64String(null));
+        assertArrayEquals(new byte[0], Hex.base64ToBytes(null));
 
         // 测试空字符串输入
-        assertArrayEquals(new byte[0], Hex.parseBase64String(""));
+        assertArrayEquals(new byte[0], Hex.base64ToBytes(""));
     }
 
     /**
-     * 测试parseBase64String方法 - 全空白字符输入
+     * 测试base64ToBytes方法 - 全空白字符输入
      */
     @Test
-    public void testParseBase64StringWithWhitespaceOnly() {
+    public void testBase64ToBytesWithWhitespaceOnly() {
         // 测试只有空格的输入
-        assertNull(Hex.parseBase64String("   "));
+        assertNull(Hex.base64ToBytes("   "));
 
         // 测试只有制表符的输入
-        assertNull(Hex.parseBase64String("\t\t\t"));
+        assertNull(Hex.base64ToBytes("\t\t\t"));
 
         // 测试只有换行符的输入
-        assertNull(Hex.parseBase64String("\n\n\n"));
+        assertNull(Hex.base64ToBytes("\n\n\n"));
     }
 
     /**
-     * 测试parseBase64String方法 - 包含空格的有效Base64
+     * 测试base64ToBytes方法 - 包含空格的有效Base64
      */
     @Test
-    public void testParseBase64StringWithSpacedBase64() {
+    public void testBase64ToBytesWithSpacedBase64() {
         // 测试包含空格的有效Base64字符串
         String originalStr = "Hello World";
         String base64 = Base64.getEncoder().encodeToString(originalStr.getBytes(StandardCharsets.UTF_8));
@@ -99,46 +99,46 @@ public class Hex_base64ToHex_Test {
         String spacedBase64 = base64.substring(0, 4) + " " + base64.substring(4, 8) + " " + base64.substring(8);
 
         byte[] expectedBytes = originalStr.getBytes(StandardCharsets.UTF_8);
-        byte[] actualBytes = Hex.parseBase64String(spacedBase64);
+        byte[] actualBytes = Hex.base64ToBytes(spacedBase64);
         assertArrayEquals(expectedBytes, actualBytes);
     }
 
     /**
-     * 测试parseBase64String方法 - MIME格式的Base64（包含换行符）
+     * 测试base64ToBytes方法 - MIME格式的Base64（包含换行符）
      */
     @Test
-    public void testParseBase64StringWithMimeFormat() {
+    public void testBase64ToBytesWithMimeFormat() {
         // 测试长字符串生成的MIME格式Base64（包含换行符）
         String longStr = "This is a long string that will generate Base64 with line breaks when using MIME encoder.";
         String mimeBase64 = Base64.getMimeEncoder().encodeToString(longStr.getBytes(StandardCharsets.UTF_8));
         byte[] expectedBytes = longStr.getBytes(StandardCharsets.UTF_8);
-        byte[] actualBytes = Hex.parseBase64String(mimeBase64);
+        byte[] actualBytes = Hex.base64ToBytes(mimeBase64);
         assertArrayEquals(expectedBytes, actualBytes);
     }
 
     /**
-     * 测试parseBase64String方法 - URL安全的Base64
+     * 测试base64ToBytes方法 - URL安全的Base64
      */
     @Test
-    public void testParseBase64StringWithUrlSafeBase64() {
+    public void testBase64ToBytesWithUrlSafeBase64() {
         // 测试URL安全的Base64字符串
         String urlStr = "Hello+World/Foo=Bar";
         String urlSafeBase64 = Base64.getUrlEncoder().encodeToString(urlStr.getBytes(StandardCharsets.UTF_8));
         byte[] expectedBytes = urlStr.getBytes(StandardCharsets.UTF_8);
-        byte[] actualBytes = Hex.parseBase64String(urlSafeBase64);
+        byte[] actualBytes = Hex.base64ToBytes(urlSafeBase64);
         assertArrayEquals(expectedBytes, actualBytes);
     }
 
 
     /**
-     * 测试base64ToHex和parseBase64String方法的集成
+     * 测试base64ToHex和base64ToBytes方法的集成
      */
     @Test
-    public void testBase64ToHexAndParseBase64StringIntegration() {
+    public void testBase64ToHexAndBase64ToBytesIntegration() {
         // 测试完整的转换链：字符串 -> Base64 -> 字节数组 -> 十六进制字符串
         String originalStr = "集成测试 Integration Test 123";
         String base64Str = Base64.getEncoder().encodeToString(originalStr.getBytes(StandardCharsets.UTF_8));
-        byte[] parsedBytes = Hex.parseBase64String(base64Str);
+        byte[] parsedBytes = Hex.base64ToBytes(base64Str);
         String hexFromMethod = Hex.base64ToHex(base64Str);
         String expectedHex = Hex.bytesToHex(parsedBytes);
 

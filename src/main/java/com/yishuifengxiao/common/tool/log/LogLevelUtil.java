@@ -1,19 +1,28 @@
 package com.yishuifengxiao.common.tool.log;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import com.yishuifengxiao.common.tool.collections.CollUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.LoggerFactory;
+
+import com.yishuifengxiao.common.tool.collections.CollUtil;
+
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * 动态修改logback日志级别
+ * <p>Logback日志级别动态修改工具类</p>
+ * <p>提供在运行时动态修改Logback日志级别的功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持按Logger名称动态修改日志级别</li>
+ * <li>日志级别合法性校验</li>
+ * <li>线程安全的操作</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

@@ -1,21 +1,22 @@
 package com.yishuifengxiao.common.tool.validate;
 
+import java.lang.annotation.Documented;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+
 import com.yishuifengxiao.common.tool.validate.validator.InBoolValidator;
+
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 /**
- * <p>
- * 目标数据必须为0或1
- * </p>
- * 该注解针对整型数据，不适用其他数据类型
+ * <p>布尔值校验注解</p>
+ * <p>校验目标值必须为0或1，适用于数据库布尔字段（tinyint类型）的校验场景。</p>
  *
  * @author yishui
  * @version 1.0.0

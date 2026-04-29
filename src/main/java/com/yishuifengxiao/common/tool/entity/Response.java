@@ -3,32 +3,35 @@
  */
 package com.yishuifengxiao.common.tool.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.yishuifengxiao.common.tool.random.IdWorker;
-import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.yishuifengxiao.common.tool.random.IdWorker;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
- * <p>
- * 通用响应
- * </p>
- * <p>
- * 该工具主要是用于对系统的的响应进行一个形式上的统一， 以便各个接口返回的响应的形式保持一致。在初步设计时主要是借助HttpStatus作为状态标识
- * （HttpStatus具体的响应值的信息可以参见
- * <a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">
- * https://developer.mozilla.org/en-US/docs/Web/HTTP/Status</a>） 。
- * </p>
- * <p>
- * 简单地说，当code的值为200时表示系统成功处理了用户的请求，当code的值为401时表示用户无权访问请求的资源，
- * 当code的值为500时表示系统成功接收到了用户的请求，但是未能按照用户的意图进行业务处理。。。。。
- * </p>
- *
- * <p>
- * 在某些情况下，如果系统内置的响应码不符合已进行的业务的需求但是又需要统一响应格式时可以自定义响应码等信息
- * </p>
+ * <p>通用响应对象</p>
+ * <p>统一系统接口的响应格式，便于各个接口返回的响应形式保持一致。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>包含请求ID用于请求追踪</li>
+ * <li>使用HttpStatus作为状态码标识</li>
+ * <li>包含响应提示信息和响应数据</li>
+ * <li>包含响应时间戳</li>
+ * <li>提供多种便捷创建方法（成功、失败、参数错误等）</li>
+ * </ul>
+ * <p>状态码说明：</p>
+ * <ul>
+ * <li>200 - 请求成功</li>
+ * <li>400 - 请求参数有误</li>
+ * <li>401 - 请求要求身份验证</li>
+ * <li>403 - 无权访问此资源</li>
+ * <li>404 - 访问的资源路径不存在</li>
+ * <li>500 - 请求处理失败</li>
+ * </ul>
  *
  * @param <T> 响应数据的数据类型
  * @author yishui

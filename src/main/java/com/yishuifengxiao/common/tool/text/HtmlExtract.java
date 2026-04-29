@@ -3,8 +3,11 @@
  */
 package com.yishuifengxiao.common.tool.text;
 
-import com.yishuifengxiao.common.tool.collections.CollUtil;
-import lombok.extern.slf4j.Slf4j;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Node;
 import org.dom4j.io.SAXReader;
@@ -13,13 +16,20 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.xml.sax.SAXException;
 
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.yishuifengxiao.common.tool.collections.CollUtil;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * html抽取工具
+ * <p>HTML提取工具类</p>
+ * <p>提供HTML内容解析和数据提取功能，支持CSS选择器和XPath两种提取方式。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>使用CSS选择器提取元素</li>
+ * <li>使用XPath表达式提取数据</li>
+ * <li>支持提取元素属性和文本内容</li>
+ * <li>HTML预处理转换为XHTML格式</li>
+ * </ul>
  *
  * @author qingteng
  * @version 1.0.0

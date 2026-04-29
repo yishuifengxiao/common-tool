@@ -1,22 +1,23 @@
 package com.yishuifengxiao.common.tool.validate;
 
+import java.lang.annotation.Documented;
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import java.lang.annotation.Retention;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import java.lang.annotation.Target;
+
 import com.yishuifengxiao.common.tool.validate.validator.InLongValidator;
+
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
 
 /**
- * <p>
- * 目标数据必须在指定的数据集合之内
- * </p>
- * 针对长整型数据，不适用其他数据类型
+ * <p>长整型枚举校验注解</p>
+ * <p>校验目标long值必须在指定的数值集合中，适用于枚举值校验场景。</p>
  *
  * @author yishui
  * @version 1.0.0

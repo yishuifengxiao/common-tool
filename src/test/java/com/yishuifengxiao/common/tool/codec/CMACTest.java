@@ -25,20 +25,20 @@ public class CMACTest {
 
 
     /**
-     * 测试calculateCMAC方法 - 一个数据块
+     * 测试calculate方法 - 一个数据块
      */
     @Test
-    public void testCalculateCMAC_OneBlock() throws Exception {
-        String result = CMAC.calculateCMAC(ONE_BLOCK_DATA, TEST_KEY);
+    public void testcalculate_OneBlock() throws Exception {
+        String result = CMAC.calculate(ONE_BLOCK_DATA, TEST_KEY);
         assertEquals("一个数据块CMAC计算错误", ONE_BLOCK_DATA_CMAC.toLowerCase(), result.toLowerCase());
     }
 
     /**
-     * 测试calculateCMAC方法 - 两个数据块
+     * 测试calculate方法 - 两个数据块
      */
     @Test
-    public void testCalculateCMAC_TwoBlocks() throws Exception {
-        String result = CMAC.calculateCMAC(TWO_BLOCK_DATA, TEST_KEY);
+    public void testcalculate_TwoBlocks() throws Exception {
+        String result = CMAC.calculate(TWO_BLOCK_DATA, TEST_KEY);
         assertEquals("两个数据块CMAC计算错误", TWO_BLOCK_DATA_CMAC.toLowerCase(), result.toLowerCase());
     }
 

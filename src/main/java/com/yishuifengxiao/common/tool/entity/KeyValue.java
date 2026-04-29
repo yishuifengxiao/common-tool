@@ -1,12 +1,19 @@
 package com.yishuifengxiao.common.tool.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 /**
- * 键值对数据
+ * <p>键值对数据对象</p>
+ * <p>通用的键值对数据结构，支持泛型键和值类型。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持泛型键值类型</li>
+ * <li>提供空值检查方法</li>
+ * <li>支持链式调用设置</li>
+ * </ul>
  *
  * @param <K> 键的类型
  * @param <V> 值的类型

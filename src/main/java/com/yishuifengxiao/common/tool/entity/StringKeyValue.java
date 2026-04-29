@@ -1,13 +1,21 @@
 package com.yishuifengxiao.common.tool.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.io.Serializable;
+
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 /**
- * 键为字符串类型的键值对数据
+ * <p>键为字符串类型的键值对数据</p>
+ * <p>继承自KeyValue，键固定为String类型，提供字符串专用的空值检查方法。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>键固定为String类型</li>
+ * <li>提供字符串专用的空值检查方法(blankKey)</li>
+ * <li>继承KeyValue的所有功能</li>
+ * </ul>
  *
  * @param <T> 值的类型
  * @author yishui

@@ -171,15 +171,15 @@ public class Asn1Util {
      * 该方法对输入的数字字符串进行计算，返回一个校验位数字（0-9）。
      * </p>
      *
-     * @param strdata 输入的数字字符串，不能为null或空字符串，必须全部由数字字符组成
+     * @param strData 输入的数字字符串，不能为null或空字符串，必须全部由数字字符组成
      * @return 计算得到的校验位数字字符串（0-9）
      * @throws UncheckedException 当输入为null、空字符串或包含非数字字符时抛出异常
      */
-    public static String generateLuhn(String strdata) {
-        if (strdata == null || strdata.isEmpty()) {
+    public static String generateLuhn(String strData) {
+        if (strData == null || strData.isEmpty()) {
             throw new UncheckedException("输入数据不能为空");
         }
-        char[] strDataChars = strdata.toCharArray();
+        char[] strDataChars = strData.toCharArray();
         int len = strDataChars.length;
         int total = 0;
         boolean doubleDigit = true;

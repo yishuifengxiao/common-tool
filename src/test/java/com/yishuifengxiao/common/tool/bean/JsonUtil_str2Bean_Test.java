@@ -21,7 +21,7 @@ public class JsonUtil_str2Bean_Test {
     @Test
     public void testStr2Bean_ValidJson() {
         String json = "{\"name\":\"John\",\"age\":30}";
-        Person result = JsonUtil.str2Bean(json, Person.class);
+        Person result = JsonUtil.strToBean(json, Person.class);
 
         assertNotNull(result);
         assertEquals("John", result.getName());
@@ -34,7 +34,7 @@ public class JsonUtil_str2Bean_Test {
      */
     @Test
     public void testStr2Bean_NullInput() {
-        Person result = JsonUtil.str2Bean(null, Person.class);
+        Person result = JsonUtil.strToBean(null, Person.class);
         assertNull(result);
     }
 
@@ -44,7 +44,7 @@ public class JsonUtil_str2Bean_Test {
      */
     @Test
     public void testStr2Bean_EmptyString() {
-        Person result = JsonUtil.str2Bean("", Person.class);
+        Person result = JsonUtil.strToBean("", Person.class);
         assertNull(result);
     }
 
@@ -54,7 +54,7 @@ public class JsonUtil_str2Bean_Test {
      */
     @Test
     public void testStr2Bean_WhitespaceString() {
-        Person result = JsonUtil.str2Bean("   ", Person.class);
+        Person result = JsonUtil.strToBean("   ", Person.class);
         assertNull(result);
     }
 
@@ -65,7 +65,7 @@ public class JsonUtil_str2Bean_Test {
     @Test
     public void testStr2Bean_InvalidJson() {
         String invalidJson = "{invalid json}";
-        Person result = JsonUtil.str2Bean(invalidJson, Person.class);
+        Person result = JsonUtil.strToBean(invalidJson, Person.class);
         assertNull(result);
     }
 
@@ -76,7 +76,7 @@ public class JsonUtil_str2Bean_Test {
     @Test
     public void testStr2Bean_MismatchedJson() {
         String json = "{\"name\":\"John\",\"age\":30}";
-        Address result = JsonUtil.str2Bean(json, Address.class);
+        Address result = JsonUtil.strToBean(json, Address.class);
         assertNull(result);
     }
 
@@ -87,7 +87,7 @@ public class JsonUtil_str2Bean_Test {
     @Test
     public void testStr2Bean_ToMap() {
         String json = "{\"name\":\"John\",\"age\":30}";
-        Map<String, Object> result = JsonUtil.str2Bean(json, Map.class);
+        Map<String, Object> result = JsonUtil.strToBean(json, Map.class);
 
         assertNotNull(result);
         assertEquals("John", result.get("name"));
@@ -101,7 +101,7 @@ public class JsonUtil_str2Bean_Test {
     @Test
     public void testStr2Bean_ToList() {
         String json = "[{\"name\":\"John\"},{\"name\":\"Jane\"}]";
-        List<Person> result = JsonUtil.str2Bean(json, List.class);
+        List<Person> result = JsonUtil.strToBean(json, List.class);
 
         assertNotNull(result);
         assertEquals(2, result.size());

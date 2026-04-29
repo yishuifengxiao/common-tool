@@ -1,21 +1,32 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.Serializable;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.Serializable;
-import java.net.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-
 /**
- * 网络工具类
+ * <p>网络工具类</p>
+ * <p>提供网络相关的工具方法，包括网络接口信息获取、MAC地址获取、外网IP获取等。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>获取所有活动网络接口信息</li>
+ * <li>获取网卡MAC地址</li>
+ * <li>获取外网IP地址</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

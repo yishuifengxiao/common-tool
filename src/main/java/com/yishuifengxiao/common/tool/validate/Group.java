@@ -5,11 +5,16 @@ import jakarta.validation.GroupSequence;
 import jakarta.validation.groups.Default;
 
 /**
- * Default Jakarta Bean Validation group.
- * Unless a list of groups is explicitly defined:
- * constraints belong to the Default group
- * validation applies to the Default group
- * Most structural constraints should belong to the default group.
+ * <p>校验分组定义类</p>
+ * <p>定义Jakarta Bean Validation的校验分组接口，用于在不同业务场景下执行不同的校验规则。</p>
+ * <p>分组类型：</p>
+ * <ul>
+ * <li>Create：创建操作校验</li>
+ * <li>Update：更新操作校验</li>
+ * <li>Delete：删除操作校验</li>
+ * <li>Query：查询操作校验</li>
+ * <li>All：包含所有分组的序列校验</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

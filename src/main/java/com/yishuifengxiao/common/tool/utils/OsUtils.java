@@ -4,7 +4,15 @@ import java.io.File;
 import java.time.ZoneId;
 
 /**
- * 系统工具类
+ * <p>操作系统工具类</p>
+ * <p>提供操作系统相关的工具方法，包括系统属性获取、路径处理、平台判断等。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持多种操作系统判断（Windows、Linux、MacOS等）</li>
+ * <li>获取系统目录路径（临时目录、用户目录、工作目录）</li>
+ * <li>提供常用字符常量（路径分隔符、符号等）</li>
+ * <li>提供时区常量</li>
+ * </ul>
  *
  * @author qingteng
  * @version 1.0.0

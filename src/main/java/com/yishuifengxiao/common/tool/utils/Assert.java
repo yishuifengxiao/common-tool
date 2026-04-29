@@ -1,26 +1,25 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import java.util.Collection;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.yishuifengxiao.common.tool.collections.CollUtil;
 import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.NumberUtil;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Collection;
 
 /**
- * <p>
- * 断言工具
- * </p>
- * <p>
- * 该工具主要判断给定的数据是否符合给定的条件，若数据不符合给定的条件就抛出自定义受检查的异常
- * </p>
- * <p>
- * 该主要是为了替换到代码里的各种<code>if</code>判断，从而提升代码的优雅性
- * </p>
- *
- * <strong>注意：本工具中抛出的异常全部为运行时异常
- * <code>UncheckedException</code>,注意在使用时带来的处理问题</strong>
+ * <p>断言工具类</p>
+ * <p>提供数据校验和断言功能，当条件不满足时抛出运行时异常。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>数字比较断言（大于、小于、等于0）</li>
+ * <li>空值判断（null、blank）</li>
+ * <li>布尔值断言</li>
+ * <li>集合/数组空值判断</li>
+ * </ul>
+ * <p><strong>注意：本工具抛出的异常全部为运行时异常{@link UncheckedException}</strong></p>
  *
  * @author yishui
  * @version 1.0.0

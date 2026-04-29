@@ -4,10 +4,15 @@
 package com.yishuifengxiao.common.tool.text;
 
 /**
- * <p>
- * 文本工具
- * </p>
- * 该工具主要用于将字符串的首字母进行大小写转换
+ * <p>文本工具类</p>
+ * <p>提供字符串处理、格式转换等文本操作功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>字符串首字母大小写转换</li>
+ * <li>驼峰命名与下划线命名互转</li>
+ * <li>SQL注释移除</li>
+ * <li>对象转字符串</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

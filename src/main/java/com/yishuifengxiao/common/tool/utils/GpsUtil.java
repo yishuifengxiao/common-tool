@@ -3,16 +3,14 @@ package com.yishuifengxiao.common.tool.utils;
 import java.math.BigDecimal;
 
 /**
- * <p>
- * 经纬度距离计算工具
- * </p>
- *
- * <p>
- * 根据两个坐标值计算出两个坐标点之间的距离
- * </p>
- * <p>
- * 算法来源 https://www.cnblogs.com/zhoug2020/p/8993750.html
- * </p>
+ * <p>GPS经纬度距离计算工具类</p>
+ * <p>根据两个坐标点的经纬度计算它们之间的距离，采用Haversine公式。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持米和千米两种单位</li>
+ * <li>地球半径取值为6378.137千米</li>
+ * <li>返回值精确到整数</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

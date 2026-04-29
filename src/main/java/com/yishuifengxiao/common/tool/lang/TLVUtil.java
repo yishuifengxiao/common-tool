@@ -1,20 +1,31 @@
 package com.yishuifengxiao.common.tool.lang;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
 /**
- * TLV工具类
+ * <p>TLV解析工具类</p>
+ * <p>提供TLV（Tag-Length-Value）格式数据的解析和构建工具方法。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>从TLV字符串中提取指定标签的值</li>
+ * <li>支持同一层级多个标签的提取</li>
+ * <li>支持嵌套层级的递归提取</li>
+ * <li>支持循环提取相同标签的所有值</li>
+ * <li>提供TLV格式构建方法</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -28,7 +39,7 @@ public class TLVUtil {
      * @param tlv TLV字符串
      * @return 找到的value，未找到或出错则返回空字符串
      */
-    public static String extractValue(String tag, String tlv) {
+    public static String extractVal(String tag, String tlv) {
         TlvResult result = extract(tag, tlv);
         if (null != result.getException()) {
             return "";
@@ -49,77 +60,116 @@ public class TLVUtil {
         if (tag == null || tlv == null || tlv.isEmpty()) {
             return new TlvResult().setException(new UncheckedException("illegal data"));
         }
-        boolean ok = Hex.isHex(tlv) && Hex.isHex(tag);
-        if (!ok) {
+        
+        tag = tag.trim();
+        tlv = tlv.trim();
+        
+        if (tag.isEmpty() || !Hex.isHex(tlv) || !Hex.isHex(tag)) {
             return new TlvResult().setException(new UncheckedException("illegal data"));
         }
-        tag = tag.trim().toUpperCase();
-        tlv = tlv.trim().toUpperCase();
-        if (!StringUtils.startsWithIgnoreCase(tlv, tag)) {
-            return new TlvResult().setException(new UncheckedException(String.format("The data does not start with " +
-                    "TAG %s", tag)));
+        
+        tag = tag.toUpperCase();
+        tlv = tlv.toUpperCase();
+        
+        if (!tlv.startsWith(tag)) {
+            return new TlvResult().setException(new UncheckedException(
+                String.format("The data does not start with TAG %s", tag)));
         }
-        String remain = StringUtils.substringAfter(tlv, tag);
-        if (StringUtils.length(remain) < 2) {
+        
+        String remain = tlv.substring(tag.length());
+        if (remain.length() < 2) {
             return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
         }
 
-        // 解析长度字段，根据前缀确定长度字段的字节数
-        String lengthStr;
-        int startPos;
-
-        if (StringUtils.startsWithIgnoreCase(remain, "83")) {
-            // 长度字段占3字节（6个十六进制字符）
-            lengthStr = StringUtils.substring(remain, 2, 8);
-            if (StringUtils.length(lengthStr) != 6) {
-                return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
-            }
-            startPos = 8;
-        } else if (StringUtils.startsWithIgnoreCase(remain, "82")) {
-            // 长度字段占2字节（4个十六进制字符）
-            lengthStr = StringUtils.substring(remain, 2, 6);
-            if (StringUtils.length(lengthStr) != 4) {
-                return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
-            }
-            startPos = 6;
-        } else if (StringUtils.startsWithIgnoreCase(remain, "81")) {
-            // 长度字段占1字节（2个十六进制字符）
-            lengthStr = StringUtils.substring(remain, 2, 4);
-            if (StringUtils.length(lengthStr) != 2) {
-                return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
-            }
-            startPos = 4;
-        } else {
-            // 长度字段占1字节（2个十六进制字符），无前缀
-            lengthStr = StringUtils.substring(remain, 0, 2);
-            if (StringUtils.length(lengthStr) != 2) {
-                return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
-            }
-            startPos = 2;
+        // 解析长度字段
+        LengthParseResult lengthResult = parseLengthField(remain);
+        if (lengthResult.exception != null) {
+            return new TlvResult().setException(lengthResult.exception);
         }
 
-        // 解析长度值并验证数据完整性
-        int length;
-        try {
-            length = Integer.parseInt(lengthStr, 16);
-        } catch (NumberFormatException e) {
-            return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
-        }
+        int startPos = lengthResult.startPos;
+        int length = lengthResult.length;
 
-        if (length <= 0) {
+        // 允许长度为0（空值）
+        if (length < 0) {
             return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
         }
 
         int valueEndPos = startPos + length * 2;
-        if (valueEndPos > StringUtils.length(remain)) {
+        if (valueEndPos > remain.length()) {
             return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
         }
 
-        String val = StringUtils.substring(remain, startPos, valueEndPos);
-        if (StringUtils.length(val) != length * 2) {
-            return new TlvResult().setException(new UncheckedException("Not valid TLV data"));
+        String val = remain.substring(startPos, valueEndPos);
+        return new TlvResult().putVal(tag, val).setRemain(remain.substring(valueEndPos));
+    }
+
+    /**
+     * 解析BER-TLV长度字段
+     */
+    private static LengthParseResult parseLengthField(String data) {
+        if (data == null || data.length() < 2) {
+            return new LengthParseResult(0, 0, new UncheckedException("Not valid TLV data"));
         }
-        return new TlvResult().putVal(tag, val).setRemain(StringUtils.substring(remain, valueEndPos));
+
+        String firstByte = data.substring(0, 2);
+        int firstByteValue;
+        
+        try {
+            firstByteValue = Integer.parseInt(firstByte, 16);
+        } catch (NumberFormatException e) {
+            return new LengthParseResult(0, 0, new UncheckedException("Not valid TLV data"));
+        }
+
+        // BER-TLV标准：最高位为0表示短格式，为1表示长格式
+        if ((firstByteValue & 0x80) == 0) {
+            // 短格式：直接表示长度（0-127），长度字段占1字节（2个十六进制字符）
+            return new LengthParseResult(2, firstByteValue, null);
+        } else {
+            // 长格式：低7位表示后续长度字节数
+            int numLengthBytes = firstByteValue & 0x7F;
+            
+            if (numLengthBytes == 0) {
+                //  indefinite length，不支持
+                return new LengthParseResult(0, 0, new UncheckedException("Indefinite length not supported"));
+            }
+            
+            if (numLengthBytes > 3) {
+                return new LengthParseResult(0, 0, new UncheckedException("Length bytes exceed maximum"));
+            }
+            
+            int requiredLength = 2 + numLengthBytes * 2;
+            if (data.length() < requiredLength) {
+                return new LengthParseResult(0, 0, new UncheckedException("Not valid TLV data"));
+            }
+            
+            String lengthStr = data.substring(2, requiredLength);
+            int length;
+            
+            try {
+                length = Integer.parseInt(lengthStr, 16);
+            } catch (NumberFormatException e) {
+                return new LengthParseResult(0, 0, new UncheckedException("Not valid TLV data"));
+            }
+            
+            // startPos是长度字段的总字节数（包括前缀字节）
+            return new LengthParseResult(requiredLength, length, null);
+        }
+    }
+
+    /**
+     * 长度解析结果内部类
+     */
+    private static class LengthParseResult {
+        final int startPos;  // 长度字段结束位置（即值开始位置）
+        final int length;    // 值的长度（字节数）
+        final UncheckedException exception;
+
+        LengthParseResult(int startPos, int length, UncheckedException exception) {
+            this.startPos = startPos;
+            this.length = length;
+            this.exception = exception;
+        }
     }
 
 
@@ -131,7 +181,7 @@ public class TLVUtil {
      * @param tags 要提取的标签列表，按顺序匹配
      * @return TlvResult对象，包含所有成功提取的标签-值对和可能的异常信息
      */
-    public static TlvResult extractValOnSameLevel(String tlv, String... tags) {
+    public static TlvResult extractValsOnSameLevel(String tlv, String... tags) {
         tlv = StringUtils.trim(tlv);
         if (!Hex.isHex(tlv)) {
             return new TlvResult().setException(new UncheckedException("illegal data"));
@@ -164,7 +214,7 @@ public class TLVUtil {
      * @param tags 要递归提取的标签列表，按层级顺序匹配
      * @return TlvResult对象，包含所有层级提取的标签-值对和可能的异常信息
      */
-    public static TlvResult extractValRecursive(String tlv, String... tags) {
+    public static TlvResult extractValsRecursive(String tlv, String... tags) {
         tlv = StringUtils.trim(tlv);
         if (!Hex.isHex(tlv)) {
             return new TlvResult().setException(new UncheckedException("illegal data"));
@@ -195,27 +245,27 @@ public class TLVUtil {
      *
      * @param tag 目标标签，应为十六进制字符串
      * @param tlv TLV格式的十六进制字符串
-     * @return 包含所有匹配值的列表，如果发生错误则返回空列表【不包含TAG】
+     * @return 包含所有匹配值的列表，如果发生错误则返回已收集的列表【不包含TAG】
      */
-    public static List<String> extractValLoop(String tag, String tlv) {
-        boolean ok = Hex.isHex(tlv) && Hex.isHex(tag);
-        if (!ok) {
+    public static List<String> extractValsLoop(String tag, String tlv) {
+        if (tag == null || tlv == null || !Hex.isHex(tlv) || !Hex.isHex(tag)) {
             return new ArrayList<>();
         }
 
-        // 循环提取相同标签的值，每次从剩余数据中继续查找
         List<String> list = new ArrayList<>();
         String remain = tlv;
-        Exception exception = null;
-        while (null == exception && StringUtils.isNotBlank(remain)) {
+        
+        while (StringUtils.isNotBlank(remain)) {
             TlvResult result = extract(tag, remain);
-            exception = result.getException();
-            if (null == exception) {
-                list.add(result.getVal(tag));
-                remain = result.getRemain();
+            if (result.getException() != null) {
+                // 发生错误时返回已收集的结果
+                break;
             }
+            list.add(result.getVal(tag));
+            remain = result.getRemain();
         }
-        return null == exception ? list : new ArrayList<>();
+        
+        return list;
     }
 
     /**
@@ -286,13 +336,16 @@ public class TLVUtil {
             return "00";
         }
 
-        String hex = Long.toHexString(value).toUpperCase();
-
-        // 如果十六进制字符串长度为奇数，在前面补0
-        if (hex.length() % 2 != 0) {
-            hex = "0" + hex;
+        // 直接使用数值计算，避免字符串操作
+        if (value <= 0xFF) {
+            return String.format("%02X", value);
+        } else if (value <= 0xFFFF) {
+            return String.format("%04X", value);
+        } else if (value <= 0xFFFFFF) {
+            return String.format("%06X", value);
+        } else {
+            return String.format("%08X", value);
         }
-        return hex;
     }
 
 
@@ -305,9 +358,9 @@ public class TLVUtil {
      * - 65536 ≤ 长度 ≤ 16777215: 83前缀 + 3字节长度
      *
      * @param hexData 输入的十六进制数据字符串（可包含不可见字符，如空格、换行等）
-     * @return 计算得到的长度字段十六进制值，超出范围返回空字符串
+     * @return 计算得到的长度字段十六进制值，超出范围抛出异常
      */
-    public static String lengthHex(String hexData) {
+    public static String calculateLengthHex(String hexData) {
         if (hexData == null || hexData.isEmpty()) {
             return "00";
         }
@@ -400,7 +453,9 @@ public class TLVUtil {
             if (StringUtils.isBlank(tag)) {
                 return this;
             }
-            map.put(StringUtils.trim(tag.toUpperCase()), StringUtils.trim(val));
+            String trimmedTag = tag.trim().toUpperCase();
+            String trimmedVal = val != null ? val.trim() : "";
+            map.put(trimmedTag, trimmedVal);
             return this;
         }
 

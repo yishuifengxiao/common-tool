@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * TLVUtil.extractValue 方法的单元测试类
+ * TLVUtil.extractVal 方法的单元测试类
  */
 public class TLVUtilFetchValueTest {
 
@@ -14,22 +14,22 @@ public class TLVUtilFetchValueTest {
      * TC01: 正常路径，目标 Tag 存在于顶层 TLV 中
      */
     @Test
-    public void testextractValue_TopLevelTag() {
+    public void testextractVal_TopLevelTag() {
         String tag = "9F01";
         String tlv = "9F0103AABBCC";
         String expected = "AABBCC";
-        assertEquals(expected, TLVUtil.extractValue(tag, tlv));
+        assertEquals(expected, TLVUtil.extractVal(tag, tlv));
     }
 
     /**
      * TC02: 正常路径，目标 Tag 存在于嵌套 TLV 中
      */
     @Test
-    public void testextractValue_NestedTag() {
+    public void testextractVal_NestedTag() {
         String tag = "9F02";
         String tlv = "9F010BAABBCC9F0203DDEEFF";
         String expected = "";
-        String actual = TLVUtil.extractValue(tag, tlv);
+        String actual = TLVUtil.extractVal(tag, tlv);
         assertEquals(expected, actual);
     }
 
@@ -37,65 +37,65 @@ public class TLVUtilFetchValueTest {
      * TC03: 目标 Tag 不存在
      */
     @Test
-    public void testextractValue_TagNotFound() {
+    public void testextractVal_TagNotFound() {
         String tag = "9F03";
         String tlv = "9F0103AABBCC";
         String expected = "";
-        assertEquals(expected, TLVUtil.extractValue(tag, tlv));
+        assertEquals(expected, TLVUtil.extractVal(tag, tlv));
     }
 
     /**
      * TC04: TLV 字符串格式错误（Tag 解析失败）
      */
     @Test
-    public void testextractValue_InvalidTagFormat() {
+    public void testextractVal_InvalidTagFormat() {
         String tag = "9F01";
         String tlv = "GG0103AABBCC"; // 非法十六进制字符
         String expected = "";
-        assertEquals(expected, TLVUtil.extractValue(tag, tlv));
+        assertEquals(expected, TLVUtil.extractVal(tag, tlv));
     }
 
     /**
      * TC05: TLV 字符串格式错误（Length 解析失败）
      */
     @Test
-    public void testextractValue_InvalidLengthFormat() {
+    public void testextractVal_InvalidLengthFormat() {
         String tag = "9F01";
         String tlv = "9F01GG03AABBCC"; // 非法长度字段
         String expected = "";
-        assertEquals(expected, TLVUtil.extractValue(tag, tlv));
+        assertEquals(expected, TLVUtil.extractVal(tag, tlv));
     }
 
     /**
      * TC06: TLV 字符串不完整（Value 不足）
      */
     @Test
-    public void testextractValue_IncompleteValue() {
+    public void testextractVal_IncompleteValue() {
         String tag = "9F01";
         String tlv = "9F0103AABB"; // Value 长度不足
         String expected = "";
-        assertEquals(expected, TLVUtil.extractValue(tag, tlv));
+        assertEquals(expected, TLVUtil.extractVal(tag, tlv));
     }
 
     /**
      * TC07: 空输入
      */
     @Test
-    public void testextractValue_EmptyInput() {
+    public void testextractVal_EmptyInput() {
         String tag = "9F01";
         String tlv = "";
         String expected = "";
-        assertEquals(expected, TLVUtil.extractValue(tag, tlv));
+        assertEquals(expected, TLVUtil.extractVal(tag, tlv));
     }
 
     /**
      * TC08: 多层嵌套 TLV 查找
      */
     @Test
-    public void testextractValue_MultiNestedTag() {
+    public void testextractVal_MultiNestedTag() {
         String tag = "9F04";
         String tlv = "9F010B9F02059F0403AABBCC"; // 三层嵌套
         String expected = "";
-        assertEquals(expected, TLVUtil.extractValue(tag, tlv));
+        assertEquals(expected, TLVUtil.extractVal(tag, tlv));
     }
 }

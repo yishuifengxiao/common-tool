@@ -1,17 +1,26 @@
 package com.yishuifengxiao.common.tool.http;
 
-import com.yishuifengxiao.common.tool.text.RegexUtil;
-import com.yishuifengxiao.common.tool.utils.OsUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yishuifengxiao.common.tool.text.RegexUtil;
+import com.yishuifengxiao.common.tool.utils.OsUtils;
+
 /**
- * url数据工具
+ * <p>URL数据工具类</p>
+ * <p>提供URL相关的解析、提取和转换功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>从URL中提取协议、域名、简短域名</li>
+ * <li>将相对URL补全为完整网络地址</li>
+ * <li>将查询字符串转换为Map结构</li>
+ * <li>判断URL是否符合网络请求格式</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -229,7 +238,7 @@ public final class UrlUtil {
      * @param queryString 待转换的查询参数字符串
      * @return 转换后的map数据
      */
-    public static Map<String, String> queryString2Map(String queryString) {
+    public static Map<String, String> queryStringToMap(String queryString) {
         if (StringUtils.isBlank(queryString)) {
             return null;
         }

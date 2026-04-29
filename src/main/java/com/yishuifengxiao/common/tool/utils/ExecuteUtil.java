@@ -1,16 +1,29 @@
 package com.yishuifengxiao.common.tool.utils;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.concurrent.atomic.AtomicLong;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * 执行工具
+ * <p>执行工具类</p>
+ * <p>提供异步任务执行、线程池管理和流程控制功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>内置线程池，支持异步任务执行</li>
+ * <li>支持执行完成和执行失败回调</li>
+ * <li>支持流程串行执行（短路求值）</li>
+ * <li>支持等待多个CompletableFuture完成</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -176,7 +189,7 @@ public class ExecuteUtil {
      * @return 输出数据
      */
     @SafeVarargs
-    public static <T> T execute(Predicate<T> match, Supplier<T>... suppliers) {
+    public static <T> T executeFirstMatch(Predicate<T> match, Supplier<T>... suppliers) {
         if (suppliers == null || match == null) {
             return null;
         }
@@ -205,7 +218,7 @@ public class ExecuteUtil {
      *
      * @param futures 待执行的任务
      */
-    public static void execute(CompletableFuture<?>... futures) {
+    public static void waitForAll(CompletableFuture<?>... futures) {
         if (futures == null || futures.length == 0) {
             return;
         }

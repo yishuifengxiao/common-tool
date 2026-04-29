@@ -1,23 +1,31 @@
 package com.yishuifengxiao.common.tool.text;
 
-import com.yishuifengxiao.common.tool.lang.NumberUtil;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
+
 /**
- * <p>
- * 正则工具
- * </p>
- * 该工具主要是利用正则对字符串进行判断，主要功能如下：
- * <ol>
- * <li>判断给定的字符串是否包含中文</li>
- * <li>判断给定的字符串是否符合给定的正则表达式</li>
- * </ol>
+ * <p>正则表达式工具类</p>
+ * <p>提供正则表达式匹配、提取等功能，支持Pattern缓存以提升性能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>正则表达式匹配和查找</li>
+ * <li>从文本中提取匹配内容</li>
+ * <li>中文检测和提取</li>
+ * <li>数字提取（支持实数）</li>
+ * <li>URL、日期、IPv4地址提取</li>
+ * <li>Pattern缓存机制</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -214,7 +222,7 @@ public final class RegexUtil {
         // 过滤掉非法数字（含有多个小数点）
         return candidates.stream()
                 .filter(candidate -> !candidate.matches(REGEX_ILLEGAL_NUMBER))
-                .map(NumberUtil::parse)
+                .map(NumberUtil::parseToBigDecimal)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
@@ -226,7 +234,7 @@ public final class RegexUtil {
      * @param str 需要判断的字符串
      * @return 如果包含汉字则返回为true，否则为false
      */
-    public static boolean containChinese(String str) {
+    public static boolean containsChinese(String str) {
         return PATTERN_CHINESE.matcher(str).find();
     }
 
@@ -256,7 +264,7 @@ public final class RegexUtil {
      * @param str 需要提取的字符串
      * @return 提取出来的所有的中文
      */
-    public static List<String> extractChinese(String str) {
+    public static List<String> extractAllChineses(String str) {
         return extractAll(REGEX_CHINESE, str);
     }
 
@@ -266,7 +274,7 @@ public final class RegexUtil {
      * @param str 需要提取的字符串
      * @return 提取出来的所有的yyyy-MM-dd格式的日期
      */
-    public static List<String> extractDate(String str) {
+    public static List<String> extractAllDates(String str) {
         return extractAll(REGEX_DATE, str);
     }
 
@@ -276,7 +284,7 @@ public final class RegexUtil {
      * @param str 需要提取的字符串
      * @return 提取出来的所有的IPv4地址
      */
-    public static List<String> extractIpv4(String str) {
+    public static List<String> extractAllIpv4s(String str) {
         return extractAll(REGEX_IPV4, str);
     }
 
@@ -286,7 +294,7 @@ public final class RegexUtil {
      * @param str 需要提取的字符串
      * @return 提取出来的所有的url地址
      */
-    public static List<String> extractUrl(String str) {
+    public static List<String> extractAllUrls(String str) {
         return extractAll(REGEX_URL, str);
     }
 }

@@ -4,7 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 十六进制字符串转换为点分十进制表示法（OID格式）
+ * <p>OID（对象标识符）工具类</p>
+ * <p>提供OID的十六进制与点分十进制格式之间的互相转换功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>十六进制字符串转点分十进制OID</li>
+ * <li>点分十进制OID转十六进制字符串</li>
+ * <li>支持Base128编码/解码</li>
+ * <li>OID格式验证</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

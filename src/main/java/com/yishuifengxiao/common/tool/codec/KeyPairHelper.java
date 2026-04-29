@@ -8,12 +8,25 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * <p>密钥对生成与操作工具类</p>
+ * <p>提供多种非对称加密算法的密钥对生成、格式转换和信息提取功能。</p>
+ * <p>支持的算法：</p>
+ * <ul>
+ * <li>ECC（椭圆曲线加密）- 支持多种曲线如secp256r1、secp384r1等</li>
+ * <li>RSA（非对称加密）</li>
+ * <li>DSA（数字签名算法）</li>
+ * </ul>
+ *
+ * @author yishui
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class KeyPairHelper {
 
     private static final Map<String, String> ECC_CURVE_OID_MAP = new HashMap<>();
 
     static {
-        // 初始化常见ECC曲线OID映射
         ECC_CURVE_OID_MAP.put("1.2.840.10045.3.1.7", "secp256r1");
         ECC_CURVE_OID_MAP.put("1.3.132.0.34", "secp384r1");
         ECC_CURVE_OID_MAP.put("1.3.132.0.35", "secp521r1");
@@ -24,6 +37,11 @@ public class KeyPairHelper {
 
     /**
      * 根据算法类型和参数生成密钥对
+     *
+     * @param algorithm 算法类型，支持"EC"、"RSA"、"DSA"
+     * @param parameter 算法参数，EC算法传入曲线名称或OID，RSA/DSA传入密钥大小（整数）
+     * @return 生成的密钥对
+     * @throws RuntimeException 密钥对生成失败时抛出
      */
     public static KeyPair generateKeyPair(String algorithm, Object parameter) {
         try {
@@ -32,22 +50,17 @@ public class KeyPairHelper {
             if ("EC".equals(algorithm)) {
                 if (parameter instanceof String) {
                     String param = (String) parameter;
-                    // 判断是OID还是曲线名称
                     if (param.contains(".")) {
-                        // 可能是OID
                         String curveName = ECC_CURVE_OID_MAP.get(param);
                         if (curveName != null) {
                             keyPairGenerator.initialize(new ECGenParameterSpec(curveName));
                         } else {
-                            // 如果不是已知OID，尝试直接作为曲线名称使用
                             keyPairGenerator.initialize(new ECGenParameterSpec(param));
                         }
                     } else {
-                        // 直接作为曲线名称
                         keyPairGenerator.initialize(new ECGenParameterSpec(param));
                     }
                 } else if (parameter instanceof Integer) {
-                    // 对于EC，参数应该是曲线名称或OID，不是整数大小
                     throw new IllegalArgumentException("EC算法需要曲线名称或OID，而不是密钥大小");
                 }
             } else if ("RSA".equals(algorithm) || "DSA".equals(algorithm)) {
@@ -67,6 +80,9 @@ public class KeyPairHelper {
 
     /**
      * 根据ECC曲线OID生成密钥对
+     *
+     * @param curveOID 曲线OID，如"1.2.840.10045.3.1.7"（secp256r1）
+     * @return 生成的ECC密钥对
      */
     public static KeyPair generateECCKeyPairByOID(String curveOID) {
         return generateKeyPair("EC", curveOID);
@@ -74,6 +90,9 @@ public class KeyPairHelper {
 
     /**
      * 生成RSA密钥对
+     *
+     * @param keySize 密钥长度，通常为1024、2048或4096
+     * @return 生成的RSA密钥对
      */
     public static KeyPair generateRSAKeyPair(int keySize) {
         return generateKeyPair("RSA", keySize);
@@ -81,6 +100,9 @@ public class KeyPairHelper {
 
     /**
      * 生成DSA密钥对
+     *
+     * @param keySize 密钥长度
+     * @return 生成的DSA密钥对
      */
     public static KeyPair generateDSAKeyPair(int keySize) {
         return generateKeyPair("DSA", keySize);
@@ -88,6 +110,11 @@ public class KeyPairHelper {
 
     /**
      * 使用安全随机数生成ECC密钥对
+     *
+     * @param curveOID      曲线OID
+     * @param secureRandom 安全随机数生成器
+     * @return 生成的ECC密钥对
+     * @throws RuntimeException 密钥对生成失败时抛出
      */
     public static KeyPair generateSecureECCKeyPairByOID(String curveOID, SecureRandom secureRandom) {
         try {
@@ -108,7 +135,9 @@ public class KeyPairHelper {
     }
 
     /**
-     * 获取密钥信息
+     * 打印密钥基本信息
+     *
+     * @param keyPair 密钥对对象
      */
     public static void printKeyInfo(KeyPair keyPair) {
         PublicKey publicKey = keyPair.getPublic();
@@ -120,7 +149,6 @@ public class KeyPairHelper {
         System.out.println("私钥格式: " + privateKey.getFormat());
         System.out.println("私钥长度: " + privateKey.getEncoded().length + " bytes");
 
-        // 对于EC密钥，可以获取更多信息
         if (publicKey instanceof java.security.interfaces.ECPublicKey) {
             java.security.interfaces.ECPublicKey ecPublicKey = (java.security.interfaces.ECPublicKey) publicKey;
             System.out.println("曲线: " + ecPublicKey.getParams().toString());
@@ -128,7 +156,10 @@ public class KeyPairHelper {
     }
 
     /**
-     * 编码密钥为Base64
+     * 将密钥编码为Base64字符串
+     *
+     * @param key 密钥对象
+     * @return Base64编码的密钥字符串
      */
     public static String encodeKeyToBase64(Key key) {
         return Base64.getEncoder().encodeToString(key.getEncoded());
@@ -136,20 +167,27 @@ public class KeyPairHelper {
 
     /**
      * 获取支持的ECC曲线OID列表
+     *
+     * @return OID字符串数组
      */
     public static String[] getSupportedECCurveOIDs() {
         return ECC_CURVE_OID_MAP.keySet().toArray(new String[0]);
     }
 
     /**
-     * 添加自定义ECC曲线映射
+     * 添加自定义ECC曲线OID映射
+     *
+     * @param oid       曲线OID
+     * @param curveName 曲线名称
      */
     public static void addECCurveMapping(String oid, String curveName) {
         ECC_CURVE_OID_MAP.put(oid, curveName);
     }
 
     /**
-     * 获取支持的ECC曲线OID列表
+     * 获取支持的ECC曲线OID列表（别名方法）
+     *
+     * @return OID字符串数组
      */
     public static String[] getSupportedCurveOIDs() {
         return ECC_CURVE_OID_MAP.keySet().toArray(new String[0]);
@@ -157,6 +195,9 @@ public class KeyPairHelper {
 
     /**
      * 根据OID获取曲线名称
+     *
+     * @param curveOID 曲线OID
+     * @return 曲线名称，未知OID返回null
      */
     public static String getCurveNameByOID(String curveOID) {
         return ECC_CURVE_OID_MAP.get(curveOID);
@@ -164,6 +205,8 @@ public class KeyPairHelper {
 
     /**
      * 打印密钥对详细信息
+     *
+     * @param keyPair 密钥对对象
      */
     public static void printKeyDetails(KeyPair keyPair) {
         PublicKey publicKey = keyPair.getPublic();
@@ -179,16 +222,18 @@ public class KeyPairHelper {
         System.out.println(encodeKeyToBase64(privateKey));
     }
 
+    /**
+     * 根据曲线名称生成ECC密钥对
+     *
+     * @param curveName 曲线名称，如"secp256r1"
+     * @return 生成的ECC密钥对
+     * @throws RuntimeException 密钥对生成失败时抛出
+     */
     public static KeyPair generateECCKeyPair(String curveName) {
         try {
-            // 获取ECC密钥对生成器实例
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
-
-            // 初始化椭圆曲线参数
             ECGenParameterSpec ecSpec = new ECGenParameterSpec(curveName);
             keyPairGenerator.initialize(ecSpec);
-
-            // 生成密钥对
             return keyPairGenerator.generateKeyPair();
 
         } catch (NoSuchAlgorithmException e) {
@@ -199,7 +244,10 @@ public class KeyPairHelper {
     }
 
     /**
-     * 从 KeyPair 获取公钥的 Hex 值
+     * 从密钥对获取公钥的十六进制表示
+     *
+     * @param keyPair 密钥对对象
+     * @return 公钥的十六进制字符串
      */
     public static String getPublicKeyHex(KeyPair keyPair) {
         PublicKey publicKey = keyPair.getPublic();
@@ -211,13 +259,16 @@ public class KeyPairHelper {
         } else if (publicKey instanceof ECPublicKey) {
             return getECPublicKeyHex((ECPublicKey) publicKey);
         } else {
-            // 通用方法：获取编码后的字节数组
             return bytesToHex(publicKey.getEncoded());
         }
     }
 
     /**
-     * 从 KeyPair 获取私钥 D 值的 Hex 值
+     * 从密钥对获取私钥D值的十六进制表示
+     *
+     * @param keyPair 密钥对对象
+     * @return 私钥D值的十六进制字符串
+     * @throws UnsupportedOperationException 不支持的私钥类型
      */
     public static String getPrivateKeyDHex(KeyPair keyPair) {
         PrivateKey privateKey = keyPair.getPrivate();
@@ -234,7 +285,10 @@ public class KeyPairHelper {
     }
 
     /**
-     * 获取 RSA 公钥的 Hex 值（模数 N）
+     * 获取RSA公钥的十六进制表示（模数N）
+     *
+     * @param rsaPublicKey RSA公钥对象
+     * @return 模数的十六进制字符串
      */
     private static String getRSAPublicKeyHex(RSAPublicKey rsaPublicKey) {
         BigInteger modulus = rsaPublicKey.getModulus();
@@ -242,16 +296,21 @@ public class KeyPairHelper {
     }
 
     /**
-     * 获取 RSA 私钥 D 值的 Hex 值
+     * 获取RSA私钥D值的十六进制表示
+     *
+     * @param rsaPrivateKey RSA私钥对象
+     * @return 私有指数的十六进制字符串
      */
     private static String getRSAPrivateKeyDHex(RSAPrivateKey rsaPrivateKey) {
-        // 对于 RSA 私钥，D 值是私有指数
         BigInteger privateExponent = rsaPrivateKey.getPrivateExponent();
         return bigIntegerToHex(privateExponent);
     }
 
     /**
-     * 获取 DSA 公钥的 Hex 值（公钥 Y）
+     * 获取DSA公钥的十六进制表示（公钥Y）
+     *
+     * @param dsaPublicKey DSA公钥对象
+     * @return 公钥Y的十六进制字符串
      */
     private static String getDSAPublicKeyHex(DSAPublicKey dsaPublicKey) {
         BigInteger y = dsaPublicKey.getY();
@@ -259,7 +318,10 @@ public class KeyPairHelper {
     }
 
     /**
-     * 获取 DSA 私钥 D 值的 Hex 值（私钥 X）
+     * 获取DSA私钥D值的十六进制表示（私钥X）
+     *
+     * @param dsaPrivateKey DSA私钥对象
+     * @return 私钥X的十六进制字符串
      */
     private static String getDSAPrivateKeyDHex(DSAPrivateKey dsaPrivateKey) {
         BigInteger x = dsaPrivateKey.getX();
@@ -267,16 +329,16 @@ public class KeyPairHelper {
     }
 
     /**
-     * 获取 EC 公钥的 Hex 值（编码后的点）
+     * 获取EC公钥的十六进制表示（未压缩格式）
+     *
+     * @param ecPublicKey EC公钥对象
+     * @return 公钥点的十六进制字符串（04 + X + Y）
      */
     private static String getECPublicKeyHex(ECPublicKey ecPublicKey) {
-        // 获取椭圆曲线上的点
         java.security.spec.ECPoint point = ecPublicKey.getW();
         BigInteger x = point.getAffineX();
         BigInteger y = point.getAffineY();
 
-        // 转换为未压缩格式: 04 + X + Y
-        // 使用固定长度的十六进制表示，每个坐标32字节（64字符）
         String xHex = bigIntegerToFixedLengthHex(x, 32);
         String yHex = bigIntegerToFixedLengthHex(y, 32);
 
@@ -284,39 +346,39 @@ public class KeyPairHelper {
     }
 
     /**
-     * 将 BigInteger 转换为固定长度的十六进制字符串
+     * 将BigInteger转换为固定长度的十六进制字符串
+     *
+     * @param bigInt      要转换的BigInteger
+     * @param targetBytes 目标字节长度
+     * @return 固定长度的十六进制字符串
      */
     private static String bigIntegerToFixedLengthHex(BigInteger bigInt, int targetBytes) {
-        // 获取BigInteger的字节数组表示
         byte[] bytes = bigInt.toByteArray();
 
-        // 处理符号位：如果第一个字节是0（表示正数且最高位为0），则移除它
         if (bytes.length > targetBytes && bytes[0] == 0) {
             byte[] trimmedBytes = new byte[bytes.length - 1];
             System.arraycopy(bytes, 1, trimmedBytes, 0, trimmedBytes.length);
             bytes = trimmedBytes;
         }
 
-        // 如果字节数仍然大于目标长度，截取后面的部分
         if (bytes.length > targetBytes) {
             byte[] result = new byte[targetBytes];
             System.arraycopy(bytes, bytes.length - targetBytes, result, 0, targetBytes);
             bytes = result;
-        }
-        // 如果字节数小于目标长度，前面补零
-        else if (bytes.length < targetBytes) {
+        } else if (bytes.length < targetBytes) {
             byte[] result = new byte[targetBytes];
             System.arraycopy(bytes, 0, result, targetBytes - bytes.length, bytes.length);
-            // 前面的字节保持为0（默认值）
             bytes = result;
         }
 
         return bytesToHex(bytes);
     }
 
-
     /**
-     * 获取 EC 私钥 D 值的 Hex 值（私钥 S）
+     * 获取EC私钥D值的十六进制表示
+     *
+     * @param ecPrivateKey EC私钥对象
+     * @return 私钥S的十六进制字符串
      */
     private static String getECPrivateKeyDHex(ECPrivateKey ecPrivateKey) {
         BigInteger s = ecPrivateKey.getS();
@@ -324,7 +386,10 @@ public class KeyPairHelper {
     }
 
     /**
-     * 将 BigInteger 转换为 Hex 字符串
+     * 将BigInteger转换为十六进制字符串
+     *
+     * @param bigInt 要转换的BigInteger
+     * @return 十六进制字符串
      */
     private static String bigIntegerToHex(BigInteger bigInt) {
         byte[] bytes = bigInt.toByteArray();
@@ -333,6 +398,9 @@ public class KeyPairHelper {
 
     /**
      * 将字节数组转换为十六进制字符串
+     *
+     * @param bytes 字节数组
+     * @return 十六进制字符串
      */
     private static String bytesToHex(byte[] bytes) {
         StringBuilder hexString = new StringBuilder();
@@ -347,7 +415,9 @@ public class KeyPairHelper {
     }
 
     /**
-     * 获取密钥对详细信息
+     * 打印密钥对详细信息（包含十六进制值）
+     *
+     * @param keyPair 密钥对对象
      */
     public static void printKeyPairDetails(KeyPair keyPair) {
         System.out.println("=== 密钥对详细信息 ===");

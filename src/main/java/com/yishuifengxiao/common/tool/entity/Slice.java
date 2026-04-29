@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.entity;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,10 +10,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import java.io.Serializable;
-
 /**
- * 基础分页查询参数
+ * <p>基础分页对象</p>
+ * <p>提供分页参数的基础实现，包括分页大小和当前页码。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>默认分页大小为10</li>
+ * <li>默认页码从1开始</li>
+ * <li>支持计算分页偏移量</li>
+ * <li>提供空值安全的参数获取方法</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

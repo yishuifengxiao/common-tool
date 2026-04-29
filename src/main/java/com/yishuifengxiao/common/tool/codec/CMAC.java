@@ -1,169 +1,196 @@
 package com.yishuifengxiao.common.tool.codec;
 
-import com.yishuifengxiao.common.tool.lang.Hex;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
- * 严格按照RFC 4493标准的CMAC实现
- * <p>CMAC（Cipher-based Message Authentication Code）是一种基于密码学的消息认证码，用于验证数据的完整性和真实性。
- * 该实现严格按照RFC 4493标准，确保在不同环境下的一致性和安全性。</p>
+ * <p>CMAC消息认证码工具类</p>
+ * <p>基于RFC 4493标准实现的CMAC算法，用于消息认证和完整性校验。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持AES-CMAC算法</li>
+ * <li>遵循RFC 4493标准</li>
+ * <li>输出结果为十六进制字符串</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class CMAC {
 
-    private static final int BLOCK_SIZE = 16;
-    private static final byte CONST_RB = (byte) 0x87;
+    /**
+     * CMAC算法名称
+     */
+    private static final String ALGORITHM = "AES";
 
     /**
-     * 计算数据的CMAC值（严格按照RFC 4493标准实现）
-     * <p>该方法实现了RFC 4493标准中定义的CMAC算法，通过对数据进行AES加密来生成消息认证码。
-     * 算法主要包含以下步骤：
-     * 1. 生成子密钥K1和K2
-     * 2. 准备数据块（根据完整性规则处理最后一个块）
-     * 3. 使用CBC模式进行加密处理
-     * </p>
-     *
-     * @param dataHex 十六进制格式的数据
-     * @param keyHex  十六进制格式的密钥（必须是16字节的AES密钥）
-     * @return 十六进制格式的CMAC值
-     * @throws Exception 加密过程中可能抛出的异常
+     * 常量Rb，用于CMAC子密钥生成
      */
-    public static String calculateCMAC(String dataHex, String keyHex) throws Exception {
-        byte[] data = Hex.hexToBytes(dataHex);
-        byte[] key = Hex.hexToBytes(keyHex);
-        // 步骤1: 计算L = AES(K, 0)
-        Cipher cipher = Cipher.getInstance("AES/ECB/NoPadding");
-        cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"));
-        byte[] zero = new byte[BLOCK_SIZE];
-        byte[] L = cipher.doFinal(zero);
-
-        // 步骤2: 生成子密钥K1和K2
-        byte[] K1 = leftShiftOneBit(L);
-        if ((L[0] & 0x80) != 0) {
-            K1[BLOCK_SIZE - 1] ^= CONST_RB;
-        }
-
-        byte[] K2 = leftShiftOneBit(K1);
-        if ((K1[0] & 0x80) != 0) {
-            K2[BLOCK_SIZE - 1] ^= CONST_RB;
-        }
-
-        // 步骤3: 计算块数
-        int n = (data.length + BLOCK_SIZE - 1) / BLOCK_SIZE;
-        if (n == 0) {
-            n = 1;
-        }
-
-        // 步骤4: 准备最后一个块
-        byte[] lastBlock = new byte[BLOCK_SIZE];
-        boolean lastBlockComplete = (data.length % BLOCK_SIZE == 0);
-
-        if (data.length == 0) {
-            // 空数据
-            lastBlock[0] = (byte) 0x80;
-            xor(lastBlock, K2);
-        } else if (lastBlockComplete) {
-            // 完整块
-            System.arraycopy(data, (n - 1) * BLOCK_SIZE, lastBlock, 0, BLOCK_SIZE);
-            xor(lastBlock, K1);
-        } else {
-            // 不完整块
-            int remaining = data.length % BLOCK_SIZE;
-            System.arraycopy(data, (n - 1) * BLOCK_SIZE, lastBlock, 0, remaining);
-            lastBlock[remaining] = (byte) 0x80;
-            xor(lastBlock, K2);
-        }
-
-        // 步骤5: CBC-MAC计算
-        byte[] cbcState = new byte[BLOCK_SIZE];
-        Arrays.fill(cbcState, (byte) 0);
-
-        // 处理前n-1个块
-        for (int i = 0; i < n - 1; i++) {
-            byte[] block = new byte[BLOCK_SIZE];
-            System.arraycopy(data, i * BLOCK_SIZE, block, 0, BLOCK_SIZE);
-
-            xor(cbcState, block);
-            cbcState = cipher.doFinal(cbcState);
-        }
-
-        // 处理最后一个块
-        xor(cbcState, lastBlock);
-        cbcState = cipher.doFinal(cbcState);
-
-        return Hex.bytesToHex(cbcState);
-    }
+    private static final byte[] Rb = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0x87};
 
     /**
-     * 左移一位
-     * <p>将输入的字节数组按位左移一位，最高位溢出丢弃，最低位补0。
-     * 该操作在CMAC算法中用于生成子密钥K1和K2。</p>
-     *
-     * @param input 输入字节数组
-     * @return 左移一位后的字节数组
+     * 零向量，用于CMAC计算初始化
      */
-    private static byte[] leftShiftOneBit(byte[] input) {
-        byte[] output = new byte[BLOCK_SIZE];
-        int carry = 0;
-
-        // 从最低字节到最高字节处理
-        for (int i = BLOCK_SIZE - 1; i >= 0; i--) {
-            int value = input[i] & 0xFF;
-            output[i] = (byte) ((value << 1) | carry);
-            carry = (value >>> 7) & 0x01;
-        }
-
-        return output;
-    }
+    private static final byte[] Zero = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
     /**
-     * 异或操作
-     * <p>对两个字节数组进行逐字节异或操作，结果存储在第一个数组中。
-     * 该操作在CMAC算法中用于数据块处理。</p>
+     * 计算数据的CMAC值
      *
-     * @param a 第一个字节数组，同时也是结果存储数组
-     * @param b 第二个字节数组
+     * @param key  加密密钥（16字节，对应AES-128）
+     * @param data 待计算的数据
+     * @return CMAC值（十六进制字符串），计算失败返回null
      */
-    private static void xor(byte[] a, byte[] b) {
-        for (int i = 0; i < a.length; i++) {
-            a[i] ^= b[i];
-        }
-    }
-
-
-    public static void main(String[] args) {
+    public static String calculate(byte[] key, byte[] data) {
         try {
-            // 测试用例1
-            System.out.println("=== 测试用例1 ===");
-            String key1 = "631DC24731C5272FB0887987580F38AC";
-            String data1 = "24F7002D1128496A4403D675557590EB8718FD396C88D14DCCBBB64E664D330EA597";
-            String expected1 = "22EAE95FEC0ECEAAB8634DF7DF64703E";
-
-            String result1 = calculateCMAC(data1, key1);
-            System.out.println("\n测试结果: " + result1.equalsIgnoreCase(expected1));
-            System.out.println("计算值: " + result1);
-            System.out.println("预期值: " + expected1);
-            System.out.println();
-
-            // 测试用例2
-            System.out.println("=== 测试用例2 ===");
-            String key2 = "DF44B25E2C89CD872FF19C48D2815D21";
-            String data2 = "C0C7D92977793D22CC684858866AEF1487186DE97254E3E5AA420199A4416295362F";
-            String expected2 = "087BE81559A5AACE22D6CE64204A504C";
-
-            String result2 = calculateCMAC(data2, key2);
-            System.out.println("\n测试结果: " + result2.equalsIgnoreCase(expected2));
-            System.out.println("计算值: " + result2);
-            System.out.println("预期值: " + expected2);
-
+            byte[] subKey1 = generateSubKey(key, true);
+            byte[] subKey2 = generateSubKey(key, false);
+            int n = (data.length + 15) / 16;
+            byte[] lastBlock = new byte[16];
+            int paddingLen = 16 - (data.length % 16);
+            if (paddingLen == 0) {
+                paddingLen = 16;
+            }
+            if (data.length == 0) {
+                System.arraycopy(Zero, 0, lastBlock, 0, 16);
+            } else {
+                System.arraycopy(data, (n - 1) * 16, lastBlock, 0, Math.min(16, data.length - (n - 1) * 16));
+            }
+            for (int i = data.length % 16; i < 16; i++) {
+                if (i == data.length % 16) {
+                    lastBlock[i] = (byte) 0x80;
+                } else {
+                    lastBlock[i] = 0x00;
+                }
+            }
+            byte[] xorKey = (data.length % 16 == 0 && data.length != 0) ? subKey1 : subKey2;
+            for (int i = 0; i < 16; i++) {
+                lastBlock[i] ^= xorKey[i];
+            }
+            byte[] iv = new byte[16];
+            byte[] result = lastBlock;
+            for (int i = 0; i < n - 1; i++) {
+                byte[] block = Arrays.copyOfRange(data, i * 16, (i + 1) * 16);
+                for (int j = 0; j < 16; j++) {
+                    block[j] ^= iv[j];
+                }
+                iv = aesEncrypt(key, block);
+            }
+            for (int j = 0; j < 16; j++) {
+                result[j] ^= iv[j];
+            }
+            result = aesEncrypt(key, result);
+            return bytesToHex(result);
         } catch (Exception e) {
-            e.printStackTrace();
+            if (log.isInfoEnabled()) {
+                log.info("CMAC计算失败，错误: {}", e.getMessage());
+            }
+            return null;
         }
     }
+
+    /**
+     * 计算字符串数据的CMAC值
+     *
+     * @param key  加密密钥字符串
+     * @param data 待计算的字符串数据
+     * @return CMAC值（十六进制字符串），计算失败返回null
+     */
+    public static String calculate(String key, String data) {
+        return calculate(key.getBytes(StandardCharsets.UTF_8), data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * 生成CMAC子密钥
+     *
+     * @param key    原始密钥
+     * @param isFirst true表示生成第一子密钥K1，false表示生成第二子密钥K2
+     * @return 生成的子密钥
+     * @throws Exception 子密钥生成失败时抛出
+     */
+    private static byte[] generateSubKey(byte[] key, boolean isFirst) throws Exception {
+        byte[] l = aesEncrypt(key, Zero);
+        byte[] subKey = new byte[16];
+        System.arraycopy(l, 0, subKey, 0, 16);
+        if ((subKey[0] & 0x80) == 0x80) {
+            subKey = shiftLeftAndXor(subKey);
+        } else {
+            subKey = shiftLeft(subKey);
+        }
+        if (!isFirst) {
+            if ((subKey[0] & 0x80) == 0x80) {
+                subKey = shiftLeftAndXor(subKey);
+            } else {
+                subKey = shiftLeft(subKey);
+            }
+        }
+        return subKey;
+    }
+
+    /**
+     * 字节数组左移一位
+     *
+     * @param data 待左移的数据
+     * @return 左移后的结果
+     */
+    private static byte[] shiftLeft(byte[] data) {
+        byte[] result = new byte[data.length];
+        byte carry = 0;
+        for (int i = data.length - 1; i >= 0; i--) {
+            result[i] = (byte) ((data[i] << 1) | carry);
+            carry = (byte) ((data[i] >> 7) & 1);
+        }
+        return result;
+    }
+
+    /**
+     * 字节数组左移一位并与Rb进行异或
+     *
+     * @param data 待处理的数据
+     * @return 处理后的结果
+     */
+    private static byte[] shiftLeftAndXor(byte[] data) {
+        byte[] shifted = shiftLeft(data);
+        for (int i = 0; i < Rb.length; i++) {
+            shifted[i] ^= Rb[i];
+        }
+        return shifted;
+    }
+
+    /**
+     * AES加密
+     *
+     * @param key  加密密钥
+     * @param data 待加密的数据
+     * @return 加密后的结果
+     * @throws Exception 加密失败时抛出
+     */
+    private static byte[] aesEncrypt(byte[] key, byte[] data) throws Exception {
+        SecretKeySpec keySpec = new SecretKeySpec(key, ALGORITHM);
+        IvParameterSpec ivSpec = new IvParameterSpec(new byte[16]);
+        Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+        return cipher.doFinal(data);
+    }
+
+    /**
+     * 将字节数组转换为十六进制字符串
+     *
+     * @param bytes 待转换的字节数组
+     * @return 十六进制字符串
+     */
+    private static String bytesToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : bytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
 }

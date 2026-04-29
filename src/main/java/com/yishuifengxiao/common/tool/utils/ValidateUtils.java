@@ -1,17 +1,23 @@
 package com.yishuifengxiao.common.tool.utils;
 
-import com.yishuifengxiao.common.tool.entity.RootEnum;
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.io.CloseUtil;
-
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.function.Supplier;
 
+import com.yishuifengxiao.common.tool.entity.RootEnum;
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.io.CloseUtil;
+
 /**
- * <p>
- * 异常处理工具
- * </p>
+ * <p>验证与异常处理工具类</p>
+ * <p>提供布尔值验证、异常抛出和错误信息提取功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>布尔值验证（支持允许null的场景）</li>
+ * <li>生成异常Supplier用于流式处理</li>
+ * <li>提取异常堆栈信息</li>
+ * <li>便捷的异常抛出方法</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

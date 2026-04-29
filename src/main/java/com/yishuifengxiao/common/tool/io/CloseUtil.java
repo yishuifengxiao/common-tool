@@ -1,15 +1,19 @@
 package com.yishuifengxiao.common.tool.io;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.Closeable;
 import java.io.Flushable;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * <p>
- * IO流关闭工具
- * </p>
- * 该工具主要目的是优雅地关闭掉各种IO流，从而屏蔽掉因为关闭IO时强制异常捕获代码造成代码优雅性的降低
+ * <p>IO流关闭工具类</p>
+ * <p>优雅地关闭各种IO流，屏蔽关闭时的异常捕获代码，提升代码整洁性。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持批量关闭多个Closeable对象</li>
+ * <li>支持在关闭前自动执行flush操作</li>
+ * <li>异常静默处理，不影响主流程</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

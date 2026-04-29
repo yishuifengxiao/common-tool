@@ -3,19 +3,40 @@
  */
 package com.yishuifengxiao.common.tool.io;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.random.IdWorker;
-import jakarta.validation.constraints.NotNull;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.random.IdWorker;
+
+import jakarta.validation.constraints.NotNull;
+
 /**
- * 文件处理工具
+ * <p>文件处理工具类</p>
+ * <p>提供文件读写、流操作、Base64转换等IO相关功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>文件与字节数组、字符串之间的转换</li>
+ * <li>输入流与输出流的复制操作</li>
+ * <li>classpath资源读取</li>
+ * <li>Base64编码与文件的互相转换</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -59,9 +80,9 @@ public class IoUtil {
      * @return 转换后的字节数组
      * @throws IOException 转换时出现问题
      */
-    public static byte[] file2ByteArray(File file) throws IOException {
+    public static byte[] fileToByteArray(File file) throws IOException {
         try (FileInputStream inputStream = new FileInputStream(file)) {
-            return inputStream2ByteArray(inputStream);
+            return inputStreamToByteArray(inputStream);
         }
     }
 
@@ -74,7 +95,7 @@ public class IoUtil {
      * @return 转换后的字节数组
      * @throws IOException 转换中发生异常
      */
-    public static byte[] inputStream2ByteArray(InputStream inputStream) throws IOException {
+    public static byte[] inputStreamToByteArray(InputStream inputStream) throws IOException {
         if (inputStream == null) {
             return new byte[0];
         }
@@ -96,7 +117,7 @@ public class IoUtil {
      * @return 转换后的字符串
      * @throws IOException 转换中发生异常
      */
-    public static String inputStream2String(InputStream in, String charsetName) throws IOException {
+    public static String inputStreamToString(InputStream in, String charsetName) throws IOException {
         try (InputStreamReader reader = new InputStreamReader(in, charsetName)) {
             try (BufferedReader bw = new BufferedReader(reader)) {
                 String result = bw.lines().collect(Collectors.joining(System.lineSeparator()));
@@ -120,8 +141,8 @@ public class IoUtil {
      * @return 转换后的字符串
      * @throws IOException 转换中发生异常
      */
-    public static String inputStream2String(InputStream in) throws IOException {
-        return inputStream2String(in, Charset.defaultCharset().name());
+    public static String inputStreamToString(InputStream in) throws IOException {
+        return inputStreamToString(in, Charset.defaultCharset().name());
     }
 
     /**
@@ -134,7 +155,7 @@ public class IoUtil {
      * @return 保存后的文件
      * @throws IOException 转换时出现问题
      */
-    public static File inputStream2File(@NotNull InputStream inputStream, @NotNull File file) throws IOException {
+    public static File inputStreamToFile(@NotNull InputStream inputStream, @NotNull File file) throws IOException {
         copy(inputStream, new FileOutputStream(file));
         return file;
     }
@@ -178,7 +199,7 @@ public class IoUtil {
      * @throws IOException 读取时出现问题
      */
     public static <T> String readResourceAsString(Class<T> clazz, String name, String charsetName) throws IOException {
-        return inputStream2String(clazz.getClassLoader().getResourceAsStream(name), charsetName);
+        return inputStreamToString(clazz.getClassLoader().getResourceAsStream(name), charsetName);
     }
 
     /**
@@ -258,7 +279,7 @@ public class IoUtil {
      * @throws IOException 当文件读取过程中发生IO异常时抛出
      */
     public static String readFileAsString(@NotNull File file) throws IOException {
-        return inputStream2String(new FileInputStream(file), StandardCharsets.UTF_8.name());
+        return inputStreamToString(new FileInputStream(file), StandardCharsets.UTF_8.name());
     }
 
 
@@ -271,7 +292,7 @@ public class IoUtil {
      * @throws IOException 当文件读取过程中发生IO异常时抛出
      */
     public static String readFileAsString(@NotNull File file, String charsetName) throws IOException {
-        return inputStream2String(new FileInputStream(file), charsetName);
+        return inputStreamToString(new FileInputStream(file), charsetName);
     }
 
 

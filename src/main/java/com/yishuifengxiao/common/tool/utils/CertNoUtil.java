@@ -1,26 +1,30 @@
 package com.yishuifengxiao.common.tool.utils;
 
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * <p>
- * 身份证号校验工具
- * </p>
- * <p>
- * 该工具主要是为了校验当前数据是否为一个合法的18位身份证号。
- * 18位身份证号码的含义如下：第7、8、9、10位为出生年份(四位数)，第11、第12位为出生月份，
- * 第13、14位代表出生日期，第17位代表性别，奇数为男，偶数为女。
- * </p>
- * <ol>
- * <li>判断给定的字符串是否为一个合法的18位身份证号</li>
- * <li>从合法的身份证号中提取出当前身份证里的出生日期</li>
- * </ol>
+ * <p>身份证号校验工具类</p>
+ * <p>提供18位身份证号的合法性校验和信息提取功能。</p>
+ * <p>18位身份证号码结构：</p>
+ * <ul>
+ * <li>第1-6位：行政区划代码</li>
+ * <li>第7-14位：出生年月日（YYYYMMDD）</li>
+ * <li>第15-17位：顺序码（第17位奇数为男，偶数为女）</li>
+ * <li>第18位：校验码</li>
+ * </ul>
+ * <p>特性：</p>
+ * <ul>
+ * <li>校验18位身份证号的合法性（格式验证+校验码验证）</li>
+ * <li>从身份证号中提取出生日期</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -29,20 +33,20 @@ import java.util.regex.Pattern;
 @Slf4j
 public final class CertNoUtil {
     /**
-     * 18位身份证正则表示
+     * 18位身份证正则表达式
      */
-    private static final Pattern REGEX_18_CARD = Pattern.compile("^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|" +
+    private static final Pattern ID_CARD_18_PATTERN = Pattern.compile("^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|" +
             "(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$");
 
     /**
      * 每位加权因子
      */
-    private static final int[] POWER = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
+    private static final int[] WEIGHT_FACTORS = {7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2};
 
     /**
      * 校验码映射表
      */
-    private static final String[] CHECK_CODES = {"1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"};
+    private static final String[] CHECK_CODE_MAP = {"1", "0", "X", "9", "8", "7", "6", "5", "4", "3", "2"};
 
     /**
      * <p>
@@ -57,21 +61,21 @@ public final class CertNoUtil {
             return false;
         }
         idcard = idcard.trim();
-        if (!REGEX_18_CARD.matcher(idcard).matches()) {
+        if (!ID_CARD_18_PATTERN.matcher(idcard).matches()) {
             return false;
         }
 
         String idcard17 = idcard.substring(0, 17);
         String idcard18Code = idcard.substring(17, 18);
 
-        if (!isDigital(idcard17)) {
+        if (!isNumeric(idcard17)) {
             return false;
         }
 
-        char[] c = idcard17.toCharArray();
-        int[] bit = converCharToInt(c);
-        int sum17 = getPowerSum(bit);
-        String checkCode = getCheckCodeBySum(sum17);
+        char[] chars = idcard17.toCharArray();
+        int[] digits = convertCharsToInts(chars);
+        int sum = calculateWeightedSum(digits);
+        String checkCode = getCheckCodeBySum(sum);
 
         if (checkCode == null || !idcard18Code.equalsIgnoreCase(checkCode)) {
             return false;
@@ -107,55 +111,55 @@ public final class CertNoUtil {
     }
 
     /**
-     * 判断输入的参数是否为纯数字
+     * 判断输入的字符串是否为纯数字
      *
-     * @param str 输入的参数
-     * @return true表示为纯数字
+     * @param str 输入的字符串
+     * @return true表示为纯数字，false表示包含非数字字符或为空
      */
-    private static boolean isDigital(String str) {
+    private static boolean isNumeric(String str) {
         return str != null && !str.isEmpty() && str.matches("^[0-9]+$");
     }
 
     /**
-     * 将身份证的每位和对应位的加权因子相乘之后，再得到和值
+     * 将身份证前17位每位数字和对应位的加权因子相乘后求和
      *
-     * @param bit
-     * @return
+     * @param digits 身份证前17位数字数组
+     * @return 加权求和结果
      */
-    private static int getPowerSum(int[] bit) {
+    private static int calculateWeightedSum(int[] digits) {
         int sum = 0;
-        for (int i = 0; i < bit.length; i++) {
-            sum += bit[i] * POWER[i];
+        for (int i = 0; i < digits.length; i++) {
+            sum += digits[i] * WEIGHT_FACTORS[i];
         }
         return sum;
     }
 
     /**
-     * 将和值与11取模得到余数进行校验码判断
+     * 将加权和与11取模得到余数，通过余数获取校验码
      *
-     * @param sum17
-     * @return 校验位
+     * @param weightedSum 加权和
+     * @return 校验码，如果余数超出范围则返回null
      */
-    private static String getCheckCodeBySum(int sum17) {
-        int remainder = sum17 % 11;
-        if (remainder >= 0 && remainder < CHECK_CODES.length) {
-            return CHECK_CODES[remainder];
+    private static String getCheckCodeBySum(int weightedSum) {
+        int remainder = weightedSum % 11;
+        if (remainder >= 0 && remainder < CHECK_CODE_MAP.length) {
+            return CHECK_CODE_MAP[remainder];
         }
         return null;
     }
 
     /**
-     * 将字符数组转为整型数组
+     * 将字符数组转换为整型数组
      *
-     * @param c
-     * @return
+     * @param chars 字符数组，每个元素应为'0'-'9'的字符
+     * @return 转换后的整型数组
      */
-    private static int[] converCharToInt(char[] c) {
-        int[] a = new int[c.length];
-        for (int i = 0; i < c.length; i++) {
-            a[i] = c[i] - '0';
+    private static int[] convertCharsToInts(char[] chars) {
+        int[] result = new int[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            result[i] = chars[i] - '0';
         }
-        return a;
+        return result;
     }
 
 }

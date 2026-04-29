@@ -301,7 +301,7 @@ public enum BoolStat implements RootEnum {
      * @param falseVal 状态值不为true时返回的值
      * @return 转换后的值
      */
-    public static Number bool2Int(BoolStat bool, Number trueVal, Number falseVal) {
+    public static Number boolToInt(BoolStat bool, Number trueVal, Number falseVal) {
         return isTrue(bool) ? trueVal : falseVal;
     }
 

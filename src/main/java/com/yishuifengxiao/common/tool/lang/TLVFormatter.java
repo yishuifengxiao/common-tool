@@ -1,7 +1,5 @@
 package com.yishuifengxiao.common.tool.lang;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
@@ -9,10 +7,27 @@ import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * TLV格式字符串解析工具类
+ * <p>TLV格式字符串格式化工具类</p>
+ * <p>提供TLV数据的格式化输出和类型转换功能，支持多种编码格式输入。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持十六进制和Base64编码输入</li>
+ * <li>支持PEM格式解析</li>
+ * <li>美化输出TLV结构（支持缩进）</li>
+ * <li>自动识别并转换多种ASN.1类型（UTF8String、INTEGER、OID等）</li>
+ * <li>支持OID含义查询</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

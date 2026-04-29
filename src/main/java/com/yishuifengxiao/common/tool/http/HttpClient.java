@@ -1,23 +1,33 @@
 package com.yishuifengxiao.common.tool.http;
 
-import com.yishuifengxiao.common.tool.utils.Assert;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Connection;
-import org.jsoup.Jsoup;
-
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.X509TrustManager;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
+
+import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+
+import com.yishuifengxiao.common.tool.utils.Assert;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * <p>
- * 基于jsoup实现的简单的http请求客户端
- * </p>
+ * <p>基于jsoup实现的简单HTTP请求客户端</p>
+ * <p>提供便捷的HTTP请求封装，支持GET/POST/PUT/DELETE等常用HTTP方法。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持链式调用构建请求</li>
+ * <li>支持自动User-Agent</li>
+ * <li>支持表单和JSON两种提交方式</li>
+ * <li>支持HTTPS请求（跳过证书验证）</li>
+ * <li>支持自定义请求头和Cookie</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

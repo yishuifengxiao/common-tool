@@ -34,9 +34,9 @@ public class TLV_parse_Test {
         String data = "9F07053003A00101";
         TLV tlv1 = TLV.of(data).parse("9F07");
         assertEquals("3003A00101", tlv1.getValue());
-        TLV tlv2 = tlv1.parse("30");  // 使用parseValue进行链式解析
+        TLV tlv2 = tlv1.parse("30");  // 使用parse进行链式解析
         assertEquals("A00101", tlv2.getValue());
-        TLV tlv3 = tlv2.parse("A0");  // 使用parseValue进行链式解析
+        TLV tlv3 = tlv2.parse("A0");  // 使用parse进行链式解析
         assertEquals("01", tlv3.getValue());
     }
 

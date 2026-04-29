@@ -35,7 +35,7 @@ public class JsonUtil_str2Bean2_Test {
     @Test
     public void testStr2Bean_ValidJson() throws Exception {
         String json = "{\"name\":\"John\",\"age\":30}";
-        TestBean result = JsonUtil.str2Bean(json, TestBean.class, false);
+        TestBean result = JsonUtil.strToBean(json, TestBean.class, false);
 
         assertNotNull(result);
         assertEquals("John", result.getName());
@@ -49,7 +49,7 @@ public class JsonUtil_str2Bean2_Test {
     @Test
     public void testStr2Bean_BlankString() {
         String json = "   ";
-        TestBean result = JsonUtil.str2Bean(json, TestBean.class, false);
+        TestBean result = JsonUtil.strToBean(json, TestBean.class, false);
 
         assertNull(result);
     }
@@ -60,7 +60,7 @@ public class JsonUtil_str2Bean2_Test {
      */
     @Test
     public void testStr2Bean_NullInput() {
-        TestBean result = JsonUtil.str2Bean(null, TestBean.class, false);
+        TestBean result = JsonUtil.strToBean(null, TestBean.class, false);
 
         assertNull(result);
     }
@@ -72,7 +72,7 @@ public class JsonUtil_str2Bean2_Test {
     @Test
     public void testStr2Bean_InvalidJson() {
         String json = "{invalid json}";
-        TestBean result = JsonUtil.str2Bean(json, TestBean.class, false);
+        TestBean result = JsonUtil.strToBean(json, TestBean.class, false);
 
         assertNull(result);
     }
@@ -84,7 +84,7 @@ public class JsonUtil_str2Bean2_Test {
     @Test
     public void testStr2Bean_FailOnUnknownPropertiesTrue() {
         String json = "{\"name\":\"John\",\"age\":30,\"unknown\":\"value\"}";
-        TestBean result = JsonUtil.str2Bean(json, TestBean.class, true);
+        TestBean result = JsonUtil.strToBean(json, TestBean.class, true);
 
         assertNull(result);
     }
@@ -96,7 +96,7 @@ public class JsonUtil_str2Bean2_Test {
     @Test
     public void testStr2Bean_FailOnUnknownPropertiesFalse() {
         String json = "{\"name\":\"John\",\"age\":30,\"unknown\":\"value\"}";
-        TestBean result = JsonUtil.str2Bean(json, TestBean.class, false);
+        TestBean result = JsonUtil.strToBean(json, TestBean.class, false);
 
         assertNotNull(result);
         assertEquals("John", result.getName());
@@ -110,7 +110,7 @@ public class JsonUtil_str2Bean2_Test {
     @Test
     public void testStr2Bean_JsonWithWhitespace() throws Exception {
         String json = "  { \"name\" : \"John\" , \"age\" : 30 }  ";
-        TestBean result = JsonUtil.str2Bean(json, TestBean.class, false);
+        TestBean result = JsonUtil.strToBean(json, TestBean.class, false);
 
         assertNotNull(result);
         assertEquals("John", result.getName());

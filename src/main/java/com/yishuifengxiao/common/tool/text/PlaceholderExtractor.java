@@ -1,17 +1,32 @@
 package com.yishuifengxiao.common.tool.text;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
+/**
+ * <p>占位符提取工具类</p>
+ * <p>提供字符串中${...}格式占位符的提取和替换功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>提取所有占位符名称</li>
+ * <li>提取占位符详细信息（位置、内容）</li>
+ * <li>批量替换占位符</li>
+ * </ul>
+ *
+ * @author yishui
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class PlaceholderExtractor {
 
     /**

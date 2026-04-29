@@ -1,21 +1,4 @@
-/*******************************************************************************
- * Copyright (C) 2023 Fred D7e (https://github.com/yafred)
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- ******************************************************************************/
 package com.yishuifengxiao.common.tool.asn1;
-
 
 import com.yishuifengxiao.common.tool.lang.Hex;
 
@@ -24,44 +7,103 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.BitSet;
 
+/**
+ * <p>
+ * BER读取器
+ * </p>
+ * <p>提供从输入流中读取ASN.1 BER编码数据的功能，支持标签读取、长度解析、以及各种数据类型的解码。</p>
+ *
+ * @author yishuifengxiao
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class BERReader {
-    private static byte[] bitMask =
-        new byte[] {(byte)0x80, (byte)0x40, (byte)0x20, (byte)0x10, (byte)0x08, (byte)0x04, (byte)0x02, (byte)0x01};
-    private java.io.InputStream in = null;
 
     /**
-     * Length
+     * 位掩码数组，用于位操作
+     */
+    private static final byte[] BIT_MASK = new byte[]{(byte) 0x80, (byte) 0x40, (byte) 0x20, (byte) 0x10,
+            (byte) 0x08, (byte) 0x04, (byte) 0x02, (byte) 0x01};
+
+    /**
+     * 输入流
+     */
+    private final java.io.InputStream in;
+
+    /**
+     * 长度字段的字节长度
      */
     private int lengthLength;
-    private int lengthValue;
-    private byte[] lengthBuffer = new byte[10];
 
     /**
-     * Tag
+     * 长度值
+     */
+    private int lengthValue;
+
+    /**
+     * 长度缓冲区
+     */
+    private final byte[] lengthBuffer = new byte[10];
+
+    /**
+     * 标签的字节数
      */
     private int tagNumBytes;
-    private byte[] tagBuffer = new byte[10];
+
+    /**
+     * 标签缓冲区
+     */
+    private final byte[] tagBuffer = new byte[10];
+
+    /**
+     * 标签是否匹配
+     */
     private boolean tagMatched = true;
 
     /**
-     * Trace
+     * 追踪缓冲区
      */
     private byte[] traceBuffer = null;
-    private int traceIndex = 0;
-    private boolean isTraceBufferEnabled = false;
-    private int traceBufferIncrement = 500;
 
+    /**
+     * 追踪索引
+     */
+    private int traceIndex = 0;
+
+    /**
+     * 是否启用追踪缓冲区
+     */
+    private boolean isTraceBufferEnabled = false;
+
+    /**
+     * 追踪缓冲区增量
+     */
+    private final int traceBufferIncrement = 500;
+
+    /**
+     * 构造函数
+     *
+     * @param in 输入流
+     */
     public BERReader(java.io.InputStream in) {
         this.in = in;
     }
 
     /**
-     * Returns number of bytes received since last call to reset() (or creation of this object).
+     * 获取自上次reset()调用以来接收的字节数
+     *
+     * @return 字节数
      */
     public int getTraceLength() {
         return traceIndex;
     }
 
+    /**
+     * 读取一个字符
+     *
+     * @return 字符值
+     * @throws IOException 读取异常
+     */
     private int readChar() throws IOException {
         int value = in.read();
 
@@ -71,7 +113,7 @@ public class BERReader {
 
         if (isTraceBufferEnabled) {
             checkTraceBufferSize();
-            traceBuffer[traceIndex] = (byte)value;
+            traceBuffer[traceIndex] = (byte) value;
         }
 
         traceIndex++;
@@ -79,6 +121,12 @@ public class BERReader {
         return value;
     }
 
+    /**
+     * 必须匹配指定的标签
+     *
+     * @param tag 标签字节数组
+     * @throws Exception 标签不匹配异常
+     */
     public void mustMatchTag(byte[] tag) throws Exception {
         if (tagNumBytes != tag.length) {
             throw new Exception("Expected size: " + tag.length + ", actual: " + tagNumBytes);
@@ -91,6 +139,12 @@ public class BERReader {
         this.tagMatched = true;
     }
 
+    /**
+     * 预查标签是否匹配多个候选标签之一
+     *
+     * @param tags 标签数组数组
+     * @return 是否匹配
+     */
     public boolean lookAheadTag(byte[][] tags) {
         boolean foundMatch = false;
 
@@ -111,6 +165,12 @@ public class BERReader {
         return foundMatch;
     }
 
+    /**
+     * 匹配标签
+     *
+     * @param tag 标签字节数组
+     * @return 是否匹配
+     */
     public boolean matchTag(byte[] tag) {
         tagMatched = false;
         if (tagNumBytes == tag.length) {
@@ -126,23 +186,22 @@ public class BERReader {
     }
 
     /**
+     * 读取标签
      *
-     * @throws IOException
+     * @throws IOException 读取异常
      */
     public void readTag() throws IOException {
-
         boolean isLastByte = false;
         tagNumBytes = 1;
 
-        // read first byte
-        tagBuffer[0] = (byte)readChar();
+        tagBuffer[0] = (byte) readChar();
 
-        if ((tagBuffer[0] & 0x1F) != 0x1F) { // short form
+        if ((tagBuffer[0] & 0x1F) != 0x1F) {
             isLastByte = true;
         }
 
         for (int i = 1; !isLastByte; i++) {
-            tagBuffer[i] = (byte)readChar();
+            tagBuffer[i] = (byte) readChar();
             tagNumBytes++;
 
             if ((tagBuffer[i] & 0x80) == 0) {
@@ -150,29 +209,34 @@ public class BERReader {
             }
         }
 
-        // switch toggle (will be set again when length is read ... meaning that tag has been matched)
         tagMatched = false;
     }
 
     /**
+     * 获取标签长度
      *
-     * @return
+     * @return 标签字节数
      */
     public int getTagLength() {
         return tagNumBytes;
     }
 
     /**
+     * 获取标签字节数组
      *
-     * @return
+     * @return 标签字节数组
      */
     public byte[] getTag() {
         byte[] ret = new byte[tagNumBytes];
         System.arraycopy(tagBuffer, 0, ret, 0, tagNumBytes);
-
         return ret;
     }
 
+    /**
+     * 必须读取零长度
+     *
+     * @throws Exception 长度不为零异常
+     */
     public void mustReadZeroLength() throws Exception {
         readLength();
         if (getLengthLength() != 1 || getLengthValue() != 0) {
@@ -181,25 +245,25 @@ public class BERReader {
     }
 
     /**
-     * @throws IOException
+     * 读取长度字段
+     *
+     * @throws IOException 读取异常
      */
     public void readLength() throws IOException {
-        // if we read a length, this means that preceding tag has been recognized
         tagMatched = true;
 
-        lengthLength = 0; // length of length
-        lengthValue = 0; // value of length
+        lengthLength = 0;
+        lengthValue = 0;
 
         int lengthBufferIndex = 0;
         int aByte = readChar();
-        lengthBuffer[lengthBufferIndex++] = (byte)aByte;
+        lengthBuffer[lengthBufferIndex++] = (byte) aByte;
 
         if (aByte == 0x80) {
             lengthLength = 1;
             lengthValue = -1;
         } else {
-            if (aByte > 0x7f) { // long form
-
+            if (aByte > 0x7f) {
                 int nBytes = (aByte & 0x7f);
 
                 if (nBytes > 4) {
@@ -211,21 +275,23 @@ public class BERReader {
 
                 for (int i = nBytes; i > 0; i--) {
                     aByte = readChar();
-                    lengthBuffer[lengthBufferIndex++] = (byte)aByte;
+                    lengthBuffer[lengthBufferIndex++] = (byte) aByte;
                     lengthValue += (aByte << ((i - 1) * 8));
                 }
-            } else { // short form
+            } else {
                 lengthLength = 1;
                 lengthValue = aByte;
             }
         }
     }
 
-    // Reminder on java types
-    // byte 8 bits
-    // short 16 bits
-    // int 32 bits
-    // long 64 bits
+    /**
+     * 读取Byte类型值
+     *
+     * @param nBytes 字节数
+     * @return Byte值
+     * @throws IOException 读取异常
+     */
     public Byte readByte(int nBytes) throws IOException {
         if (nBytes > 1) {
             throw new RuntimeException("Size of Byte cannot be " + nBytes);
@@ -233,6 +299,13 @@ public class BERReader {
         return readBigInteger(nBytes).byteValue();
     }
 
+    /**
+     * 读取Short类型值
+     *
+     * @param nBytes 字节数
+     * @return Short值
+     * @throws IOException 读取异常
+     */
     public Short readShort(int nBytes) throws IOException {
         if (nBytes > 2) {
             throw new RuntimeException("Size of Short cannot be " + nBytes);
@@ -240,6 +313,13 @@ public class BERReader {
         return readBigInteger(nBytes).shortValue();
     }
 
+    /**
+     * 读取Integer类型值
+     *
+     * @param nBytes 字节数
+     * @return Integer值
+     * @throws IOException 读取异常
+     */
     public Integer readInteger(int nBytes) throws IOException {
         if (nBytes > 5) {
             throw new RuntimeException("Size of Integer cannot be " + nBytes);
@@ -247,6 +327,13 @@ public class BERReader {
         return readBigInteger(nBytes).intValue();
     }
 
+    /**
+     * 读取Long类型值
+     *
+     * @param nBytes 字节数
+     * @return Long值
+     * @throws IOException 读取异常
+     */
     public Long readLong(int nBytes) throws IOException {
         if (nBytes > 8) {
             throw new RuntimeException("Size of Long cannot be " + nBytes);
@@ -254,28 +341,52 @@ public class BERReader {
         return readBigInteger(nBytes).longValue();
     }
 
+    /**
+     * 读取BigInteger类型值
+     *
+     * @param nBytes 字节数
+     * @return BigInteger值
+     * @throws IOException 读取异常
+     */
     public java.math.BigInteger readBigInteger(int nBytes) throws IOException {
         return new java.math.BigInteger(readOctetString(nBytes));
     }
 
+    /**
+     * 读取受限字符字符串
+     *
+     * @param nBytes 字节数
+     * @return 字符串
+     * @throws IOException 读取异常
+     */
     public String readRestrictedCharacterString(int nBytes) throws IOException {
         byte[] buffer = new byte[nBytes];
 
         for (int i = 0; i < nBytes; i++) {
-            buffer[i] = (byte)readChar();
+            buffer[i] = (byte) readChar();
         }
 
         return new String(buffer);
     }
 
+    /**
+     * 读取十六进制字符串
+     *
+     * @param nBytes 字节数
+     * @return 十六进制字符串
+     * @throws IOException 读取异常
+     */
     public String readHexString(int nBytes) throws IOException {
         byte[] buffer = new byte[nBytes];
-
         return Hex.bytesToHex(buffer);
     }
 
     /**
-     * Reads a bitstring encoded as primitive value
+     * 读取位串
+     *
+     * @param nBytes 字节数
+     * @return BitSet对象
+     * @throws IOException 读取异常
      */
     public BitSet readBitString(int nBytes) throws IOException {
         if (nBytes < 1) {
@@ -286,16 +397,14 @@ public class BERReader {
             byte b = (byte) readChar();
             byte[] byteArray = {b};
             return BitSet.valueOf(byteArray);
-//            return new BitSet(0);
         }
 
         byte[] copy = new byte[nBytes];
 
         for (int i = 0; i < nBytes; i++) {
-            copy[i] = (byte)readChar();
+            copy[i] = (byte) readChar();
         }
 
-        // first byte is number of padding bits
         int numSignificantBitInLastByte = 8 - copy[0];
 
         BitSet result = new BitSet();
@@ -303,18 +412,16 @@ public class BERReader {
         int bitIndex = 0;
         int byteIndex = 0;
 
-        // handle full bytes
         for (byteIndex = 1; byteIndex < (nBytes - 1); byteIndex++) {
             for (int k = 0; k < 8; k++, bitIndex++) {
-                if ((copy[byteIndex] & bitMask[k]) != 0x00) {
+                if ((copy[byteIndex] & BIT_MASK[k]) != 0x00) {
                     result.set(bitIndex);
                 }
             }
         }
 
-        // handle last byte
         for (int k = 0; k < numSignificantBitInLastByte; k++, bitIndex++) {
-            if ((copy[byteIndex] & bitMask[k]) != 0x00) {
+            if ((copy[byteIndex] & BIT_MASK[k]) != 0x00) {
                 result.set(bitIndex);
             }
         }
@@ -322,75 +429,90 @@ public class BERReader {
         return result;
     }
 
+    /**
+     * 读取对象标识符
+     *
+     * @param nBytes 字节数
+     * @return OID数组
+     * @throws IOException 读取异常
+     */
     public long[] readObjectIdentifier(int nBytes) throws IOException {
-        ArrayList<Long> objectIdentifier = new ArrayList<Long>();
+        ArrayList<Long> objectIdentifier = new ArrayList<>();
         byte[] buffer = readOctetString(nBytes);
         long arc = -1;
         long mult = 1;
         for (int i = nBytes - 1; i >= 0; i--) {
             if ((buffer[i] & 0x80) == 0x00) {
                 if (arc != -1) {
-                    objectIdentifier.add(0, Long.valueOf(arc));
+                    objectIdentifier.add(0, arc);
                 }
                 arc = buffer[i];
                 mult = 1;
             } else {
-                // mult *= 128;
                 mult = Math.multiplyExact(mult, 128);
-                // arc += mult * (buffer[i] & 0x7F);
-                arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F))); // detect overflow
+                arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F)));
             }
         }
         if (arc < 40) {
-            objectIdentifier.add(0, Long.valueOf(arc));
-            objectIdentifier.add(0, Long.valueOf(0));
+            objectIdentifier.add(0, arc);
+            objectIdentifier.add(0, 0L);
         } else if (arc < 80) {
-            objectIdentifier.add(0, Long.valueOf(arc - 40));
-            objectIdentifier.add(0, Long.valueOf(1));
+            objectIdentifier.add(0, arc - 40);
+            objectIdentifier.add(0, 1L);
         } else {
-            objectIdentifier.add(0, Long.valueOf(arc - 80));
-            objectIdentifier.add(0, Long.valueOf(2));
+            objectIdentifier.add(0, arc - 80);
+            objectIdentifier.add(0, 2L);
         }
 
         long[] ret = new long[objectIdentifier.size()];
         int i = 0;
         for (Long arcAsLong : objectIdentifier) {
-            ret[i] = arcAsLong.longValue();
-            i++;
+            ret[i++] = arcAsLong;
         }
         return ret;
     }
 
+    /**
+     * 读取相对对象标识符
+     *
+     * @param nBytes 字节数
+     * @return 相对OID数组
+     * @throws IOException 读取异常
+     */
     public long[] readRelativeOID(int nBytes) throws IOException {
-        ArrayList<Long> objectIdentifier = new ArrayList<Long>();
+        ArrayList<Long> objectIdentifier = new ArrayList<>();
         byte[] buffer = readOctetString(nBytes);
         long arc = -1;
         long mult = 1;
         for (int i = nBytes - 1; i >= 0; i--) {
             if ((buffer[i] & 0x80) == 0x00) {
                 if (arc != -1) {
-                    objectIdentifier.add(0, Long.valueOf(arc));
+                    objectIdentifier.add(0, arc);
                 }
                 arc = buffer[i];
                 mult = 1;
             } else {
-                // mult *= 128;
                 mult = Math.multiplyExact(mult, 128);
-                // arc += mult * (buffer[i] & 0x7F);
-                arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F))); // detect overflow
+                arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F)));
             }
         }
-        objectIdentifier.add(0, Long.valueOf(arc));
+        objectIdentifier.add(0, arc);
 
         long[] ret = new long[objectIdentifier.size()];
         int i = 0;
         for (Long arcAsLong : objectIdentifier) {
-            ret[i] = arcAsLong.longValue();
-            i++;
+            ret[i++] = arcAsLong;
         }
         return ret;
     }
 
+    /**
+     * 读取任意数据（包含标签和长度）
+     *
+     * @param nBytes 数据字节数
+     * @return 字节数组（标签+长度+数据）
+     * @throws IOException 读取异常
+     */
     public byte[] readAny(int nBytes) throws IOException {
         byte[] ret = new byte[tagNumBytes + lengthLength + nBytes];
 
@@ -400,36 +522,48 @@ public class BERReader {
         return ret;
     }
 
+    /**
+     * 读取八位字节串
+     *
+     * @param nBytes 字节数
+     * @return 字节数组
+     * @throws IOException 读取异常
+     */
     public byte[] readOctetString(int nBytes) throws IOException {
         byte[] result = new byte[nBytes];
 
         for (int i = 0; i < nBytes; i++) {
-            result[i] = (byte)readChar();
+            result[i] = (byte) readChar();
         }
 
         return result;
     }
 
-    public Boolean readBoolean(int Bytes) throws IOException {
+    /**
+     * 读取布尔值
+     *
+     * @param bytes 字节数
+     * @return Boolean值
+     * @throws IOException 读取异常
+     */
+    public Boolean readBoolean(int bytes) throws IOException {
         int value = readChar();
-
-        if (value == 0) {
-            return Boolean.valueOf(false);
-        } else {
-            return Boolean.valueOf(true);
-        }
+        return value != 0;
     }
 
     /**
-     * Enables bufferization for trace purposes. Keeps all bytes received until reset() is called.
+     * 启用/禁用追踪缓冲区
+     *
+     * @param state 是否启用
      */
     public void setTraceBufferEnabled(boolean state) {
         this.isTraceBufferEnabled = state;
     }
 
     /**
-     * Provides a buffer containing all the bytes that have been received since enableTraceBuffer(true) or reset() was
-     * called. Returns null if nothing has been traced.
+     * 获取追踪缓冲区
+     *
+     * @return 追踪缓冲区字节数组
      */
     public byte[] getTraceBuffer() {
         byte[] copy = null;
@@ -443,14 +577,14 @@ public class BERReader {
     }
 
     /**
-     * Resets index and hence the trace.
+     * 重置追踪索引
      */
     public void reset() {
         traceIndex = 0;
     }
 
     /**
-     * Checks traceBuffer is big enough. Enlarges it otherwise.
+     * 检查追踪缓冲区大小
      */
     private void checkTraceBufferSize() {
         if (traceBuffer == null) {
@@ -464,31 +598,50 @@ public class BERReader {
         }
     }
 
+    /**
+     * 获取长度字段的字节长度
+     *
+     * @return 长度字段字节数
+     */
     public int getLengthLength() {
         return lengthLength;
     }
 
+    /**
+     * 获取长度值
+     *
+     * @return 长度值
+     */
     public int getLengthValue() {
         return lengthValue;
     }
 
+    /**
+     * 获取长度字节数组
+     *
+     * @return 长度字节数组
+     */
     public byte[] getLength() {
         byte[] ret = new byte[lengthLength];
         System.arraycopy(lengthBuffer, 0, ret, 0, lengthLength);
-
         return ret;
     }
 
-    /*
-     * False when a tag has just been read
-     * True when a length has been read or a match method has been successful
+    /**
+     * 标签是否已匹配
+     *
+     * @return 是否匹配
      */
     public boolean isTagMatched() {
         return tagMatched;
     }
 
+    /**
+     * 设置标签匹配状态
+     *
+     * @param tagMatched 是否匹配
+     */
     public void setTagMatched(boolean tagMatched) {
         this.tagMatched = tagMatched;
     }
-
 }

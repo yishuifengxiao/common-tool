@@ -8,11 +8,20 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 /**
- * <p>
- * 在线性时间内抽取主题类（新闻、博客等）网页的正文。 采用了<b>基于行块分布函数</b>的方法，为保持通用性没有针对特定网站编写规则。
- * </p>
+ * <p>网页正文抽取工具类</p>
+ * <p>在线性时间内抽取主题类（新闻、博客等）网页的正文内容。</p>
+ * <p>采用基于行块分布函数的方法，为保持通用性没有针对特定网站编写规则。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>自动过滤HTML标签、脚本、样式</li>
+ * <li>剔除广告链接和噪声内容</li>
+ * <li>基于行块分布算法提取正文</li>
+ * <li>支持阈值调整以平衡准确率和召回率</li>
+ * </ul>
  *
  * @author Chen Xin(xchen@ir.hit.edu.cn)
+ * @version 1.0.0
+ * @since 1.0.0
  */
 public final class TextExtract {
 

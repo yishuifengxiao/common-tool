@@ -45,7 +45,7 @@ public class JsonUtil_strList_Test {
     @Test
     public void testStr2List_NormalCase() {
         String json = "[{\"name\":\"Alice\",\"age\":25},{\"name\":\"Bob\",\"age\":30}]";
-        List<TestClass> result = JsonUtil.str2List(json, TestClass.class, false);
+        List<TestClass> result = JsonUtil.strToList(json, TestClass.class, false);
 
         assertEquals(2, result.size());
         assertEquals("Alice", result.get(0).getName());
@@ -60,7 +60,7 @@ public class JsonUtil_strList_Test {
      */
     @Test
     public void testStr2List_NullJson() {
-        List<TestClass> result = JsonUtil.str2List(null, TestClass.class, false);
+        List<TestClass> result = JsonUtil.strToList(null, TestClass.class, false);
         assertTrue(result.isEmpty());
     }
 
@@ -71,7 +71,7 @@ public class JsonUtil_strList_Test {
     @Test
     public void testStr2List_NullClazz() {
         String json = "[{\"name\":\"Alice\",\"age\":25}]";
-        List<TestClass> result = JsonUtil.str2List(json, null, false);
+        List<TestClass> result = JsonUtil.strToList(json, null, false);
         assertTrue(result.isEmpty());
     }
 
@@ -81,7 +81,7 @@ public class JsonUtil_strList_Test {
      */
     @Test
     public void testStr2List_EmptyString() {
-        List<TestClass> result = JsonUtil.str2List("", TestClass.class, false);
+        List<TestClass> result = JsonUtil.strToList("", TestClass.class, false);
         assertTrue(result.isEmpty());
     }
 
@@ -91,7 +91,7 @@ public class JsonUtil_strList_Test {
      */
     @Test
     public void testStr2List_BlankString() {
-        List<TestClass> result = JsonUtil.str2List("   ", TestClass.class, false);
+        List<TestClass> result = JsonUtil.strToList("   ", TestClass.class, false);
         assertTrue(result.isEmpty());
     }
 
@@ -102,7 +102,7 @@ public class JsonUtil_strList_Test {
     @Test
     public void testStr2List_InvalidJson() {
         String json = "[{\"name\":\"Alice\",\"age\":25}";
-        List<TestClass> result = JsonUtil.str2List(json, TestClass.class, false);
+        List<TestClass> result = JsonUtil.strToList(json, TestClass.class, false);
         assertTrue(result.isEmpty());
     }
 
@@ -113,7 +113,7 @@ public class JsonUtil_strList_Test {
     @Test
     public void testStr2List_FailOnUnknownProperties() {
         String json = "[{\"name\":\"Alice\",\"age\":25,\"unknown\":\"value\"}]";
-        List<TestClass> result = JsonUtil.str2List(json, TestClass.class, true);
+        List<TestClass> result = JsonUtil.strToList(json, TestClass.class, true);
         assertTrue(result.isEmpty());
     }
 
@@ -124,7 +124,7 @@ public class JsonUtil_strList_Test {
     @Test
     public void testStr2List_IgnoreUnknownProperties() {
         String json = "[{\"name\":\"Alice\",\"age\":25,\"unknown\":\"value\"}]";
-        List<TestClass> result = JsonUtil.str2List(json, TestClass.class, false);
+        List<TestClass> result = JsonUtil.strToList(json, TestClass.class, false);
 
         assertEquals(1, result.size());
         assertEquals("Alice", result.get(0).getName());
@@ -138,7 +138,7 @@ public class JsonUtil_strList_Test {
     @Test
     public void testStr2List_EmptyJsonArray() {
         String json = "[]";
-        List<TestClass> result = JsonUtil.str2List(json, TestClass.class, false);
+        List<TestClass> result = JsonUtil.strToList(json, TestClass.class, false);
         assertTrue(result.isEmpty());
     }
 }

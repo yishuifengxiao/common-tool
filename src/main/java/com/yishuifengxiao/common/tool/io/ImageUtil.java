@@ -1,20 +1,32 @@
 package com.yishuifengxiao.common.tool.io;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Base64;
 
+import javax.imageio.ImageIO;
+
+import org.apache.commons.lang3.StringUtils;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
- * <p>
- * base64与图片转换工具
- * </p>
- * <p>
- * 该工具的主要作用是实现图片与base64字符串之间的互相转换.
- * </p>
+ * <p>图片与Base64转换工具类</p>
+ * <p>提供图片文件、BufferedImage与Base64字符串之间的互相转换功能。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>支持本地图片文件转Base64</li>
+ * <li>支持Base64字符串转图片文件</li>
+ * <li>支持BufferedImage与Base64互转</li>
+ * <li>自动处理Base64格式前缀</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0
@@ -45,9 +57,9 @@ public final class ImageUtil {
      * @return base64字符串
      * @throws IOException 转换时发生问题
      */
-    public static String imageToBase64ByLocal(String imgPath) throws IOException {
+    public static String imageFileToBase64(String imgPath) throws IOException {
         // 返回Base64编码过的字节数组字符串
-        return imageToBase64ByLocal(new File(imgPath));
+        return imageFileToBase64(new File(imgPath));
     }
 
     /**
@@ -62,7 +74,7 @@ public final class ImageUtil {
      * @return base64字符串
      * @throws IOException 转换时发生问题
      */
-    public static String imageToBase64ByLocal(File image) throws IOException {
+    public static String imageFileToBase64(File image) throws IOException {
         InputStream inputStream = null;
         byte[] data = null;
         // 读取图片字节数组
@@ -141,7 +153,7 @@ public final class ImageUtil {
      * @param image 需要转换的图片
      * @return 转换后的字符串
      */
-    public static String image2Base64(BufferedImage image) {
+    public static String imageToBase64(BufferedImage image) {
         if (null == image) {
             return null;
         }
@@ -174,12 +186,12 @@ public final class ImageUtil {
      * @param image 需要转换的图片
      * @return 转换后的字符串
      */
-    public static String image2Base64Png(BufferedImage image) {
+    public static String imageToBase64WithPngHeader(BufferedImage image) {
         if (null == image) {
             return null;
         }
 
-        return new StringBuffer(BASE64_PNG_PREFIX).append(image2Base64(image)).toString();
+        return new StringBuffer(BASE64_PNG_PREFIX).append(imageToBase64(image)).toString();
 
     }
 

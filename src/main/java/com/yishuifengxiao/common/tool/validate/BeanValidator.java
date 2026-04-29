@@ -1,16 +1,23 @@
 package com.yishuifengxiao.common.tool.validate;
 
 
+import java.util.Collections;
+import java.util.Set;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.groups.Default;
 
-import java.util.Collections;
-import java.util.Set;
-
 /**
- * 校验工具类
+ * <p>Bean校验工具类</p>
+ * <p>基于Jakarta Bean Validation提供对象校验功能，支持分组校验。</p>
+ * <p>特性：</p>
+ * <ul>
+ * <li>使用默认分组或指定分组校验</li>
+ * <li>返回完整校验结果或仅第一条错误信息</li>
+ * <li>Validator实例线程安全，静态初始化</li>
+ * </ul>
  *
  * @author yishui
  * @version 1.0.0

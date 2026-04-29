@@ -1,21 +1,4 @@
-/*******************************************************************************
- * Copyright (C) 2023 Fred D7e (https://github.com/yafred)
- * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
- * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
- * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
- * Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
- * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
- * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
- * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- ******************************************************************************/
 package com.yishuifengxiao.common.tool.asn1;
-
 
 import com.yishuifengxiao.common.tool.lang.Hex;
 
@@ -23,30 +6,88 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.BitSet;
 
+/**
+ * <p>
+ * BER写入器
+ * </p>
+ * <p>提供将ASN.1数据编码为BER格式并写入输出流的功能，支持整数、布尔值、字符串、位串、对象标识符等类型。</p>
+ *
+ * @author yishuifengxiao
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public class BERWriter {
-    static byte[] bitMask =
-        new byte[] {(byte)0x80, (byte)0x40, (byte)0x20, (byte)0x10, (byte)0x08, (byte)0x04, (byte)0x02, (byte)0x01};
-    private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
-    OutputStream out = null;
-    byte[] buffer = null;
-    int dataSize = 0;
-    boolean flushFlag = false; // true when buffer has been written to out and no data has been encoded yet.
-    int increment;
 
+    /**
+     * 位掩码数组，用于位操作
+     */
+    private static final byte[] BIT_MASK = new byte[]{(byte) 0x80, (byte) 0x40, (byte) 0x20, (byte) 0x10,
+            (byte) 0x08, (byte) 0x04, (byte) 0x02, (byte) 0x01};
+
+    /**
+     * 十六进制字符数组
+     */
+    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+
+    /**
+     * 输出流
+     */
+    private final OutputStream out;
+
+    /**
+     * 缓冲区
+     */
+    private byte[] buffer = null;
+
+    /**
+     * 数据大小
+     */
+    private int dataSize = 0;
+
+    /**
+     * 刷新标志
+     */
+    private boolean flushFlag = false;
+
+    /**
+     * 缓冲区增量
+     */
+    private final int increment;
+
+    /**
+     * 构造函数
+     *
+     * @param out       输出流
+     * @param initialSize 初始大小
+     * @param increment   增量大小
+     */
     public BERWriter(OutputStream out, int initialSize, int increment) {
         this.out = out;
         this.increment = increment;
         buffer = new byte[initialSize];
     }
 
+    /**
+     * 构造函数（使用默认初始大小和增量）
+     *
+     * @param out 输出流
+     */
     public BERWriter(OutputStream out) {
         this(out, 100, 100);
     }
 
+    /**
+     * 构造函数（无输出流）
+     */
     public BERWriter() {
         this(null);
     }
 
+    /**
+     * 刷新输出
+     *
+     * @throws IOException IO异常
+     */
     public void flush() throws IOException {
         if (out != null) {
             out.write(buffer, buffer.length - dataSize, dataSize);
@@ -55,7 +96,12 @@ public class BERWriter {
         flushFlag = true;
     }
 
-    void increaseDataSize(int nBytes) {
+    /**
+     * 增加数据大小
+     *
+     * @param nBytes 字节数
+     */
+    private void increaseDataSize(int nBytes) {
         if (flushFlag) {
             flushFlag = false;
             dataSize = 0;
@@ -70,42 +116,67 @@ public class BERWriter {
         dataSize += nBytes;
     }
 
-    // Reminder on java types
-    // byte 8bits
-    // short 16 bits
-    // int 32 bits
-    // long 64 bits
+    /**
+     * 写入Byte类型整数
+     *
+     * @param value Byte值
+     * @return 写入的字节数
+     */
     public int writeInteger(Byte value) {
         return writeInteger(value.longValue());
     }
 
+    /**
+     * 写入Short类型整数
+     *
+     * @param value Short值
+     * @return 写入的字节数
+     */
     public int writeInteger(Short value) {
         return writeInteger(value.longValue());
     }
 
+    /**
+     * 写入Integer类型整数
+     *
+     * @param value Integer值
+     * @return 写入的字节数
+     */
     public int writeInteger(Integer value) {
         return writeInteger(value.longValue());
     }
 
+    /**
+     * 写入Long类型整数
+     *
+     * @param value Long值
+     * @return 写入的字节数
+     */
     public int writeInteger(Long value) {
         return writeInteger(java.math.BigInteger.valueOf(value));
     }
 
+    /**
+     * 写入BigInteger类型整数
+     *
+     * @param value BigInteger值
+     * @return 写入的字节数
+     */
     public int writeInteger(java.math.BigInteger value) {
         return writeOctetString(value.toByteArray());
     }
 
-    /*
-     * BitSet is not the best way to hold a bitstring
-     * We have to scan all the bits of the BitSet
+    /**
+     * 写入位串（版本2）
+     *
+     * @param value BitSet值
+     * @return 写入的字节数
      */
     public int writeBitString2(BitSet value) {
-        // find last true bit
         int significantBitNumber = value.length();
 
-        // count number of bytes
         int nBytes = 0;
-        int nPadding = 0; // bit string is left aligned
+        int nPadding = 0;
 
         if (significantBitNumber == 0) {
             nBytes = 0;
@@ -118,7 +189,6 @@ public class BERWriter {
             }
         }
 
-        // put into writer
         increaseDataSize(nBytes);
 
         int currentIndex = buffer.length - dataSize;
@@ -126,7 +196,7 @@ public class BERWriter {
 
         for (int i = 0; i < significantBitNumber; i++) {
             if (value.get(i)) {
-                buffer[currentIndex] |= bitMask[maskId];
+                buffer[currentIndex] |= BIT_MASK[maskId];
             }
 
             if (maskId == 7) {
@@ -137,25 +207,24 @@ public class BERWriter {
             }
         }
 
-        // leading byte is number of unused bit in last byte
         increaseDataSize(1);
 
         buffer[buffer.length - dataSize] = 0;
 
-        return nBytes + 1; // bit string bytes + leading byte (containing num of padding bits)
+        return nBytes + 1;
     }
 
-    /*
-     * BitSet is not the best way to hold a bitstring
-     * We have to scan all the bits of the BitSet
+    /**
+     * 写入位串
+     *
+     * @param value BitSet值
+     * @return 写入的字节数
      */
     public int writeBitString(BitSet value) {
-        // find last true bit
         int significantBitNumber = value.length();
 
-        // count number of bytes
         int nBytes = 0;
-        int nPadding = 0; // bit string is left aligned
+        int nPadding = 0;
 
         if (significantBitNumber == 0) {
             nBytes = 0;
@@ -168,7 +237,6 @@ public class BERWriter {
             }
         }
 
-        // put into writer
         increaseDataSize(nBytes);
 
         int currentIndex = buffer.length - dataSize;
@@ -176,7 +244,7 @@ public class BERWriter {
 
         for (int i = 0; i < significantBitNumber; i++) {
             if (value.get(i)) {
-                buffer[currentIndex] |= bitMask[maskId];
+                buffer[currentIndex] |= BIT_MASK[maskId];
             }
 
             if (maskId == 7) {
@@ -187,24 +255,29 @@ public class BERWriter {
             }
         }
 
-        // leading byte is number of unused bit in last byte
         increaseDataSize(1);
 
         if (nPadding == 0) {
             buffer[buffer.length - dataSize] = 0;
         } else {
-            buffer[buffer.length - dataSize] = (byte)(8 - nPadding);
+            buffer[buffer.length - dataSize] = (byte) (8 - nPadding);
         }
 
-        return nBytes + 1; // bit string bytes + leading byte (containing num of padding bits)
+        return nBytes + 1;
     }
 
+    /**
+     * 写入布尔值
+     *
+     * @param value Boolean值
+     * @return 写入的字节数
+     */
     public int writeBoolean(Boolean value) {
         boolean boolValue = value.booleanValue();
         increaseDataSize(1);
 
         if (boolValue) {
-            buffer[buffer.length - dataSize] = (byte)0xFF;
+            buffer[buffer.length - dataSize] = (byte) 0xFF;
         } else {
             buffer[buffer.length - dataSize] = 0x00;
         }
@@ -212,25 +285,33 @@ public class BERWriter {
         return 1;
     }
 
+    /**
+     * 写入受限字符字符串
+     *
+     * @param value 字符串值
+     * @return 写入的字节数
+     */
     public int writeRestrictedCharacterString(String value) {
         byte[] bytes = value.getBytes();
-
         return writeOctetString(bytes);
     }
 
     /**
-     * value为16进制字符串
-     * @param value
-     * @return
+     * 写入十六进制字符串
+     *
+     * @param value 十六进制字符串
+     * @return 写入的字节数
      */
     public int writeHexString(String value) {
         byte[] bytes = Hex.hexToBytes(value);
-
         return writeOctetString(bytes);
     }
 
     /**
-     * a 32bit int provides for a maximum length of 2147483647 (> 2G)
+     * 写入长度字段
+     *
+     * @param value 长度值
+     * @return 写入的字节数
      */
     public int writeLength(int value) {
         if (value < 0) {
@@ -255,35 +336,50 @@ public class BERWriter {
 
         for (int i = nBytes; i > 1; i--, nShift += 8) {
             increaseDataSize(1);
-            buffer[buffer.length - dataSize] = (byte)(value >> nShift);
+            buffer[buffer.length - dataSize] = (byte) (value >> nShift);
         }
 
-        // first byte is either number of subsequent bytes or the length itself
         increaseDataSize(1);
 
         if (nBytes > 1) {
-            buffer[buffer.length - dataSize] = (byte)((nBytes - 1) | 0x80);
+            buffer[buffer.length - dataSize] = (byte) ((nBytes - 1) | 0x80);
         } else {
-            buffer[buffer.length - dataSize] = (byte)(value);
+            buffer[buffer.length - dataSize] = (byte) value;
         }
 
         return nBytes;
     }
 
+    /**
+     * 写入八位字节串
+     *
+     * @param value 字节数组
+     * @return 写入的字节数
+     */
     public int writeOctetString(byte[] value) {
         increaseDataSize(value.length);
         System.arraycopy(value, 0, buffer, buffer.length - dataSize, value.length);
-
         return value.length;
     }
 
+    /**
+     * 写入单个字节
+     *
+     * @param value 字节值
+     * @return 写入的字节数
+     */
     public int writeByte(byte value) {
         increaseDataSize(1);
         buffer[buffer.length - dataSize] = value;
-
         return 1;
     }
 
+    /**
+     * 写入对象标识符
+     *
+     * @param value OID数组
+     * @return 写入的字节数
+     */
     public int writeObjectIdentifier(long[] value) {
         if (value == null) {
             throw new RuntimeException("Object Identifier cannot be null");
@@ -313,7 +409,7 @@ public class BERWriter {
                 } else {
                     aByte |= 0x80;
                 }
-                writeByte((byte)aByte);
+                writeByte((byte) aByte);
                 size++;
             } while (arc > 0);
         }
@@ -328,13 +424,19 @@ public class BERWriter {
             } else {
                 aByte |= 0x80;
             }
-            writeByte((byte)aByte);
+            writeByte((byte) aByte);
             size++;
         } while (arc > 0);
 
         return size;
     }
 
+    /**
+     * 写入相对对象标识符
+     *
+     * @param value 相对OID数组
+     * @return 写入的字节数
+     */
     public int writeRelativeOID(long[] value) {
         int size = 0;
         for (int i = value.length - 1; i >= 0; i--) {
@@ -348,7 +450,7 @@ public class BERWriter {
                 } else {
                     aByte |= 0x80;
                 }
-                writeByte((byte)aByte);
+                writeByte((byte) aByte);
                 size++;
             } while (arc > 0);
         }
@@ -357,8 +459,9 @@ public class BERWriter {
     }
 
     /**
-     * Provides a buffer containing the encoded data. Returns null if no data has been encoded since the buffer has been
-     * flushed.
+     * 获取追踪缓冲区（编码后的数据）
+     *
+     * @return 编码后的字节数组
      */
     public byte[] getTraceBuffer() {
         byte[] copy = null;
@@ -371,25 +474,41 @@ public class BERWriter {
         return copy;
     }
 
-    // == zc add begin
+    /**
+     * 将字节数组转换为十六进制字符串
+     *
+     * @param bytes 字节数组
+     * @return 十六进制字符串
+     */
     public static String fromBytes(byte[] bytes) {
         return fromBytes(bytes, 0, bytes.length);
     }
 
+    /**
+     * 将字节数组的指定部分转换为十六进制字符串
+     *
+     * @param bytes  字节数组
+     * @param offset 偏移量
+     * @param length 长度
+     * @return 十六进制字符串
+     */
     public static String fromBytes(byte[] bytes, int offset, int length) {
-
         char[] hexChars = new char[length * 2];
         for (int j = 0; j < length; j++) {
             int v = bytes[j + offset] & 0xff;
-            hexChars[j * 2] = hexArray[v >>> 4];
-            hexChars[j * 2 + 1] = hexArray[v & 0x0f];
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0f];
         }
         return new String(hexChars);
     }
 
+    /**
+     * 将字节数组转换为八位字节串格式
+     *
+     * @param bytes 字节数组
+     * @return 八位字节串格式字符串
+     */
     public String bytesToOctetString(byte[] bytes) {
-        String octetString = "'" + fromBytes(bytes) + "'H";
-        return octetString;
+        return "'" + fromBytes(bytes) + "'H";
     }
-    // ==zc add end
 }
