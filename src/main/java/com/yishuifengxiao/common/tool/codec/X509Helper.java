@@ -492,7 +492,7 @@ public class X509Helper {
      */
     private static void extractCipkid(X509Certificate certificate, Cert info) {
         // 从TLV格式的SKID中提取标签为"04"的值作为CIPKID
-        info.setCipkid(TLVUtil.fetchValueFromTlv("04", info.getSkid()));
+        info.setCipkid(TLVUtil.extractValue("04", info.getSkid()));
     }
 
 
@@ -514,7 +514,7 @@ public class X509Helper {
                 if (skidValue != null) {
                     String skid = Hex.bytesToHex(skidValue);
                     // 从TLV格式数据中提取值
-                    return TLVUtil.fetchValueFromTlv("04", skid);
+                    return TLVUtil.extractValue("04", skid);
                 }
             }
         } catch (Exception e) {
