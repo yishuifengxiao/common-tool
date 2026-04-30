@@ -95,17 +95,6 @@ public class TLV implements Serializable {
 
 
     /**
-     * 验证hex数据
-     *
-     * @param data 待验证的字符串数据
-     * @return 如果数据是有效的十六进制格式则返回true，否则返回false
-     */
-    private boolean isValidHex(String data) {
-        return data.matches("^[0-9A-F]*$");
-    }
-
-
-    /**
      * 统一的解析方法 - 支持链式调用
      *
      * @param tag 标签字符串，用于匹配数据开头的标签
@@ -123,7 +112,7 @@ public class TLV implements Serializable {
         this.tag = tag == null ? "" : cleanData(tag);
 
         // 验证数据有效性
-        if (!isValidHex(data)) {
+        if (!Hex.isHex(data)) {
             setError("无效的Hex数据");
             this.remainingData = data; // 修复：解析失败时保留原始数据
             this.value = ""; // 修复：确保value字段不为null
@@ -223,7 +212,7 @@ public class TLV implements Serializable {
 
         String firstByte = data.substring(0, 2);
         // 验证第一个字节是否为有效十六进制
-        if (!isValidHex(firstByte)) {
+        if (!Hex.isHex(firstByte)) {
             return null;
         }
 
@@ -236,21 +225,21 @@ public class TLV implements Serializable {
         // 处理多字节长度标识（第一个字节标识后续长度字节数）
         else if (firstLength == 0x81 && data.length() >= 4) {
             String lengthStr = data.substring(2, 4);
-            if (!isValidHex(lengthStr)) {
+            if (!Hex.isHex(lengthStr)) {
                 return null;
             }
             int length = Integer.parseInt(lengthStr, 16);
             return new LengthInfo(length, 4);
         } else if (firstLength == 0x82 && data.length() >= 6) {
             String lengthStr = data.substring(2, 6);
-            if (!isValidHex(lengthStr)) {
+            if (!Hex.isHex(lengthStr)) {
                 return null;
             }
             int length = Integer.parseInt(lengthStr, 16);
             return new LengthInfo(length, 6);
         } else if (firstLength == 0x83 && data.length() >= 8) {
             String lengthStr = data.substring(2, 8);
-            if (!isValidHex(lengthStr)) {
+            if (!Hex.isHex(lengthStr)) {
                 return null;
             }
             int length = Integer.parseInt(lengthStr, 16);

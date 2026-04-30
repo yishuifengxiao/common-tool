@@ -75,7 +75,7 @@ public class TLVParseTest {
         TLV tlv = TLV.of(emptyData).parse("5F37");
 
         assertFalse(tlv.isSuccess(), "应解析失败");
-        assertEquals("数据为空", tlv.getError(), "错误信息应为 '数据为空'");
+        assertEquals("无效的Hex数据", tlv.getError(), "错误信息应为 '数据为空'");
     }
 
     /**

@@ -99,9 +99,23 @@ public class TLVUtil {
     }
 
     /**
-     * 解析BER-TLV长度字段
+     * 解析BER-TLV编码格式的长度字段
+     * <p>根据BER-TLV编码标准，长度字段分为两种格式：</p>
+     * <ul>
+     * <li>短格式：最高位为0，长度值直接由该字节表示（0-127字节），长度字段占1字节</li>
+     * <li>长格式：最高位为1，低7位表示后续长度字节数，实际长度由后续字节共同表示</li>
+     * </ul>
+     * <p>支持的最大长度字节数为3字节，不支持不定长格式。</p>
+     *
+     * @param data 待解析的十六进制字符串数据，从长度字段起始位置开始
+     * @return LengthParseResult对象，包含：
+     *         <ul>
+     *         <li>startPos: 长度字段结束位置（即值字段开始位置的索引，以字符为单位）</li>
+     *         <li>length: 解析得到的实际数据长度（以字节为单位）</li>
+     *         <li>exception: 解析过程中产生的异常，成功时为null</li>
+     *         </ul>
      */
-    private static LengthParseResult parseLengthField(String data) {
+    public static LengthParseResult parseLengthField(String data) {
         if (data == null || data.length() < 2) {
             return new LengthParseResult(0, 0, new UncheckedException("Not valid TLV data"));
         }
@@ -178,21 +192,22 @@ public class TLVUtil {
     public static TlvResult extractValsOnSameLevel(String tlv, String... tags) {
         tlv = StringUtils.trim(tlv);
         if (!Hex.isHex(tlv)) {
-            return new TlvResult().setException(new UncheckedException("illegal data"));
+            return new TlvResult().setException(new UncheckedException("illegal data")).setRemain(tlv);
         }
         if (null == tags || tags.length == 0) {
-            return new TlvResult().setException(new UncheckedException("no tags provided"));
+            return new TlvResult().setException(new UncheckedException("no tags provided")).setRemain(tlv);
         }
 
         // 依次提取每个标签的值，每次从剩余数据中继续解析
-        TlvResult tlvResult = new TlvResult();
-        String remain = tlv;
+        TlvResult tlvResult = new TlvResult().setRemain(tlv);
+        String input = tlv;
         for (String tag : tags) {
-            TlvResult result = extract(tag, remain);
-            remain = result.getRemain();
-            if (null == result.getException()) {
+            TlvResult result = extract(tag, input);
+            if (result.isSuccess()) {
                 tlvResult.putVal(tag, result.getVal(tag));
             }
+            input = result.getRemain();
+            tlvResult.setRemain(result.getRemain());
         }
         return tlvResult;
     }
@@ -215,17 +230,17 @@ public class TLVUtil {
         }
 
         // 递归提取嵌套标签，每次将当前标签的值作为下一层的输入
-        TlvResult tlvResult = new TlvResult();
-        String remain = tlv;
+        TlvResult tlvResult = new TlvResult().setRemain(tlv);
+        String input = tlv;
         for (String tag : tags) {
-            TlvResult result = extract(tag, remain);
+            TlvResult result = extract(tag, input);
             if (null != result.getException()) {
                 tlvResult.setException(result.getException());
                 break;
             }
             String val = result.getVal(tag);
-            remain = val;
-            tlvResult.putVal(tag, val);
+            input = val;
+            tlvResult.putVal(tag, val).setRemain(result.getRemain());
         }
         return tlvResult;
     }
@@ -244,16 +259,16 @@ public class TLVUtil {
         }
 
         List<String> list = new ArrayList<>();
-        String remain = tlv;
+        String input = tlv;
 
-        while (StringUtils.isNotBlank(remain)) {
-            TlvResult result = extract(tag, remain);
+        while (StringUtils.isNotBlank(input)) {
+            TlvResult result = extract(tag, input);
             if (result.getException() != null) {
                 // 发生错误时返回已收集的结果
                 break;
             }
             list.add(result.getVal(tag));
-            remain = result.getRemain();
+            input = result.getRemain();
         }
 
         return list;
@@ -407,7 +422,7 @@ public class TLVUtil {
     @Accessors(chain = true)
     public static class TlvResult implements Serializable {
         private Map<String, String> map = new HashMap<>();
-        private String remain;
+        private String remain = "";
         private Exception exception;
 
         /**
@@ -445,7 +460,7 @@ public class TLVUtil {
                 return this;
             }
             String trimmedTag = tag.trim().toUpperCase();
-            String trimmedVal = val != null ? val.trim() : "";
+            String trimmedVal = val != null ? val.trim().toUpperCase() : "";
             map.put(trimmedTag, trimmedVal);
             return this;
         }
