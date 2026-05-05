@@ -3,20 +3,11 @@ package com.yishuifengxiao.common.tool.bean;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import java.beans.Introspector;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.lang.invoke.SerializedLambda;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 
 /**
  * <p>
@@ -44,63 +35,88 @@ public final class ClassUtil {
 
     /**
      * 提取类中所有属性字段（包括父类属性）
+     * 默认排除特殊修饰符字段（如transient、@Transient注解、编译器生成字段等）
+     * 该方法为fields(Class<T> clazz, boolean noSpecialModifier)的便捷重载版本
      *
-     * @param <T>   对象类型
-     * @param clazz 待处理的类
-     * @return 所有提取的属性字段列表
+     * @param <T>   对象类型泛型参数
+     * @param clazz 待处理的类，不能为null；如果为null将抛出NullPointerException
+     * @return 所有提取的属性字段列表，包含当前类及其父类的所有非特殊修饰字段；如果clazz为null则抛出NullPointerException
+     * @throws NullPointerException 当clazz参数为null时抛出
+     * @see #fields(Class, boolean)
      */
     public static <T> List<Field> fields(Class<T> clazz) {
-        return fields(clazz, false);
+        // 调用完整版本的方法，默认排除特殊修饰符字段（noSpecialModifier=true）
+        return fields(clazz, true);
     }
 
     /**
      * 获取指定类的所有字段
+     * 提取流程：
+     * 1. 验证输入参数clazz是否为null，为null则抛出NullPointerException
+     * 2. 调用getFieldsFromCache方法从缓存中获取字段列表（支持缓存机制提高性能）
+     * 3. 根据noSpecialModifier参数决定是否过滤特殊修饰符字段
      *
-     * @param clazz              要获取字段的类，不能为null
-     * @param noSpecialModifier 是否包含特殊修饰符字段（transient、@Transient注解等）
-     * @return 类的字段列表
-     * @throws NullPointerException 当clazz参数为null时抛出
+     * @param clazz             要获取字段的类，不能为null；如果为null将抛出NullPointerException
+     * @param noSpecialModifier 是否排除特殊修饰符字段的标志
+     *                          - true: 排除特殊修饰符字段（如transient、@Transient注解、编译器生成字段等）
+     *                          - false: 包含所有字段，不做特殊修饰符过滤
+     * @return 类的字段列表，包含当前类及其父类的所有符合条件的字段；返回不可修改的列表
+     * @throws NullPointerException 当clazz参数为null时抛出，异常信息为"Class cannot be null"
+     * @see #isSpecialModifier(Field)
+     * @see #getFieldsFromCache(Class, boolean)
      */
     public static <T> List<Field> fields(Class<T> clazz, boolean noSpecialModifier) {
+        // 参数校验，确保clazz不为null
         if (clazz == null) {
             throw new NullPointerException("Class cannot be null");
         }
+        // 从缓存中获取字段列表，避免重复反射操作提高性能
         return getFieldsFromCache(clazz, noSpecialModifier);
     }
 
+
     /**
      * 判断字段是否为特殊修饰字段
+     * 检查规则（满足任一条件即为特殊修饰字段）：
+     * 1. null字段
+     * 2. 编译器生成的内部类字段（this$、val$前缀）
+     * 3. 标注了@Transient注解的字段（不参与持久化）
+     * 4. 使用特殊修饰符的字段：transient、static、final、native、abstract
+     * 5. 接口类型的字段
      *
-     * @param field 要检查的字段对象
-     * @return 如果字段是特殊修饰字段（transient、@Transient注解、编译器生成字段）则返回true
+     * @param field 要检查的字段对象，如果为null则返回false
+     * @return 如果字段是特殊修饰字段则返回true，否则返回false
      */
     public static boolean isSpecialModifier(Field field) {
+        // 空值检查，null字段不被视为特殊修饰字段
         if (field == null) {
             return false;
         }
 
+        // 检查是否为编译器生成的内部类字段（this$表示外部类引用，val$表示匿名内部类捕获的变量）
         String fieldName = field.getName();
         if (fieldName.startsWith("this$") || fieldName.startsWith("val$")) {
             return true;
         }
 
-        Class<? extends Annotation> transientAnnotationClass = getTransientAnnotationClass();
-        if (transientAnnotationClass != null && field.isAnnotationPresent(transientAnnotationClass)) {
+       
+        // 检查字段是否具有特殊修饰符或类型：transient（不序列化）、static（类级别）、
+        // final（不可变）、native（本地方法）、abstract（抽象）、interface（接口类型）
+        int modifiers = field.getModifiers();
+        if (Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers) || Modifier.isNative(modifiers) || Modifier.isAbstract(modifiers) || field.getType().isInterface()) {
             return true;
         }
-
-        int modifiers = field.getModifiers();
-        return Modifier.isTransient(modifiers);
+        return false;
     }
 
     /**
      * 从缓存中获取指定类的字段列表
      *
-     * @param clazz              要获取字段的类
+     * @param clazz             要获取字段的类
      * @param noSpecialModifier 是否包含特殊修饰符字段
      * @return 指定类及其父类的所有字段列表
      */
-    private static <T> List<Field> getFieldsFromCache(Class<T> clazz, boolean noSpecialModifier) {
+    private static synchronized <T> List<Field> getFieldsFromCache(Class<T> clazz, boolean noSpecialModifier) {
         String cacheKey = clazz.getName() + ":" + noSpecialModifier;
 
         return FIELDS_CACHE.computeIfAbsent(cacheKey, key -> {
@@ -113,7 +129,6 @@ public final class ClassUtil {
                     for (Field field : declaredFields) {
                         if (field != null) {
                             if (noSpecialModifier || !isSpecialModifier(field)) {
-                                field.setAccessible(true);
                                 result.add(field);
                             }
                         }
@@ -135,36 +150,6 @@ public final class ClassUtil {
      */
     private static volatile Class<? extends Annotation> transientAnnotationClass;
 
-    /**
-     * 获取javax.persistence.Transient注解类并缓存
-     *
-     * @return javax.persistence.Transient注解类，如果不存在则返回null
-     */
-    @SuppressWarnings("unchecked")
-    private static Class<? extends Annotation> getTransientAnnotationClass() {
-        if (transientAnnotationClass != null) {
-            return transientAnnotationClass;
-        }
-
-        synchronized (ClassUtil.class) {
-            if (transientAnnotationClass != null) {
-                return transientAnnotationClass;
-            }
-
-            try {
-                Class<?> clazz = Class.forName("javax.persistence.Transient");
-                if (Annotation.class.isAssignableFrom(clazz)) {
-                    transientAnnotationClass = (Class<? extends Annotation>) clazz;
-                }
-            } catch (ClassNotFoundException e) {
-                if (log.isTraceEnabled()) {
-                    log.trace("未找到 javax.persistence.Transient 类，跳过注解检查");
-                }
-            }
-
-            return transientAnnotationClass;
-        }
-    }
 
     /**
      * 字段查找缓存
@@ -188,7 +173,7 @@ public final class ClassUtil {
             return extractNestedValue(data, trimmedFieldName);
         }
 
-        return extractSimpleValue(data, trimmedFieldName);
+        return getValue(data, trimmedFieldName);
     }
 
     /**
@@ -198,7 +183,7 @@ public final class ClassUtil {
      * @param nestedFieldName 嵌套字段名称，使用点号分隔
      * @return 提取到的字段值，路径中任一对象为null则返回null
      */
-    private static Object extractNestedValue(Object data, String nestedFieldName) {
+    public static Object extractNestedValue(Object data, String nestedFieldName) {
         String[] fieldParts = nestedFieldName.split("\\.");
         Object currentObject = data;
 
@@ -206,7 +191,7 @@ public final class ClassUtil {
             if (currentObject == null) {
                 return null;
             }
-            currentObject = extractSimpleValue(currentObject, fieldPart);
+            currentObject = getValue(currentObject, fieldPart);
         }
 
         return currentObject;
@@ -214,267 +199,94 @@ public final class ClassUtil {
 
     /**
      * 从指定对象中提取简单属性值
+     * 提取流程：
+     * 1. 如果data是Map类型，直接从Map中获取指定key的值
+     * 2. 如果data是普通对象，通过反射机制获取字段值
+     * 3. 查找字段并临时设置accessible为true以访问私有字段
+     * 4. 获取字段值后恢复原始的accessible状态
+     * 5. 发生异常时记录DEBUG日志并返回null
      *
-     * @param data      需要提取属性值的对象（支持普通对象或Map）
-     * @param fieldName 要提取的属性名称
-     * @return 提取到的属性值，未找到或发生异常则返回null
+     * @param data      需要提取属性值的对象，支持普通Java对象或Map类型；如果为null则返回null
+     * @param fieldName 要提取的属性名称，区分大小写；如果为null或空字符串则返回null
+     * @return 提取到的属性值，如果字段不存在、data为null或发生异常则返回null
      */
-    private static Object extractSimpleValue(Object data, String fieldName) {
-        if (data instanceof Map) {
+    public static Object getValue(Object data, String fieldName) {
+        // 处理Map类型对象，直接通过key获取value
+        if (null == data || StringUtils.isBlank(fieldName)) {
+            return null;
+        } else if (data instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) data;
             return map.get(fieldName);
+        } else if (data instanceof Iterable) {
+            return null;
         }
-
+        Field field = null;
+        boolean originalAccessible = false;
         try {
-            Field field = findField(data.getClass(), fieldName);
+            // 通过缓存机制查找指定名称的字段
+            field = findField(data.getClass(), fieldName);
             if (field == null) {
                 return null;
             }
-            field.setAccessible(true);
+            // 保存字段的原始访问权限，并设置为可访问以读取私有字段
+            originalAccessible = field.isAccessible();
+            if (!originalAccessible) {
+                field.setAccessible(true);
+            }
+            // 通过反射获取字段的值
             return field.get(data);
         } catch (IllegalAccessException e) {
-            if (log.isWarnEnabled()) {
-                log.warn("根据属性名获取属性值时发生访问异常，属性名：{}，异常原因：{}", fieldName, e.getMessage(), e);
+            // 记录访问权限异常的DEBUG日志
+            if (log.isDebugEnabled()) {
+                log.debug("根据属性名获取属性值时发生访问异常，属性名：{}，异常原因：{}", fieldName, e);
             }
+            return null;
         } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("根据属性名获取属性值时发生异常，属性名：{}，异常原因：{}", fieldName, e.getMessage());
+            // 记录其他异常的DEBUG日志
+            if (log.isDebugEnabled()) {
+                log.debug("根据属性名获取属性值时发生异常，属性名：{}，异常原因：{}", fieldName, e.getMessage());
+            }
+            return null;
+        } finally {
+            // 无论是否发生异常，都恢复字段的原始访问状态
+            if (field != null && !originalAccessible) {
+                field.setAccessible(originalAccessible);
             }
         }
-        return null;
     }
+
 
     /**
      * 在指定类中查找指定名称的字段
+     * 查找流程：
+     * 1. 构建缓存键（类名:字段名）
+     * 2. 从FIELD_LOOKUP_CACHE中查找，如果已缓存则直接返回
+     * 3. 如果未缓存，调用fields(clazz)获取所有字段列表（包括父类字段）
+     * 4. 遍历字段列表，通过名称匹配找到目标字段
+     * 5. 将结果存入缓存并返回
      *
-     * @param clazz      要查找字段的类
-     * @param fieldName  要查找的字段名称
-     * @return 找到的字段对象，未找到则返回null
+     * @param clazz     要查找字段的类，不能为null
+     * @param fieldName 要查找的字段名称，区分大小写
+     * @return 找到的字段对象，如果未找到则返回null；结果会被缓存以提高后续查询性能
      */
-    private static Field findField(Class<?> clazz, String fieldName) {
+    public static Field findField(Class<?> clazz, String fieldName) {
+        // 构建缓存键，使用类名和字段名的组合作为唯一标识
         String cacheKey = clazz.getName() + ":" + fieldName;
 
+        // 使用缓存机制避免重复查找，提高性能
         return FIELD_LOOKUP_CACHE.computeIfAbsent(cacheKey, key -> {
+            // 获取类的所有字段（包括继承的字段）
             List<Field> allFields = fields(clazz);
+            // 遍历字段列表，通过名称精确匹配查找目标字段
             for (Field field : allFields) {
                 if (field.getName().equals(fieldName)) {
                     return field;
                 }
             }
+            // 未找到匹配的字段，返回null
             return null;
         });
     }
 
-    /**
-     * 字段访问缓存
-     */
-    private static final Map<String, Boolean> FIELD_ACCESSIBLE_CACHE = new ConcurrentHashMap<>();
-
-    /**
-     * 遍历对象所有属性和值
-     *
-     * @param data   待处理的对象
-     * @param action 遍历操作
-     */
-    public static void forEach(Object data, BiConsumer<Field, Object> action) {
-        if (data == null || action == null) {
-            return;
-        }
-
-        List<Field> fields = fields(data.getClass());
-        for (Field field : fields) {
-            try {
-                ensureFieldAccessible(field);
-                Object value = field.get(data);
-                action.accept(field, value);
-            } catch (IllegalAccessException e) {
-                if (log.isWarnEnabled()) {
-                    log.warn("访问字段时发生异常，字段名：{}，异常原因：{}", field.getName(), e.getMessage(), e);
-                }
-            } catch (Exception e) {
-                if (log.isInfoEnabled()) {
-                    log.info("处理字段时发生异常，字段名：{}，异常原因：{}", field.getName(), e.getMessage());
-                }
-            }
-        }
-    }
-
-    /**
-     * 遍历对象所有属性，支持字段过滤
-     *
-     * @param data        待处理的对象
-     * @param action      遍历操作
-     * @param fieldFilter 字段过滤器，返回true表示处理该字段
-     */
-    public static void forEach(Object data, BiConsumer<Field, Object> action, java.util.function.Predicate<Field> fieldFilter) {
-        if (data == null || action == null || fieldFilter == null) {
-            return;
-        }
-
-        List<Field> fields = fields(data.getClass());
-        for (Field field : fields) {
-            if (!fieldFilter.test(field)) {
-                continue;
-            }
-
-            try {
-                ensureFieldAccessible(field);
-                Object value = field.get(data);
-                action.accept(field, value);
-            } catch (IllegalAccessException e) {
-                if (log.isWarnEnabled()) {
-                    log.warn("访问字段时发生异常，字段名：{}，异常原因：{}", field.getName(), e.getMessage(), e);
-                }
-            }
-        }
-    }
-
-    /**
-     * 批量获取对象所有字段的值
-     *
-     * @param data 待处理的对象
-     * @return 字段名到字段值的映射
-     */
-    public static Map<String, Object> getAllFieldValues(Object data) {
-        Map<String, Object> result = new java.util.HashMap<>();
-        if (data == null) {
-            return result;
-        }
-
-        forEach(data, (field, value) -> result.put(field.getName(), value));
-        return result;
-    }
-
-    /**
-     * 批量设置对象所有字段的值
-     *
-     * @param data   待处理的对象
-     * @param values 字段名到字段值的映射
-     */
-    public static void setAllFieldValues(Object data, Map<String, Object> values) {
-        if (data == null || values == null || values.isEmpty()) {
-            return;
-        }
-
-        List<Field> fields = fields(data.getClass());
-        for (Field field : fields) {
-            String fieldName = field.getName();
-            if (values.containsKey(fieldName)) {
-                try {
-                    ensureFieldAccessible(field);
-                    Object value = values.get(fieldName);
-                    field.set(data, value);
-                } catch (IllegalAccessException e) {
-                    if (log.isWarnEnabled()) {
-                        log.warn("设置字段值时发生异常，字段名：{}，异常原因：{}", fieldName, e.getMessage(), e);
-                    }
-                } catch (IllegalArgumentException e) {
-                    if (log.isWarnEnabled()) {
-                        log.warn("设置字段值时类型不匹配，字段名：{}，期望类型：{}，实际值：{}",
-                                fieldName, field.getType().getSimpleName(), values.get(fieldName), e);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 确保字段可访问，使用缓存提高性能
-     *
-     * @param field 字段对象
-     */
-    private static void ensureFieldAccessible(Field field) {
-        String cacheKey = field.getDeclaringClass().getName() + ":" + field.getName();
-
-        if (!FIELD_ACCESSIBLE_CACHE.computeIfAbsent(cacheKey, key -> {
-            boolean accessible = field.isAccessible();
-            if (!accessible) {
-                field.setAccessible(true);
-            }
-            return true;
-        })) {
-            field.setAccessible(true);
-        }
-    }
-
-    /**
-     * 根据POJO属性的Function函数获取原始属性名称
-     *
-     * @param function POJO属性的Function函数
-     * @param <T>      函数输入类型
-     * @param <R>      函数返回类型
-     * @return Function函数对应的原始属性名称
-     */
-    public static <T, R> String pojoFieldName(SerFunction<T, R> function) {
-        if (function == null) {
-            return null;
-        }
-
-        try {
-            Method writeReplace = function.getClass().getDeclaredMethod("writeReplace");
-            writeReplace.setAccessible(true);
-
-            SerializedLambda serializedLambda = (SerializedLambda) writeReplace.invoke(function);
-            String implMethodName = serializedLambda.getImplMethodName();
-
-            if (!isValidGetterName(implMethodName)) {
-                return null;
-            }
-
-            boolean isBooleanGetter = isBooleanTypeGetter(serializedLambda.getInstantiatedMethodType(), implMethodName);
-            String fieldName = isBooleanGetter ? Introspector.decapitalize(implMethodName.substring(2))
-                    : Introspector.decapitalize(implMethodName.substring(3));
-
-            return fieldName;
-
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            if (log.isWarnEnabled()) {
-                log.warn("Failed to obtain field name from POJO attribute Function due to reflection issues.", e);
-            }
-        } catch (Exception e) {
-            if (log.isErrorEnabled()) {
-                log.error("Unexpected error occurred while extracting field name from lambda expression.", e);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 验证方法名是否符合getter命名规范
-     *
-     * @param methodName 方法名
-     * @return 是否符合getter命名规范
-     */
-    private static boolean isValidGetterName(String methodName) {
-        if (methodName.startsWith("get") && methodName.length() > 3) {
-            return true;
-        }
-        if (methodName.startsWith("is") && methodName.length() > 2) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * 判断方法是否是Boolean类型对应的isXxx() getter方法
-     *
-     * @param instantiatedMethodType 实例化的方法签名
-     * @param methodName             方法名
-     * @return 是否为Boolean类型的is开头getter方法
-     */
-    private static boolean isBooleanTypeGetter(String instantiatedMethodType, String methodName) {
-        return instantiatedMethodType.endsWith("Ljava/lang/Boolean;") && methodName.startsWith("is");
-    }
-
-    /**
-     * 可序列化函数式接口
-     *
-     * @param <T> 函数输入类型
-     * @param <R> 函数返回类型
-     */
-    @FunctionalInterface
-    public interface SerFunction<T extends Object, R extends Object> extends java.util.function.Function<T, R>, Serializable {
-    }
 
 }
