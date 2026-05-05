@@ -33,43 +33,35 @@ public final class ClassUtil {
      */
     private static final Map<String, List<Field>> FIELDS_CACHE = new ConcurrentHashMap<>();
 
+
     /**
-     * 提取类中所有属性字段（包括父类属性）
-     * 默认排除特殊修饰符字段（如transient、@Transient注解、编译器生成字段等）
-     * 该方法为fields(Class<T> clazz, boolean noSpecialModifier)的便捷重载版本
+     * 获取指定类及其父类的所有字段列表（默认排除特殊修饰符字段）
+     * 功能说明：
+     * 1. 返回当前类及继承链上所有父类的字段（不包括Object类）
+     * 2. 默认排除特殊修饰符的字段（如transient、static、final等）
+     * 3. 使用缓存机制避免重复反射操作，提高性能
      *
-     * @param <T>   对象类型泛型参数
-     * @param clazz 待处理的类，不能为null；如果为null将抛出NullPointerException
-     * @return 所有提取的属性字段列表，包含当前类及其父类的所有非特殊修饰字段；如果clazz为null则抛出NullPointerException
-     * @throws NullPointerException 当clazz参数为null时抛出
-     * @see #fields(Class, boolean)
+     * @param clazz 要获取字段的类对象，不能为null
+     * @return 字段列表，返回不可修改的List；如果类没有字段则返回空列表；结果会被缓存以提高后续查询性能
      */
     public static <T> List<Field> fields(Class<T> clazz) {
         // 调用完整版本的方法，默认排除特殊修饰符字段（noSpecialModifier=true）
         return fields(clazz, true);
     }
 
+
     /**
-     * 获取指定类的所有字段
-     * 提取流程：
-     * 1. 验证输入参数clazz是否为null，为null则抛出NullPointerException
-     * 2. 调用getFieldsFromCache方法从缓存中获取字段列表（支持缓存机制提高性能）
-     * 3. 根据noSpecialModifier参数决定是否过滤特殊修饰符字段
+     * 获取指定类及其父类的所有字段列表（支持缓存）
+     * 功能说明：
+     * 1. 返回当前类及继承链上所有父类的字段（不包括Object类）
+     * 2. 可根据参数选择是否排除特殊修饰符的字段（如transient、static、final等）
+     * 3. 使用缓存机制避免重复反射操作，提高性能
      *
-     * @param clazz             要获取字段的类，不能为null；如果为null将抛出NullPointerException
-     * @param noSpecialModifier 是否排除特殊修饰符字段的标志
-     *                          - true: 排除特殊修饰符字段（如transient、@Transient注解、编译器生成字段等）
-     *                          - false: 包含所有字段，不做特殊修饰符过滤
-     * @return 类的字段列表，包含当前类及其父类的所有符合条件的字段；返回不可修改的列表
-     * @throws NullPointerException 当clazz参数为null时抛出，异常信息为"Class cannot be null"
-     * @see #isSpecialModifier(Field)
-     * @see #getFieldsFromCache(Class, boolean)
+     * @param clazz             要获取字段的类对象，不能为null
+     * @param noSpecialModifier 是否排除特殊修饰符字段；true表示排除（只返回普通字段），false表示包含所有字段
+     * @return 字段列表，返回不可修改的List；如果类没有字段则返回空列表；结果会被缓存以提高后续查询性能
      */
     public static <T> List<Field> fields(Class<T> clazz, boolean noSpecialModifier) {
-        // 参数校验，确保clazz不为null
-        if (clazz == null) {
-            throw new NullPointerException("Class cannot be null");
-        }
         // 从缓存中获取字段列表，避免重复反射操作提高性能
         return getFieldsFromCache(clazz, noSpecialModifier);
     }
@@ -88,35 +80,66 @@ public final class ClassUtil {
      * @return 如果字段是特殊修饰字段则返回true，否则返回false
      */
     public static boolean isSpecialModifier(Field field) {
-        // 空值检查，null字段不被视为特殊修饰字段
         if (field == null) {
             return false;
         }
 
-        // 检查是否为编译器生成的内部类字段（this$表示外部类引用，val$表示匿名内部类捕获的变量）
         String fieldName = field.getName();
         if (fieldName.startsWith("this$") || fieldName.startsWith("val$")) {
             return true;
         }
 
-       
-        // 检查字段是否具有特殊修饰符或类型：transient（不序列化）、static（类级别）、
-        // final（不可变）、native（本地方法）、abstract（抽象）、interface（接口类型）
+        Annotation[] annotations = field.getDeclaredAnnotations();
+        for (Annotation annotation : annotations) {
+            if ("Transient".equals(annotation.annotationType().getSimpleName())) {
+                return true;
+            }
+        }
+
         int modifiers = field.getModifiers();
-        if (Modifier.isTransient(modifiers) || Modifier.isStatic(modifiers) || Modifier.isFinal(modifiers) || Modifier.isNative(modifiers) || Modifier.isAbstract(modifiers) || field.getType().isInterface()) {
+        if (hasSpecialModifier(modifiers) || field.getType().isInterface()) {
             return true;
         }
+
         return false;
     }
 
     /**
-     * 从缓存中获取指定类的字段列表
+     * 检查修饰符是否包含特殊修饰符
      *
-     * @param clazz             要获取字段的类
-     * @param noSpecialModifier 是否包含特殊修饰符字段
-     * @return 指定类及其父类的所有字段列表
+     * @param modifiers 字段的修饰符整数表示
+     * @return 如果包含特殊修饰符则返回true，否则返回false
      */
-    private static synchronized <T> List<Field> getFieldsFromCache(Class<T> clazz, boolean noSpecialModifier) {
+    public static boolean hasSpecialModifier(int modifiers) {
+        return Modifier.isTransient(modifiers)
+                || Modifier.isStatic(modifiers)
+                || Modifier.isFinal(modifiers)
+                || Modifier.isNative(modifiers)
+                || Modifier.isAbstract(modifiers);
+    }
+
+    /**
+     * 从缓存中获取指定类及其父类的所有字段列表
+     * 处理流程：
+     * 1. 验证输入参数clazz是否为null，为null则抛出IllegalArgumentException
+     * 2. 构建缓存键（类名:是否排除特殊修饰符）
+     * 3. 使用ConcurrentHashMap的computeIfAbsent方法实现线程安全的缓存读取和写入
+     * 4. 如果缓存未命中，通过反射遍历类继承链获取所有字段
+     * 5. 从当前类开始，逐级向上遍历父类，直到Object类为止
+     * 6. 对每个类的字段进行过滤：根据noSpecialModifier参数决定是否排除特殊修饰符字段
+     * 7. 捕获SecurityException异常并记录警告日志，发生异常时继续遍历父类
+     * 8. 将结果包装为不可修改的List并存入缓存
+     *
+     * @param clazz             要获取字段的类对象，不能为null，否则抛出IllegalArgumentException
+     * @param noSpecialModifier 是否排除特殊修饰符字段；true表示排除（只返回普通字段），false表示包含所有字段
+     * @return 不可修改的字段列表；如果类没有字段则返回空列表；结果会被缓存以提高后续查询性能
+     * @throws IllegalArgumentException 当clazz参数为null时抛出
+     */
+    private static <T> List<Field> getFieldsFromCache(Class<T> clazz, boolean noSpecialModifier) {
+        if (clazz == null) {
+            throw new IllegalArgumentException("类对象不能为null");
+        }
+
         String cacheKey = clazz.getName() + ":" + noSpecialModifier;
 
         return FIELDS_CACHE.computeIfAbsent(cacheKey, key -> {
@@ -127,15 +150,13 @@ public final class ClassUtil {
                 try {
                     Field[] declaredFields = current.getDeclaredFields();
                     for (Field field : declaredFields) {
-                        if (field != null) {
-                            if (noSpecialModifier || !isSpecialModifier(field)) {
-                                result.add(field);
-                            }
+                        if (!noSpecialModifier || !isSpecialModifier(field)) {
+                            result.add(field);
                         }
                     }
                 } catch (SecurityException e) {
                     if (log.isWarnEnabled()) {
-                        log.warn("获取字段时发生安全异常，类名：{}", current.getName(), e);
+                        log.warn("获取字段时发生安全异常，类名：{}，将继续遍历父类", current.getName(), e);
                     }
                 }
                 current = current.getSuperclass();
@@ -144,11 +165,6 @@ public final class ClassUtil {
             return Collections.unmodifiableList(result);
         });
     }
-
-    /**
-     * javax.persistence.Transient注解类缓存
-     */
-    private static volatile Class<? extends Annotation> transientAnnotationClass;
 
 
     /**

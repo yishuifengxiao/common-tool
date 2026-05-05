@@ -5,7 +5,6 @@ import com.yishuifengxiao.common.tool.text.TextUtil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 
@@ -89,8 +88,6 @@ public class FieldExtractor {
                 List<Field> fields = ClassUtil.fields(clazz, true);
                 // 过滤并转换字段为FieldValue对象
                 return fields.stream()
-                        // 过滤掉标注了JPA @Transient注解的字段
-                        .filter(field -> field.getAnnotation(Transient.class) == null)
                         // 转换为FieldValue对象，同时判断是否为主键
                         .map(field -> new FieldValue(field, isPrimary(field)))
                         .collect(Collectors.toList());
