@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -277,6 +278,9 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (targetType.isInstance(rawValue)) {
             return rawValue;
         }
+        if (rawValue instanceof byte[]) {
+            return convertByteArray((byte[]) rawValue, targetType, isPrimitive);
+        }
         if (rawValue instanceof Number) {
             return convertNumber((Number) rawValue, targetType, isPrimitive);
         } else if (rawValue instanceof Boolean) {
@@ -285,6 +289,19 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
             return convertString((String) rawValue, targetType, isPrimitive);
         }
         return rawValue;
+    }
+
+    private Object convertByteArray(byte[] bytes, Class<?> targetType, boolean isPrimitive) {
+        if (bytes == null) {
+            return handleNullValue(targetType, isPrimitive);
+        }
+        if (targetType == String.class) {
+            return new String(bytes, StandardCharsets.UTF_8);
+        }
+        if (targetType == byte[].class || targetType == Byte[].class) {
+            return bytes;
+        }
+        return bytes;
     }
 
     private Object convertNumber(Number number, Class<?> targetType, boolean isPrimitive) {
