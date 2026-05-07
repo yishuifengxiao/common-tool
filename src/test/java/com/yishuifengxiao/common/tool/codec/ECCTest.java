@@ -30,7 +30,7 @@ public class ECCTest {
             System.out.println("使用的曲线OID: " + curveOID);
 
             // 2. 使用私钥签名
-            byte[] signature = ECC.signData(privateKey, originalData.getBytes(StandardCharsets.UTF_8));
+            byte[] signature = ECC.sign(privateKey, originalData.getBytes(StandardCharsets.UTF_8));
             String signatureBase64 = Base64.getEncoder().encodeToString(signature);
             System.out.println("签名结果 (Base64): " + signatureBase64);
             System.out.println("签名结果 (Hex): " + Hex.bytesToHex(signature));
@@ -76,7 +76,7 @@ public class ECCTest {
                     KeyPair keyPair = ECC.createKeyPairFromComponents(oid, publicKeyHex, privateKeyDHex);
 
                     // 尝试签名和验证
-                    byte[] signature = ECC.signData(keyPair.getPrivate(), data.getBytes(StandardCharsets.UTF_8));
+                    byte[] signature = ECC.sign(keyPair.getPrivate(), data.getBytes(StandardCharsets.UTF_8));
                     boolean isValid = ECC.verifySignature(keyPair.getPublic(), data.getBytes(StandardCharsets.UTF_8), signature);
 
                     System.out.println("使用OID " + oid + " 的签名验证: " + isValid);

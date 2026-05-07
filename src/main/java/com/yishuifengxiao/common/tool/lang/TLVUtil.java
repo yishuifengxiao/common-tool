@@ -9,9 +9,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * <p>TLV解析工具类</p>
@@ -109,11 +108,11 @@ public class TLVUtil {
      *
      * @param data 待解析的十六进制字符串数据，从长度字段起始位置开始
      * @return LengthParseResult对象，包含：
-     *         <ul>
-     *         <li>startPos: 长度字段结束位置（即值字段开始位置的索引，以字符为单位）</li>
-     *         <li>length: 解析得到的实际数据长度（以字节为单位）</li>
-     *         <li>exception: 解析过程中产生的异常，成功时为null</li>
-     *         </ul>
+     * <ul>
+     * <li>startPos: 长度字段结束位置（即值字段开始位置的索引，以字符为单位）</li>
+     * <li>length: 解析得到的实际数据长度（以字节为单位）</li>
+     * <li>exception: 解析过程中产生的异常，成功时为null</li>
+     * </ul>
      */
     public static LengthParseResult parseLengthField(String data) {
         if (data == null || data.length() < 2) {
@@ -254,7 +253,7 @@ public class TLVUtil {
      * @return 包含所有匹配值的列表，如果发生错误则返回已收集的列表【不包含TAG】
      */
     public static List<String> extractValsLoop(String tag, String tlv) {
-        if (tag == null || tlv == null || !Hex.isHex(tlv) || !Hex.isHex(tag)) {
+        if (!Hex.isHex(tlv) || !Hex.isHex(tag)) {
             return new ArrayList<>();
         }
 
@@ -284,7 +283,7 @@ public class TLVUtil {
      */
     public static String toTLV(String tag, String value) {
         tag = StringUtils.isBlank(tag) ? "" : tag.trim();
-        if (value == null || !Hex.isHex(value)) {
+        if (!Hex.isHex(value)) {
             return tag;
         }
 
@@ -421,7 +420,7 @@ public class TLVUtil {
     @NoArgsConstructor
     @Accessors(chain = true)
     public static class TlvResult implements Serializable {
-        private Map<String, String> map = new HashMap<>();
+        private LinkedHashMap<String, String> map = new LinkedHashMap<>();
         private String remain = "";
         private Exception exception;
 
@@ -430,8 +429,8 @@ public class TLVUtil {
          *
          * @return 包含所有标签-值对的Map副本，不会暴露内部数据结构
          */
-        public Map<String, String> getResults() {
-            return new HashMap<>(map);
+        public LinkedHashMap<String, String> getResults() {
+            return new LinkedHashMap<>(map);
         }
 
         /**
@@ -464,6 +463,23 @@ public class TLVUtil {
             map.put(trimmedTag, trimmedVal);
             return this;
         }
+
+
+        /**
+         * 获取TLV解析结果中的最后一个值
+         * <p>当map中存在多个标签-值对时，返回最后插入的那个值。</p>
+         * <p>如果map为空或null，则返回空字符串。</p>
+         *
+         * @return 最后一个标签对应的值，如果map为空或null则返回空字符串
+         */
+        public String getVal() {
+            if (null == map || map.isEmpty()) {
+                return "";
+            }
+            String lastValue = map.values().stream().reduce((a, b) -> b).orElse("");
+            return lastValue;
+        }
+
 
         /**
          * 判断TLV解析操作是否成功

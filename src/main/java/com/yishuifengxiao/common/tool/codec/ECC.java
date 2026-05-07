@@ -239,7 +239,7 @@ public class ECC {
      * @return byte[] 签名数据的字节数组
      * @throws Exception 当签名过程中发生错误时抛出异常
      */
-    public static byte[] signData(PrivateKey privateKey, byte[] data) throws Exception {
+    public static byte[] sign(PrivateKey privateKey, byte[] data) throws Exception {
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initSign(privateKey);
         signature.update(data);
@@ -278,9 +278,9 @@ public class ECC {
             // 解析EC私钥
             PrivateKey privateKey = parseECPrivateKey(privateKeyVal);
             // 使用私钥对数据进行签名
-            byte[] signData = signData(privateKey, data.getBytes(StandardCharsets.UTF_8));
+            byte[] sign = sign(privateKey, data.getBytes(StandardCharsets.UTF_8));
             // 使用公钥验证签名是否有效
-            return verifySignature(publicKey, data.getBytes(StandardCharsets.UTF_8), signData);
+            return verifySignature(publicKey, data.getBytes(StandardCharsets.UTF_8), sign);
         } catch (Exception e) {
             // 记录异常日志
             log.warn("verifyMatch error: ", e);
@@ -297,7 +297,8 @@ public class ECC {
      * @param expectedPrivateKeyDHex 期望的私钥D值十六进制字符串表示
      * @throws Exception 当验证过程中发生错误时抛出异常
      */
-    public static void verifyKeyComponents(KeyPair keyPair, String expectedPublicKeyHex, String expectedPrivateKeyDHex) throws Exception {
+    public static void verifyKeyComponents(KeyPair keyPair, String expectedPublicKeyHex,
+                                           String expectedPrivateKeyDHex) throws Exception {
         ECPublicKey ecPublicKey = (ECPublicKey) keyPair.getPublic();
         ECPrivateKey ecPrivateKey = (ECPrivateKey) keyPair.getPrivate();
 
@@ -354,7 +355,7 @@ public class ECC {
         // 根据提供的组件创建密钥对
         ECPrivateKey ecPrivateKey = parsePrivateKeyFromHex(curveOID, privateKeyDHex);
         // 使用私钥对数据进行签名
-        byte[] signature = signData(ecPrivateKey, utf8String.getBytes(StandardCharsets.UTF_8));
+        byte[] signature = sign(ecPrivateKey, utf8String.getBytes(StandardCharsets.UTF_8));
         // 将签名结果进行Base64编码并返回
         return Base64.getEncoder().encodeToString(signature);
     }
@@ -370,7 +371,7 @@ public class ECC {
      */
     public static String signHex(String curveOID, String privateKeyDHex, String hexData) throws Exception {
         ECPrivateKey ecPrivateKey = parsePrivateKeyFromHex(curveOID, privateKeyDHex);
-        byte[] signature = signData(ecPrivateKey, Hex.hexToBytes(hexData));
+        byte[] signature = sign(ecPrivateKey, Hex.hexToBytes(hexData));
         return Hex.bytesToHex(signature);
     }
 
@@ -379,14 +380,14 @@ public class ECC {
      * 使用EC私钥对证书数据进行签名
      *
      * @param privateKeyCertificate 私钥证书字符串，用于解析出EC私钥
-     * @param utf8String                  待签名的utf8编码数据
+     * @param utf8String            待签名的utf8编码数据
      * @return 返回Base64编码后的签名结果
      * @throws Exception 当私钥解析或签名过程中发生错误时抛出异常
      */
     public static String sign(String privateKeyCertificate, String utf8String) throws Exception {
         ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyCertificate);
         // 使用私钥对数据进行签名
-        byte[] signature = signData(ecPrivateKey, utf8String.getBytes(StandardCharsets.UTF_8));
+        byte[] signature = sign(ecPrivateKey, utf8String.getBytes(StandardCharsets.UTF_8));
         // 将签名结果进行Base64编码并返回
         return Base64.getEncoder().encodeToString(signature);
     }
@@ -403,7 +404,7 @@ public class ECC {
         ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyCertificate);
         // 使用私钥对数据进行签名
         byte[] data = Hex.hexToBytes(hexData);
-        byte[] signature = signData(ecPrivateKey, data);
+        byte[] signature = sign(ecPrivateKey, data);
 
         // 将DER编码的签名转换为固定长度的128字符格式
         return convertDERToFixedLength(signature);
@@ -475,22 +476,6 @@ public class ECC {
 
 
     /**
-     * 验证数字签名的有效性
-     *
-     * @param certData        包含公钥信息的证书数据字符串
-     * @param utf8String            待验证签名的utf8编码数据
-     * @param signatureBase64 经过Base64编码的签名数据
-     * @return 签名验证结果，true表示签名有效，false表示签名无效
-     * @throws Exception 当证书解析失败或签名验证过程中发生错误时抛出异常
-     */
-    public static boolean verify(String certData, String utf8String, String signatureBase64) throws Exception {
-        PublicKey publicKey = X509Helper.extractPublicKey(certData);
-        // 解码Base64签名并验证签名有效性
-        byte[] signature = Base64.getDecoder().decode(signatureBase64);
-        return verifySignature(publicKey, utf8String.getBytes(StandardCharsets.UTF_8), signature);
-    }
-
-    /**
      * 验证十六进制数据的签名有效性
      *
      * @param certData     包含公钥的证书数据字符串
@@ -499,7 +484,7 @@ public class ECC {
      * @return 签名验证结果，有效返回true，无效返回false
      * @throws Exception 当证书解析、数据解码或签名验证过程中发生错误时抛出异常
      */
-    public static boolean verifyHex(String certData, String hexData, String signatureHex) throws Exception {
+    public static boolean verify(String certData, String hexData, String signatureHex) throws Exception {
         PublicKey publicKey = X509Helper.extractPublicKey(certData);
         // 将固定长度签名转换为DER编码
         byte[] signature = convertFixedLengthToDER(signatureHex);
@@ -588,21 +573,21 @@ public class ECC {
     /**
      * 验证签名
      *
-     * @param curveOID        椭圆曲线OID标识符
-     * @param publicKeyHex    十六进制格式的公钥字符串
-     * @param utf8String            待验证的utf8编码数据字符串
-     * @param signatureBase64 Base64编码的签名值
+     * @param curveOID     椭圆曲线OID标识符
+     * @param publicKeyHex 十六进制格式的公钥字符串
+     * @param originalHex  待验证的原始Hex数据字符串
+     * @param signatureHex 十六进制格式的签名字符串（长度为128字符）
      * @return 验证成功返回true，验证失败返回false
      * @throws Exception 验证过程中可能抛出的异常
      */
-    public static boolean verify(String curveOID, String publicKeyHex, String utf8String, String signatureBase64) throws Exception {
+    public static boolean verify(String curveOID, String publicKeyHex, String originalHex, String signatureHex) throws Exception {
         // 创建一个虚拟私钥来构建密钥对
         String dummyPrivateKey = "0000000000000000000000000000000000000000000000000000000000000001";
         KeyPair keyPair = createKeyPairFromComponents(curveOID, publicKeyHex, dummyPrivateKey);
 
         // 解码Base64签名并验证签名有效性
-        byte[] signature = Base64.getDecoder().decode(signatureBase64);
-        return verifySignature(keyPair.getPublic(), utf8String.getBytes(StandardCharsets.UTF_8), signature);
+        byte[] signature = Hex.hexToBytes(signatureHex);
+        return verifySignature(keyPair.getPublic(), Hex.hexToBytes(originalHex), signature);
     }
 
 
@@ -647,7 +632,8 @@ public class ECC {
         }
 
         // 然后处理 EC PRIVATE KEY 部分
-        privateKeyData = privateKeyData.replace("-----BEGIN EC PRIVATE KEY-----", "").replace("-----END EC PRIVATE KEY-----", "").replaceAll("\\s", "");
+        privateKeyData = privateKeyData.replace("-----BEGIN EC PRIVATE KEY-----", "").replace("-----END EC PRIVATE " +
+                "KEY-----", "").replaceAll("\\s", "");
 
         // 使用优化的parseECPrivateKey函数解析私钥
         ECPrivateKey privateKey = parseECPrivateKey(privateKeyData);
@@ -764,7 +750,8 @@ public class ECC {
      */
     public static byte[] base64ToBytes(String base64String) {
         // 移除可能的PEM头部和尾部（如果存在）
-        String cleanBase64 = base64String.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replaceAll("\\s", "");
+        String cleanBase64 =
+                base64String.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replaceAll("\\s", "");
 
         return X509Helper.base64ToBytes(cleanBase64);
     }
@@ -982,7 +969,8 @@ public class ECC {
      */
     private static String extractBase64FromPEM(String pemData) {
         // 移除所有PEM头部和尾部
-        String cleanData = pemData.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8, "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replace(PEM_HEADER_PUBLIC, "").replace(PEM_FOOTER_PUBLIC, "").replaceAll("\\s", "");
+        String cleanData = pemData.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8,
+                "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "").replace(PEM_HEADER_PUBLIC, "").replace(PEM_FOOTER_PUBLIC, "").replaceAll("\\s", "");
 
         return cleanData;
     }
@@ -1055,7 +1043,8 @@ public class ECC {
         BigInteger h = BigInteger.ONE;
 
         // 构造椭圆曲线对象，基于素数域p，并设置曲线方程中的a和b系数
-        java.security.spec.EllipticCurve curve = new java.security.spec.EllipticCurve(new java.security.spec.ECFieldFp(p), a, b);
+        java.security.spec.EllipticCurve curve =
+                new java.security.spec.EllipticCurve(new java.security.spec.ECFieldFp(p), a, b);
 
         // 设置基点G的坐标(x, y)
         java.security.spec.ECPoint g = new java.security.spec.ECPoint(x, y);
@@ -1285,7 +1274,8 @@ public class ECC {
      * @return 派生出的共享密钥的十六进制字符串表示
      * @throws Exception 当密钥协商或哈希计算过程中发生错误时抛出
      */
-    public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex, String sShareInfo, int iKeyLen) throws Exception {
+    public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex,
+                                         String sShareInfo, int iKeyLen) throws Exception {
 
 
         // 执行ECC密钥协商，获取原始共享密钥数据
@@ -1458,7 +1448,8 @@ public class ECC {
         }
 
         // 移除PEM头部和尾部（如果存在）
-        cleanData = cleanData.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "").replaceAll("\\s", "");
+        cleanData =
+                cleanData.replace("-----BEGIN PUBLIC KEY-----", "").replace("-----END PUBLIC KEY-----", "").replaceAll("\\s", "");
 
         // 尝试Base64解码
         byte[] keyBytes;
@@ -1740,7 +1731,9 @@ public class ECC {
         }
 
         // 移除PEM头部和尾部（如果存在）
-        cleanData = cleanData.replace("-----BEGIN EC PRIVATE KEY-----", "").replace("-----END EC PRIVATE KEY-----", "").replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "").replaceAll("\\s", "");
+        cleanData = cleanData.replace("-----BEGIN EC PRIVATE KEY-----", "").replace("-----END EC PRIVATE KEY-----",
+                "").replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "").replaceAll(
+                "\\s", "");
 
         // 尝试Base64解码
         byte[] keyBytes;
