@@ -23,29 +23,39 @@ public class ECCTest {
 
             // 1. 从已知参数构建密钥对
             KeyPair keyPair = ECC.createKeyPairFromComponents(curveOID, publicKeyHex, privateKeyDHex);
-            PrivateKey privateKey = keyPair.getPrivate();
-            PublicKey publicKey = keyPair.getPublic();
+            java.security.PrivateKey privateKey = keyPair.getPrivate();
+            java.security.PublicKey publicKey = keyPair.getPublic();
 
             System.out.println("成功从提供的组件构建密钥对");
             System.out.println("使用的曲线OID: " + curveOID);
 
-            // 2. 使用私钥签名
+            // 2. 使用私钥签名（返回固定64字节的签名）
             byte[] signature = ECC.sign(privateKey, originalData.getBytes(StandardCharsets.UTF_8));
-            String signatureBase64 = Base64.getEncoder().encodeToString(signature);
-            System.out.println("签名结果 (Base64): " + signatureBase64);
-            System.out.println("签名结果 (Hex): " + Hex.bytesToHex(signature));
+            String signatureHex = Hex.bytesToHex(signature).toUpperCase();
+            System.out.println("签名结果 (Hex): " + signatureHex);
+            System.out.println("签名长度: " + signatureHex.length() + " 字符（应为128字符）");
 
-            // 3. 使用公钥验签
-            boolean isValid = ECC.verifySignature(publicKey,originalData.getBytes(StandardCharsets.UTF_8), signature);
+            // 3. 使用公钥验签（传入固定长度签名）
+            boolean isValid = ECC.verifySignature(publicKey, originalData.getBytes(StandardCharsets.UTF_8), signature);
             System.out.println("签名验证结果: " + isValid);
 
             // 4. 测试篡改数据的情况
             String tamperedData = "这是被篡改的数据";
-            boolean isTamperedValid = ECC.verifySignature(publicKey,tamperedData.getBytes(StandardCharsets.UTF_8), signature);
+            boolean isTamperedValid = ECC.verifySignature(publicKey, tamperedData.getBytes(StandardCharsets.UTF_8), signature);
             System.out.println("篡改数据验证结果: " + isTamperedValid);
 
             // 5. 验证密钥组件
             ECC.verifyKeyComponents(keyPair, publicKeyHex, privateKeyDHex);
+
+            // 6. 测试signHex方法（十六进制数据签名）
+            String hexData = Hex.bytesToHex(originalData.getBytes(StandardCharsets.UTF_8)).toUpperCase();
+            String signatureHex2 = ECC.signHex(curveOID, privateKeyDHex, hexData);
+            System.out.println("\nsignHex方法签名结果: " + signatureHex2);
+            System.out.println("signHex签名长度: " + signatureHex2.length() + " 字符（应为128字符）");
+
+            // 7. 测试verify方法（证书验签）
+            boolean isValid2 = ECC.verify(curveOID, publicKeyHex, hexData, signatureHex2);
+            System.out.println("verify方法验证结果: " + isValid2);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,8 +85,11 @@ public class ECCTest {
                     System.out.println("\n测试曲线OID: " + oid);
                     KeyPair keyPair = ECC.createKeyPairFromComponents(oid, publicKeyHex, privateKeyDHex);
 
-                    // 尝试签名和验证
+                    // 尝试签名和验证（使用固定长度签名）
                     byte[] signature = ECC.sign(keyPair.getPrivate(), data.getBytes(StandardCharsets.UTF_8));
+                    String signatureHex = Hex.bytesToHex(signature).toUpperCase();
+                    System.out.println("签名长度: " + signatureHex.length() + " 字符");
+                    
                     boolean isValid = ECC.verifySignature(keyPair.getPublic(), data.getBytes(StandardCharsets.UTF_8), signature);
 
                     System.out.println("使用OID " + oid + " 的签名验证: " + isValid);
@@ -84,6 +97,92 @@ public class ECCTest {
                     System.out.println("OID " + oid + " 失败: " + e.getMessage());
                 }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 测试签名和验签的完整流程
+     */
+    @Test
+    public void testSignAndVerifyFlow() {
+        try {
+            // 生成密钥对
+            KeyPair keyPair = ECC.generateECCKeyPair();
+            java.security.PrivateKey privateKey = keyPair.getPrivate();
+            java.security.PublicKey publicKey = keyPair.getPublic();
+
+            String testData = "Hello, ECC Signature!";
+            byte[] dataBytes = testData.getBytes(StandardCharsets.UTF_8);
+
+            // 签名
+            byte[] signature = ECC.sign(privateKey, dataBytes);
+            String signatureHex = Hex.bytesToHex(signature).toUpperCase();
+            
+            System.out.println("原始数据: " + testData);
+            System.out.println("签名 (Hex): " + signatureHex);
+            System.out.println("签名长度: " + signatureHex.length() + " 字符");
+
+            // 验证正确签名
+            boolean validResult = ECC.verifySignature(publicKey, dataBytes, signature);
+            System.out.println("正确签名验证: " + validResult);
+
+            // 验证错误数据
+            String wrongData = "Wrong data";
+            boolean invalidResult = ECC.verifySignature(publicKey, wrongData.getBytes(StandardCharsets.UTF_8), signature);
+            System.out.println("错误数据验证: " + invalidResult);
+
+            // 验证错误签名
+            byte[] wrongSignature = new byte[64];
+            boolean wrongSigResult = ECC.verifySignature(publicKey, dataBytes, wrongSignature);
+            System.out.println("错误签名验证: " + wrongSigResult);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 测试固定长度签名格式转换
+     */
+    @Test
+    public void testFixedLengthSignatureFormat() {
+        try {
+            // 生成密钥对
+            KeyPair keyPair = ECC.generateECCKeyPair();
+            java.security.PrivateKey privateKey = keyPair.getPrivate();
+            java.security.PublicKey publicKey = keyPair.getPublic();
+
+            String testData = "Test fixed length signature format";
+            byte[] dataBytes = testData.getBytes(StandardCharsets.UTF_8);
+
+            // 签名
+            byte[] signature = ECC.sign(privateKey, dataBytes);
+            String signatureHex = Hex.bytesToHex(signature).toUpperCase();
+
+            // 验证签名长度为128字符
+            if (signatureHex.length() != 128) {
+                throw new AssertionError("签名长度应为128字符，实际为: " + signatureHex.length());
+            }
+            System.out.println("签名长度验证通过: " + signatureHex.length() + " 字符");
+
+            // 验证R和S各为64字符
+            String rPart = signatureHex.substring(0, 64);
+            String sPart = signatureHex.substring(64);
+            System.out.println("R部分: " + rPart);
+            System.out.println("S部分: " + sPart);
+
+            // 验签
+            boolean isValid = ECC.verifySignature(publicKey, dataBytes, signature);
+            System.out.println("签名验证结果: " + isValid);
+
+            if (!isValid) {
+                throw new AssertionError("签名验证失败");
+            }
+
+            System.out.println("固定长度签名格式测试通过");
+
         } catch (Exception e) {
             e.printStackTrace();
         }

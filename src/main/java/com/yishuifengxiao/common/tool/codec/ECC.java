@@ -236,30 +236,36 @@ public class ECC {
      *
      * @param data       待签名的数据
      * @param privateKey 私钥对象，用于签名
-     * @return byte[] 签名数据的字节数组
+     * @return byte[] 签名数据的字节数组（固定64字节：R和S各32字节）
      * @throws Exception 当签名过程中发生错误时抛出异常
      */
     public static byte[] sign(PrivateKey privateKey, byte[] data) throws Exception {
+        // 使用SHA256withECDSA算法进行签名
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initSign(privateKey);
         signature.update(data);
-        return signature.sign();
+        byte[] derSignature = signature.sign();
+        
+        // 将DER编码的签名转换为固定长度格式（64字节）
+        return convertDERToFixedLengthBytes(derSignature);
     }
 
     /**
      * 使用公钥验证签名
      *
      * @param data      待验证的数据
-     * @param signature 签名数据的字节数组
+     * @param signature 签名数据的字节数组（固定64字节：R和S各32字节）
      * @param publicKey 公钥对象，用于验证签名
      * @return boolean 如果签名验证成功则返回true，否则返回false
      * @throws Exception 当验证过程中发生错误时抛出异常
      */
     public static boolean verifySignature(PublicKey publicKey, byte[] data, byte[] signature) throws Exception {
+        // 将固定长度签名转换为DER编码格式
+        byte[] derSignature = convertFixedLengthBytesToDER(signature);
         Signature verifySignature = Signature.getInstance("SHA256withECDSA");
         verifySignature.initVerify(publicKey);
         verifySignature.update(data);
-        return verifySignature.verify(signature);
+        return verifySignature.verify(derSignature);
     }
 
     /**
@@ -348,16 +354,16 @@ public class ECC {
      * @param curveOID       椭圆曲线OID标识符
      * @param privateKeyDHex 私钥D值的十六进制字符串表示
      * @param utf8String     需要签名的utf8编码数据字符串
-     * @return 签名结果的Base64编码字符串
+     * @return 固定长度128字符的签名十六进制字符串（大写）
      * @throws Exception 当密钥创建或签名过程中发生错误时抛出
      */
     public static String sign(String curveOID, String privateKeyDHex, String utf8String) throws Exception {
         // 根据提供的组件创建密钥对
         ECPrivateKey ecPrivateKey = parsePrivateKeyFromHex(curveOID, privateKeyDHex);
-        // 使用私钥对数据进行签名
+        // 使用私钥对数据进行签名，返回固定64字节的签名
         byte[] signature = sign(ecPrivateKey, utf8String.getBytes(StandardCharsets.UTF_8));
-        // 将签名结果进行Base64编码并返回
-        return Base64.getEncoder().encodeToString(signature);
+        // 将签名结果转换为十六进制字符串并返回
+        return Hex.bytesToHex(signature).toUpperCase();
     }
 
     /**
@@ -366,13 +372,15 @@ public class ECC {
      * @param curveOID       椭圆曲线OID标识符，用于指定使用的椭圆曲线参数（例如1.2.840.10045.3.1.7或secp256r1）
      * @param privateKeyDHex 私钥D值的十六进制字符串表示（不包含0x前缀）
      * @param hexData        待签名的数据，以十六进制字符串格式提供（不包含0x前缀）
-     * @return 签名结果的十六进制字符串表示（DER编码的ECDSA签名）
+     * @return 签名结果的十六进制字符串表示，固定长度为128字符（R和S各64字符，大写）
      * @throws Exception 当密钥解析失败、签名过程出错或参数无效时抛出异常
      */
     public static String signHex(String curveOID, String privateKeyDHex, String hexData) throws Exception {
         ECPrivateKey ecPrivateKey = parsePrivateKeyFromHex(curveOID, privateKeyDHex);
+        // 使用私钥对数据进行签名，返回固定64字节的签名
         byte[] signature = sign(ecPrivateKey, Hex.hexToBytes(hexData));
-        return Hex.bytesToHex(signature);
+        // 直接转换为十六进制字符串（已经是固定长度格式）
+        return Hex.bytesToHex(signature).toUpperCase();
     }
 
 
@@ -381,15 +389,15 @@ public class ECC {
      *
      * @param privateKeyCertificate 私钥证书字符串，用于解析出EC私钥
      * @param utf8String            待签名的utf8编码数据
-     * @return 返回Base64编码后的签名结果
+     * @return 返回固定长度128字符的签名十六进制字符串（大写）
      * @throws Exception 当私钥解析或签名过程中发生错误时抛出异常
      */
     public static String sign(String privateKeyCertificate, String utf8String) throws Exception {
         ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyCertificate);
-        // 使用私钥对数据进行签名
+        // 使用私钥对数据进行签名，返回固定64字节的签名
         byte[] signature = sign(ecPrivateKey, utf8String.getBytes(StandardCharsets.UTF_8));
-        // 将签名结果进行Base64编码并返回
-        return Base64.getEncoder().encodeToString(signature);
+        // 将签名结果转换为十六进制字符串并返回
+        return Hex.bytesToHex(signature).toUpperCase();
     }
 
     /**
@@ -397,17 +405,16 @@ public class ECC {
      *
      * @param privateKeyCertificate 私钥证书字符串，用于解析出EC私钥
      * @param hexData               待签名的十六进制格式数据
-     * @return 签名结果的十六进制字符串表示，长度为128字符（R和S各64字符）
+     * @return 签名结果的十六进制字符串表示，固定长度为128字符（R和S各64字符）
      * @throws Exception 当私钥解析失败或签名过程出现错误时抛出异常
      */
     public static String signHex(String privateKeyCertificate, String hexData) throws Exception {
         ECPrivateKey ecPrivateKey = parseECPrivateKey(privateKeyCertificate);
-        // 使用私钥对数据进行签名
+        // 使用私钥对数据进行签名，返回固定64字节的签名
         byte[] data = Hex.hexToBytes(hexData);
         byte[] signature = sign(ecPrivateKey, data);
-
-        // 将DER编码的签名转换为固定长度的128字符格式
-        return convertDERToFixedLength(signature);
+        // 直接转换为十六进制字符串（已经是固定长度格式）
+        return Hex.bytesToHex(signature).toUpperCase();
     }
 
     /**
@@ -418,9 +425,19 @@ public class ECC {
      * @throws Exception 解析DER编码时出错
      */
     public static String convertDERToFixedLength(byte[] derSignature) throws Exception {
-        // 解析DER编码的签名
-// DER编码格式: 0x30 + 总长度 + 0x02 + R长度 + R值 + 0x02 + S长度 + S值
+        byte[] fixedBytes = convertDERToFixedLengthBytes(derSignature);
+        return Hex.bytesToHex(fixedBytes).toUpperCase();
+    }
 
+    /**
+     * 将DER编码的ECDSA签名转换为固定长度字节数组（64字节：R和S各32字节）
+     *
+     * @param derSignature DER编码的签名
+     * @return 固定长度64字节的签名字节数组
+     * @throws Exception 解析DER编码时出错
+     */
+    private static byte[] convertDERToFixedLengthBytes(byte[] derSignature) throws Exception {
+        // DER编码格式: 0x30 + 总长度 + 0x02 + R长度 + R值 + 0x02 + S长度 + S值
         ByteArrayInputStream bais = new ByteArrayInputStream(derSignature);
         if (bais.read() != 0x30) {
             throw new Exception("Invalid DER signature: wrong sequence tag");
@@ -447,11 +464,38 @@ public class ECC {
         BigInteger r = new BigInteger(1, rBytes);
         BigInteger s = new BigInteger(1, sBytes);
 
-        // 转换为固定长度的十六进制字符串（各32字节，即64个字符）
-        String rHex = String.format("%064x", r);
-        String sHex = String.format("%064x", s);
+        // 转换为固定长度的字节数组（各32字节）
+        byte[] rPadded = padBytes(r.toByteArray(), 32);
+        byte[] sPadded = padBytes(s.toByteArray(), 32);
 
-        return (rHex + sHex).toUpperCase();
+        // 拼接R和S为64字节
+        byte[] result = new byte[64];
+        System.arraycopy(rPadded, 0, result, 0, 32);
+        System.arraycopy(sPadded, 0, result, 32, 32);
+        
+        return result;
+    }
+
+    /**
+     * 填充或截断字节数组到固定长度（大端序补零）
+     *
+     * @param bytes     需要处理的字节数组
+     * @param targetLen 目标长度
+     * @return 处理后的字节数组，长度为targetLen
+     */
+    private static byte[] padBytes(byte[] bytes, int targetLen) {
+        if (bytes.length > targetLen) {
+            // 截断高位，保留低位
+            byte[] result = new byte[targetLen];
+            System.arraycopy(bytes, bytes.length - targetLen, result, 0, targetLen);
+            return result;
+        }
+        
+        // 创建目标长度的数组并填充零
+        byte[] padded = new byte[targetLen];
+        // 将原始字节复制到低位，高位自动补零
+        System.arraycopy(bytes, 0, padded, targetLen - bytes.length, bytes.length);
+        return padded;
     }
 
     /**
@@ -480,16 +524,17 @@ public class ECC {
      *
      * @param certData     包含公钥的证书数据字符串
      * @param hexData      待验证的十六进制数据字符串
-     * @param signatureHex 十六进制格式的签名字符串（长度为128字符）
+     * @param signatureHex 十六进制格式的签名字符串（固定长度为128字符）
      * @return 签名验证结果，有效返回true，无效返回false
      * @throws Exception 当证书解析、数据解码或签名验证过程中发生错误时抛出异常
      */
     public static boolean verify(String certData, String hexData, String signatureHex) throws Exception {
         PublicKey publicKey = X509Helper.extractPublicKey(certData);
         // 将固定长度签名转换为DER编码
-        byte[] signature = convertFixedLengthToDER(signatureHex);
+        byte[] signatureBytes = Hex.hexToBytes(signatureHex);
+        byte[] derSignature = convertFixedLengthBytesToDER(signatureBytes);
         byte[] data = Hex.hexToBytes(hexData);
-        return verifySignature(publicKey, data, signature);
+        return verifySignature(publicKey, data, derSignature);
     }
 
     /**
@@ -502,26 +547,44 @@ public class ECC {
         if (fixedSignature.length() != 128) {
             throw new Exception("Invalid signature length: expected 128 characters, got " + fixedSignature.length());
         }
+        
+        byte[] signatureBytes = Hex.hexToBytes(fixedSignature);
+        return convertFixedLengthBytesToDER(signatureBytes);
+    }
 
-        // 分离R和S值
-        String rHex = fixedSignature.substring(0, 64);
-        String sHex = fixedSignature.substring(64);
+    /**
+     * 将固定长度签名字节数组转换为DER编码格式
+     *
+     * @param fixedSignatureBytes 固定长度签名字节数组（64字节：R和S各32字节）
+     * @return DER编码的签名
+     * @throws Exception 当签名长度不正确时抛出异常
+     */
+    private static byte[] convertFixedLengthBytesToDER(byte[] fixedSignatureBytes) throws Exception {
+        if (fixedSignatureBytes.length != 64) {
+            throw new Exception("Invalid signature length: expected 64 bytes, got " + fixedSignatureBytes.length);
+        }
 
-        BigInteger r = new BigInteger(rHex, 16);
-        BigInteger s = new BigInteger(sHex, 16);
+        // 分离R和S值（各32字节）
+        byte[] rBytes = new byte[32];
+        byte[] sBytes = new byte[32];
+        System.arraycopy(fixedSignatureBytes, 0, rBytes, 0, 32);
+        System.arraycopy(fixedSignatureBytes, 32, sBytes, 0, 32);
+
+        BigInteger r = new BigInteger(1, rBytes);
+        BigInteger s = new BigInteger(1, sBytes);
 
         // 构造DER编码
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
         // R值
-        byte[] rBytes = r.toByteArray();
+        byte[] rEncoded = r.toByteArray();
         // S值
-        byte[] sBytes = s.toByteArray();
+        byte[] sEncoded = s.toByteArray();
 
         // 计算总长度
-        int rLen = rBytes.length;
-        int sLen = sBytes.length;
-        int totalLen = 2 + rLen + 2 + sLen; // 0x02 + rLen + 0x02 + sLen
+        int rLen = rEncoded.length;
+        int sLen = sEncoded.length;
+        int totalLen = 2 + rLen + 2 + sLen;
 
         // 写入序列标记和长度
         baos.write(0x30);
@@ -530,12 +593,12 @@ public class ECC {
         // 写入R
         baos.write(0x02);
         writeDERLength(baos, rLen);
-        baos.write(rBytes);
+        baos.write(rEncoded);
 
         // 写入S
         baos.write(0x02);
         writeDERLength(baos, sLen);
-        baos.write(sBytes);
+        baos.write(sEncoded);
 
         return baos.toByteArray();
     }
@@ -576,7 +639,7 @@ public class ECC {
      * @param curveOID     椭圆曲线OID标识符
      * @param publicKeyHex 十六进制格式的公钥字符串
      * @param originalHex  待验证的原始Hex数据字符串
-     * @param signatureHex 十六进制格式的签名字符串（长度为128字符）
+     * @param signatureHex 十六进制格式的签名字符串（固定长度为128字符）
      * @return 验证成功返回true，验证失败返回false
      * @throws Exception 验证过程中可能抛出的异常
      */
@@ -585,9 +648,10 @@ public class ECC {
         String dummyPrivateKey = "0000000000000000000000000000000000000000000000000000000000000001";
         KeyPair keyPair = createKeyPairFromComponents(curveOID, publicKeyHex, dummyPrivateKey);
 
-        // 解码Base64签名并验证签名有效性
-        byte[] signature = Hex.hexToBytes(signatureHex);
-        return verifySignature(keyPair.getPublic(), Hex.hexToBytes(originalHex), signature);
+        // 将固定长度签名转换为DER编码并验证签名有效性
+        byte[] signatureBytes = Hex.hexToBytes(signatureHex);
+        byte[] derSignature = convertFixedLengthBytesToDER(signatureBytes);
+        return verifySignature(keyPair.getPublic(), Hex.hexToBytes(originalHex), derSignature);
     }
 
 
