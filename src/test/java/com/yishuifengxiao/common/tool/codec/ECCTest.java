@@ -48,7 +48,7 @@ public class ECCTest {
 
         // 6. 测试signHex方法（十六进制数据签名）
         String hexData = Hex.bytesToHex(originalData.getBytes(StandardCharsets.UTF_8)).toUpperCase();
-        String signatureHex2 = ECC.signHex(curveOID, privateKeyDHex, hexData);
+        String signatureHex2 = ECC.sign(curveOID, privateKeyDHex, hexData);
         System.out.println("\nsignHex方法签名结果: " + signatureHex2);
         System.out.println("signHex签名长度: " + signatureHex2.length() + " 字符（应为128字符）");
 
