@@ -113,7 +113,7 @@ public class Hex {
             hexString.append(hexChars[b & 0x0f]);
         }
 
-        return hexString.toString();
+        return hexString.toString().toUpperCase();
     }
 
     /**
@@ -519,7 +519,7 @@ public class Hex {
             long unsignedValue = value & ((1L << (byteNum * 8)) - 1);
             hexString = Long.toHexString(unsignedValue);
         }
-        return hexString;
+        return hexString.toUpperCase();
     }
 
     /**
@@ -532,7 +532,7 @@ public class Hex {
             long unsignedValue = value & mask;
             hexString = Long.toHexString(unsignedValue);
         }
-        return hexString;
+        return hexString.toUpperCase();
     }
 
     /**
@@ -546,7 +546,7 @@ public class Hex {
             unsignedValue = (int) (unsignedValue & mask);
             hexString = Integer.toHexString(unsignedValue);
         }
-        return hexString;
+        return hexString.toUpperCase();
     }
 
     /**
@@ -560,7 +560,7 @@ public class Hex {
             unsignedValue = (int) (unsignedValue & mask);
             hexString = Integer.toHexString(unsignedValue);
         }
-        return hexString;
+        return hexString.toUpperCase();
     }
 
 
@@ -572,7 +572,7 @@ public class Hex {
      * @return 16进制字符串
      */
     public static String numberToHexString(Number number) {
-        return numberToHexString(number, null);
+        return numberToHexString(number, null).toUpperCase();
     }
 
     /**
@@ -620,25 +620,25 @@ public class Hex {
         // 整数类型（包括 BigInteger）
         if (number instanceof BigInteger) {
             byte[] bytes = ((BigInteger) number).toByteArray();
-            return bytesToHex(bytes);
+            return bytesToHex(bytes).toUpperCase();
         }
 
         if (number instanceof Byte || number instanceof Short || number instanceof Integer || number instanceof Long) {
             BigInteger bigInt = BigInteger.valueOf(number.longValue());
             byte[] bytes = bigInt.toByteArray();
-            return bytesToHex(bytes);
+            return bytesToHex(bytes).toUpperCase();
         }
 
         // 单精度浮点数
         if (number instanceof Float) {
             int bits = Float.floatToIntBits((Float) number);
-            return Integer.toHexString(bits);
+            return Integer.toHexString(bits).toUpperCase();
         }
 
         // 双精度浮点数
         if (number instanceof Double) {
             long bits = Double.doubleToLongBits((Double) number);
-            return Long.toHexString(bits);
+            return Long.toHexString(bits).toUpperCase();
         }
 
         // BigDecimal：返回 unscaledValue 的十六进制和 scale

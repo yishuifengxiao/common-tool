@@ -1,12 +1,11 @@
 package com.yishuifengxiao.common.tool.codec;
 
 import com.yishuifengxiao.common.tool.lang.Hex;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 
 /**
@@ -46,6 +45,9 @@ public class AesCbc {
         if (key.length != 16 && key.length != 24 && key.length != 32) {
             throw new IllegalArgumentException("密钥长度必须是16字节（AES-128）、24字节（AES-192）或32字节（AES-256）");
         }
+        if (null == iv || iv.length == 0) {
+            iv = Hex.hexToBytes(StringUtils.repeat("00", 16));
+        }
 
         // 检查初始向量长度（必须是16字节）
         if (iv.length != 16) {
@@ -84,22 +86,11 @@ public class AesCbc {
      * @throws Exception 加密过程中可能抛出的异常
      */
     public static String encrypt(String data, String key, String iv) throws Exception {
-        byte[] encrypted = encrypt(Hex.hexToBytes(data), Hex.hexToBytes(key), Hex.hexToBytes(iv));
+        byte[] encrypted = encrypt(Hex.hexToBytes(data), Hex.hexToBytes(key), StringUtils.isNotBlank(iv) ?
+                Hex.hexToBytes(iv) : null);
         return Hex.bytesToHex(encrypted);
     }
 
-    /**
-     * AES CBC无填充加密（返回Base64字符串）
-     *
-     * @param data 明文（必须是16字节的倍数）
-     * @param key  密钥
-     * @param iv   初始向量
-     * @return Base64编码的加密字符串
-     */
-    public static String encryptToBase64(String data, String key, String iv) throws Exception {
-        byte[] encrypted = encrypt(data.getBytes(StandardCharsets.UTF_8), key.getBytes(StandardCharsets.UTF_8), iv.getBytes(StandardCharsets.UTF_8));
-        return Base64.getEncoder().encodeToString(encrypted);
-    }
 
     /**
      * AES CBC无填充解密
@@ -139,19 +130,6 @@ public class AesCbc {
         return decrypted;
     }
 
-    /**
-     * AES CBC无填充解密（从Base64字符串）
-     *
-     * @param base64Data Base64编码的加密字符串
-     * @param key        密钥
-     * @param iv         初始向量
-     * @return 解密后的字符串
-     */
-    public static String decryptFromBase64(String base64Data, String key, String iv) throws Exception {
-        byte[] encryptedData = Base64.getDecoder().decode(base64Data);
-        byte[] decrypted = decrypt(encryptedData, key.getBytes(StandardCharsets.UTF_8), iv.getBytes(StandardCharsets.UTF_8));
-        return new String(decrypted, StandardCharsets.UTF_8);
-    }
 
     /**
      * AES CBC无填充解密
@@ -218,46 +196,4 @@ public class AesCbc {
         return iv;
     }
 
-    /**
-     * 测试示例
-     */
-    public static void main(String[] args) {
-        try {
-            // 测试数据（正好16字节）
-            String originalText = "1234567890ABCDEF"; // 16个字符
-
-
-            System.out.println("原始文本: " + originalText);
-            System.out.println("密钥: " + key);
-            System.out.println("IV: " + iv);
-            System.out.println("原始文本字节长度: " + originalText.getBytes(StandardCharsets.UTF_8).length);
-
-            // 加密
-            String encryptedBase64 = encryptToBase64(originalText, key, iv);
-            System.out.println("\n加密后(Base64): " + encryptedBase64);
-
-            // 解密
-            String decryptedText = decryptFromBase64(encryptedBase64, key, iv);
-            System.out.println("解密后: " + decryptedText);
-
-            // 测试需要填充的情况
-            System.out.println("\n=== 测试需要填充的情况 ===");
-            String shortText = "Hello World!"; // 12个字符，需要填充
-            System.out.println("短文本: " + shortText);
-
-            // 先填充再加密
-            byte[] paddedData = padData(shortText.getBytes(StandardCharsets.UTF_8));
-            byte[] encrypted = encrypt(paddedData, key.getBytes(StandardCharsets.UTF_8), iv.getBytes(StandardCharsets.UTF_8));
-
-            // 解密
-            byte[] decrypted = decrypt(encrypted, key.getBytes(StandardCharsets.UTF_8), iv.getBytes(StandardCharsets.UTF_8));
-            byte[] unpaddedData = unpadData(decrypted);
-            System.out.println("解密并去除填充后: " + new String(unpaddedData, StandardCharsets.UTF_8));
-
-            System.out.println();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }

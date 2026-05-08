@@ -52,7 +52,7 @@ public class CMAC {
      */
     public static String calculate(String keyHex, String dataHex) {
         byte[] result = calculate(Hex.hexToBytes(keyHex), Hex.hexToBytes(dataHex));
-        return bytesToHex(result).toUpperCase();
+        return Hex.bytesToHex(result);
     }
 
 
@@ -185,18 +185,5 @@ public class CMAC {
         return cipher.doFinal(data);
     }
 
-    /**
-     * 将字节数组转换为十六进制字符串
-     *
-     * @param bytes 待转换的字节数组
-     * @return 十六进制字符串
-     */
-    private static String bytesToHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString().toUpperCase();
-    }
 
 }

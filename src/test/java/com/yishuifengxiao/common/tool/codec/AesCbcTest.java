@@ -1,6 +1,7 @@
 package com.yishuifengxiao.common.tool.codec;
 
 import com.yishuifengxiao.common.tool.lang.Hex;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -63,18 +64,6 @@ public class AesCbcTest {
         assertTrue("加密结果应是有效的十六进制字符串", encryptedHex.matches("[0-9A-Fa-f]+"));
     }
 
-    /**
-     * 测试encryptToBase64方法 - 正常情况
-     */
-    @Test
-    public void testEncryptToBase64_Normal() throws Exception {
-        String encryptedBase64 = AesCbc.encryptToBase64(TEST_DATA, KEY, IV);
-
-        assertNotNull("加密结果不应为null", encryptedBase64);
-        assertFalse("加密结果不应为空", encryptedBase64.isEmpty());
-        // 验证是有效的Base64字符串
-        assertTrue("加密结果应是有效的Base64字符串", encryptedBase64.matches("[A-Za-z0-9+/=]+"));
-    }
 
     /**
      * 测试decrypt(byte[], byte[], byte[])方法 - 正常情况
@@ -108,17 +97,6 @@ public class AesCbcTest {
         assertEquals("解密后的数据应与原始数据相同", dataHex, decryptedHex);
     }
 
-    /**
-     * 测试decryptFromBase64方法 - 正常情况
-     */
-    @Test
-    public void testDecryptFromBase64_Normal() throws Exception {
-        // 先加密再解密
-        String encryptedBase64 = AesCbc.encryptToBase64(TEST_DATA, KEY, IV);
-        String decrypted = AesCbc.decryptFromBase64(encryptedBase64, KEY, IV);
-
-        assertEquals("解密后的数据应与原始数据相同", TEST_DATA, decrypted);
-    }
 
     /**
      * 测试decrypt(byte[], byte[], byte[])方法 - 密文长度不是16的倍数时抛出异常
@@ -167,5 +145,34 @@ public class AesCbcTest {
         System.out.println(encrypt);
         String decrypt = AesCbc.decrypt(encrypt, KEY + KEY, IV + IV);
         assertEquals(TEST_DATA + TEST_DATA, decrypt);
+    }
+
+    @Test
+    public void test_normal_hex() throws Exception {
+        String r1 = AesCbc.encrypt("00000000000000000000000000000001", "A3A2B056FA38B2D461DFD2C4794EF3E1",
+                "00000000000000000000000000000000");
+        Assert.assertEquals("0A9707B4AA79E9B451850CC2326DB582", r1);
+        r1 = AesCbc.encrypt("00000000000000000000000000000001", "A3A2B056FA38B2D461DFD2C4794EF3E1",
+                null);
+        Assert.assertEquals("0A9707B4AA79E9B451850CC2326DB582", r1);
+        String r2 = AesCbc.encrypt("BF2407B805800388370A800000000000", "A3A2B056FA38B2D461DFD2C4794EF3E1",
+                "0A9707B4AA79E9B451850CC2326DB582");
+        Assert.assertEquals("3E625BAC9B572C30CB0FBD36CB239D07", r2);
+
+        String r3 = AesCbc.encrypt("00000000000000000000000000000002", "A3A2B056FA38B2D461DFD2C4794EF3E1",
+                "00000000000000000000000000000000");
+        Assert.assertEquals("BA975F05026770690FEC301163F35009", r3);
+
+        String r4 = AesCbc.encrypt(
+                "BF253F5A0A986811415220491600719104636d6363920870726f66696c6531950102B6173015800204F0810F31302e382e33302e37353a38303930B705800344F4448000000000000000000000000000", "A3A2B056FA38B2D461DFD2C4794EF3E1",
+                "BA975F05026770690FEC301163F35009");
+        Assert.assertEquals(
+                "C42284A9B74959541432BA3E70F73D76D3585577ADCD7ABF923DDDDC8A79A2F903F715FD52E6ED75575A5A22AF6EE616408117E0E761B5EB39B75F21A1C27314E7D1F1741D5CEC3E56480197D78AFF1A", r4);
+
+        String r5 = AesCbc.encrypt(
+                "BF26368010105288ba317e46fd9eabddb8b0a347a3811021c18be721f548feb7bf49e716da68648210ad027d2b289c465d8aa99c43d8142a4c80000000000000", "A3A2B056FA38B2D461DFD2C4794EF3E1",
+                "0EB8778AC4B5EBA99FCEE92A7D05281D");
+        Assert.assertEquals(
+                "7645C492AC7EE3CC25835243A7D3DC8B5F942EE11641B608D1D919D727291819715ED199D996BE6A61FB021C88C65599F3FE46BF3A3F05F339A758FBFE55210A", r5);
     }
 }
