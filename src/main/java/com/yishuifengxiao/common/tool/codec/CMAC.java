@@ -1,11 +1,11 @@
 package com.yishuifengxiao.common.tool.codec;
 
+import com.yishuifengxiao.common.tool.lang.Hex;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 /**
@@ -33,12 +33,28 @@ public class CMAC {
     /**
      * 常量Rb，用于CMAC子密钥生成
      */
-    private static final byte[] Rb = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0x87};
+    private static final byte[] Rb = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, (byte) 0x87};
 
     /**
      * 零向量，用于CMAC计算初始化
      */
-    private static final byte[] Zero = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    private static final byte[] Zero = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00};
+
+
+    /**
+     * 计算十六进制数据的CMAC值
+     *
+     * @param keyHex  十六进制格式的密钥字符串
+     * @param dataHex 十六进制格式的数据字符串
+     * @return CMAC值（十六进制字符串），计算失败返回null
+     */
+    public static String calculate(String keyHex, String dataHex) {
+        byte[] result = calculate(Hex.hexToBytes(keyHex), Hex.hexToBytes(dataHex));
+        return bytesToHex(result).toUpperCase();
+    }
+
 
     /**
      * 计算数据的CMAC值
@@ -47,7 +63,7 @@ public class CMAC {
      * @param data 待计算的数据
      * @return CMAC值（十六进制字符串），计算失败返回null
      */
-    public static String calculate(byte[] key, byte[] data) {
+    public static byte[] calculate(byte[] key, byte[] data) {
         try {
             byte[] subKey1 = generateSubKey(key, true);
             byte[] subKey2 = generateSubKey(key, false);
@@ -86,7 +102,7 @@ public class CMAC {
                 result[j] ^= iv[j];
             }
             result = aesEncrypt(key, result);
-            return bytesToHex(result);
+            return result;
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
                 log.info("CMAC计算失败，错误: {}", e.getMessage());
@@ -95,21 +111,11 @@ public class CMAC {
         }
     }
 
-    /**
-     * 计算字符串数据的CMAC值
-     *
-     * @param key  加密密钥字符串
-     * @param data 待计算的字符串数据
-     * @return CMAC值（十六进制字符串），计算失败返回null
-     */
-    public static String calculate(String key, String data) {
-        return calculate(key.getBytes(StandardCharsets.UTF_8), data.getBytes(StandardCharsets.UTF_8));
-    }
 
     /**
      * 生成CMAC子密钥
      *
-     * @param key    原始密钥
+     * @param key     原始密钥
      * @param isFirst true表示生成第一子密钥K1，false表示生成第二子密钥K2
      * @return 生成的子密钥
      * @throws Exception 子密钥生成失败时抛出
@@ -190,7 +196,7 @@ public class CMAC {
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));
         }
-        return sb.toString();
+        return sb.toString().toUpperCase();
     }
 
 }

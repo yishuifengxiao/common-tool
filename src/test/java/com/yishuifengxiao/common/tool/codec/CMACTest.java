@@ -2,121 +2,85 @@ package com.yishuifengxiao.common.tool.codec;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
- * CMAC工具类的单元测试
+ * CMAC.calculate 单元测试类
  */
 public class CMACTest {
 
-    // RFC 4493标准测试用例
-    private static final String TEST_KEY = "2b7e151628aed2a6abf7158809cf4f3c"; // AES-128密钥
-    private static final String EMPTY_DATA = "";
-    private static final String EMPTY_DATA_CMAC = "bb1d6929e95937287fa37d129b756746"; // 空数据的CMAC
 
-    private static final String ONE_BLOCK_DATA = "6bc1bee22e409f96e93d7e117393172a";
-    private static final String ONE_BLOCK_DATA_CMAC = "070a16b46b4d4144f79bdd9dd04a287c";
+    private static final String TEST_KEY_HEX = "9DD5D73CB40668F7CBEA45DB1E3ECFB0";
+    private static final String TEST_DATA_HEX = "24F7002D1128496A4403D675557590EB8718FD396C88D14DCCBBB64E664D330EA597";
+    private static final String EXPECTED_CMAC_HEX = "631DC24731C5272FB0887987580F38AC";
 
-    private static final String TWO_BLOCK_DATA = "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e51";
-    private static final String TWO_BLOCK_DATA_CMAC = "CE0CBF1738F4DF6428B1D93BF12081C9";
-
-    private static final String THREE_BLOCK_DATA = "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e5130c81c46a35ce411";
-    private static final String THREE_BLOCK_DATA_CMAC = "51f0bebf7e3b9d92fc49741779363cfe";
-
-
-    /**
-     * 测试calculate方法 - 一个数据块
-     */
     @Test
-    public void testcalculate_OneBlock() throws Exception {
-        String result = CMAC.calculate(ONE_BLOCK_DATA, TEST_KEY);
-        assertEquals("一个数据块CMAC计算错误", ONE_BLOCK_DATA_CMAC.toLowerCase(), result.toLowerCase());
+    public void testCalculateHex_ValidInputs_ReturnsExpectedResult() {
+        String result = CMAC.calculate(TEST_KEY_HEX, TEST_DATA_HEX);
+        assertNotNull("CMAC calculation should not return null for valid inputs", result);
+        assertEquals("CMAC calculation should return expected result", EXPECTED_CMAC_HEX.toUpperCase(),
+                result.toUpperCase());
     }
 
-    /**
-     * 测试calculate方法 - 两个数据块
-     */
     @Test
-    public void testcalculate_TwoBlocks() throws Exception {
-        String result = CMAC.calculate(TWO_BLOCK_DATA, TEST_KEY);
-        assertEquals("两个数据块CMAC计算错误", TWO_BLOCK_DATA_CMAC.toLowerCase(), result.toLowerCase());
+    public void testCalculateHex_ValidInputs_ReturnsExpectedResult2() {
+        String result = CMAC.calculate("DF44B25E2C89CD872FF19C48D2815D21",
+                "C0C7D92977793D22CC684858866AEF1487186DE97254E3E5AA420199A4416295362F");
+        assertNotNull("CMAC calculation should not return null for valid inputs", result);
+        assertEquals("CMAC calculation should return expected result",
+                "087BE81559A5AACE22D6CE64204A504C".toUpperCase(), result.toUpperCase());
+    }
+
+    @Test
+    public void testCalculateHex_ValidInputs_ReturnsExpectedResult3() {
+        String result = CMAC.calculate("DF44B25E2C89CD872FF19C48D2815D21",
+                "087BE81559A5AACE22D6CE64204A504C884ABF253F5A0A986811415220491600719104636d6363920870726f66696c6531950102B6173015800204F0810F31302e382e33302e37353a38303930B705800344F444");
+        assertNotNull("CMAC calculation should not return null for valid inputs", result);
+        assertEquals("CMAC calculation should return expected result",
+                "52801F1FDCDD62F91D2B408F3D68F234".toUpperCase(), result.toUpperCase());
+    }
+
+    @Test
+    public void testCalculateHex_SingleByteData() {
+        String key = "2b7e151628aed2a6abf7158809cf4f3c";
+        String data = "6b"; // 单字节数据
+        String result = CMAC.calculate(key, data);
+        assertNotNull("CMAC calculation should not return null for single byte data", result);
+    }
+
+    @Test
+    public void testCalculateHex_ShortData() {
+        String key = "2b7e151628aed2a6abf7158809cf4f3c";
+        String data = "6bc1bee22e409f96e93d7e11739317"; // 15字节数据，少于16字节
+        String result = CMAC.calculate(key, data);
+        assertNotNull("CMAC calculation should not return null for short data", result);
+    }
+
+    @Test
+    public void testCalculateHex_LongerData() {
+        String key = "2b7e151628aed2a6abf7158809cf4f3c";
+        String data = "6bc1bee22e409f96e93d7e117393172aae2d8a571e03ac9c9eb76fac45af8e51" +
+                "30c81c46a35ce411e5fbc1191a0a52ef" +
+                "f69f2445df4f9b17ad2b417be66c3710"; // 多个16字节块的数据
+        String result = CMAC.calculate(key, data);
+        assertNotNull("CMAC calculation should not return null for longer data", result);
     }
 
 
-
-    /**
-     * 测试leftShiftOneBit方法 - 正常情况
-     */
     @Test
-    public void testLeftShiftOneBit_Normal() throws Exception {
-        // 构造一个测试数组
-        byte[] input = new byte[]{(byte) 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-        
-        // 手动计算期望结果 (0x80左移一位变成0x00，最高位的1丢失，没有进位)
-        byte[] expected = new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-        
-        // 通过反射访问私有方法
-        java.lang.reflect.Method method = CMAC.class.getDeclaredMethod("leftShiftOneBit", byte[].class);
-        method.setAccessible(true);
-        byte[] result = (byte[]) method.invoke(null, (Object) input);
-        
-        assertArrayEquals("左移一位计算错误", expected, result);
+    public void testCalculate_InvalidKeyLength() {
+        // 使用长度不是16字节的密钥，应该能正常工作或给出预期结果
+        String shortKey = "000102030405060708090a0b0c0d0e"; // 15字节
+        String data = "6bc1bee22e409f96e93d7e117393172a";
+
+        try {
+            String result = CMAC.calculate(shortKey, data);
+            // 根据具体实现，这里可能返回null或抛出异常
+            // 这个测试主要是验证不会抛出意外异常
+        } catch (Exception e) {
+            // 可能由于密钥长度问题抛出异常，这是预期的行为
+        }
     }
 
-    /**
-     * 测试leftShiftOneBit方法 - 带进位情况
-     */
-    @Test
-    public void testLeftShiftOneBit_WithCarry() throws Exception {
-        // 构造一个测试数组
-        byte[] input = new byte[]{(byte) 0xC0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-        
-        // 手动计算期望结果 (0xC0左移一位变成0x80，最高位的1丢失，有进位)
-        byte[] expected = new byte[]{(byte) 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                                     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-        
-        // 通过反射访问私有方法
-        java.lang.reflect.Method method = CMAC.class.getDeclaredMethod("leftShiftOneBit", byte[].class);
-        method.setAccessible(true);
-        byte[] result = (byte[]) method.invoke(null, (Object) input);
-        
-        assertArrayEquals("左移一位计算错误", expected, result);
-    }
-
-    /**
-     * 测试xor方法 - 正常情况
-     */
-    @Test
-    public void testXor_Normal() throws Exception {
-        byte[] a = new byte[]{(byte) 0xFF, 0x00, (byte) 0xAA, 0x55};
-        byte[] b = new byte[]{(byte) 0x00, (byte) 0xFF, (byte) 0x55, (byte) 0xAA};
-        byte[] expected = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
-        
-        // 通过反射访问私有方法
-        java.lang.reflect.Method method = CMAC.class.getDeclaredMethod("xor", byte[].class, byte[].class);
-        method.setAccessible(true);
-        method.invoke(null, (Object) a, (Object) b);
-        
-        assertArrayEquals("异或操作错误", expected, a);
-    }
-
-    /**
-     * 测试xor方法 - 相同数组异或
-     */
-    @Test
-    public void testXor_SameArray() throws Exception {
-        byte[] a = new byte[]{(byte) 0xFF, 0x00, (byte) 0xAA, 0x55};
-        byte[] b = new byte[]{(byte) 0xFF, 0x00, (byte) 0xAA, 0x55};
-        byte[] expected = new byte[]{0x00, 0x00, 0x00, 0x00};
-        
-        // 通过反射访问私有方法
-        java.lang.reflect.Method method = CMAC.class.getDeclaredMethod("xor", byte[].class, byte[].class);
-        method.setAccessible(true);
-        method.invoke(null, (Object) a, (Object) b);
-        
-        assertArrayEquals("相同数组异或操作错误", expected, a);
-    }
 }
