@@ -20,7 +20,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import java.io.Serializable;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,11 +47,42 @@ public class JdbcHelper {
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private ZoneId databaseZoneId = ZoneId.systemDefault();
 
+    private int batchSize = DEFAULT_BATCH_SIZE;
+
+    /**
+     * 默认构造函数
+     * <p>
+     * 创建一个空的JdbcHelper实例，需要后续通过setJdbcTemplate方法设置JdbcTemplate
+     * </p>
+     */
     public JdbcHelper() {
     }
 
+    /**
+     * 使用JdbcTemplate初始化构造函数
+     * <p>
+     * 创建JdbcHelper实例并初始化NamedParameterJdbcTemplate和数据库时区信息
+     * </p>
+     *
+     * @param jdbcTemplate Spring的JdbcTemplate对象，用于执行SQL操作
+     */
     public JdbcHelper(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        initialize();
+    }
+
+    /**
+     * 使用JdbcTemplate和批量大小初始化构造函数
+     * <p>
+     * 创建JdbcHelper实例，设置自定义的批量操作大小，并初始化NamedParameterJdbcTemplate和数据库时区信息
+     * </p>
+     *
+     * @param jdbcTemplate Spring的JdbcTemplate对象，用于执行SQL操作
+     * @param batchSize    批量操作的大小，表示每次批量处理的最大记录数
+     */
+    public JdbcHelper(JdbcTemplate jdbcTemplate, int batchSize) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.batchSize = batchSize;
         initialize();
     }
 
@@ -618,16 +648,26 @@ public class JdbcHelper {
         if (null == list || list.isEmpty()) {
             return new Result(null, 0, null);
         }
+
+        // 过滤出非空元素
+        List<T> validItems = list.stream().filter(Objects::nonNull).collect(Collectors.toList());
+        if (validItems.isEmpty()) {
+            return new Result(null, 0, null);
+        }
+
         StringBuilder sql = new StringBuilder("INSERT INTO `");
         List<SqlParameterSource> paramsList = new ArrayList<>();
-        AtomicReference<Class> reference = new AtomicReference<>();
+        boolean sqlBuilt = false;
+        String tableName = null;
 
         // 遍历实体列表，构建SQL模板和参数列表
-        list.stream().filter(Objects::nonNull).forEach(s -> {
+        for (T item : validItems) {
             MapSqlParameterSource params = new MapSqlParameterSource();
-            List<FieldValue> fieldValues = FieldExtractor.extractFieldValue(s);
-            if (reference.getAndSet(s.getClass()) != null) {
-                String tableName = FieldExtractor.extractTableName(s.getClass());
+            List<FieldValue> fieldValues = FieldExtractor.extractFieldValue(item);
+
+            // 首次遇到有效对象时，构建SQL模板
+            if (!sqlBuilt && fieldValues != null && !fieldValues.isEmpty()) {
+                tableName = FieldExtractor.extractTableName(item.getClass());
                 sql.append(tableName).append("` (");
                 StringBuilder placeholder = new StringBuilder();
                 StringBuilder valueClause = new StringBuilder();
@@ -642,14 +682,22 @@ public class JdbcHelper {
                 placeholder = placeholder.deleteCharAt(placeholder.length() - 1);
                 valueClause = valueClause.deleteCharAt(valueClause.length() - 1);
                 sql.append(placeholder).append(" ) VALUES ( ").append(valueClause).append(" )");
+                sqlBuilt = true;
+            } else if (fieldValues != null) {
+                // 后续对象只添加参数
+                for (FieldValue field : fieldValues) {
+                    params.addValue(field.getColumnName(), field.getValue(), field.sqlType());
+                }
             }
-            paramsList.add(params);
 
-        });
-        if (paramsList.isEmpty()) {
+            paramsList.add(params);
+        }
+
+        if (paramsList.isEmpty() || !sqlBuilt) {
             return new Result(null, 0, null);
         }
-        return this.batchUpdate(reference.get(), sql.toString(), paramsList.toArray(new SqlParameterSource[paramsList.size()]));
+
+        return this.batchUpdate(sql.toString(), paramsList.toArray(new SqlParameterSource[0]));
     }
 
 
@@ -919,19 +967,50 @@ public class JdbcHelper {
      * 4. 执行批量更新操作并返回包含主键和受影响行数的Result对象
      * </p>
      *
-     * @param clazz  目标结果类型（此参数在当前实现中未使用）
      * @param sql    要执行的SQL语句，支持命名参数（如:name, :age等）
      * @param params SQL参数源对象数组，每个元素对应一次批量操作的参数
      * @return Result对象，包含KeyHolder、受影响的行数和批量更新的行数数组
      */
-    public <T> Result batchUpdate(Class<T> clazz, String sql, SqlParameterSource[] params) {
+    public <T> Result batchUpdate(String sql, SqlParameterSource[] params) {
         sql = this.sql(sql);
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+
         if (null == params) {
             params = new SqlParameterSource[0];
         }
-        int[] update = this.namedParameterJdbcTemplate.batchUpdate(sql, params, keyHolder);
-        return new Result(keyHolder, update.length, update);
+
+        List<Map<String, Object>> keyList = new ArrayList<>();
+        int totalAffectedRows = 0;
+        List<Integer> affectedRowsList = new ArrayList<>();
+        int batchSize = this.batchSize();
+
+        // 把params按照DEFAULT_BATCH_SIZE切成小批量
+        for (int i = 0; i < params.length; i += batchSize) {
+            int end = Math.min(i + batchSize, params.length);
+            SqlParameterSource[] batch = new SqlParameterSource[end - i];
+            System.arraycopy(params, i, batch, 0, batch.length);
+            GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+            int[] updates = this.namedParameterJdbcTemplate.batchUpdate(sql, batch, generatedKeyHolder);
+
+            // 安全地添加生成的主键
+            if (generatedKeyHolder.getKeyList() != null) {
+                keyList.addAll(generatedKeyHolder.getKeyList());
+            }
+
+            // 统计受影响的行数
+            if (null != updates) {
+                for (int update : updates) {
+                    affectedRowsList.add(update);
+                    totalAffectedRows += update;
+                }
+            }
+        }
+        int affectedRows = affectedRowsList.stream().mapToInt(Integer::intValue).sum();
+
+        // 转换为数组
+        int[] affectedRowsArray = affectedRowsList.stream().mapToInt(Integer::intValue).toArray();
+
+
+        return new Result(new GeneratedKeyHolder(keyList), affectedRows, affectedRowsArray);
     }
 
 
@@ -1050,9 +1129,14 @@ public class JdbcHelper {
         private int[] batchAffectedRows;
 
         /**
-         * KeyHolder对象，用于存储生成的主键值
+         * 获取KeyHolder对象，用于存储生成的主键值
+         * <p>
+         * 执行流程：
+         * 1. 如果keyHolder不为null，则返回keyHolder
+         * 2. 否则返回defaultKeyHolder
+         * </p>
          *
-         * @return 当执行INSERT操作且数据库使用自增主键时，可以通过此对象获取生成的主键值
+         * @return KeyHolder对象，当执行INSERT操作且数据库使用自增主键时，可以通过此对象获取生成的主键值
          */
         public KeyHolder keyHolder() {
             if (null != keyHolder) {
@@ -1075,13 +1159,16 @@ public class JdbcHelper {
      * 设置JdbcTemplate实例并重新初始化
      * <p>
      * 调用此方法会触发initialize()方法，重新创建NamedParameterJdbcTemplate并检测数据库时区
+     * 使用链式调用设计，返回当前对象实例，支持流畅的API调用
      * </p>
      *
      * @param jdbcTemplate JdbcTemplate对象
+     * @return 当前JdbcHelper实例，支持链式调用
      */
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+    public JdbcHelper setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.initialize();
+        return this;
     }
 
     /**
@@ -1209,4 +1296,39 @@ public class JdbcHelper {
         ASC, DESC
     }
 
+    /**
+     * 获取批量操作的大小
+     *
+     * @return 当前设置的批量大小值
+     */
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    /**
+     * 设置批量操作的大小
+     * <p>
+     * 使用链式调用设计，返回当前对象实例，支持流畅的API调用
+     * </p>
+     *
+     * @param batchSize 批量操作的大小，表示每次批量处理的最大记录数
+     * @return 当前JdbcHelper实例，支持链式调用
+     */
+    public JdbcHelper setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+        return this;
+    }
+
+    /**
+     * 获取有效的批量操作大小
+     * <p>
+     * 如果当前设置的批量大小小于或等于0，则返回默认的批量大小（DEFAULT_BATCH_SIZE）
+     * 否则返回当前设置的批量大小
+     * </p>
+     *
+     * @return 有效的批量大小值，保证始终为正数
+     */
+    public int batchSize() {
+        return this.batchSize <= 0 ? DEFAULT_BATCH_SIZE : this.batchSize;
+    }
 }
