@@ -41,6 +41,26 @@ public class SmartCard {
     private static final int MAX_CHUNK_SIZE = 510;
 
     /**
+     * 最大自动拉取次数，防止无限递归
+     */
+    private static final int MAX_AUTO_PULL_COUNT = 100;
+
+    /**
+     * 成功状态字SW1
+     */
+    private static final int SW1_SUCCESS = 0x90;
+
+    /**
+     * 需要拉取更多数据的状态字SW1
+     */
+    private static final int SW1_MORE_DATA = 0x61;
+
+    /**
+     * GET RESPONSE命令前缀
+     */
+    private static final String GET_RESPONSE_PREFIX = "01C00000";
+
+    /**
      * 智能卡连接对象
      */
     private Card card;
@@ -108,6 +128,7 @@ public class SmartCard {
         }
         if (null == this.card) {
             this.card = terminal.connect("*");
+            log.debug("成功连接到读卡器: {}", terminalName);
         }
         return this;
     }
@@ -120,8 +141,13 @@ public class SmartCard {
      */
     public synchronized SmartCard disconnect() throws CardException {
         if (null != this.card) {
-            this.card.disconnect(true);
-            this.card = null;
+            try {
+                this.card.disconnect(true);
+                log.debug("已断开智能卡连接");
+            } finally {
+                this.card = null;
+                this.cardChannel = null;
+            }
         }
         return this;
     }
@@ -142,20 +168,23 @@ public class SmartCard {
         }
         if (null == this.cardChannel) {
             this.cardChannel = this.card.openLogicalChannel();
+            log.debug("已打开新的逻辑通道");
         }
         return this;
     }
 
-    private CardChannel cardChannel() throws CardException {
+    private synchronized CardChannel cardChannel() throws CardException {
         if (null == this.cardChannel) {
             this.cardChannel = this.card.openLogicalChannel();
+            log.debug("已自动打开逻辑通道");
         }
         return this.cardChannel;
     }
 
-    public SmartCard selectIsr() throws CardException {
+    public synchronized SmartCard selectIsr() throws CardException {
         CommandAPDU commandAPDU = this.convertToCommandApdu(COMMAND_SELECT_ISR);
         this.cardChannel().transmit(commandAPDU);
+        log.debug("已选择ISR应用");
         return this;
     }
 
@@ -190,17 +219,17 @@ public class SmartCard {
      */
     public synchronized ApduResult transmitWithNewLogicalChannel(String hexCommand) throws CardException {
         CardChannel channel = null;
-        ApduResult result = null;
         try {
             channel = this.card.openLogicalChannel();
+            log.debug("在新逻辑通道上执行命令: {}", hexCommand);
             channel.transmit(this.convertToCommandApdu(COMMAND_SELECT_ISR));
-            result = this.transmit(channel, hexCommand, true);
+            return this.transmit(channel, hexCommand, true);
+        } catch (CardException e) {
+            log.error("在新逻辑通道上执行命令失败: {}", hexCommand, e);
+            throw e;
         } finally {
-            if (null != channel) {
-                channel.close();
-            }
+            closeChannelQuietly(channel);
         }
-        return result;
     }
 
 
@@ -214,6 +243,9 @@ public class SmartCard {
         hexCommand = hexCommand.replaceAll("\\s+", "").trim();
         if (!Hex.isHex(hexCommand)) {
             throw new UncheckedException(String.format("输入的数据%s不是十六进制数据", hexCommand));
+        }
+        if (hexCommand.length() % 2 != 0) {
+            throw new UncheckedException(String.format("输入的十六进制数据%s长度不是偶数", hexCommand));
         }
         byte[] commandBytes = Hex.hexToBytes(hexCommand);
         return new CommandAPDU(commandBytes);
@@ -234,7 +266,7 @@ public class SmartCard {
             return transmitWithoutAutoPull(channel, hexCommand);
         } else {
             ApduResult result = new ApduResult();
-            return transmitWithAutoPull(result, channel, hexCommand);
+            return transmitWithAutoPull(result, channel, hexCommand, 0);
         }
     }
 
@@ -276,12 +308,17 @@ public class SmartCard {
      * @param result     累积的结果对象，用于保存多次拉取的数据
      * @param channel    目标逻辑通道
      * @param hexCommand 十六进制格式的APDU命令字符串
+     * @param pullCount  当前拉取次数，用于防止无限循环
      * @return APDU命令执行结果，包含完整的响应数据和最终状态字
      * @throws CardException 当命令传输失败时抛出
      */
-    private ApduResult transmitWithAutoPull(ApduResult result, CardChannel channel, String hexCommand) throws CardException {
+    private ApduResult transmitWithAutoPull(ApduResult result, CardChannel channel, String hexCommand, int pullCount) throws CardException {
+        if (pullCount >= MAX_AUTO_PULL_COUNT) {
+            throw new UncheckedException("自动拉取次数超过限制(" + MAX_AUTO_PULL_COUNT + ")，可能存在异常");
+        }
+
         StringBuilder responseData = new StringBuilder(result.getData() != null ? result.getData() : "");
-        List<ExecuteRecord> records = new ArrayList<>(result.getRecords());
+        List<ExecuteRecord> records = result.getRecords() != null ? result.getRecords() : new ArrayList<>();
 
         CommandAPDU commandApdu = this.convertToCommandApdu(hexCommand);
         ResponseAPDU responseApdu = channel.transmit(commandApdu);
@@ -293,11 +330,13 @@ public class SmartCard {
         responseData.append(data);
         records.add(new ExecuteRecord(hexCommand, Hex.bytesToHex(responseApdu.getBytes())));
 
-        if (sw1 != 0x61) {
+        if (sw1 != SW1_MORE_DATA) {
+            log.debug("命令执行完成，SW1=0x{}, SW2=0x{}", Integer.toHexString(sw1), Integer.toHexString(sw2));
             return result.setData(responseData.toString()).setSw1(sw1).setSw2(sw2).setRecords(records);
         } else {
-            String getNextCommand = "01C00000" + Hex.numberToHexString(sw2);
-            return transmitWithAutoPull(result, channel, getNextCommand);
+            log.debug("检测到SW1=0x61，执行第{}次自动拉取", pullCount + 1);
+            String getNextCommand = GET_RESPONSE_PREFIX + Hex.numberToHexString(sw2);
+            return transmitWithAutoPull(result, channel, getNextCommand, pullCount + 1);
         }
     }
 
@@ -383,16 +422,18 @@ public class SmartCard {
         try {
             // 打开新的逻辑通道
             channel = this.card.openLogicalChannel();
+            log.debug("在81E2专用逻辑通道上执行{}条命令", hexCommand.size());
             channel.transmit(this.convertToCommandApdu(COMMAND_SELECT_ISR));
             // 在逻辑通道上依次执行所有APDU命令
             for (String command : hexCommand) {
                 results.add(transmit81E2Request(channel, command));
             }
+        } catch (CardException e) {
+            log.error("在81E2专用逻辑通道上执行命令失败", e);
+            throw e;
         } finally {
             // 确保逻辑通道被正确关闭
-            if (null != channel) {
-                channel.close();
-            }
+            closeChannelQuietly(channel);
         }
         return results;
     }
@@ -416,6 +457,8 @@ public class SmartCard {
         StringBuilder responseData = new StringBuilder();
 
         List<String> chunks = splitCommand(hexCommand);
+        log.debug("81E2命令分包数量: {}", chunks.size());
+
         for (int i = 0; i < chunks.size(); i++) {
             String prefix = "81E291";
             String chunk = chunks.get(i);
@@ -429,6 +472,7 @@ public class SmartCard {
             responseData.append(transmitResult.getData());
 
             if (!transmitResult.isSuccess()) {
+                log.warn("81E2命令第{}个分包执行失败，SW1=0x{}", i + 1, Integer.toHexString(transmitResult.getSw1()));
                 break;
             }
         }
@@ -446,17 +490,21 @@ public class SmartCard {
      * @return 分割后的命令片段列表
      */
     private List<String> splitCommand(String hexCommand) {
+        if (hexCommand == null || hexCommand.isEmpty()) {
+            return Collections.singletonList("");
+        }
+
         if (hexCommand.length() <= MAX_CHUNK_SIZE) {
             return Collections.singletonList(hexCommand);
         }
+
         List<String> chunks = new ArrayList<>();
         int startPos = 0;
-        int endPos = MAX_CHUNK_SIZE;
 
-        while (endPos < hexCommand.length()) {
+        while (startPos < hexCommand.length()) {
+            int endPos = Math.min(startPos + MAX_CHUNK_SIZE, hexCommand.length());
             String chunk = StringUtils.substring(hexCommand, startPos, endPos);
             startPos = endPos;
-            endPos = startPos + MAX_CHUNK_SIZE;
             chunks.add(chunk);
         }
 
@@ -493,14 +541,16 @@ public class SmartCard {
         CardChannel channel = null;
         try {
             channel = this.card.openLogicalChannel();
+            log.debug("在新逻辑通道上批量执行{}条命令", hexCommands.size());
             for (String hexCommand : hexCommands) {
                 ApduResult result = this.transmit(channel, hexCommand, true);
                 results.add(result);
             }
+        } catch (CardException e) {
+            log.error("在新逻辑通道上批量执行命令失败", e);
+            throw e;
         } finally {
-            if (null != channel) {
-                channel.close();
-            }
+            closeChannelQuietly(channel);
         }
         return results;
     }
@@ -541,6 +591,21 @@ public class SmartCard {
         return TLVUtil.extractValsRecursive(transmit.getData(), "BF3E", "5A").getVal("5A");
     }
 
+    /**
+     * 安静地关闭逻辑通道，不抛出异常
+     *
+     * @param channel 要关闭的逻辑通道
+     */
+    private void closeChannelQuietly(CardChannel channel) {
+        if (null != channel) {
+            try {
+                channel.close();
+                log.debug("逻辑通道已关闭");
+            } catch (CardException e) {
+                log.warn("关闭逻辑通道时发生异常", e);
+            }
+        }
+    }
 
     /**
      * APDU命令执行结果
@@ -607,7 +672,7 @@ public class SmartCard {
          * @return true表示成功或需要继续拉取，false表示执行失败
          */
         public boolean isSuccess() {
-            return this.sw1 == 0x90 || this.sw1 == 0x61;
+            return this.sw1 == SW1_SUCCESS || this.sw1 == SW1_MORE_DATA;
         }
     }
 
