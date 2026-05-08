@@ -3,15 +3,14 @@
  */
 package com.yishuifengxiao.common.tool.entity;
 
+import com.yishuifengxiao.common.tool.collections.CollUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.yishuifengxiao.common.tool.collections.CollUtil;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * <p>通用分页对象</p>
@@ -58,15 +57,15 @@ public class Page<S> extends Slice implements Serializable {
     /**
      * 全参构造函数
      *
-     * @param data  当前页的数据
-     * @param total 记录总数
-     * @param pages 总的分页数
-     * @param size  分页大小
-     * @param num   当前页页码，从1开始
+     * @param data    当前页的数据
+     * @param total   记录总数
+     * @param pages   总的分页数
+     * @param size    分页大小
+     * @param current 当前页页码，从1开始
      */
-    public Page(List<S> data, Number total, Number pages, Number size, Number num) {
+    public Page(List<S> data, Number total, Number pages, Number size, Number current) {
         this.size = size;
-        this.num = num;
+        this.current = current;
         this.data = data;
         this.pages = pages;
         this.total = total;
@@ -77,6 +76,13 @@ public class Page<S> extends Slice implements Serializable {
      */
     public Page() {
 
+    }
+
+    public static <S> Page<S> of(Slice slice, Number total, List<S> data) {
+        slice = null == slice ? Slice.DEFAULT_SLICE : slice;
+        data = null == data ? new ArrayList<>() : data;
+        total = null == total ? 0L : total;
+        return new Page<>(data, total, page(total, slice.size()), slice.size(), slice.current());
     }
 
     /**
@@ -146,47 +152,47 @@ public class Page<S> extends Slice implements Serializable {
     /**
      * 从总的数据中根据分页参数获取一个分页对象
      *
-     * @param <S>  分页对象里包含的数据的类型
-     * @param list 传入的总数据
-     * @param size 分页大小
-     * @param num  当前页页码
+     * @param <S>     分页对象里包含的数据的类型
+     * @param list    传入的总数据
+     * @param size    分页大小
+     * @param current 当前页页码
      * @return 分页对象
      */
-    public static <S> Page<S> toPage(List<S> list, Number size, Number num) {
+    public static <S> Page<S> toPage(List<S> list, Number size, Number current) {
         if (CollUtil.isEmpty(list)) {
             return Page.ofEmpty(size);
         }
         if (size.longValue() <= 0) {
             size = DEFAULT_PAGE_SIZE;
         }
-        if (num.longValue() <= 0) {
-            num = DEFAULT_PAGE_NUM;
+        if (current.longValue() <= 0) {
+            current = DEFAULT_PAGE_NUM;
         }
         // 起始量
-        long startNum = (num.longValue() - 1) * size.longValue();
+        long startNum = (current.longValue() - 1) * size.longValue();
 
         List<S> data = null == list ? Collections.emptyList() :
                 list.stream().skip(startNum).limit(size.longValue()).collect(Collectors.toList());
 
-        return Page.of(data, list.size(), size, num);
+        return Page.of(data, list.size(), size, current);
     }
 
     /**
      * 生成分页对象
      *
-     * @param <S>   分页对象里包含的数据的类型
-     * @param data  当前页数据
-     * @param total 总的记录数
-     * @param size  分页大小
-     * @param num   当前页页码，从1开始
+     * @param <S>     分页对象里包含的数据的类型
+     * @param data    当前页数据
+     * @param total   总的记录数
+     * @param size    分页大小
+     * @param current 当前页页码，从1开始
      * @return 分页对象
      */
-    public static <S> Page<S> of(List<S> data, Number total, Number size, Number num) {
+    public static <S> Page<S> of(List<S> data, Number total, Number size, Number current) {
         if (null == size || size.longValue() <= 0) {
             size = DEFAULT_PAGE_SIZE;
         }
-        if (null == num || num.longValue() <= 0) {
-            num = DEFAULT_PAGE_NUM;
+        if (null == current || current.longValue() <= 0) {
+            current = DEFAULT_PAGE_NUM;
         }
 
         if (null == total || total.longValue() <= 0) {
@@ -194,7 +200,7 @@ public class Page<S> extends Slice implements Serializable {
         }
 
 
-        return new Page<>(data, total, page(total, size), size, num);
+        return new Page<>(data, total, page(total, size), size, current);
     }
 
     /**
@@ -207,7 +213,7 @@ public class Page<S> extends Slice implements Serializable {
      * @return 分页对象
      */
     public static <S> Page<S> of(List<S> data, Number total, Slice slice) {
-        return of(data, total, slice.size(), slice.num());
+        return of(data, total, slice.size(), slice.current());
     }
 
     /**
@@ -238,10 +244,10 @@ public class Page<S> extends Slice implements Serializable {
      */
     public <T> Page<T> map(DataConverter<S, T> converter) {
         if (null == this.data) {
-            return Page.of(Collections.emptyList(), this.total, this.size, this.num);
+            return Page.of(Collections.emptyList(), this.total, this.size, this.current);
         }
         return Page.of(this.data.stream().map(converter::map).collect(Collectors.toList()), this.total, this.size,
-                this.num);
+                this.current);
     }
 
 
@@ -260,11 +266,11 @@ public class Page<S> extends Slice implements Serializable {
     /**
      * 设置当前页页码
      *
-     * @param num 当前页页码
+     * @param current 当前页页码
      * @return 当前分页对象
      */
-    public Page<S> num(Number num) {
-        this.num = num;
+    public Page<S> current(Number current) {
+        this.current = current;
         return this;
     }
 
@@ -340,7 +346,7 @@ public class Page<S> extends Slice implements Serializable {
 
     @Override
     public String toString() {
-        String builder = "Page [size=" + size + ", num=" + num + ", data=" + data + ", pages=" + pages + ", " +
+        String builder = "Page [size=" + size + ", current=" + current + ", data=" + data + ", pages=" + pages + ", " +
                 "total=" + total + "]";
         return builder;
     }

@@ -105,4 +105,9 @@ public class PageQuery<T> extends Slice implements Serializable {
     public static <T> PageQuery<T> of(T query) {
         return new PageQuery<>(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUM, query);
     }
+
+    @Override
+    public Number num() {
+        return super.num();
+    }
 }

@@ -1,9 +1,12 @@
 package com.yishuifengxiao.common.tool.jdbc;
 
+import com.yishuifengxiao.common.tool.text.TextUtil;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -26,11 +29,15 @@ import java.util.Map;
 @NoArgsConstructor
 public class FieldValue implements Serializable {
     private static final long serialVersionUID = 338863052159133444L;
-    
-    /** Java类型到SQL类型的映射表，用于根据Java字段类型确定对应的JDBC类型 */
+
+    /**
+     * Java类型到SQL类型的映射表，用于根据Java字段类型确定对应的JDBC类型
+     */
     private static final Map<Class<?>, SQLType> JAVA_TO_SQL_TYPE_MAP = new HashMap<>();
-    
-    /** SQL数据类型名称到JDBC类型的映射表，用于从columnDefinition解析SQL类型 */
+
+    /**
+     * SQL数据类型名称到JDBC类型的映射表，用于从columnDefinition解析SQL类型
+     */
     private static final Map<String, SQLType> TYPE_MAP = new HashMap<>();
 
     static {
@@ -93,20 +100,30 @@ public class FieldValue implements Serializable {
     }
 
     private SQLType sqlType;
-    
-    /** Java反射字段对象，用于获取字段的类型和注解信息 */
+
+    /**
+     * Java反射字段对象，用于获取字段的类型和注解信息
+     */
     private Field field;
-    
-    /** JPA Column注解，包含列名、列定义等数据库映射信息 */
+
+    /**
+     * JPA Column注解，包含列名、列定义等数据库映射信息
+     */
     private Column column;
-    
-    /** 标识该字段是否为主键 */
+
+    /**
+     * 标识该字段是否为主键
+     */
     private boolean primary;
-    
-    /** 字段的实际值 */
+
+    /**
+     * 字段的实际值
+     */
     private Object value;
-    
-    /** 数据库列名，优先使用Column注解的name属性，否则使用字段名的下划线命名 */
+
+    /**
+     * 数据库列名，优先使用Column注解的name属性，否则使用字段名的下划线命名
+     */
     private String columnName;
 
     /**
@@ -136,13 +153,13 @@ public class FieldValue implements Serializable {
         this.primary = primary;
         this.value = value;
         // 提取字段上的JPA Column注解，用于获取列名和列定义等信息
-        this.column = org.springframework.core.annotation.AnnotationUtils.findAnnotation(this.field, Column.class);
-        if (null != this.column && org.apache.commons.lang3.StringUtils.isNotBlank(this.column.name())) {
+        this.column = AnnotationUtils.findAnnotation(this.field, Column.class);
+        if (null != this.column && StringUtils.isNotBlank(this.column.name())) {
             // 优先使用Column注解中显式配置的列名
             this.columnName = this.column.name();
         } else if (null != this.field) {
             // 未配置列名时，将字段名转换为下划线命名风格作为列名
-            this.columnName = com.yishuifengxiao.common.tool.text.TextUtil.underscoreName(this.field.getName());
+            this.columnName = TextUtil.underscoreName(this.field.getName());
         }
         this.sqlType = determineSqlType();
     }
@@ -152,8 +169,8 @@ public class FieldValue implements Serializable {
      *
      * @return SQL 类型
      */
-    public SQLType sqlType() {
-        return this.sqlType;
+    public int sqlType() {
+        return this.sqlType.getVendorTypeNumber();
     }
 
     /**
@@ -209,13 +226,13 @@ public class FieldValue implements Serializable {
      * @return 提取的SQL类型，无法提取时返回null
      */
     private SQLType extractSqlTypeFromDefinition(String columnDefinition) {
-        if (org.apache.commons.lang3.StringUtils.isBlank(columnDefinition)) {
+        if (StringUtils.isBlank(columnDefinition)) {
             return null;
         }
         // 转换为大写并提取数据类型部分，忽略长度、精度等附加信息
         String definition = columnDefinition.trim().toUpperCase();
         String dataType = extractDataType(definition);
-        if (org.apache.commons.lang3.StringUtils.isBlank(dataType)) {
+        if (StringUtils.isBlank(dataType)) {
             return null;
         }
         return TYPE_MAP.getOrDefault(dataType, null);
@@ -278,6 +295,7 @@ public class FieldValue implements Serializable {
     public boolean isNullVal() {
         return null == this.value;
     }
+
 
     @Override
     public String toString() {

@@ -1,14 +1,13 @@
 package com.yishuifengxiao.common.tool.entity;
 
-import java.io.Serializable;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+
+import java.io.Serializable;
 
 /**
  * <p>基础分页对象</p>
@@ -31,6 +30,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @Accessors(chain = true)
 public class Slice implements Serializable {
+    public static final Slice DEFAULT_SLICE = Slice.of(10, 1);
 
     /**
      *
@@ -58,7 +58,7 @@ public class Slice implements Serializable {
      * 当前页页码
      */
     @Schema(title = "当前页页码,从1开始", example = "1")
-    protected Number num;
+    protected Number current;
 
 
     /**
@@ -83,25 +83,25 @@ public class Slice implements Serializable {
      * @return 当前页页码
      */
     @JsonIgnore
-    public Number num() {
-        if (null == this.num || this.num.longValue() <= 0) {
+    public Number current() {
+        if (null == this.current || this.current.longValue() <= 0) {
             return DEFAULT_PAGE_NUM;
         }
 
-        return this.num;
+        return this.current;
     }
 
     /**
      * 构建一个基础的分页对象
      *
-     * @param size 分页大小
-     * @param num  当前页页码
+     * @param size    分页大小
+     * @param current 当前页页码
      * @return 基础分页对象
      */
-    public static Slice of(Number size, Number num) {
+    public static Slice of(Number size, Number current) {
         size = null == size || size.longValue() <= 0 ? DEFAULT_PAGE_SIZE : size;
-        num = null == num || num.longValue() <= 0 ? DEFAULT_PAGE_NUM : num;
-        return new Slice(size, num);
+        current = null == current || current.longValue() <= 0 ? DEFAULT_PAGE_NUM : current;
+        return new Slice(size, current);
     }
 
     /**
@@ -110,7 +110,7 @@ public class Slice implements Serializable {
      * @return 起始偏移量
      */
     public Number startOffset() {
-        return (this.num().longValue() - 1) * this.size().longValue();
+        return (this.current().longValue() - 1) * this.size().longValue();
     }
 
     /**
@@ -119,6 +119,19 @@ public class Slice implements Serializable {
      * @return 结束偏移量
      */
     public Number endOffset() {
-        return this.num().longValue() * this.size().longValue();
+        return this.current().longValue() * this.size().longValue();
+    }
+
+    /**
+     * <p>获取当前页页码</p>
+     * <p>若分页大小为null或者&#60;=0则返回默认值 1</p>
+     *
+     * @return 当前页页码
+     */
+    @JsonIgnore
+    public Number num() {
+
+
+        return this.current();
     }
 }
