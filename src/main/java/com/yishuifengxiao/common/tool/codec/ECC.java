@@ -245,7 +245,7 @@ public class ECC {
         signature.initSign(privateKey);
         signature.update(data);
         byte[] derSignature = signature.sign();
-        
+
         // 将DER编码的签名转换为固定长度格式（64字节）
         return convertDERToFixedLengthBytes(derSignature);
     }
@@ -472,7 +472,7 @@ public class ECC {
         byte[] result = new byte[64];
         System.arraycopy(rPadded, 0, result, 0, 32);
         System.arraycopy(sPadded, 0, result, 32, 32);
-        
+
         return result;
     }
 
@@ -490,7 +490,7 @@ public class ECC {
             System.arraycopy(bytes, bytes.length - targetLen, result, 0, targetLen);
             return result;
         }
-        
+
         // 创建目标长度的数组并填充零
         byte[] padded = new byte[targetLen];
         // 将原始字节复制到低位，高位自动补零
@@ -547,7 +547,7 @@ public class ECC {
         if (fixedSignature.length() != 128) {
             throw new Exception("Invalid signature length: expected 128 characters, got " + fixedSignature.length());
         }
-        
+
         byte[] signatureBytes = Hex.hexToBytes(fixedSignature);
         return convertFixedLengthBytesToDER(signatureBytes);
     }
@@ -644,14 +644,13 @@ public class ECC {
      * @throws Exception 验证过程中可能抛出的异常
      */
     public static boolean verify(String curveOID, String publicKeyHex, String originalHex, String signatureHex) throws Exception {
-        // 创建一个虚拟私钥来构建密钥对
-        String dummyPrivateKey = "0000000000000000000000000000000000000000000000000000000000000001";
-        KeyPair keyPair = createKeyPairFromComponents(curveOID, publicKeyHex, dummyPrivateKey);
+        // 直接从十六进制字符串解析公钥
+        ECPublicKey publicKey = parsePublicKeyFromHex(curveOID, publicKeyHex);
 
         // 将固定长度签名转换为DER编码并验证签名有效性
         byte[] signatureBytes = Hex.hexToBytes(signatureHex);
-        byte[] derSignature = convertFixedLengthBytesToDER(signatureBytes);
-        return verifySignature(keyPair.getPublic(), Hex.hexToBytes(originalHex), derSignature);
+        byte[] dataBytes = Hex.hexToBytes(originalHex);
+        return verifySignature(publicKey, dataBytes, signatureBytes);
     }
 
 
@@ -1361,7 +1360,7 @@ public class ECC {
             String counter = Hex.padHexLeft(Integer.toHexString(i), 4);
             hashSb.append(SHA256.calculateSHA256FromHex(result + counter + sShareInfo));
         }
-        return hashSb.toString().substring(0, iKeyLen * 2).toUpperCase();
+        return hashSb.substring(0, iKeyLen * 2).toUpperCase();
     }
 
     /**
@@ -1392,7 +1391,7 @@ public class ECC {
         int lineLength = 64;
         for (int i = 0; i < base64Key.length(); i += lineLength) {
             int end = Math.min(i + lineLength, base64Key.length());
-            pemBuilder.append(base64Key.substring(i, end)).append("\n");
+            pemBuilder.append(base64Key, i, end).append("\n");
         }
 
         pemBuilder.append("-----END PUBLIC KEY-----\n");
@@ -1477,7 +1476,7 @@ public class ECC {
         int lineLength = 64;
         for (int i = 0; i < base64Key.length(); i += lineLength) {
             int end = Math.min(i + lineLength, base64Key.length());
-            pemBuilder.append(base64Key.substring(i, end)).append("\n");
+            pemBuilder.append(base64Key, i, end).append("\n");
         }
 
         pemBuilder.append("-----END PUBLIC KEY-----\n");
@@ -1649,7 +1648,7 @@ public class ECC {
         int lineLength = 64;
         for (int i = 0; i < base64Key.length(); i += lineLength) {
             int end = Math.min(i + lineLength, base64Key.length());
-            pemBuilder.append(base64Key.substring(i, end)).append("\n");
+            pemBuilder.append(base64Key, i, end).append("\n");
         }
 
         pemBuilder.append("-----END EC PRIVATE KEY-----\n");
@@ -1760,7 +1759,7 @@ public class ECC {
         int lineLength = 64;
         for (int i = 0; i < base64Key.length(); i += lineLength) {
             int end = Math.min(i + lineLength, base64Key.length());
-            pemBuilder.append(base64Key.substring(i, end)).append("\n");
+            pemBuilder.append(base64Key, i, end).append("\n");
         }
 
         pemBuilder.append("-----END EC PRIVATE KEY-----\n");
