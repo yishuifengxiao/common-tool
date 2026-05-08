@@ -240,7 +240,7 @@ public class JdbcHelper {
      * @param <T>      实体类型泛型参数
      * @return 符合条件的记录总数，如果查询对象为空或发生异常则返回0
      */
-    public <T> Long countAll(T t, boolean likeMode) {
+    public <T> Long count(T t, boolean likeMode) {
         if (t == null) {
             return 0L;
         }
@@ -343,7 +343,7 @@ public class JdbcHelper {
      * @param <T>      实体类型泛型参数
      * @return 符合条件的实体对象列表，如果没有匹配记录或查询对象为空则返回空列表
      */
-    public <T> List<T> findAll(T t, boolean likeMode, Order... orders) {
+    public <T> List<T> find(T t, boolean likeMode, Order... orders) {
         if (t == null) {
             return Collections.emptyList();
         }
