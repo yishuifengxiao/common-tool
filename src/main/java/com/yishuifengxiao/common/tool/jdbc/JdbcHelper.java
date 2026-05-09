@@ -557,6 +557,48 @@ public class JdbcHelper {
         });
     }
 
+    /**
+     * 根据主键列表批量删除记录
+     * <p>
+     * 执行流程：
+     * 1. 验证主键列表是否为空，为空则返回0表示未删除任何记录
+     * 2. 从实体类中提取表名和主键字段信息
+     * 3. 为每个主键值生成独立的WHERE条件（使用OR连接）
+     * 4. 生成DELETE SQL语句
+     * 5. 执行SQL并返回受影响的行数
+     * </p>
+     *
+     * @param clazz       实体类型，用于提取表名和主键字段信息
+     * @param primaryKeys 主键值列表，支持多个主键；null值和空列表会被过滤；如果为空或无有效值则返回0
+     * @param <T>         实体类型泛型参数
+     * @return Result对象，包含KeyHolder、受影响的行数和批量更新的行数数组；如果主键列表为空或无有效值则返回空结果
+     */
+    public <T> Result deleteByPrimaryKeys(Class<T> clazz, List primaryKeys) {
+        if (primaryKeys == null || primaryKeys.size() == 0) {
+            return new Result(null, 0, null);
+        }
+        FieldValue primaryKeyValue = FieldExtractor.extractPrimaryField(clazz);
+        if (null == primaryKeyValue) {
+            return new Result(null, 0, null);
+        }
+        String tableName = FieldExtractor.extractTableName(clazz);
+
+        return this.update(params -> {
+            StringBuilder sql = new StringBuilder("DELETE FROM `");
+            sql.append(tableName).append("` WHERE ");
+
+            for (int i = 0; i < primaryKeys.size(); i++) {
+                String variableName = primaryKeyValue.getColumnName() + i;
+                params.addValue(variableName, primaryKeys.get(i), primaryKeyValue.sqlType());
+                sql.append("`").append(primaryKeyValue.getColumnName()).append("` = :").append(variableName);
+                if (i < primaryKeys.size() - 1) {
+                    sql.append(" OR ");
+                }
+            }
+            return sql.toString();
+        });
+    }
+
 
     /**
      * 插入新记录并返回生成的主键
