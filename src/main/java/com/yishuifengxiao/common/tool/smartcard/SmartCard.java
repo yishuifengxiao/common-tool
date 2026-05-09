@@ -466,7 +466,7 @@ public class SmartCard {
         log.debug("81E2命令分包数量: {}", chunks.size());
 
         for (int i = 0; i < chunks.size(); i++) {
-            String prefix = "81E291";
+            String prefix = (chunks.size() - 1 == i) ? "81E291" : "81E211";
             String chunk = chunks.get(i);
             String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk +
                     "00";
