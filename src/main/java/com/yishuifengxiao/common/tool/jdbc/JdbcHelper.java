@@ -262,7 +262,7 @@ public class JdbcHelper {
             for (FieldValue fieldValue : fieldValues) {
 
                 if (likeMode && fieldValue.getValue() instanceof String) {
-                    sql.append(" AND `").append(fieldValue.getColumnName()).append("`like CONCAT('%', :").append(fieldValue.getColumnName()).append(", '%')");
+                    sql.append(" AND `").append(fieldValue.getColumnName()).append("` like CONCAT('%', :").append(fieldValue.getColumnName()).append(", '%')");
                 } else {
                     sql.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
                 }
@@ -312,7 +312,7 @@ public class JdbcHelper {
             for (FieldValue fieldValue : fieldValues) {
 
                 if (likeMode && fieldValue.getValue() instanceof String) {
-                    sql.append(" AND `").append(fieldValue.getColumnName()).append("`like CONCAT('%', :").append(fieldValue.getColumnName()).append(", '%')");
+                    sql.append(" AND `").append(fieldValue.getColumnName()).append("` like CONCAT('%', :").append(fieldValue.getColumnName()).append(", '%')");
                 } else {
                     sql.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
                 }
