@@ -189,14 +189,20 @@ public class SmartCard {
     }
 
     /**
-     * 在当前活动的逻辑通道上发送APDU命令（默认启用自动拉取）
+     * 在当前活动的逻辑通道上发送APDU命令
+     * <p>
+     * 该方法委托给三参数的transmit方法执行，支持自动拉取功能。
+     * 当autoPull为true且响应SW1=0x61时，会自动发送GET RESPONSE命令获取剩余数据；
+     * 当autoPull为false时，仅执行单次命令传输，不进行自动拉取。
+     * </p>
      *
      * @param hexCommand 十六进制格式的APDU命令字符串
-     * @return APDU命令执行结果
-     * @throws CardException 当命令传输失败时抛出
+     * @param autoPull   是否启用自动拉取功能。当SW1=0x61时，自动发送GET RESPONSE命令获取剩余数据
+     * @return APDU命令执行结果，包含响应数据和状态字信息
+     * @throws CardException 当智能卡未连接、逻辑通道打开失败或命令传输失败时抛出
      */
-    public synchronized ApduResult transmit(String hexCommand) throws CardException {
-        return this.transmit(this.cardChannel(), hexCommand, true);
+    public synchronized ApduResult transmit(String hexCommand, boolean autoPull) throws CardException {
+        return this.transmit(this.cardChannel(), hexCommand, autoPull);
     }
 
 
@@ -460,7 +466,7 @@ public class SmartCard {
         log.debug("81E2命令分包数量: {}", chunks.size());
 
         for (int i = 0; i < chunks.size(); i++) {
-            String prefix = "81E291";
+            String prefix = (chunks.size() - 1 == i) ? "81E291" : "81E211";
             String chunk = chunks.get(i);
             String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk +
                     "00";

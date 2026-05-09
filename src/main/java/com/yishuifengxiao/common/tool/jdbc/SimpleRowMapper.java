@@ -183,7 +183,7 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null) {
+        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
             LocalDateTime dbLocalDateTime = timestamp.toLocalDateTime();
             ZonedDateTime dbTime = dbLocalDateTime.atZone(databaseZoneId);
             ZonedDateTime appTime = dbTime.withZoneSameInstant(ZoneId.systemDefault());
@@ -213,7 +213,7 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null) {
+        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
             LocalDateTime localDateTime = timestamp.toLocalDateTime();
             ZonedDateTime dbTime = localDateTime.atZone(databaseZoneId);
             return dbTime.toInstant();
@@ -226,7 +226,7 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null) {
+        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
             LocalDateTime localDateTime = timestamp.toLocalDateTime();
             ZonedDateTime dbTime = localDateTime.atZone(databaseZoneId);
             return dbTime.withZoneSameInstant(ZoneId.systemDefault());

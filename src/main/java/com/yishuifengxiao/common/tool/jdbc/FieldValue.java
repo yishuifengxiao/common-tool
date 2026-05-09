@@ -2,9 +2,7 @@ package com.yishuifengxiao.common.tool.jdbc;
 
 import com.yishuifengxiao.common.tool.text.TextUtil;
 import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 
@@ -24,9 +22,7 @@ import java.util.Map;
  * @version 1.0.0
  * @since 1.0.0
  */
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Getter
 public class FieldValue implements Serializable {
     private static final long serialVersionUID = 338863052159133444L;
 
@@ -59,6 +55,8 @@ public class FieldValue implements Serializable {
         JAVA_TO_SQL_TYPE_MAP.put(char.class, JDBCType.CHAR);
         JAVA_TO_SQL_TYPE_MAP.put(Character.class, JDBCType.CHAR);
         JAVA_TO_SQL_TYPE_MAP.put(String.class, JDBCType.VARCHAR);
+        JAVA_TO_SQL_TYPE_MAP.put(CharSequence.class, JDBCType.VARCHAR);
+        JAVA_TO_SQL_TYPE_MAP.put(Object.class, JDBCType.OTHER);
         JAVA_TO_SQL_TYPE_MAP.put(java.util.Date.class, JDBCType.TIMESTAMP);
         JAVA_TO_SQL_TYPE_MAP.put(java.sql.Date.class, JDBCType.DATE);
         JAVA_TO_SQL_TYPE_MAP.put(java.sql.Time.class, JDBCType.TIME);
@@ -66,15 +64,40 @@ public class FieldValue implements Serializable {
         JAVA_TO_SQL_TYPE_MAP.put(java.time.LocalDate.class, JDBCType.DATE);
         JAVA_TO_SQL_TYPE_MAP.put(java.time.LocalTime.class, JDBCType.TIME);
         JAVA_TO_SQL_TYPE_MAP.put(java.time.LocalDateTime.class, JDBCType.TIMESTAMP);
+        JAVA_TO_SQL_TYPE_MAP.put(java.time.ZonedDateTime.class, JDBCType.TIMESTAMP);
+        JAVA_TO_SQL_TYPE_MAP.put(java.time.OffsetDateTime.class, JDBCType.TIMESTAMP);
+        JAVA_TO_SQL_TYPE_MAP.put(java.time.Instant.class, JDBCType.TIMESTAMP);
+        JAVA_TO_SQL_TYPE_MAP.put(java.time.OffsetTime.class, JDBCType.TIME_WITH_TIMEZONE);
         JAVA_TO_SQL_TYPE_MAP.put(BigDecimal.class, JDBCType.DECIMAL);
         JAVA_TO_SQL_TYPE_MAP.put(BigInteger.class, JDBCType.BIGINT);
         JAVA_TO_SQL_TYPE_MAP.put(byte[].class, JDBCType.VARBINARY);
         JAVA_TO_SQL_TYPE_MAP.put(Byte[].class, JDBCType.VARBINARY);
+        JAVA_TO_SQL_TYPE_MAP.put(char[].class, JDBCType.VARCHAR);
+        JAVA_TO_SQL_TYPE_MAP.put(Character[].class, JDBCType.VARCHAR);
+        JAVA_TO_SQL_TYPE_MAP.put(boolean[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(Boolean[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(int[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(Integer[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(long[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(Long[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(float[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(Float[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(double[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(Double[].class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(java.net.URL.class, JDBCType.DATALINK);
+        JAVA_TO_SQL_TYPE_MAP.put(java.sql.Blob.class, JDBCType.BLOB);
+        JAVA_TO_SQL_TYPE_MAP.put(java.sql.Clob.class, JDBCType.CLOB);
+        JAVA_TO_SQL_TYPE_MAP.put(java.sql.Array.class, JDBCType.ARRAY);
+        JAVA_TO_SQL_TYPE_MAP.put(java.sql.Ref.class, JDBCType.REF);
+        JAVA_TO_SQL_TYPE_MAP.put(java.sql.RowId.class, JDBCType.ROWID);
+        JAVA_TO_SQL_TYPE_MAP.put(java.sql.NClob.class, JDBCType.NCLOB);
+        JAVA_TO_SQL_TYPE_MAP.put(java.sql.SQLXML.class, JDBCType.SQLXML);
 
         // 初始化SQL数据类型名称到JDBC类型的映射，支持常见的数据库列类型定义
 
         TYPE_MAP.put("INT", JDBCType.INTEGER);
         TYPE_MAP.put("INTEGER", JDBCType.INTEGER);
+        TYPE_MAP.put("MEDIUMINT", JDBCType.INTEGER);
         TYPE_MAP.put("BIGINT", JDBCType.BIGINT);
         TYPE_MAP.put("SMALLINT", JDBCType.SMALLINT);
         TYPE_MAP.put("TINYINT", JDBCType.TINYINT);
@@ -85,18 +108,53 @@ public class FieldValue implements Serializable {
         TYPE_MAP.put("REAL", JDBCType.REAL);
         TYPE_MAP.put("BOOLEAN", JDBCType.BOOLEAN);
         TYPE_MAP.put("BOOL", JDBCType.BOOLEAN);
+        TYPE_MAP.put("BIT", JDBCType.BIT);
         TYPE_MAP.put("CHAR", JDBCType.CHAR);
+        TYPE_MAP.put("NCHAR", JDBCType.NCHAR);
         TYPE_MAP.put("VAR", JDBCType.VARCHAR);
         TYPE_MAP.put("VARCHAR", JDBCType.VARCHAR);
+        TYPE_MAP.put("NVARCHAR", JDBCType.NVARCHAR);
+        TYPE_MAP.put("LONGVARCHAR", JDBCType.LONGVARCHAR);
         TYPE_MAP.put("TEXT", JDBCType.CLOB);
         TYPE_MAP.put("CLOB", JDBCType.CLOB);
+        TYPE_MAP.put("NCLOB", JDBCType.NCLOB);
+        TYPE_MAP.put("MEDIUMCLOB", JDBCType.CLOB);
+        TYPE_MAP.put("LONGCLOB", JDBCType.CLOB);
+        TYPE_MAP.put("TINYTEXT", JDBCType.CLOB);
+        TYPE_MAP.put("MEDIUMTEXT", JDBCType.CLOB);
+        TYPE_MAP.put("LONGTEXT", JDBCType.CLOB);
         TYPE_MAP.put("BLOB", JDBCType.BLOB);
+        TYPE_MAP.put("MEDIUMBLOB", JDBCType.BLOB);
+        TYPE_MAP.put("LONGBLOB", JDBCType.BLOB);
+        TYPE_MAP.put("TINYBLOB", JDBCType.BLOB);
         TYPE_MAP.put("BINARY", JDBCType.BINARY);
         TYPE_MAP.put("VARBINARY", JDBCType.VARBINARY);
+        TYPE_MAP.put("LONGVARBINARY", JDBCType.LONGVARBINARY);
         TYPE_MAP.put("DATE", JDBCType.DATE);
         TYPE_MAP.put("TIME", JDBCType.TIME);
         TYPE_MAP.put("TIMESTAMP", JDBCType.TIMESTAMP);
         TYPE_MAP.put("DATETIME", JDBCType.TIMESTAMP);
+        TYPE_MAP.put("YEAR", JDBCType.INTEGER);
+        TYPE_MAP.put("JSON", JDBCType.VARCHAR);
+        TYPE_MAP.put("XML", JDBCType.SQLXML);
+        TYPE_MAP.put("UUID", JDBCType.VARCHAR);
+        TYPE_MAP.put("ENUM", JDBCType.VARCHAR);
+        TYPE_MAP.put("SET", JDBCType.VARCHAR);
+        TYPE_MAP.put("INTERVAL", JDBCType.VARCHAR);
+        TYPE_MAP.put("SERIAL", JDBCType.BIGINT);
+        TYPE_MAP.put("BIGSERIAL", JDBCType.BIGINT);
+        TYPE_MAP.put("SMALLSERIAL", JDBCType.SMALLINT);
+        TYPE_MAP.put("BYTEA", JDBCType.BINARY);
+        TYPE_MAP.put("INET", JDBCType.VARCHAR);
+        TYPE_MAP.put("CIDR", JDBCType.VARCHAR);
+        TYPE_MAP.put("MACADDR", JDBCType.VARCHAR);
+        TYPE_MAP.put("POINT", JDBCType.VARCHAR);
+        TYPE_MAP.put("LINE", JDBCType.VARCHAR);
+        TYPE_MAP.put("LSEG", JDBCType.VARCHAR);
+        TYPE_MAP.put("BOX", JDBCType.VARCHAR);
+        TYPE_MAP.put("PATH", JDBCType.VARCHAR);
+        TYPE_MAP.put("POLYGON", JDBCType.VARCHAR);
+        TYPE_MAP.put("CIRCLE", JDBCType.VARCHAR);
     }
 
     private SQLType sqlType;
@@ -185,33 +243,46 @@ public class FieldValue implements Serializable {
      * @return 推断出的SQL类型，默认为JDBCType.VARCHAR
      */
     private SQLType determineSqlType() {
-        if (this.column != null && org.apache.commons.lang3.StringUtils.isNotBlank(this.column.columnDefinition())) {
-            // 优先从Column注解的columnDefinition中提取SQL类型定义
+        if (this.column != null && StringUtils.isNotBlank(this.column.columnDefinition())) {
             SQLType typeFromDefinition = extractSqlTypeFromDefinition(this.column.columnDefinition());
             if (typeFromDefinition != null) {
                 return typeFromDefinition;
             }
         }
-        if (this.field != null) {
-            // 基于Java字段类型进行SQL类型映射
-            Class<?> fieldType = this.field.getType();
-            if (fieldType.isArray()) {
-                // 数组类型需要特殊处理：字节数组映射为二进制类型，其他数组映射为字符串类型
-                Class<?> componentType = fieldType.getComponentType();
-                if (componentType == byte.class || componentType == Byte.class) {
-                    return JDBCType.VARBINARY;
-                }
-                return JDBCType.VARCHAR;
-            }
-            SQLType mappedType = JAVA_TO_SQL_TYPE_MAP.get(fieldType);
-            if (mappedType != null) {
-                return mappedType;
-            }
-            // 枚举类型统一映射为VARCHAR，存储枚举名称
-            if (fieldType.isEnum()) {
-                return JDBCType.VARCHAR;
-            }
+
+        if (this.field == null) {
+            return JDBCType.VARCHAR;
         }
+
+        Class<?> fieldType = this.field.getType();
+
+        if (fieldType.isEnum()) {
+            return JDBCType.VARCHAR;
+        }
+
+        if (fieldType.isArray()) {
+            Class<?> componentType = fieldType.getComponentType();
+            if (componentType == byte.class || componentType == Byte.class) {
+                return JDBCType.VARBINARY;
+            }
+            if (componentType == char.class || componentType == Character.class) {
+                return JDBCType.VARCHAR;
+            }
+            if (componentType.isPrimitive() || Number.class.isAssignableFrom(componentType)) {
+                return JDBCType.ARRAY;
+            }
+            return JDBCType.VARCHAR;
+        }
+
+        SQLType mappedType = JAVA_TO_SQL_TYPE_MAP.get(fieldType);
+        if (mappedType != null) {
+            return mappedType;
+        }
+
+        if (CharSequence.class.isAssignableFrom(fieldType)) {
+            return JDBCType.VARCHAR;
+        }
+
         return JDBCType.VARCHAR;
     }
 
@@ -229,13 +300,11 @@ public class FieldValue implements Serializable {
         if (StringUtils.isBlank(columnDefinition)) {
             return null;
         }
-        // 转换为大写并提取数据类型部分，忽略长度、精度等附加信息
+
         String definition = columnDefinition.trim().toUpperCase();
         String dataType = extractDataType(definition);
-        if (StringUtils.isBlank(dataType)) {
-            return null;
-        }
-        return TYPE_MAP.getOrDefault(dataType, null);
+
+        return StringUtils.isNotBlank(dataType) ? TYPE_MAP.get(dataType) : null;
     }
 
     /**
@@ -301,4 +370,6 @@ public class FieldValue implements Serializable {
     public String toString() {
         return "FieldValue{" + "sqlType=" + sqlType + ", value=" + value + ", primary=" + primary + ", columnName='" + columnName + '\'' + '}';
     }
+
+
 }

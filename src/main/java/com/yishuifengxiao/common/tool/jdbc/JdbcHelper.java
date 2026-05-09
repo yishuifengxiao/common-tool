@@ -173,7 +173,8 @@ public class JdbcHelper {
         if (orders == null || orders.isEmpty()) {
             return "";
         }
-        String orderByClause = orders.stream().map(order -> order.getOrderName() + " " + order.getDirection()).collect(Collectors.joining(", "));
+        String orderByClause =
+                orders.stream().map(order -> order.getOrderName() + " " + order.getDirection()).collect(Collectors.joining(", "));
         return " ORDER BY " + orderByClause;
     }
 
@@ -261,7 +262,7 @@ public class JdbcHelper {
             for (FieldValue fieldValue : fieldValues) {
 
                 if (likeMode && fieldValue.getValue() instanceof String) {
-                    sql.append(" AND `").append(fieldValue.getColumnName()).append("`like CONCAT('%', :").append(fieldValue.getColumnName()).append(", '%')");
+                    sql.append(" AND `").append(fieldValue.getColumnName()).append("` like CONCAT('%', :").append(fieldValue.getColumnName()).append(", '%')");
                 } else {
                     sql.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
                 }
@@ -292,7 +293,8 @@ public class JdbcHelper {
         if (t == null) {
             return null;
         }
-        List<Order> orderBys = null == orders ? Collections.emptyList() : Arrays.asList(orders).stream().filter(s -> null != s && StringUtils.isNotBlank(s.orderName)).collect(Collectors.toList());
+        List<Order> orderBys = null == orders ? Collections.emptyList() :
+                Arrays.asList(orders).stream().filter(s -> null != s && StringUtils.isNotBlank(s.orderName)).collect(Collectors.toList());
         String tableName = FieldExtractor.extractTableName(t.getClass());
         List<FieldValue> fieldValues = FieldExtractor.extractFieldValue(t).stream().filter(s -> {
             if (null == s.getValue()) {
@@ -310,7 +312,7 @@ public class JdbcHelper {
             for (FieldValue fieldValue : fieldValues) {
 
                 if (likeMode && fieldValue.getValue() instanceof String) {
-                    sql.append(" AND `").append(fieldValue.getColumnName()).append("`like CONCAT('%', :").append(fieldValue.getColumnName()).append(", '%')");
+                    sql.append(" AND `").append(fieldValue.getColumnName()).append("` like CONCAT('%', :").append(fieldValue.getColumnName()).append(", '%')");
                 } else {
                     sql.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
                 }
@@ -446,7 +448,8 @@ public class JdbcHelper {
             return new Result(null, 0, null);
         }
         List<FieldValue> fieldValues = FieldExtractor.extractFieldValue(t);
-        FieldValue primaryKeyValue = fieldValues.stream().filter(Objects::nonNull).filter(field -> field.isPrimary() && field.isNotNullVal()).findFirst().orElse(null);
+        FieldValue primaryKeyValue =
+                fieldValues.stream().filter(Objects::nonNull).filter(field -> field.isPrimary() && field.isNotNullVal()).findFirst().orElse(null);
         if (null == primaryKeyValue || primaryKeyValue.isNullVal()) {
             return new Result(null, 0, null);
         }
@@ -489,7 +492,8 @@ public class JdbcHelper {
             return new Result(null, 0, null);
         }
         List<FieldValue> fieldValues = FieldExtractor.extractFieldValue(t);
-        FieldValue primaryKeyValue = fieldValues.stream().filter(Objects::nonNull).filter(field -> field.isPrimary() && field.isNotNullVal()).findFirst().orElse(null);
+        FieldValue primaryKeyValue =
+                fieldValues.stream().filter(Objects::nonNull).filter(field -> field.isPrimary() && field.isNotNullVal()).findFirst().orElse(null);
         if (null == primaryKeyValue || primaryKeyValue.isNullVal()) {
             return new Result(null, 0, null);
         }
@@ -539,13 +543,55 @@ public class JdbcHelper {
 
         return this.update(params -> {
             StringBuilder sql = new StringBuilder("DELETE FROM `");
-            sql.append(tableName).append("` WHERE `");
+            sql.append(tableName).append("` WHERE ");
 
             for (int i = 0; i < primaryKeys.length; i++) {
                 String variableName = primaryKeyValue.getColumnName() + i;
                 params.addValue(variableName, primaryKeys[i], primaryKeyValue.sqlType());
                 sql.append("`").append(primaryKeyValue.getColumnName()).append("` = :").append(variableName);
                 if (i < primaryKeys.length - 1) {
+                    sql.append(" OR ");
+                }
+            }
+            return sql.toString();
+        });
+    }
+
+    /**
+     * 根据主键列表批量删除记录
+     * <p>
+     * 执行流程：
+     * 1. 验证主键列表是否为空，为空则返回0表示未删除任何记录
+     * 2. 从实体类中提取表名和主键字段信息
+     * 3. 为每个主键值生成独立的WHERE条件（使用OR连接）
+     * 4. 生成DELETE SQL语句
+     * 5. 执行SQL并返回受影响的行数
+     * </p>
+     *
+     * @param clazz       实体类型，用于提取表名和主键字段信息
+     * @param primaryKeys 主键值列表，支持多个主键；null值和空列表会被过滤；如果为空或无有效值则返回0
+     * @param <T>         实体类型泛型参数
+     * @return Result对象，包含KeyHolder、受影响的行数和批量更新的行数数组；如果主键列表为空或无有效值则返回空结果
+     */
+    public <T> Result deleteByPrimaryKeys(Class<T> clazz, List primaryKeys) {
+        if (primaryKeys == null || primaryKeys.size() == 0) {
+            return new Result(null, 0, null);
+        }
+        FieldValue primaryKeyValue = FieldExtractor.extractPrimaryField(clazz);
+        if (null == primaryKeyValue) {
+            return new Result(null, 0, null);
+        }
+        String tableName = FieldExtractor.extractTableName(clazz);
+
+        return this.update(params -> {
+            StringBuilder sql = new StringBuilder("DELETE FROM `");
+            sql.append(tableName).append("` WHERE ");
+
+            for (int i = 0; i < primaryKeys.size(); i++) {
+                String variableName = primaryKeyValue.getColumnName() + i;
+                params.addValue(variableName, primaryKeys.get(i), primaryKeyValue.sqlType());
+                sql.append("`").append(primaryKeyValue.getColumnName()).append("` = :").append(variableName);
+                if (i < primaryKeys.size() - 1) {
                     sql.append(" OR ");
                 }
             }
@@ -771,7 +817,10 @@ public class JdbcHelper {
         if (null == params) {
             params = EmptySqlParameterSource.INSTANCE;
         }
-        List<T> list = FieldExtractor.isBasicResult(clazz) ? this.namedParameterJdbcTemplate.queryForList(sql, params, clazz) : this.namedParameterJdbcTemplate.query(sql, params, new SimpleRowMapper<>(clazz, this.databaseZoneId));
+        log.trace("{tag}执行SQL查询：sql= {}, params= {}", LOG_PREFIX, sql, params);
+        List<T> list = FieldExtractor.isBasicResult(clazz) ? this.namedParameterJdbcTemplate.queryForList(sql, params
+                , clazz) : this.namedParameterJdbcTemplate.query(sql, params, new SimpleRowMapper<>(clazz,
+                this.databaseZoneId));
         return null == list ? Collections.emptyList() : list;
     }
 
@@ -935,6 +984,7 @@ public class JdbcHelper {
         if (null == params) {
             params = EmptySqlParameterSource.INSTANCE;
         }
+        log.trace("{tag}执行SQL更新：sql= {}, params= {}", LOG_PREFIX, sql, params);
         int update = this.namedParameterJdbcTemplate.update(sql, params, keyHolder);
         return new Result(keyHolder, update, new int[]{update});
     }
@@ -977,7 +1027,7 @@ public class JdbcHelper {
         if (null == params) {
             params = new SqlParameterSource[0];
         }
-
+        log.trace("{tag}执行SQL批量更新：sql= {}, params= {}", LOG_PREFIX, sql, params);
         List<Map<String, Object>> keyList = new ArrayList<>();
         int totalAffectedRows = 0;
         List<Integer> affectedRowsList = new ArrayList<>();
@@ -1032,7 +1082,9 @@ public class JdbcHelper {
         if (StringUtils.isBlank(sql)) {
             throw new UncheckedException(JdbcError.SQL_IS_NULL, "SQL语句不能为空");
         }
-        sql = sql.replaceAll("\r", "  ").replaceAll("\n", "  ").replaceAll(";", " ").trim();
+        sql = sql.replaceAll("\r", "  ").replaceAll("\n", "  ").replaceAll("\t", " ").trim();
+        // 去除末尾的分号
+        sql = sql.replaceAll(";$", "");
         return sql;
     }
 
