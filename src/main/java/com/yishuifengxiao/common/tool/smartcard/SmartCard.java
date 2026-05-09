@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class SmartCard {
 
     private static final String COMMAND_EID = "81E2910006BF3E035C015A";
-    private static final String COMMAND_SELECT_ISR = "01A4040010A0000005591010FFFFFFFF890000100";
+    private static final String COMMAND_SELECT_ISR = "01A4040010A0000005591010FFFFFFFF8900000100";
     /**
      * APDU命令分包最大长度（字节数）
      */
