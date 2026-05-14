@@ -3,16 +3,15 @@
  */
 package com.yishuifengxiao.common.tool.random;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.utils.OsUtils;
+import org.apache.commons.lang3.RandomUtils;
+
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
-
-import org.apache.commons.lang3.RandomUtils;
-
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.utils.OsUtils;
 
 /**
  * <p>随机工具类</p>
@@ -55,7 +54,7 @@ public class RandomUtil {
             b[1] = (Integer.valueOf(lowCode)).byteValue();
             return new String(b, "GBK");
         } catch (UnsupportedEncodingException e) {
-            throw UncheckedException.of(e.getMessage());
+            throw new UncheckedException(e);
         }
 
     }

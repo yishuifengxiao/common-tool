@@ -118,16 +118,19 @@ public class SmartCard {
      *
      * @param terminalName 读卡器名称
      * @return 当前SmartCard实例，支持链式调用
-     * @throws CardException 当读卡器不存在或连接失败时抛出
      */
-    public synchronized SmartCard connect(String terminalName) throws CardException {
+    public synchronized SmartCard connect(String terminalName) {
         CardTerminal terminal = this.getCardTerminals().getTerminal(terminalName);
         if (null == terminal) {
             this.card = null;
             throw new UncheckedException("未找到名称为" + terminalName + "的终端");
         }
         if (null == this.card) {
-            this.card = terminal.connect("*");
+            try {
+                this.card = terminal.connect("*");
+            } catch (CardException e) {
+                throw new UncheckedException(e);
+            }
             log.debug("成功连接到读卡器: {}", terminalName);
         }
         return this;
@@ -137,13 +140,14 @@ public class SmartCard {
      * 断开与智能卡的连接
      *
      * @return 当前SmartCard实例，支持链式调用
-     * @throws CardException 当断开连接失败时抛出
      */
-    public synchronized SmartCard disconnect() throws CardException {
+    public synchronized SmartCard disconnect() {
         if (null != this.card) {
             try {
                 this.card.disconnect(true);
                 log.debug("已断开智能卡连接");
+            } catch (CardException e) {
+                throw new UncheckedException(e);
             } finally {
                 this.card = null;
                 this.cardChannel = null;
@@ -160,31 +164,43 @@ public class SmartCard {
      * </p>
      *
      * @return 当前SmartCard实例，支持链式调用
-     * @throws CardException 当打开逻辑通道失败时抛出
      */
-    public synchronized SmartCard openLogicalChannel() throws CardException {
+    public synchronized SmartCard openLogicalChannel() {
         if (null == this.card) {
             throw new UncheckedException("请先连接智能卡");
         }
         if (null == this.cardChannel) {
-            this.cardChannel = this.card.openLogicalChannel();
-            log.debug("已打开新的逻辑通道");
+            try {
+                this.cardChannel = this.card.openLogicalChannel();
+                log.debug("已打开新的逻辑通道");
+            } catch (CardException e) {
+                throw new UncheckedException(e);
+            }
+
         }
         return this;
     }
 
-    private synchronized CardChannel cardChannel() throws CardException {
+    private synchronized CardChannel cardChannel() {
         if (null == this.cardChannel) {
-            this.cardChannel = this.card.openLogicalChannel();
-            log.debug("已自动打开逻辑通道");
+            try {
+                this.cardChannel = this.card.openLogicalChannel();
+                log.debug("已自动打开逻辑通道");
+            } catch (CardException e) {
+                throw new UncheckedException(e);
+            }
         }
         return this.cardChannel;
     }
 
-    public synchronized SmartCard selectIsr() throws CardException {
+    public synchronized SmartCard selectIsr() {
         CommandAPDU commandAPDU = this.convertToCommandApdu(COMMAND_SELECT_ISR);
-        this.cardChannel().transmit(commandAPDU);
-        log.debug("已选择ISR应用");
+        try {
+            this.cardChannel().transmit(commandAPDU);
+            log.debug("已选择ISR应用");
+        } catch (CardException e) {
+            throw new UncheckedException(e);
+        }
         return this;
     }
 
@@ -199,9 +215,8 @@ public class SmartCard {
      * @param hexCommand 十六进制格式的APDU命令字符串
      * @param autoPull   是否启用自动拉取功能。当SW1=0x61时，自动发送GET RESPONSE命令获取剩余数据
      * @return APDU命令执行结果，包含响应数据和状态字信息
-     * @throws CardException 当智能卡未连接、逻辑通道打开失败或命令传输失败时抛出
      */
-    public synchronized ApduResult transmit(String hexCommand, boolean autoPull) throws CardException {
+    public synchronized ApduResult transmit(String hexCommand, boolean autoPull) {
         return this.transmit(this.cardChannel(), hexCommand, autoPull);
     }
 
@@ -221,9 +236,8 @@ public class SmartCard {
      *
      * @param hexCommand 十六进制格式的APDU命令字符串
      * @return APDU命令执行结果，包含响应数据和状态字信息
-     * @throws CardException 当打开逻辑通道、选择ISR或命令传输失败时抛出
      */
-    public synchronized ApduResult transmitWithNewLogicalChannel(String hexCommand) throws CardException {
+    public synchronized ApduResult transmitWithNewLogicalChannel(String hexCommand) {
         CardChannel channel = null;
         try {
             channel = this.card.openLogicalChannel();
@@ -232,7 +246,7 @@ public class SmartCard {
             return this.transmit(channel, hexCommand, true);
         } catch (CardException e) {
             log.error("在新逻辑通道上执行命令失败: {}", hexCommand, e);
-            throw e;
+            throw new UncheckedException("在新逻辑通道上执行命令失败", e);
         } finally {
             closeChannelQuietly(channel);
         }
@@ -264,9 +278,8 @@ public class SmartCard {
      * @param hexCommand 十六进制格式的APDU命令字符串
      * @param autoPull   是否启用自动拉取功能。当SW1=0x61时，自动发送GET RESPONSE命令获取剩余数据
      * @return APDU命令执行结果
-     * @throws CardException 当命令传输失败时抛出
      */
-    public synchronized ApduResult transmit(CardChannel channel, String hexCommand, boolean autoPull) throws CardException {
+    public synchronized ApduResult transmit(CardChannel channel, String hexCommand, boolean autoPull) {
         this.validate();
         if (!autoPull) {
             return transmitWithoutAutoPull(channel, hexCommand);
@@ -285,11 +298,16 @@ public class SmartCard {
      * @param channel    目标逻辑通道
      * @param hexCommand 十六进制格式的APDU命令字符串
      * @return APDU命令执行结果，包含响应数据和状态字
-     * @throws CardException 当命令传输失败时抛出
      */
-    private ApduResult transmitWithoutAutoPull(CardChannel channel, String hexCommand) throws CardException {
+    private ApduResult transmitWithoutAutoPull(CardChannel channel, String hexCommand) {
         CommandAPDU commandApdu = this.convertToCommandApdu(hexCommand);
-        ResponseAPDU responseApdu = channel.transmit(commandApdu);
+        ResponseAPDU responseApdu = null;
+
+        try {
+            responseApdu = channel.transmit(commandApdu);
+        } catch (CardException e) {
+            throw new UncheckedException("命令传输失败", e);
+        }
 
         String responseData = Hex.bytesToHex(responseApdu.getData());
         String fullResponse = Hex.bytesToHex(responseApdu.getBytes());
@@ -316,9 +334,8 @@ public class SmartCard {
      * @param hexCommand 十六进制格式的APDU命令字符串
      * @param pullCount  当前拉取次数，用于防止无限循环
      * @return APDU命令执行结果，包含完整的响应数据和最终状态字
-     * @throws CardException 当命令传输失败时抛出
      */
-    private ApduResult transmitWithAutoPull(ApduResult result, CardChannel channel, String hexCommand, int pullCount) throws CardException {
+    private ApduResult transmitWithAutoPull(ApduResult result, CardChannel channel, String hexCommand, int pullCount) {
         if (pullCount >= MAX_AUTO_PULL_COUNT) {
             throw new UncheckedException("自动拉取次数超过限制(" + MAX_AUTO_PULL_COUNT + ")，可能存在异常");
         }
@@ -327,7 +344,13 @@ public class SmartCard {
         List<ExecuteRecord> records = result.getRecords() != null ? result.getRecords() : new ArrayList<>();
 
         CommandAPDU commandApdu = this.convertToCommandApdu(hexCommand);
-        ResponseAPDU responseApdu = channel.transmit(commandApdu);
+        ResponseAPDU responseApdu = null;
+
+        try {
+            responseApdu = channel.transmit(commandApdu);
+        } catch (CardException e) {
+            throw new UncheckedException("命令传输失败", e);
+        }
 
         String data = Hex.bytesToHex(responseApdu.getData());
         int sw1 = responseApdu.getSW1();
@@ -355,9 +378,8 @@ public class SmartCard {
      *
      * @param suppliers 命令提供者数组，每个Supplier生成一个十六进制命令字符串
      * @return 每个命令的执行结果列表
-     * @throws CardException 当命令传输失败时抛出
      */
-    public synchronized List<ApduResult> transmitWithNewLogicalChannel(Supplier<String>... suppliers) throws CardException {
+    public synchronized List<ApduResult> transmitWithNewLogicalChannel(Supplier<String>... suppliers) {
         List<String> commands = Arrays.stream(suppliers).map(Supplier::get).collect(Collectors.toList());
         return transmitWithNewLogicalChannel(commands);
     }
@@ -370,9 +392,8 @@ public class SmartCard {
      *
      * @param hexCommand 十六进制格式的81E2命令字符串
      * @return APDU命令执行结果
-     * @throws CardException 当命令传输失败时抛出
      */
-    public synchronized ApduResult transmit81E2RequestWithNewLogicalChannel(String hexCommand) throws CardException {
+    public synchronized ApduResult transmit81E2RequestWithNewLogicalChannel(String hexCommand) {
         return this.transmit81E2RequestWithNewLogicalChannel(Arrays.asList(hexCommand)).get(0);
     }
 
@@ -386,9 +407,8 @@ public class SmartCard {
      *
      * @param suppliers APDU命令的Supplier可变参数，每个Supplier在执行时返回一条十六进制格式的APDU命令字符串
      * @return APDU响应结果列表，按顺序包含每条命令的执行结果
-     * @throws CardException 当卡片操作出现异常时抛出，例如通道打开失败、通信错误等
      */
-    public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(Supplier<String>... suppliers) throws CardException {
+    public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(Supplier<String>... suppliers) {
         // 将Supplier数组转换为命令字符串列表
         List<String> commands = Arrays.stream(suppliers).map(Supplier::get).collect(Collectors.toList());
         return this.transmit81E2RequestWithNewLogicalChannel(commands);
@@ -404,9 +424,8 @@ public class SmartCard {
      *
      * @param hexCommand 十六进制格式的APDU命令可变参数，每个参数代表一条完整的APDU命令字符串
      * @return APDU响应结果列表，按顺序包含每条命令的执行结果
-     * @throws CardException 当卡片操作出现异常时抛出，例如通道打开失败、通信错误等
      */
-    public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(String... hexCommand) throws CardException {
+    public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(String... hexCommand) {
         return this.transmit81E2RequestWithNewLogicalChannel(Arrays.asList(hexCommand));
     }
 
@@ -420,9 +439,8 @@ public class SmartCard {
      *
      * @param hexCommand 十六进制格式的APDU命令列表，每个元素代表一条完整的APDU命令字符串
      * @return APDU响应结果列表，按顺序包含每条命令的执行结果
-     * @throws CardException 当卡片操作出现异常时抛出，例如通道打开失败、通信错误等
      */
-    public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(List<String> hexCommand) throws CardException {
+    public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(List<String> hexCommand) {
         List<ApduResult> results = new ArrayList<>();
         CardChannel channel = null;
         try {
@@ -436,7 +454,7 @@ public class SmartCard {
             }
         } catch (CardException e) {
             log.error("在81E2专用逻辑通道上执行命令失败", e);
-            throw e;
+            throw new UncheckedException("在81E2专用逻辑通道上执行命令失败", e);
         } finally {
             // 确保逻辑通道被正确关闭
             closeChannelQuietly(channel);
@@ -455,9 +473,8 @@ public class SmartCard {
      * @param channel    目标逻辑通道
      * @param hexCommand 十六进制格式的81E2命令字符串（不含CLA头部的完整数据部分）
      * @return APDU命令执行结果，包含所有分包的拼接数据
-     * @throws CardException 当命令传输失败时抛出
      */
-    public synchronized ApduResult transmit81E2Request(CardChannel channel, String hexCommand) throws CardException {
+    public synchronized ApduResult transmit81E2Request(CardChannel channel, String hexCommand) {
         ApduResult result = new ApduResult();
         List<ExecuteRecord> records = new ArrayList<>();
         StringBuilder responseData = new StringBuilder();
@@ -468,8 +485,7 @@ public class SmartCard {
         for (int i = 0; i < chunks.size(); i++) {
             String prefix = (chunks.size() - 1 == i) ? "81E291" : "81E211";
             String chunk = chunks.get(i);
-            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk +
-                    "00";
+            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk + "00";
 
             ApduResult transmitResult = this.transmit(channel, command, true);
             records.addAll(transmitResult.getRecords());
@@ -525,9 +541,8 @@ public class SmartCard {
      *
      * @param hexCommands 十六进制格式的命令字符串数组
      * @return 每个命令的执行结果列表
-     * @throws CardException 当命令传输失败时抛出
      */
-    public synchronized List<ApduResult> transmitWithNewLogicalChannel(String... hexCommands) throws CardException {
+    public synchronized List<ApduResult> transmitWithNewLogicalChannel(String... hexCommands) {
         return transmitWithNewLogicalChannel(Arrays.asList(hexCommands));
     }
 
@@ -540,9 +555,8 @@ public class SmartCard {
      *
      * @param hexCommands 十六进制格式的命令字符串列表
      * @return 每个命令的执行结果列表
-     * @throws CardException 当命令传输失败时抛出
      */
-    public synchronized List<ApduResult> transmitWithNewLogicalChannel(List<String> hexCommands) throws CardException {
+    public synchronized List<ApduResult> transmitWithNewLogicalChannel(List<String> hexCommands) {
         List<ApduResult> results = new ArrayList<>();
         CardChannel channel = null;
         try {
@@ -554,7 +568,7 @@ public class SmartCard {
             }
         } catch (CardException e) {
             log.error("在新逻辑通道上批量执行命令失败", e);
-            throw e;
+            throw new UncheckedException("在新逻辑通道上批量执行命令失败", e);
         } finally {
             closeChannelQuietly(channel);
         }
@@ -570,9 +584,8 @@ public class SmartCard {
      * 2. 检查是否存在活动的逻辑通道，如果不存在则自动创建新的逻辑通道
      * </p>
      *
-     * @throws CardException 当智能卡未连接或打开逻辑通道失败时抛出
      */
-    private void validate() throws CardException {
+    private void validate() {
         if (null == this.card) {
             throw new UncheckedException("请先连接智能卡");
         }
@@ -590,9 +603,8 @@ public class SmartCard {
      * </p>
      *
      * @return eID字符串值，如果提取失败可能返回null或空字符串
-     * @throws CardException 当卡片连接、命令传输或数据解析失败时抛出
      */
-    public synchronized String getEid() throws CardException {
+    public synchronized String getEid() {
         ApduResult transmit = this.transmitWithNewLogicalChannel(COMMAND_EID);
         return TLVUtil.extractValsRecursive(transmit.getData(), "BF3E", "5A").getVal("5A");
     }
