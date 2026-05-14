@@ -254,14 +254,22 @@ public class ECC {
      * 使用公钥验证签名
      *
      * @param data      待验证的数据
-     * @param signature 签名数据的字节数组（固定64字节：R和S各32字节）
+     * @param signature 签名数据的字节数组（支持64字节R||S格式或DER编码格式）
      * @param publicKey 公钥对象，用于验证签名
      * @return boolean 如果签名验证成功则返回true，否则返回false
      * @throws Exception 当验证过程中发生错误时抛出异常
      */
     public static boolean verifySignature(PublicKey publicKey, byte[] data, byte[] signature) throws Exception {
-        // 将固定长度签名转换为DER编码格式
-        byte[] derSignature = convertFixedLengthBytesToDER(signature);
+        // 判断签名格式：64字节为R||S格式，需要转换；其他长度假设为DER格式
+        byte[] derSignature;
+        if (signature.length == 64) {
+            // R||S格式，转换为DER编码
+            derSignature = convertFixedLengthBytesToDER(signature);
+        } else {
+            // 已经是DER编码格式，直接使用
+            derSignature = signature;
+        }
+        
         Signature verifySignature = Signature.getInstance("SHA256withECDSA");
         verifySignature.initVerify(publicKey);
         verifySignature.update(data);
@@ -479,16 +487,25 @@ public class ECC {
      *
      * @param certData     包含公钥的证书数据字符串
      * @param hexData      待验证的十六进制数据字符串
-     * @param signatureHex 十六进制格式的签名字符串（固定长度为128字符）
+     * @param signatureHex 十六进制格式的签名字符串（支持64字节R||S格式或DER编码格式）
      * @return 签名验证结果，有效返回true，无效返回false
      * @throws Exception 当证书解析、数据解码或签名验证过程中发生错误时抛出异常
      */
     public static boolean verify(String certData, String hexData, String signatureHex) throws Exception {
         PublicKey publicKey = X509Helper.extractPublicKey(certData);
-        // 将固定长度签名转换为DER编码
         byte[] signatureBytes = Hex.hexToBytes(signatureHex);
-        byte[] derSignature = convertFixedLengthBytesToDER(signatureBytes);
         byte[] data = Hex.hexToBytes(hexData);
+        
+        // 判断签名格式：64字节为R||S格式，需要转换；其他长度假设为DER格式
+        byte[] derSignature;
+        if (signatureBytes.length == 64) {
+            // R||S格式，转换为DER编码
+            derSignature = convertFixedLengthBytesToDER(signatureBytes);
+        } else {
+            // 已经是DER编码格式，直接使用
+            derSignature = signatureBytes;
+        }
+        
         return verifySignature(publicKey, data, derSignature);
     }
 
