@@ -142,6 +142,7 @@ public class SmartCard {
         if (null != this.card) {
             try {
                 this.card.disconnect(true);
+                log.debug("已断开智能卡连接");
             } catch (CardException e) {
                 throw new UncheckedException("断开与该卡的连接失败", e);
             } finally {
@@ -166,12 +167,7 @@ public class SmartCard {
             throw new UncheckedException("请先连接智能卡");
         }
         if (null == this.cardChannel) {
-            try {
-                this.cardChannel = this.card.openLogicalChannel();
-            } catch (CardException e) {
-                throw new UncheckedException(e);
-            }
-
+            this.cardChannel();
         }
         return this;
     }
@@ -262,6 +258,9 @@ public class SmartCard {
      * @return APDU命令执行结果，包含响应数据和状态字信息
      */
     public synchronized ApduResult transmitWithNewLogicalChannel(String hexCommand) {
+        if (null == this.card) {
+            throw new UncheckedException("请先连接智能卡");
+        }
         CardChannel channel = null;
         try {
             channel = this.card.openLogicalChannel();
@@ -296,7 +295,7 @@ public class SmartCard {
         } catch (UncheckedException e) {
             throw e;
         } catch (Exception e) {
-            log.error("将Hex数据{}转换成CommandAPDU时出现问题{}", hexCommand, e.getMessage());
+            log.error("将Hex数据{}转换成CommandAPDU时出现问题", hexCommand, e);
             throw new UncheckedException("将Hex数据" + hexCommand + "转换成CommandAPDU时出现问题", e);
         }
     }
@@ -531,13 +530,6 @@ public class SmartCard {
              */
             closeChannelQuietly(channel);
         }
-
-        /*
-         * 防御性处理：确保在异常情况下不会返回null，而是返回空列表
-         */
-        if (null == results) {
-            results = new ArrayList<>();
-        }
         return results;
     }
 
@@ -603,7 +595,7 @@ public class SmartCard {
 
         while (startPos < hexCommand.length()) {
             int endPos = Math.min(startPos + MAX_CHUNK_SIZE, hexCommand.length());
-            String chunk = StringUtils.substring(hexCommand, startPos, endPos);
+            String chunk = hexCommand.substring(startPos, endPos);
             startPos = endPos;
             chunks.add(chunk);
         }
