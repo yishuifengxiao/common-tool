@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class SmartCard {
 
     private static final String COMMAND_EID = "81E2910006BF3E035C015A";
-    private static final String COMMAND_SELECT_ISR = "01A4040010A0000005591010FFFFFFFF890000100";
+    private static final String COMMAND_SELECT_ISR = "01A4040010A0000005591010FFFFFFFF8900000100";
     /**
      * APDU命令分包最大长度（字节数）
      */
@@ -281,15 +281,22 @@ public class SmartCard {
      * @return CommandAPDU对象
      */
     private CommandAPDU convertToCommandApdu(String hexCommand) {
-        hexCommand = hexCommand.replaceAll("\\s+", "").trim();
-        if (!Hex.isHex(hexCommand)) {
-            throw new UncheckedException(String.format("输入的数据%s不是十六进制数据", hexCommand));
+        try {
+            hexCommand = hexCommand.replaceAll("\\s+", "").trim();
+            if (!Hex.isHex(hexCommand)) {
+                throw new UncheckedException(String.format("输入的数据%s不是十六进制数据", hexCommand));
+            }
+            if (hexCommand.length() % 2 != 0) {
+                throw new UncheckedException(String.format("输入的十六进制数据%s长度不是偶数", hexCommand));
+            }
+            byte[] commandBytes = Hex.hexToBytes(hexCommand);
+            return new CommandAPDU(commandBytes);
+        } catch (UncheckedException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("将Hex数据{}转换成CommandAPDU时出现问题{}", hexCommand, e.getMessage());
+            throw new UncheckedException("将Hex数据" + hexCommand + "转换成CommandAPDU时出现问题", e);
         }
-        if (hexCommand.length() % 2 != 0) {
-            throw new UncheckedException(String.format("输入的十六进制数据%s长度不是偶数", hexCommand));
-        }
-        byte[] commandBytes = Hex.hexToBytes(hexCommand);
-        return new CommandAPDU(commandBytes);
     }
 
     /**
@@ -506,15 +513,10 @@ public class SmartCard {
             channel = this.card.openLogicalChannel();
             log.debug("在81E2专用逻辑通道上执行{}条命令", hexCommand.size());
 
-            /*
-             * 在新通道上执行ISR应用选择命令，这是81E2协议通信的前置必要步骤
-             */
-            channel.transmit(this.convertToCommandApdu(COMMAND_SELECT_ISR));
-
-            /*
-             * 在已建立的81E2逻辑通道上依次执行所有APDU命令，并收集执行结果
-             */
-            results = this.transmit81E2Request(channel, hexCommand);
+            for (String cmd : hexCommand) {
+                ApduResult apduResult = this.transmit81E2Request(channel, cmd);
+                results.add(apduResult);
+            }
         } catch (CardException e) {
             log.error("在81E2专用逻辑通道上执行命令失败", e);
             throw new UncheckedException("在81E2专用逻辑通道上执行命令失败", e);
