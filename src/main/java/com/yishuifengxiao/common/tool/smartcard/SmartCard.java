@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class SmartCard {
 
     private static final String COMMAND_EID = "81E2910006BF3E035C015A";
-    private static final String COMMAND_SELECT_ISR = "01A4040010A0000005591010FFFFFFFF8900000100";
+    private static final String COMMAND_SELECT_ISR = "01A4040010A0000005591010FFFFFFFF890000100";
     /**
      * APDU命令分包最大长度（字节数）
      */
@@ -193,12 +193,33 @@ public class SmartCard {
         return this.cardChannel;
     }
 
+    /**
+     * 在当前逻辑通道上选择ISR应用
+     * <p>
+     * 该方法会将预定义的ISR选择命令（COMMAND_SELECT_ISR）转换为CommandAPDU对象，
+     * 并在当前活动的逻辑通道上传输执行。如果当前没有活动的逻辑通道，会自动创建一个。
+     * </p>
+     *
+     * @return 当前SmartCard实例，支持链式调用
+     */
     public synchronized SmartCard selectIsr() {
+
+        /*
+         * 将预定义的ISR选择命令字符串转换为CommandAPDU对象
+         */
         CommandAPDU commandAPDU = this.convertToCommandApdu(COMMAND_SELECT_ISR);
         try {
+
+            /*
+             * 获取或创建逻辑通道，并传输ISR选择命令以激活ISR应用
+             */
             this.cardChannel().transmit(commandAPDU);
             log.debug("已选择ISR应用");
         } catch (CardException e) {
+
+            /*
+             * 卡片通信异常时抛出非检查型异常，中断执行流程
+             */
             throw new UncheckedException(e);
         }
         return this;
@@ -385,16 +406,54 @@ public class SmartCard {
     }
 
     /**
-     * 在新的逻辑通道上发送81E2类型的请求命令
+     * 在新的逻辑通道上发送81E2类型的请求命令（单命令版本）
      * <p>
-     * 自动创建临时逻辑通道，执行完成后关闭。专门用于处理81E2开头的特殊命令。
+     * 该方法会自动创建临时逻辑通道，在该通道上执行ISR应用选择后，
+     * 调用 {@link #transmit81E2Request(CardChannel, String)} 方法处理81E2命令。
+     * 此方法专门用于处理以81E2开头的特殊命令，支持自动分包和响应数据拼接。
+     * </p>
+     * <p>
+     * 执行流程：
+     * 1. 打开新的逻辑通道
+     * 2. 选择ISR应用（81E2协议的前置必要步骤）
+     * 3. 执行81E2命令（自动处理分包和响应拼接）
+     * 4. 关闭逻辑通道（在finally块中确保资源释放）
      * </p>
      *
-     * @param hexCommand 十六进制格式的81E2命令字符串
-     * @return APDU命令执行结果
+     * @param hexCommand 十六进制格式的81E2命令字符串（不含CLA头部的完整数据部分）
+     * @return APDU命令执行结果，包含响应数据、状态字和执行记录；如果执行失败则返回null
      */
     public synchronized ApduResult transmit81E2RequestWithNewLogicalChannel(String hexCommand) {
-        return this.transmit81E2RequestWithNewLogicalChannel(Arrays.asList(hexCommand)).get(0);
+        ApduResult results = null;
+        CardChannel channel = null;
+        try {
+
+            /*
+             * 为81E2命令创建专用的临时逻辑通道，确保与当前活动通道隔离
+             */
+            channel = this.card.openLogicalChannel();
+
+            /*
+             * 在新通道上执行ISR应用选择命令，这是81E2协议通信的前置必要步骤
+             */
+            channel.transmit(this.convertToCommandApdu(COMMAND_SELECT_ISR));
+
+            /*
+             * 调用单命令版本的81E2传输方法，该方法会自动处理命令分包、
+             * 添加81E2协议头部、依次执行分包并拼接响应数据
+             */
+            results = this.transmit81E2Request(channel, hexCommand);
+        } catch (CardException e) {
+            log.error("在81E2专用逻辑通道上执行命令失败", e);
+            throw new UncheckedException("在81E2专用逻辑通道上执行命令失败", e);
+        } finally {
+
+            /*
+             * 无论执行成功与否，都必须确保逻辑通道被正确关闭以释放资源
+             */
+            closeChannelQuietly(channel);
+        }
+        return results;
     }
 
     /**
@@ -438,26 +497,40 @@ public class SmartCard {
      * </p>
      *
      * @param hexCommand 十六进制格式的APDU命令列表，每个元素代表一条完整的APDU命令字符串
-     * @return APDU响应结果列表，按顺序包含每条命令的执行结果
+     * @return APDU响应结果列表，按顺序包含每条命令的执行结果；如果执行结果为null则返回空列表
      */
     public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(List<String> hexCommand) {
         List<ApduResult> results = new ArrayList<>();
         CardChannel channel = null;
         try {
-            // 打开新的逻辑通道
             channel = this.card.openLogicalChannel();
             log.debug("在81E2专用逻辑通道上执行{}条命令", hexCommand.size());
+
+            /*
+             * 在新通道上执行ISR应用选择命令，这是81E2协议通信的前置必要步骤
+             */
             channel.transmit(this.convertToCommandApdu(COMMAND_SELECT_ISR));
-            // 在逻辑通道上依次执行所有APDU命令
-            for (String command : hexCommand) {
-                results.add(transmit81E2Request(channel, command));
-            }
+
+            /*
+             * 在已建立的81E2逻辑通道上依次执行所有APDU命令，并收集执行结果
+             */
+            results = this.transmit81E2Request(channel, hexCommand);
         } catch (CardException e) {
             log.error("在81E2专用逻辑通道上执行命令失败", e);
             throw new UncheckedException("在81E2专用逻辑通道上执行命令失败", e);
         } finally {
-            // 确保逻辑通道被正确关闭
+
+            /*
+             * 无论执行成功与否，都必须确保逻辑通道被正确关闭以释放资源
+             */
             closeChannelQuietly(channel);
+        }
+
+        /*
+         * 防御性处理：确保在异常情况下不会返回null，而是返回空列表
+         */
+        if (null == results) {
+            results = new ArrayList<>();
         }
         return results;
     }
@@ -485,7 +558,8 @@ public class SmartCard {
         for (int i = 0; i < chunks.size(); i++) {
             String prefix = (chunks.size() - 1 == i) ? "81E291" : "81E211";
             String chunk = chunks.get(i);
-            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk + "00";
+            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk +
+                    "00";
 
             ApduResult transmitResult = this.transmit(channel, command, true);
             records.addAll(transmitResult.getRecords());
@@ -500,6 +574,66 @@ public class SmartCard {
         }
 
         return result.setData(responseData.toString()).setRecords(records);
+    }
+
+    /**
+     * 在指定逻辑通道上批量发送81E2类型的请求命令（列表版本）
+     * <p>
+     * 该方法接收已分好的命令包列表，为每个分包添加81E2协议头部信息（包括前缀、序列号、长度），
+     * 然后依次在指定通道上执行。与单命令版本不同，此方法返回每个分包的独立执行结果列表，
+     * 不进行响应数据的拼接。适用于需要单独处理每个分包响应结果的场景。
+     * </p>
+     * <p>
+     * 如果某个分包执行失败（SW1!=0x90），会记录警告日志并立即终止后续分包的执行。
+     * </p>
+     *
+     * @param channel 目标逻辑通道
+     * @param chunks  已分割好的十六进制格式命令包列表，每个元素代表一个完整的数据包
+     * @return 每个分包的执行结果列表，按顺序包含各分包的响应数据和状态字
+     */
+    public synchronized List<ApduResult> transmit81E2Request(CardChannel channel, List<String> chunks) {
+        List<ApduResult> list = new ArrayList<>();
+
+        List<ExecuteRecord> records = new ArrayList<>();
+        StringBuilder responseData = new StringBuilder();
+
+        log.debug("81E2命令分包数量: {}", chunks.size());
+
+        for (int i = 0; i < chunks.size(); i++) {
+
+            /*
+             * 根据是否为最后一个分包确定前缀：最后一个使用81E291（结束标记），其他使用81E211（继续标记）
+             */
+            ApduResult result = new ApduResult();
+            String prefix = (chunks.size() - 1 == i) ? "81E291" : "81E211";
+            String chunk = chunks.get(i);
+
+            /*
+             * 组装完整的81E2命令：前缀 + 序列号 + 数据长度 + 数据内容 + 填充字节
+             */
+            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk +
+                    "00";
+
+            /*
+             * 在当前通道上执行组装后的81E2命令，启用自动拉取功能
+             */
+            ApduResult transmitResult = this.transmit(channel, command, true);
+            records.addAll(transmitResult.getRecords());
+            result.setSw1(transmitResult.getSw1());
+            result.setSw2(transmitResult.getSw2());
+            responseData.append(transmitResult.getData());
+            list.add(transmitResult);
+
+            /*
+             * 检查执行状态，如果失败则记录警告并终止后续分包的执行
+             */
+            if (!transmitResult.isSuccess()) {
+                log.warn("81E2命令第{}个分包执行失败，SW1=0x{}", i + 1, Integer.toHexString(transmitResult.getSw1()));
+                break;
+            }
+        }
+
+        return list;
     }
 
     /**
@@ -583,7 +717,6 @@ public class SmartCard {
      * 1. 检查是否已连接到智能卡，如果未连接则抛出异常
      * 2. 检查是否存在活动的逻辑通道，如果不存在则自动创建新的逻辑通道
      * </p>
-     *
      */
     private void validate() {
         if (null == this.card) {
