@@ -59,9 +59,8 @@ public class Asn1Util {
      *
      * @param object 要序列化的对象，必须实现 writePdu 方法且不能为 null
      * @return 序列化后的十六进制字符串
-     * @throws Exception 如果在序列化过程中出现错误（如方法调用失败、IO 异常等）
      */
-    public static String toHexString(Object object) throws Exception {
+    public static String toHexString(Object object) {
         if (object == null) {
             throw new UncheckedException("object参数不能为null");
         }
