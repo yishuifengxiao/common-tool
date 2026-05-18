@@ -264,7 +264,10 @@ public class SmartCard {
         CardChannel channel = null;
         try {
             channel = this.card.openLogicalChannel();
-            channel.transmit(this.convertToCommandApdu(COMMAND_SELECT_ISR));
+            ApduResult selectResult = this.transmit(channel, COMMAND_SELECT_ISR, true);
+            if (!selectResult.isSuccess()) {
+                throw new UncheckedException("在81E2专用逻辑通道上执行命令失败:" + selectResult.getData() + ",sw:" + selectResult.swHex());
+            }
             return this.transmit(channel, hexCommand, true);
         } catch (CardException e) {
             log.error("在新逻辑通道上执行命令失败: {}", hexCommand, e);
@@ -409,7 +412,8 @@ public class SmartCard {
      * @return 每个命令的执行结果列表
      */
     public synchronized List<ApduResult> transmitWithNewLogicalChannel(Supplier<String>... suppliers) {
-        List<String> commands = Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        List<String> commands =
+                Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         return transmitWithNewLogicalChannel(commands);
     }
 
@@ -477,7 +481,8 @@ public class SmartCard {
      */
     public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(Supplier<String>... suppliers) {
         // 将Supplier数组转换为命令字符串列表
-        List<String> commands = Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        List<String> commands =
+                Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         return this.transmit81E2RequestWithNewLogicalChannel(commands);
     }
 
@@ -512,7 +517,10 @@ public class SmartCard {
         CardChannel channel = null;
         try {
             channel = this.card.openLogicalChannel();
-
+            ApduResult selectResult = this.transmit(channel, COMMAND_SELECT_ISR, true);
+            if (!selectResult.isSuccess()) {
+                throw new UncheckedException("在81E2专用逻辑通道上执行命令失败:" + selectResult.getData() + ",sw:" + selectResult.swHex());
+            }
             for (String cmd : hexCommand) {
                 ApduResult apduResult = this.transmit81E2Request(channel, cmd);
                 results.add(apduResult);
@@ -554,7 +562,8 @@ public class SmartCard {
         for (int i = 0; i < chunks.size(); i++) {
             String prefix = (chunks.size() - 1 == i) ? "81E291" : "81E211";
             String chunk = chunks.get(i);
-            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk + "00";
+            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk +
+                    "00";
 
             ApduResult transmitResult = this.transmit(channel, command, true);
             records.addAll(transmitResult.getRecords());
@@ -563,7 +572,8 @@ public class SmartCard {
             responseData.append(transmitResult.getData());
 
             if (!transmitResult.isSuccess()) {
-                log.warn("81E2命令{}第{}个分包执行失败，SW1=0x{}", hexCommand, i + 1, Integer.toHexString(transmitResult.getSw1()).toUpperCase());
+                log.warn("81E2命令{}第{}个分包执行失败，SW1=0x{}", hexCommand, i + 1,
+                        Integer.toHexString(transmitResult.getSw1()).toUpperCase());
                 break;
             }
         }
