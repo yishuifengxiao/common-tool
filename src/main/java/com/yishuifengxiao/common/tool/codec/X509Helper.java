@@ -1,5 +1,15 @@
 package com.yishuifengxiao.common.tool.codec;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.lang.Hex;
+import com.yishuifengxiao.common.tool.lang.OID;
+import com.yishuifengxiao.common.tool.lang.TLVUtil;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.ByteArrayInputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
@@ -11,24 +21,8 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
 import java.security.interfaces.RSAPublicKey;
 import java.security.spec.ECPoint;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
-
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.lang.Hex;
-import com.yishuifengxiao.common.tool.lang.OID;
-import com.yishuifengxiao.common.tool.lang.TLVUtil;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Accessors;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>X.509证书解析工具类</p>
@@ -51,7 +45,8 @@ public class X509Helper {
 
     private static final String PEM_HEADER = "-----BEGIN CERTIFICATE-----";
     private static final String PEM_FOOTER = "-----END CERTIFICATE-----";
-    private static final Pattern PEM_PATTERN = Pattern.compile("-----BEGIN CERTIFICATE-----.*-----END " + "CERTIFICATE-----", Pattern.DOTALL);
+    private static final Pattern PEM_PATTERN = Pattern.compile("-----BEGIN CERTIFICATE-----.*-----END " +
+            "CERTIFICATE-----", Pattern.DOTALL);
 
     private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9A-Fa-f]+$");
 
@@ -775,7 +770,6 @@ public class X509Helper {
     }
 
 
-
     /**
      * 提取OID和主题备用名称（SAN），并将其存储在证书信息对象中
      *
@@ -898,6 +892,75 @@ public class X509Helper {
             return extractPublicKeyValue(certificate);
         } catch (Exception e) {
             log.info("Failed to extract public key value: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 从证书数据中提取subjectPublicKey的十六进制表示
+     *
+     * @param certData 证书数据字符串，可以是十六进制、base64编码或PEM格式
+     * @return subjectPublicKey的十六进制字符串(未压缩格式 ： 0x04 + X + Y)，如果提取失败则返回null
+     */
+    public static String extractSubjectPublicKeyHex(String certData) {
+        try {
+            X509Certificate certificate = parseCert(certData);
+            return extractSubjectPublicKeyHex(certificate);
+        } catch (Exception e) {
+            log.info("Failed to extract subject public key hex: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 从X509Certificate中提取subjectPublicKey的十六进制表示
+     *
+     * @param certificate X.509证书对象
+     * @return subjectPublicKey的十六进制字符串(未压缩格式 ： 0x04 + X + Y)，如果提取失败则返回null
+     */
+    public static String extractSubjectPublicKeyHex(X509Certificate certificate) {
+        if (certificate == null) {
+            return null;
+        }
+
+        try {
+            PublicKey publicKey = certificate.getPublicKey();
+            return extractSubjectPublicKeyHex(publicKey);
+        } catch (Exception e) {
+            log.info("Failed to extract subject public key hex: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 从PublicKey中提取subjectPublicKey的十六进制表示
+     *
+     * @param publicKey 公钥对象
+     * @return subjectPublicKey的十六进制字符串，如果提取失败则返回null
+     */
+    public static String extractSubjectPublicKeyHex(PublicKey publicKey) {
+        if (publicKey == null) {
+            return null;
+        }
+
+        try {
+            String publicKeyValue;
+
+            if (publicKey instanceof ECPublicKey) {
+                // ECDSA公钥处理，返回未压缩格式 (0x04 + X + Y)
+                publicKeyValue = extractECDSAPublicKeyHex((ECPublicKey) publicKey);
+            } else if (publicKey instanceof RSAPublicKey) {
+                // RSA公钥处理，返回完整DER编码
+                publicKeyValue = extractRSAPublicKeyHex((RSAPublicKey) publicKey);
+            } else {
+                // 其他类型的公钥，使用完整编码
+                byte[] publicKeyBytes = publicKey.getEncoded();
+                publicKeyValue = Hex.bytesToHex(publicKeyBytes);
+            }
+
+            return publicKeyValue.toUpperCase();
+        } catch (Exception e) {
+            log.info("Failed to extract subject public key hex: " + e.getMessage());
             return null;
         }
     }
@@ -1043,7 +1106,8 @@ public class X509Helper {
 
         } catch (Exception e) {
             if (log.isDebugEnabled()) {
-                log.debug("证书签发关系验证失败，签发者证书: {}, 被签发证书: {}, 错误信息: {}", issuerCert.getSubjectX500Principal(), subjectCert.getSubjectX500Principal(), e.getMessage());
+                log.debug("证书签发关系验证失败，签发者证书: {}, 被签发证书: {}, 错误信息: {}", issuerCert.getSubjectX500Principal(),
+                        subjectCert.getSubjectX500Principal(), e.getMessage());
             }
             return false;
         }
@@ -1333,9 +1397,11 @@ public class X509Helper {
             String cleanedPem = pemPublicKey.trim();
 
             // 定义可能的PEM头部模式
-            String[] pemHeaders = {"-----BEGIN RSA PUBLIC KEY-----", "-----BEGIN EC PUBLIC KEY-----", "-----BEGIN DSA PUBLIC KEY-----", "-----BEGIN PUBLIC KEY-----"};
+            String[] pemHeaders = {"-----BEGIN RSA PUBLIC KEY-----", "-----BEGIN EC PUBLIC KEY-----", "-----BEGIN DSA" +
+                    " PUBLIC KEY-----", "-----BEGIN PUBLIC KEY-----"};
 
-            String[] pemFooters = {"-----END RSA PUBLIC KEY-----", "-----END EC PUBLIC KEY-----", "-----END DSA PUBLIC KEY-----", "-----END PUBLIC KEY-----"};
+            String[] pemFooters = {"-----END RSA PUBLIC KEY-----", "-----END EC PUBLIC KEY-----", "-----END DSA " +
+                    "PUBLIC KEY-----", "-----END PUBLIC KEY-----"};
 
             // 移除所有可能的PEM头部和尾部
             for (String header : pemHeaders) {

@@ -304,6 +304,56 @@ public class ECC {
     }
 
     /**
+     * 验证证书与私钥D值是否匹配
+     * <p>
+     * 通过使用私钥D值对测试数据签名，然后使用证书中的公钥验证签名，
+     * 来判断私钥D值与证书是否匹配。
+     * </p>
+     *
+     * @param certData       证书数据字符串，可以是十六进制、base64编码或PEM格式
+     * @param privateKeyDHex 私钥D值的十六进制字符串表示（不包含0x前缀）
+     * @return 如果验证成功返回true，否则返回false
+     */
+    public static boolean verifyMatchWithDValue(String certData, String privateKeyDHex) {
+        return verifyMatchWithDValue(certData, privateKeyDHex, defalut_curveOID);
+    }
+
+    /**
+     * 验证证书与私钥D值是否匹配
+     * <p>
+     * 通过使用私钥D值对测试数据签名，然后使用证书中的公钥验证签名，
+     * 来判断私钥D值与证书是否匹配。
+     * </p>
+     *
+     * @param certData       证书数据字符串，可以是十六进制、base64编码或PEM格式
+     * @param privateKeyDHex 私钥D值的十六进制字符串表示（不包含0x前缀）
+     * @param curveOID       椭圆曲线OID标识符，用于指定使用的椭圆曲线参数
+     * @return 如果验证成功返回true，否则返回false
+     */
+    public static boolean verifyMatchWithDValue(String certData, String privateKeyDHex, String curveOID) {
+        try {
+            // 从证书中提取subjectPublicKey的十六进制表示
+            String publicKeyValue = X509Helper.extractSubjectPublicKeyHex(certData);
+            if (publicKeyValue == null) {
+                log.warn("Failed to extract subject public key from certificate");
+                return false;
+            }
+
+            // 使用默认测试数据
+            String testData = "12345678";
+
+            // 使用私钥D值对数据进行签名
+            String signature = sign(curveOID, privateKeyDHex, testData);
+
+            // 使用公钥验证签名
+            return verify(curveOID, publicKeyValue, testData, signature);
+        } catch (Exception e) {
+            log.warn("verifyMatchWithDValue error: ", e);
+            return false;
+        }
+    }
+
+    /**
      * 验证密钥组件是否正确
      *
      * @param keyPair                包含公钥和私钥的密钥对对象
