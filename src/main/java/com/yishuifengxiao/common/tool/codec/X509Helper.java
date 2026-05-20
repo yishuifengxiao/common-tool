@@ -25,9 +25,15 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 /**
- * <p>X.509证书解析工具类</p>
- * <p>提供X.509证书的解析、信息提取和格式转换等功能。</p>
- * <p>特性：</p>
+ * <p>
+ * X.509证书解析工具类
+ * </p>
+ * <p>
+ * 提供X.509证书的解析、信息提取和格式转换等功能。
+ * </p>
+ * <p>
+ * 特性：
+ * </p>
  * <ul>
  * <li>支持多种证书格式解析（十六进制、Base64、PEM）</li>
  * <li>提取证书完整信息（主题、颁发者、序列号、有效期等）</li>
@@ -49,6 +55,15 @@ public class X509Helper {
             "CERTIFICATE-----", Pattern.DOTALL);
 
     private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9A-Fa-f]+$");
+
+    private static final String RSA_PEM_HEADER = "-----BEGIN RSA PUBLIC KEY-----";
+    private static final String RSA_PEM_FOOTER = "-----END RSA PUBLIC KEY-----";
+    private static final String EC_PEM_HEADER = "-----BEGIN EC PUBLIC KEY-----";
+    private static final String EC_PEM_FOOTER = "-----END EC PUBLIC KEY-----";
+    private static final String DSA_PEM_HEADER = "-----BEGIN DSA PUBLIC KEY-----";
+    private static final String DSA_PEM_FOOTER = "-----END DSA PUBLIC KEY-----";
+    private static final String GENERIC_PEM_HEADER = "-----BEGIN PUBLIC KEY-----";
+    private static final String GENERIC_PEM_FOOTER = "-----END PUBLIC KEY-----";
 
     /**
      * 解析证书数据，支持多种格式的输入
@@ -173,7 +188,6 @@ public class X509Helper {
         }
     }
 
-
     /**
      * 证书信息完整类
      */
@@ -213,7 +227,8 @@ public class X509Helper {
         /**
          * 定义如何签名和验证,签名算法字段。
          * 算法OID： 位置1：tbsCertificate.signature - 表示CA用来签署证书的算法，例如 ecdsa-with-SHA256。
-         * 位置2：tbsCertificate.subjectPublicKeyInfo.algorithm - 这里的算法OID是 ecPublicKey (1.2.840.10045.2.1)
+         * 位置2：tbsCertificate.subjectPublicKeyInfo.algorithm - 这里的算法OID是 ecPublicKey
+         * (1.2.840.10045.2.1)
          * 。这告诉你这个公钥是基于ECC的。 在证书中通常出现在签名算法字段
          */
         private String sigAlgOID;
@@ -314,7 +329,6 @@ public class X509Helper {
         info.setSigAlgOID(certificate.getSigAlgOID());
         info.setSigAlgName(certificate.getSigAlgName());
 
-
         // 提取公钥信息
         extractPublicKeyInfo(certificate, info);
 
@@ -351,8 +365,8 @@ public class X509Helper {
 
             if (publicKey instanceof ECPublicKey) {
                 ECPublicKey eCPublicKey = (ECPublicKey) publicKey;
-                //曲线的algid
-                String algid = getCurveOIDFromPublicKeyEncoding(eCPublicKey.getEncoded());
+                // 曲线的algid
+                String algid = getCurveOIDFromPublicKeyEncoding(Hex.bytesToHex(eCPublicKey.getEncoded()));
                 info.setAlgid(algid);
                 // ECDSA公钥处理
                 publicKeyValue = extractECDSAPublicKeyHex(eCPublicKey);
@@ -380,35 +394,212 @@ public class X509Helper {
         }
     }
 
-
     /**
      * 从公钥编码中提取曲线OID
      *
-     * @param encoded 公钥的字节编码数组
+     * @param encodedHex 公钥的十六进制编码字符串
      * @return 曲线OID的点分十进制表示字符串
      * @throws IllegalArgumentException 当公钥编码格式不正确或长度不足时抛出
      */
-    public static String getCurveOIDFromPublicKeyEncoding(byte[] encoded) {
-        // 定位第二个OID的内容
-        if (encoded.length < 23) {
+    public static String getCurveOIDFromPublicKeyEncoding(String encodedHex) {
+        if (encodedHex == null || encodedHex.trim().isEmpty()) {
+            throw new IllegalArgumentException("公钥编码不能为空");
+        }
+
+        byte[] encoded = Hex.hexToBytes(encodedHex);
+        if (encoded == null || encoded.length < 23) {
             throw new IllegalArgumentException("公钥编码长度不足");
         }
-        // 检查结构是否符合预期
-        if (encoded[0] != 0x30 || encoded[2] != 0x30 || encoded[4] != 0x06 || encoded[13] != 0x06) {
+        if (encoded[0] != 0x30 || encoded[2] != 0x30 || encoded[4] != 0x06) {
             throw new IllegalArgumentException("非预期的公钥编码结构");
         }
-// 提取第二个OID的数据
-        int oidLength = encoded[14];
-        if (oidLength != 8) {
-            throw new IllegalArgumentException("非预期的OID长度");
+
+        int pos = 5;
+        int firstOidLength = encoded[pos] & 0xFF;
+        pos += firstOidLength + 1;
+
+        if (pos + 2 > encoded.length || encoded[pos] != 0x06) {
+            throw new IllegalArgumentException("无法找到曲线OID");
         }
+        pos++;
+
+        int oidLength = encoded[pos] & 0xFF;
+        pos++;
+
+        if (pos + oidLength > encoded.length) {
+            throw new IllegalArgumentException("OID数据不完整");
+        }
+
         byte[] oidBytes = new byte[oidLength];
-        System.arraycopy(encoded, 15, oidBytes, 0, oidLength);
+        System.arraycopy(encoded, pos, oidBytes, 0, oidLength);
         String hex = Hex.bytesToHex(oidBytes);
-        String notation = OID.hexToDotNotation(hex);
-        return notation;
+        return OID.hexToDotNotation(hex);
     }
 
+    /**
+     * 从PublicKey对象中提取曲线OID
+     *
+     * @param publicKey 公钥对象
+     * @return 曲线OID的点分十进制表示字符串，如果无法提取则返回null
+     */
+    public static String extractCurveOID(PublicKey publicKey) {
+        if (publicKey == null) {
+            return null;
+        }
+
+        try {
+            if (publicKey instanceof ECPublicKey) {
+                ECPublicKey ecPublicKey = (ECPublicKey) publicKey;
+                return ecPublicKey.getParams().getCurve().toString();
+            }
+
+            byte[] encoded = publicKey.getEncoded();
+            return getCurveOIDFromPublicKeyEncoding(Hex.bytesToHex(encoded));
+        } catch (Exception e) {
+            log.info("Failed to extract curve OID: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 从证书字符串中提取曲线OID
+     *
+     * @param certData 证书数据字符串，可以是十六进制、Base64或PEM格式
+     * @return 曲线OID的点分十进制表示字符串，如果无法提取则返回null
+     */
+    public static String extractCurveOIDFromCert(String certData) {
+        try {
+            X509Certificate certificate = parseCert(certData);
+            return extractCurveOID(certificate.getPublicKey());
+        } catch (Exception e) {
+            log.info("Failed to extract curve OID from certificate: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 根据算法OID、参数OID和subjectPublicKey生成PublicKey对象
+     *
+     * @param algorithmOID        算法OID（如1.2.840.10045.2.1表示EC算法）
+     * @param parametersOID       参数OID（曲线OID，如1.2.840.10045.3.1.7表示secp256r1）
+     * @param subjectPublicKeyHex subjectPublicKey的十六进制字符串（未压缩格式：0x04 + X + Y）
+     * @return 生成的PublicKey对象
+     * @throws CertificateException 当生成公钥失败时抛出此异常
+     */
+    public static PublicKey generatePublicKey(String algorithmOID, String parametersOID, String subjectPublicKeyHex)
+            throws CertificateException {
+        if (algorithmOID == null || algorithmOID.trim().isEmpty()) {
+            throw new CertificateException("Algorithm OID cannot be null or empty");
+        }
+        if (subjectPublicKeyHex == null || subjectPublicKeyHex.trim().isEmpty()) {
+            throw new CertificateException("Subject public key cannot be null or empty");
+        }
+
+        try {
+            String cleanHex = subjectPublicKeyHex.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
+            byte[] keyBytes = Hex.hexToBytes(cleanHex);
+            if (keyBytes == null || keyBytes.length < 3) {
+                throw new CertificateException("Invalid subject public key format");
+            }
+
+            if ("1.2.840.10045.2.1".equals(algorithmOID)) {
+                return generateECPublicKey(parametersOID, subjectPublicKeyHex);
+            } else {
+                throw new CertificateException("Unsupported algorithm OID: " + algorithmOID);
+            }
+        } catch (CertificateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new CertificateException("Failed to generate public key: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 生成EC公钥
+     *
+     * @param curveOID            曲线OID
+     * @param subjectPublicKeyHex subjectPublicKey的十六进制字符串（未压缩格式：0x04 + X + Y）
+     * @return 生成的ECPublicKey对象
+     * @throws Exception 当生成公钥失败时抛出此异常
+     */
+    private static PublicKey generateECPublicKey(String curveOID, String subjectPublicKeyHex) throws Exception {
+        java.security.spec.ECParameterSpec ecParams = getECParameters(curveOID);
+
+        String cleanHex = subjectPublicKeyHex.replaceAll("\\s", "").replace("0x", "").replace("0X", "");
+        byte[] keyBytes = Hex.hexToBytes(cleanHex);
+
+        int keySize = (keyBytes.length - 1) / 2;
+        byte[] xBytes = new byte[keySize];
+        byte[] yBytes = new byte[keySize];
+        System.arraycopy(keyBytes, 1, xBytes, 0, keySize);
+        System.arraycopy(keyBytes, 1 + keySize, yBytes, 0, keySize);
+
+        java.security.spec.ECPoint ecPoint = new java.security.spec.ECPoint(
+                new BigInteger(1, xBytes),
+                new BigInteger(1, yBytes));
+
+        java.security.spec.ECPublicKeySpec ecPublicKeySpec = new java.security.spec.ECPublicKeySpec(ecPoint, ecParams);
+        java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance("EC");
+        return keyFactory.generatePublic(ecPublicKeySpec);
+    }
+
+    /**
+     * 根据曲线OID获取EC参数规范
+     *
+     * @param curveOID 曲线OID
+     * @return EC参数规范
+     * @throws Exception 当曲线OID不支持时抛出此异常
+     */
+    private static java.security.spec.ECParameterSpec getECParameters(String curveOID) throws Exception {
+        java.security.Provider provider = java.security.Security.getProvider("SunEC");
+        if (provider == null) {
+            provider = java.security.Security.getProvider("BC");
+        }
+
+        java.security.spec.EllipticCurve curve;
+        java.security.spec.ECPoint generator;
+        BigInteger order;
+        BigInteger cofactor;
+
+        switch (curveOID) {
+            case "1.2.840.10045.3.1.7":
+                curve = new java.security.spec.EllipticCurve(
+                        new java.security.spec.ECFieldFp(new BigInteger(
+                                "115792089210356248762697446949407573530086143415290314195533631308867097853951")),
+                        new BigInteger(
+                                "115792089210356248762697446949407573530086143415290314195533631308867097853948"),
+                        new BigInteger(
+                                "41058363725152142129326129780047268409114441015993725554835256314039467401291"));
+                generator = new java.security.spec.ECPoint(
+                        new BigInteger("48439561293906451759052585252797914202762949526041747995844080717082404635286"),
+                        new BigInteger(
+                                "36134250956749795798585127919587881956611106672985015071877198253568414405109"));
+                order = new BigInteger(
+                        "115792089210356248762697446949407573529996955224135760342422259061068512044369");
+                cofactor = BigInteger.ONE;
+                break;
+            case "1.3.132.0.34":
+                curve = new java.security.spec.EllipticCurve(
+                        new java.security.spec.ECFieldFp(new BigInteger(
+                                "115792089237316195423570985008687907853269984665640564039457584007908834671663")),
+                        new BigInteger(
+                                "115792089237316195423570985008687907853269984665640564039457584007908834671662"),
+                        new BigInteger(
+                                "41058363725152142129326129780047268409114441015993725554835256314039467401291"));
+                generator = new java.security.spec.ECPoint(
+                        new BigInteger("48439561293906451759052585252797914202762949526041747995844080717082404635287"),
+                        new BigInteger(
+                                "36134250956749795798585127919587881956611106672985015071877198253568414405108"));
+                order = new BigInteger(
+                        "115792089237316195423570985008687907853269984665640564039457584007908834671663");
+                cofactor = BigInteger.ONE;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported curve OID: " + curveOID);
+        }
+
+        return new java.security.spec.ECParameterSpec(curve, generator, order, cofactor.intValue());
+    }
 
     /**
      * 提取RSA公钥的十六进制表示
@@ -496,7 +687,6 @@ public class X509Helper {
         }
     }
 
-
     /**
      * 从X509证书中提取CIPKID信息
      *
@@ -507,7 +697,6 @@ public class X509Helper {
         // 从TLV格式的SKID中提取标签为"04"的值作为CIPKID
         info.setCipkid(TLVUtil.extractVal("04", info.getSkid()));
     }
-
 
     /**
      * 从证书数据中提取CIPKID（Certificate Issuer Public Key Identifier）
@@ -536,7 +725,6 @@ public class X509Helper {
         return null;
     }
 
-
     /**
      * 从Authority Key Identifier扩展中提取Key Identifier（OID: 2.5.29.35）
      *
@@ -562,7 +750,8 @@ public class X509Helper {
                     byte tag = akidSequence[pos];
                     pos++;
 
-                    if (pos >= akidSequence.length) break;
+                    if (pos >= akidSequence.length)
+                        break;
 
                     int elementLength = akidSequence[pos] & 0xFF;
                     pos++;
@@ -665,9 +854,9 @@ public class X509Helper {
             String subject = certificate.getSubjectX500Principal().getName();
 
             // 尝试多种可能的序列号属性名称
-            String[] possibleNames = {"SERIALNUMBER", "SERIAL NUMBER", "SERIALNUMBER=", "SERIAL NUMBER=",
+            String[] possibleNames = { "SERIALNUMBER", "SERIAL NUMBER", "SERIALNUMBER=", "SERIAL NUMBER=",
                     "serialNumber", "serial number", "serialNumber=", "serial number=",
-                    "2.5.4.5"};
+                    "2.5.4.5" };
 
             // 使用多种分隔符分割主题DN
             String[] subjectParts = subject.split("[,;]");
@@ -769,7 +958,6 @@ public class X509Helper {
         return null;
     }
 
-
     /**
      * 提取OID和主题备用名称（SAN），并将其存储在证书信息对象中
      *
@@ -824,7 +1012,8 @@ public class X509Helper {
                 while (iterator.hasNext()) {
                     List<?> alternativeName = iterator.next();
                     // 检查备用名称列表是否有效且包含足够的元素，同时判断是否为OID类型(类型标识为8)
-                    if (alternativeName != null && alternativeName.size() >= 2 && "8".equals(String.valueOf(alternativeName.get(0)))) {
+                    if (alternativeName != null && alternativeName.size() >= 2
+                            && "8".equals(String.valueOf(alternativeName.get(0)))) {
                         oid = String.valueOf(alternativeName.get(1));
                         break;
                     }
@@ -835,7 +1024,6 @@ public class X509Helper {
         }
         return oid;
     }
-
 
     /**
      * 从证书数据中提取OID标识符
@@ -853,7 +1041,6 @@ public class X509Helper {
             return null;
         }
     }
-
 
     /**
      * 从X509证书中提取公钥
@@ -936,7 +1123,7 @@ public class X509Helper {
      * 从PublicKey中提取subjectPublicKey的十六进制表示
      *
      * @param publicKey 公钥对象
-     * @return subjectPublicKey的十六进制字符串，如果提取失败则返回null
+     * @return subjectPublicKey的十六进制字符串（EC公钥为未压缩格式：0x04 + X + Y），如果提取失败则返回null
      */
     public static String extractSubjectPublicKeyHex(PublicKey publicKey) {
         if (publicKey == null) {
@@ -947,13 +1134,10 @@ public class X509Helper {
             String publicKeyValue;
 
             if (publicKey instanceof ECPublicKey) {
-                // ECDSA公钥处理，返回未压缩格式 (0x04 + X + Y)
                 publicKeyValue = extractECDSAPublicKeyHex((ECPublicKey) publicKey);
             } else if (publicKey instanceof RSAPublicKey) {
-                // RSA公钥处理，返回完整DER编码
                 publicKeyValue = extractRSAPublicKeyHex((RSAPublicKey) publicKey);
             } else {
-                // 其他类型的公钥，使用完整编码
                 byte[] publicKeyBytes = publicKey.getEncoded();
                 publicKeyValue = Hex.bytesToHex(publicKeyBytes);
             }
@@ -965,6 +1149,53 @@ public class X509Helper {
         }
     }
 
+    /**
+     * 从十六进制格式的公钥字符串中提取subjectPublicKey的十六进制表示
+     *
+     * @param hexPublicKey 十六进制格式的公钥字符串
+     * @return subjectPublicKey的十六进制字符串（EC公钥为未压缩格式：0x04 + X + Y），如果提取失败则返回null
+     */
+    public static String extractSubjectPublicKeyHexFromHex(String hexPublicKey) {
+        try {
+            PublicKey publicKey = parsePublicKeyFromHex(hexPublicKey);
+            return extractSubjectPublicKeyHex(publicKey);
+        } catch (Exception e) {
+            log.info("Failed to extract subject public key hex from HEX: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 从Base64格式的公钥字符串中提取subjectPublicKey的十六进制表示
+     *
+     * @param base64PublicKey Base64格式的公钥字符串
+     * @return subjectPublicKey的十六进制字符串（EC公钥为未压缩格式：0x04 + X + Y），如果提取失败则返回null
+     */
+    public static String extractSubjectPublicKeyHexFromBase64(String base64PublicKey) {
+        try {
+            PublicKey publicKey = parsePublicKeyFromBase64(base64PublicKey);
+            return extractSubjectPublicKeyHex(publicKey);
+        } catch (Exception e) {
+            log.info("Failed to extract subject public key hex from Base64: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 从PEM格式的公钥字符串中提取subjectPublicKey的十六进制表示
+     *
+     * @param pemPublicKey PEM格式的公钥字符串
+     * @return subjectPublicKey的十六进制字符串（EC公钥为未压缩格式：0x04 + X + Y），如果提取失败则返回null
+     */
+    public static String extractSubjectPublicKeyHexFromPem(String pemPublicKey) {
+        try {
+            PublicKey publicKey = parsePublicKeyFromPem(pemPublicKey);
+            return extractSubjectPublicKeyHex(publicKey);
+        } catch (Exception e) {
+            log.info("Failed to extract subject public key hex from PEM: " + e.getMessage());
+            return null;
+        }
+    }
 
     /**
      * 从X509证书中提取公钥值并转换为十六进制字符串
@@ -986,7 +1217,6 @@ public class X509Helper {
             return null;
         }
     }
-
 
     /**
      * 仅提取SKID
@@ -1029,7 +1259,6 @@ public class X509Helper {
         }
         return null;
     }
-
 
     /**
      * 打印证书详细信息，包括主题、颁发者、序列号、有效期、版本、公钥算法、公钥值、SKID、CIPKID、AKID、OID和主题备用名称
@@ -1263,6 +1492,38 @@ public class X509Helper {
     }
 
     /**
+     * 将X509Certificate对象转换为Base64格式字符串
+     *
+     * @param certificate X.509证书对象
+     * @return Base64格式的证书字符串
+     * @throws CertificateException 当证书编码失败时抛出此异常
+     */
+    public static String toBase64Format(X509Certificate certificate) throws CertificateException {
+        if (certificate == null) {
+            throw new CertificateException("Certificate cannot be null");
+        }
+
+        try {
+            byte[] certBytes = certificate.getEncoded();
+            return Base64.getEncoder().encodeToString(certBytes);
+        } catch (Exception e) {
+            throw new CertificateException("Failed to convert certificate to Base64 format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 将证书字符串转换为Base64格式
+     *
+     * @param certData 证书数据字符串，可以是十六进制、base64编码或PEM格式
+     * @return Base64格式的证书字符串
+     * @throws CertificateException 当证书解析或转换失败时抛出此异常
+     */
+    public static String convertToBase64(String certData) throws CertificateException {
+        X509Certificate certificate = parseCert(certData);
+        return toBase64Format(certificate);
+    }
+
+    /**
      * 将PublicKey对象转换为PEM格式字符串
      *
      * @param publicKey 公钥对象
@@ -1319,6 +1580,49 @@ public class X509Helper {
     }
 
     /**
+     * 将PublicKey对象转换为Base64格式字符串
+     *
+     * @param publicKey 公钥对象
+     * @return Base64格式的公钥字符串
+     * @throws CertificateException 当公钥编码失败时抛出此异常
+     */
+    public static String publicKeyToBase64(PublicKey publicKey) throws CertificateException {
+        if (publicKey == null) {
+            throw new CertificateException("PublicKey cannot be null");
+        }
+
+        try {
+            byte[] keyBytes = publicKey.getEncoded();
+            return Base64.getEncoder().encodeToString(keyBytes);
+        } catch (Exception e) {
+            throw new CertificateException("Failed to convert public key to Base64 format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 从Base64格式的公钥字符串生成PublicKey对象
+     *
+     * @param base64PublicKey Base64格式的公钥字符串
+     * @return 解析得到的PublicKey对象
+     * @throws CertificateException 当公钥解析失败时抛出此异常
+     */
+    public static PublicKey parsePublicKeyFromBase64(String base64PublicKey) throws CertificateException {
+        if (base64PublicKey == null || base64PublicKey.trim().isEmpty()) {
+            throw new CertificateException("Base64 public key cannot be null or empty");
+        }
+
+        try {
+            byte[] keyBytes = Hex.base64ToBytes(base64PublicKey);
+            if (keyBytes == null || keyBytes.length == 0) {
+                throw new CertificateException("Invalid Base64 public key data");
+            }
+            return parsePublicKeyFromBytes(keyBytes);
+        } catch (Exception e) {
+            throw new CertificateException("Failed to parse public key from Base64 format: " + e.getMessage(), e);
+        }
+    }
+
+    /**
      * 根据公钥类型获取对应的PEM头部
      *
      * @param publicKey 公钥对象
@@ -1340,7 +1644,7 @@ public class X509Helper {
     }
 
     /**
-     * 根据公钥类型获取对应的PEM尾部
+     * 将点分十进制格式的OID字符串转换为十六进制字符串
      *
      * @param publicKey 公钥对象
      * @return 对应的PEM尾部字符串
@@ -1358,6 +1662,84 @@ public class X509Helper {
             default:
                 return "-----END PUBLIC KEY-----";
         }
+    }
+
+    /**
+     * 将PublicKey转换为ECPublicKey
+     *
+     * @param publicKey 公钥对象
+     * @return ECPublicKey对象，如果转换失败则返回null
+     */
+    public static ECPublicKey toECPublicKey(PublicKey publicKey) {
+        if (publicKey == null) {
+            return null;
+        }
+
+        if (publicKey instanceof ECPublicKey) {
+            return (ECPublicKey) publicKey;
+        }
+
+        try {
+            java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance("EC");
+            java.security.spec.X509EncodedKeySpec keySpec = new java.security.spec.X509EncodedKeySpec(
+                    publicKey.getEncoded());
+            return (ECPublicKey) keyFactory.generatePublic(keySpec);
+        } catch (Exception e) {
+            log.info("Failed to convert PublicKey to ECPublicKey: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 将ECPublicKey转换为PublicKey
+     *
+     * @param ecPublicKey EC公钥对象
+     * @return PublicKey对象，如果转换失败则返回null
+     */
+    public static PublicKey toPublicKey(ECPublicKey ecPublicKey) {
+        if (ecPublicKey == null) {
+            return null;
+        }
+        return ecPublicKey;
+    }
+
+    /**
+     * 将PublicKey转换为RSAPublicKey
+     *
+     * @param publicKey 公钥对象
+     * @return RSAPublicKey对象，如果转换失败则返回null
+     */
+    public static RSAPublicKey toRSAPublicKey(PublicKey publicKey) {
+        if (publicKey == null) {
+            return null;
+        }
+
+        if (publicKey instanceof RSAPublicKey) {
+            return (RSAPublicKey) publicKey;
+        }
+
+        try {
+            java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance("RSA");
+            java.security.spec.X509EncodedKeySpec keySpec = new java.security.spec.X509EncodedKeySpec(
+                    publicKey.getEncoded());
+            return (RSAPublicKey) keyFactory.generatePublic(keySpec);
+        } catch (Exception e) {
+            log.info("Failed to convert PublicKey to RSAPublicKey: " + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 将RSAPublicKey转换为PublicKey
+     *
+     * @param rsaPublicKey RSA公钥对象
+     * @return PublicKey对象，如果转换失败则返回null
+     */
+    public static PublicKey toPublicKey(RSAPublicKey rsaPublicKey) {
+        if (rsaPublicKey == null) {
+            return null;
+        }
+        return rsaPublicKey;
     }
 
     /**
@@ -1379,7 +1761,6 @@ public class X509Helper {
         }
     }
 
-
     /**
      * 从PEM格式的公钥字符串生成PublicKey对象
      *
@@ -1397,11 +1778,13 @@ public class X509Helper {
             String cleanedPem = pemPublicKey.trim();
 
             // 定义可能的PEM头部模式
-            String[] pemHeaders = {"-----BEGIN RSA PUBLIC KEY-----", "-----BEGIN EC PUBLIC KEY-----", "-----BEGIN DSA" +
-                    " PUBLIC KEY-----", "-----BEGIN PUBLIC KEY-----"};
+            String[] pemHeaders = { "-----BEGIN RSA PUBLIC KEY-----", "-----BEGIN EC PUBLIC KEY-----",
+                    "-----BEGIN DSA" +
+                            " PUBLIC KEY-----",
+                    "-----BEGIN PUBLIC KEY-----" };
 
-            String[] pemFooters = {"-----END RSA PUBLIC KEY-----", "-----END EC PUBLIC KEY-----", "-----END DSA " +
-                    "PUBLIC KEY-----", "-----END PUBLIC KEY-----"};
+            String[] pemFooters = { "-----END RSA PUBLIC KEY-----", "-----END EC PUBLIC KEY-----", "-----END DSA " +
+                    "PUBLIC KEY-----", "-----END PUBLIC KEY-----" };
 
             // 移除所有可能的PEM头部和尾部
             for (String header : pemHeaders) {
