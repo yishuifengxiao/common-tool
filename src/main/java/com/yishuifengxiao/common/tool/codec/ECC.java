@@ -583,6 +583,37 @@ public class ECC {
     }
 
     /**
+     * 根据椭圆曲线OID标识符、subjectPublicKey的十六进制字符串、待验证的十六进制数据字符串和
+     * 十六进制格式的签名字符串来验证十六进制数据的签名有效性
+     * <p>
+     * 该方法支持两种签名格式：
+     * </p>
+     * <ul>
+     * <li>64字节R||S格式（128个十六进制字符）</li>
+     * <li>DER编码格式</li>
+     * </ul>
+     *
+     * @param curveOID            椭圆曲线OID标识符（如1.2.840.10045.3.1.7表示secp256r1，或直接使用"secp256r1"）
+     * @param subjectPublicKeyHex subjectPublicKey的十六进制字符串（未压缩格式：0x04 + X + Y，共130个字符）
+     * @param hexData             待验证的十六进制数据字符串（不包含0x前缀）
+     * @param signatureHex        十六进制格式的签名字符串（支持64字节R||S格式或DER编码格式）
+     * @return 签名验证结果，有效返回true，无效返回false
+     * @throws Exception 当公钥解析、数据解码或签名验证过程中发生错误时抛出异常
+     */
+    public static boolean verifySignatureByHex(String curveOID, String subjectPublicKeyHex, String hexData,
+            String signatureHex) throws Exception {
+        // 从十六进制字符串解析公钥
+        ECPublicKey publicKey = parsePublicKeyFromHex(curveOID, subjectPublicKeyHex);
+
+        // 将十六进制数据转换为字节数组
+        byte[] dataBytes = Hex.hexToBytes(hexData);
+        byte[] signatureBytes = Hex.hexToBytes(signatureHex);
+
+        // 调用verifySignature方法进行验证（内部会自动处理签名格式）
+        return verifySignature(publicKey, dataBytes, signatureBytes);
+    }
+
+    /**
      * 将固定长度签名字节数组转换为DER编码格式
      *
      * @param fixedSignatureBytes 固定长度签名字节数组（64字节：R和S各32字节）
