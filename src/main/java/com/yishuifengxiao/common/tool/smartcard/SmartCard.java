@@ -572,7 +572,7 @@ public class SmartCard {
             responseData.append(transmitResult.getData());
 
             if (!transmitResult.isSuccess()) {
-                log.warn("81E2命令{}第{}个分包执行失败，SW1=0x{}", hexCommand, i + 1,
+                log.warn("81E2命令{}第{}个分包{}执行命令{}失败，SW1=0x{}", hexCommand, i + 1, chunk, command,
                         Integer.toHexString(transmitResult.getSw1()).toUpperCase());
                 break;
             }
@@ -784,7 +784,7 @@ public class SmartCard {
          *
          * @return 格式化后的状态字十六进制字符串（4位大写）
          */
-        private String swHex() {
+        public String swHex() {
             return String.format("%02X%02X", this.sw1, this.sw2);
         }
     }
