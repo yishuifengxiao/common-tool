@@ -389,7 +389,7 @@ public class ECC {
      * @throws Exception 当验证过程中发生错误时抛出异常
      */
     public static void verifyKeyComponents(KeyPair keyPair, String expectedPublicKeyHex,
-            String expectedPrivateKeyDHex) throws Exception {
+                                           String expectedPrivateKeyDHex) throws Exception {
         ECPublicKey ecPublicKey = (ECPublicKey) keyPair.getPublic();
         ECPrivateKey ecPrivateKey = (ECPrivateKey) keyPair.getPrivate();
 
@@ -601,7 +601,7 @@ public class ECC {
      * @throws Exception 当公钥解析、数据解码或签名验证过程中发生错误时抛出异常
      */
     public static boolean verifySignatureByHex(String curveOID, String subjectPublicKeyHex, String hexData,
-            String signatureHex) throws Exception {
+                                               String signatureHex) throws Exception {
         // 从十六进制字符串解析公钥
         ECPublicKey publicKey = parsePublicKeyFromHex(curveOID, subjectPublicKeyHex);
 
@@ -1088,7 +1088,7 @@ public class ECC {
     private static String extractBase64FromPEM(String pemData) {
         // 移除所有PEM头部和尾部
         String cleanData = pemData.replace(PEM_HEADER_EC, "").replace(PEM_FOOTER_EC, "").replace(PEM_HEADER_PKCS8,
-                "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "")
+                        "").replace(PEM_FOOTER_PKCS8, "").replace(PEM_HEADER_PKCS8_ENC, "").replace(PEM_FOOTER_PKCS8_ENC, "")
                 .replace(PEM_HEADER_PUBLIC, "").replace(PEM_FOOTER_PUBLIC, "").replaceAll("\\s", "");
 
         return cleanData;
@@ -1266,22 +1266,26 @@ public class ECC {
         return keyAgreement.generateSecret();
     }
 
+
     /**
      * 执行密钥协商操作，根据提供的椭圆曲线参数和密钥信息生成共享密钥
      *
      * @param curveOID       椭圆曲线的OID标识符，用于指定使用的椭圆曲线类型
-     * @param publicKeyHex   对方公钥的十六进制字符串表示
      * @param privateKeyDHex 本地私钥的十六进制字符串表示
+     * @param publicKeyHex   对方公钥的十六进制字符串表示
      * @return 协商生成的共享密钥字节数组
      * @throws Exception 当密钥协商过程中发生错误时抛出异常
      */
     public static byte[] performKeyAgreement(String curveOID, String privateKeyDHex, String publicKeyHex)
             throws Exception {
-        // 根据椭圆曲线参数和密钥组件创建密钥对
-        KeyPair keyPair = createKeyPairFromComponents(curveOID, publicKeyHex, privateKeyDHex);
-        // 执行密钥协商操作并返回结果
-        return performKeyAgreement(keyPair.getPrivate(), keyPair.getPublic());
+        ECParameterSpec ecParameterSpec = getECParameterSpecFromOID(curveOID);
+
+        PrivateKey privateKey = parsePrivateKeyFromHex(ecParameterSpec, privateKeyDHex);
+        PublicKey publicKey = parsePublicKeyFromHex(ecParameterSpec, publicKeyHex);
+
+        return performKeyAgreement(privateKey, publicKey);
     }
+
 
     /**
      * 从字节数组重建私钥
@@ -1359,6 +1363,7 @@ public class ECC {
         }
     }
 
+
     /**
      * 执行ECC密钥协商算法，生成共享密钥
      *
@@ -1371,14 +1376,21 @@ public class ECC {
      * @throws Exception 当密钥协商或哈希计算过程中发生错误时抛出
      */
     public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex,
-            String sShareInfo, int iKeyLen) throws Exception {
+                                         String sShareInfo, int iKeyLen) throws Exception {
 
         // 执行ECC密钥协商，获取原始共享密钥数据
         byte[] bytes = performKeyAgreement(curveOID, privateKeyDHex, publicKeyHex);
+        if (bytes == null || bytes.length == 0) {
+            throw new Exception("Key agreement failed: empty shared secret");
+        }
+
         String hex = Hex.bytesToHex(bytes);
 
         // 对原始密钥数据进行左填充，确保长度为32字节
         String result = Hex.padHexLeft(hex, 32);
+        if (result == null) {
+            throw new Exception("Failed to pad shared secret hex string");
+        }
 
         // 计算需要进行哈希运算的次数
         int klen_bit = iKeyLen * 8;
@@ -1387,11 +1399,24 @@ public class ECC {
         // 通过迭代哈希运算派生最终的密钥
         StringBuilder hashSb = new StringBuilder();
         for (int i = 1; i <= hlen; i++) {
-            String counter = Hex.padHexLeft(Integer.toHexString(i), 4);
-            hashSb.append(SHA256.calculateSHA256FromHex(result + counter + sShareInfo));
+            // 将计数器转换为十六进制，并确保长度为偶数（左侧补0）
+            String counterHex = Integer.toHexString(i);
+            if (counterHex.length() % 2 != 0) {
+                counterHex = "0" + counterHex;
+            }
+            String counter = Hex.padHexLeft(counterHex, 2);
+            if (counter == null) {
+                throw new Exception("Failed to pad counter hex string: " + counterHex);
+            }
+            String input = result + counter + sShareInfo;
+            if (input == null || input.isEmpty()) {
+                throw new Exception("Invalid input for SHA256 calculation");
+            }
+            hashSb.append(SHA256.calculateSHA256FromHex(input));
         }
         return hashSb.substring(0, iKeyLen * 2).toUpperCase();
     }
+
 
     /**
      * 将ECPublicKey对象转换为PEM格式字符串
@@ -1826,7 +1851,7 @@ public class ECC {
         // 移除PEM头部和尾部（如果存在）
         cleanData = cleanData.replace("-----BEGIN EC PRIVATE KEY-----", "").replace("-----END EC PRIVATE KEY-----",
                 "").replace("-----BEGIN PRIVATE KEY-----", "").replace("-----END PRIVATE KEY-----", "").replaceAll(
-                        "\\s", "");
+                "\\s", "");
 
         // 尝试Base64解码
         byte[] keyBytes;
