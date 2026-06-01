@@ -87,7 +87,6 @@ public class SmartCard {
             TerminalFactory factory = TerminalFactory.getDefault();
             return factory.terminals().list().stream().map(CardTerminal::getName).toList();
         } catch (Exception e) {
-            log.warn("获取所有可访问的读卡器失败", e);
         }
         return Collections.emptyList();
     }
@@ -105,7 +104,6 @@ public class SmartCard {
             }
             return this.getCardTerminals().list(state).stream().map(CardTerminal::getName).toList();
         } catch (Exception e) {
-            log.warn("获取所有可访问的读卡器失败", e);
         }
         return Collections.emptyList();
     }
