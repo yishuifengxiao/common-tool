@@ -53,9 +53,26 @@ public class EccKeyAgreementTest {
             System.out.println("Expected: " + expectedKey);
         }
     }
-    //20:16:19.331 [main] INFO com.yishuifengxiao.tool.personalkit.gsma.spg22.BppProducer -- [BppProducer]
-    // ECC 密钥协商：OID=1.2.840.10045.3.1.7,
-    // euiccOtpkHex=04697843B5C54E5B8DA68F5E8EA46CCA8D578FB8D23A02AAF6EAA6679C61D75A5B314B35254E463C15F30A2495AC2604338E5B2CF573A689FCE557A4584E4FFD32,
-    // privateKeyDHex=00E8DA689492DF2968BF34C59C6D97E0DB6A1F82F82B2740D17EC4269AB5679C88,
-    // shareInfo=881005112233445589086029202200002122000046506478, keyLen=48
+
+    @Test
+    public void test2() throws Exception {
+        String euiccOtpkHex = "0456676C12819B80B0FB04B1D035B35BA52CB853F187BF3F2AEAE9A31D99F69DF6744E219477379F27A42CCF6354DE5B44FD5328F92B969C66C6201C46DF273837";
+        String privateKeyDHex = "667C0D2BA9DC56CF40850088BD1873B53D66254330ED929D2166482BB4679AC9";
+        String shareInfo = "881005112233445589086029202200002122000046506478";
+
+        // 尝试两种方式：十六进制解析和普通字符串
+        String sessionKeyHex = EccKeyAgreement.eccKeyAgreement("1.2.840.10045.3.1.7", euiccOtpkHex, privateKeyDHex, shareInfo, 48);
+        System.out.println("Hex mode: " + sessionKeyHex);
+
+        String expectedKey = "2517518C39EB1DA7CDFEE00CC6D54BDD5A9A3F5DA8FDA70C771C565676F7B8F1110FBE5F6447D3829B5C5B9FBEAABEA3";
+
+        boolean flagHex = sessionKeyHex.equalsIgnoreCase(expectedKey);
+        System.out.println("Hex mode: " + flagHex);
+        if (flagHex) {
+            System.out.println("Test passed!");
+        } else {
+            System.out.println("Test failed!");
+            System.out.println("Expected: " + expectedKey);
+        }
+    }
 }
