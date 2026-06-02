@@ -5,10 +5,10 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * TLVUtil 单元测试类
+ * TLV 单元测试类
  * 测试TLV数据提取功能，包括短格式和长格式长度字段
  */
-public class TLVUtilTest {
+public class TLVTest {
 
     // ==================== extract 方法测试 ====================
 
@@ -19,7 +19,7 @@ public class TLVUtilTest {
     @Test
     public void testExtract_ShortFormat_Success() {
         String tlv = "9F02060000000005009F0306000000000000";
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", tlv);
+        TLV.TlvResult result = TLV.extract("9F02", tlv);
 
         assertTrue(result.isSuccess());
         assertEquals("000000000500", result.getVal("9F02"));
@@ -29,7 +29,7 @@ public class TLVUtilTest {
     @Test
     public void testExtract_ShortFormat_Success1() {
         String tlv = "A000";
-        TLVUtil.TlvResult result = TLVUtil.extract("A0", tlv);
+        TLV.TlvResult result = TLV.extract("A0", tlv);
 
         assertTrue(result.isSuccess());
         assertEquals("", result.getVal("A0"));
@@ -42,7 +42,7 @@ public class TLVUtilTest {
     @Test
     public void testExtract_ZeroLengthValue_Success() {
         String tlv = "9F02009F0306000000000000";
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", tlv);
+        TLV.TlvResult result = TLV.extract("9F02", tlv);
 
         assertTrue(result.isSuccess());
         assertEquals("", result.getVal("9F02"));
@@ -56,7 +56,7 @@ public class TLVUtilTest {
     public void testExtract_LongFormat_Success() {
         String value = "000102030405060708090A0B0C0D0E0F";
         String tlv = "9F028110" + value + "9F0306000000000000";
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", tlv);
+        TLV.TlvResult result = TLV.extract("9F02", tlv);
 
         assertTrue(result.isSuccess());
         assertEquals(value, result.getVal("9F02"));
@@ -69,7 +69,7 @@ public class TLVUtilTest {
     @Test
     public void testExtract_NullTag_Failure() {
         String tlv = "9F0206000000000500";
-        TLVUtil.TlvResult result = TLVUtil.extract(null, tlv);
+        TLV.TlvResult result = TLV.extract(null, tlv);
 
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -81,7 +81,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testExtract_NullTLV_Failure() {
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", null);
+        TLV.TlvResult result = TLV.extract("9F02", null);
 
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -94,7 +94,7 @@ public class TLVUtilTest {
     @Test
     public void testExtract_TagNotAtStart_Failure() {
         String tlv = "9F03060000000000009F0206000000000500";
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", tlv);
+        TLV.TlvResult result = TLV.extract("9F02", tlv);
 
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -107,7 +107,7 @@ public class TLVUtilTest {
     @Test
     public void testExtract_InsufficientValueData_Failure() {
         String tlv = "9F020600000000";
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", tlv);
+        TLV.TlvResult result = TLV.extract("9F02", tlv);
 
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -120,7 +120,7 @@ public class TLVUtilTest {
     @Test
     public void testExtract_IndefiniteLength_Failure() {
         String tlv = "9F0280";
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", tlv);
+        TLV.TlvResult result = TLV.extract("9F02", tlv);
 
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -133,7 +133,7 @@ public class TLVUtilTest {
     @Test
     public void testExtract_LengthBytesExceedMaximum_Failure() {
         String tlv = "9F028400000010";
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", tlv);
+        TLV.TlvResult result = TLV.extract("9F02", tlv);
 
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -148,7 +148,7 @@ public class TLVUtilTest {
     @Test
     public void testExtractVal_Success() {
         String tlv = "9F0206000000000500";
-        String value = TLVUtil.extractVal("9F02", tlv);
+        String value = TLV.extractVal("9F02", tlv);
 
         assertEquals("000000000500", value);
     }
@@ -159,7 +159,7 @@ public class TLVUtilTest {
     @Test
     public void testExtractVal_Failure_ReturnsEmptyString() {
         String tlv = "9F0306000000000000";
-        String value = TLVUtil.extractVal("9F02", tlv);
+        String value = TLV.extractVal("9F02", tlv);
 
         assertEquals("", value);
     }
@@ -172,7 +172,7 @@ public class TLVUtilTest {
     @Test
     public void testExtractValsOnSameLevel_Success() {
         String tlv = "9F02060000000005009F03060000000000009F1A020156";
-        TLVUtil.TlvResult result = TLVUtil.extractValsOnSameLevel(tlv, "9F02", "9F03", "9F1A");
+        TLV.TlvResult result = TLV.extractValsOnSameLevel(tlv, "9F02", "9F03", "9F1A");
 
         assertTrue(result.isSuccess());
         assertEquals("000000000500", result.getVal("9F02"));
@@ -186,7 +186,7 @@ public class TLVUtilTest {
     @Test
     public void testExtractValsOnSameLevel_NoTags_Failure() {
         String tlv = "9F0206000000000500";
-        TLVUtil.TlvResult result = TLVUtil.extractValsOnSameLevel(tlv);
+        TLV.TlvResult result = TLV.extractValsOnSameLevel(tlv);
 
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -200,7 +200,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testTlvResult_GetResultsReturnsCopy() {
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", "9F0206000000000500");
+        TLV.TlvResult result = TLV.extract("9F02", "9F0206000000000500");
 
         java.util.Map<String, String> results1 = result.getResults();
         java.util.Map<String, String> results2 = result.getResults();
@@ -216,7 +216,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testTlvResult_GetValWithNullOrEmptyTag() {
-        TLVUtil.TlvResult result = TLVUtil.extract("9F02", "9F0206000000000500");
+        TLV.TlvResult result = TLV.extract("9F02", "9F0206000000000500");
 
         assertEquals("", result.getVal(null));
         assertEquals("", result.getVal(""));
@@ -228,10 +228,10 @@ public class TLVUtilTest {
      */
     @Test
     public void testTlvResult_IsSuccess() {
-        TLVUtil.TlvResult successResult = TLVUtil.extract("9F02", "9F0206000000000500");
+        TLV.TlvResult successResult = TLV.extract("9F02", "9F0206000000000500");
         assertTrue(successResult.isSuccess());
 
-        TLVUtil.TlvResult failureResult = TLVUtil.extract(null, "9F0206000000000500");
+        TLV.TlvResult failureResult = TLV.extract(null, "9F0206000000000500");
         assertFalse(failureResult.isSuccess());
     }
 
@@ -248,11 +248,11 @@ public class TLVUtilTest {
                         "9F1A020156" +
                         "5F2A020156";
 
-        TLVUtil.TlvResult result1 = TLVUtil.extract("9F02", emvTLV);
+        TLV.TlvResult result1 = TLV.extract("9F02", emvTLV);
         assertTrue(result1.isSuccess());
         assertEquals("000000000500", result1.getVal("9F02"));
 
-        TLVUtil.TlvResult result2 = TLVUtil.extract("9F03", result1.getRemain());
+        TLV.TlvResult result2 = TLV.extract("9F03", result1.getRemain());
         assertTrue(result2.isSuccess());
         assertEquals("000000000000", result2.getVal("9F03"));
     }
@@ -264,13 +264,13 @@ public class TLVUtilTest {
     public void testExtract_ConsecutiveTLVs_Success() {
         String tlv = "9F02060000000005009F03060000000000009F1A020156";
 
-        TLVUtil.TlvResult result1 = TLVUtil.extract("9F02", tlv);
+        TLV.TlvResult result1 = TLV.extract("9F02", tlv);
         assertTrue(result1.isSuccess());
 
-        TLVUtil.TlvResult result2 = TLVUtil.extract("9F03", result1.getRemain());
+        TLV.TlvResult result2 = TLV.extract("9F03", result1.getRemain());
         assertTrue(result2.isSuccess());
 
-        TLVUtil.TlvResult result3 = TLVUtil.extract("9F1A", result2.getRemain());
+        TLV.TlvResult result3 = TLV.extract("9F1A", result2.getRemain());
         assertTrue(result3.isSuccess());
 
         assertEquals("0156", result3.getVal("9F1A"));
@@ -289,7 +289,7 @@ public class TLVUtilTest {
         String outerValue = String.format("%02X", innerTLV.length() / 2) + innerTLV;
         String tlv = "9F02" + outerValue;
 
-        TLVUtil.TlvResult result = TLVUtil.extractValsRecursive(tlv, "9F02", "9F03");
+        TLV.TlvResult result = TLV.extractValsRecursive(tlv, "9F02", "9F03");
 
         assertTrue(result.isSuccess());
         assertNotNull(result.getVal("9F02"));
@@ -302,7 +302,7 @@ public class TLVUtilTest {
     @Test
     public void testExtractValsRecursive_MissingTag_Failure() {
         String tlv = "9F0206000000000500";
-        TLVUtil.TlvResult result = TLVUtil.extractValsRecursive(tlv, "9F02", "9F99");
+        TLV.TlvResult result = TLV.extractValsRecursive(tlv, "9F02", "9F99");
 
         assertFalse(result.isSuccess());
         assertNotNull(result.getException());
@@ -313,7 +313,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testExtractValsRecursive_NullTags_Failure() {
-        TLVUtil.TlvResult result = TLVUtil.extractValsRecursive("9F0206000000000500", (String[]) null);
+        TLV.TlvResult result = TLV.extractValsRecursive("9F0206000000000500", (String[]) null);
 
         assertFalse(result.isSuccess());
         assertEquals("no tags provided", result.getException().getMessage());
@@ -324,7 +324,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testExtractValsRecursive_InvalidTLV_Failure() {
-        TLVUtil.TlvResult result = TLVUtil.extractValsRecursive("XYZ", "9F02");
+        TLV.TlvResult result = TLV.extractValsRecursive("XYZ", "9F02");
 
         assertFalse(result.isSuccess());
         assertEquals("illegal data", result.getException().getMessage());
@@ -338,7 +338,7 @@ public class TLVUtilTest {
     @Test
     public void testExtractValsLoop_MultipleSameTags_Success() {
         String tlv = "9F02060000000005009F02060000000006009F0206000000000700";
-        java.util.List<String> values = TLVUtil.extractValsLoop("9F02", tlv);
+        java.util.List<String> values = TLV.extractValsLoop("9F02", tlv);
 
         assertEquals(3, values.size());
         assertEquals("000000000500", values.get(0));
@@ -352,7 +352,7 @@ public class TLVUtilTest {
     @Test
     public void testExtractValsLoop_SingleTag_Success() {
         String tlv = "9F0206000000000500";
-        java.util.List<String> values = TLVUtil.extractValsLoop("9F02", tlv);
+        java.util.List<String> values = TLV.extractValsLoop("9F02", tlv);
 
         assertEquals(1, values.size());
         assertEquals("000000000500", values.get(0));
@@ -364,7 +364,7 @@ public class TLVUtilTest {
     @Test
     public void testExtractValsLoop_NoMatch_ReturnsEmptyList() {
         String tlv = "9F0306000000000000";
-        java.util.List<String> values = TLVUtil.extractValsLoop("9F02", tlv);
+        java.util.List<String> values = TLV.extractValsLoop("9F02", tlv);
 
         assertEquals(0, values.size());
     }
@@ -374,7 +374,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testExtractValsLoop_NullTag_ReturnsEmptyList() {
-        java.util.List<String> values = TLVUtil.extractValsLoop(null, "9F0206000000000500");
+        java.util.List<String> values = TLV.extractValsLoop(null, "9F0206000000000500");
         assertEquals(0, values.size());
     }
 
@@ -383,7 +383,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testExtractValsLoop_NullTLV_ReturnsEmptyList() {
-        java.util.List<String> values = TLVUtil.extractValsLoop("9F02", null);
+        java.util.List<String> values = TLV.extractValsLoop("9F02", null);
         assertEquals(0, values.size());
     }
 
@@ -394,7 +394,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testToTLV_ShortFormat_Success() {
-        String result = TLVUtil.toTLV("9F02", "000000000500");
+        String result = TLV.toTLV("9F02", "000000000500");
         assertEquals("9F0206000000000500", result);
     }
 
@@ -408,7 +408,7 @@ public class TLVUtilTest {
         for (int i = 0; i < 128; i++) {
             value.append("00");
         }
-        String result = TLVUtil.toTLV("9F02", value.toString());
+        String result = TLV.toTLV("9F02", value.toString());
         assertTrue(result.startsWith("9F028180"));
     }
 
@@ -422,7 +422,7 @@ public class TLVUtilTest {
         for (int i = 0; i < 256; i++) {
             value.append("00");
         }
-        String result = TLVUtil.toTLV("9F02", value.toString());
+        String result = TLV.toTLV("9F02", value.toString());
         assertTrue(result.startsWith("9F02820100"));
     }
 
@@ -431,7 +431,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testToTLV_NullValue_ReturnsTagOnly() {
-        String result = TLVUtil.toTLV("9F02", null);
+        String result = TLV.toTLV("9F02", null);
         assertEquals("9F02", result);
     }
 
@@ -440,7 +440,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testToTLV_EmptyValue_ReturnsTagOnly() {
-        String result = TLVUtil.toTLV("9F02", "");
+        String result = TLV.toTLV("9F02", "");
         assertEquals("9F02", result);
     }
 
@@ -449,13 +449,13 @@ public class TLVUtilTest {
      */
     @Test
     public void testToTLV_NullOrBlankTag_Success() {
-        String result1 = TLVUtil.toTLV(null, "000000000500");
+        String result1 = TLV.toTLV(null, "000000000500");
         assertEquals("06000000000500", result1);
 
-        String result2 = TLVUtil.toTLV("", "000000000500");
+        String result2 = TLV.toTLV("", "000000000500");
         assertEquals("06000000000500", result2);
 
-        String result3 = TLVUtil.toTLV("   ", "000000000500");
+        String result3 = TLV.toTLV("   ", "000000000500");
         assertEquals("06000000000500", result3);
     }
 
@@ -464,7 +464,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testToTLV_InvalidHexValue_ReturnsTagOnly() {
-        String result = TLVUtil.toTLV("9F02", "XYZ");
+        String result = TLV.toTLV("9F02", "XYZ");
         assertEquals("9F02", result);
     }
 
@@ -475,7 +475,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testCalculateLengthHex_ShortFormat_Success() {
-        String result = TLVUtil.calculateLengthHex("000000000500");
+        String result = TLV.calculateLengthHex("000000000500");
         assertEquals("06", result);
     }
 
@@ -488,7 +488,7 @@ public class TLVUtilTest {
         for (int i = 0; i < 128; i++) {
             hex.append("00");
         }
-        String result = TLVUtil.calculateLengthHex(hex.toString());
+        String result = TLV.calculateLengthHex(hex.toString());
         assertEquals("8180", result);
     }
 
@@ -501,7 +501,7 @@ public class TLVUtilTest {
         for (int i = 0; i < 256; i++) {
             hex.append("00");
         }
-        String result = TLVUtil.calculateLengthHex(hex.toString());
+        String result = TLV.calculateLengthHex(hex.toString());
         assertEquals("820100", result);
     }
 
@@ -514,7 +514,7 @@ public class TLVUtilTest {
         for (int i = 0; i < 65536; i++) {
             hex.append("00");
         }
-        String result = TLVUtil.calculateLengthHex(hex.toString());
+        String result = TLV.calculateLengthHex(hex.toString());
         assertEquals("83010000", result);
     }
 
@@ -523,8 +523,8 @@ public class TLVUtilTest {
      */
     @Test
     public void testCalculateLengthHex_EmptyInput_ReturnsZero() {
-        assertEquals("00", TLVUtil.calculateLengthHex(""));
-        assertEquals("00", TLVUtil.calculateLengthHex(null));
+        assertEquals("00", TLV.calculateLengthHex(""));
+        assertEquals("00", TLV.calculateLengthHex(null));
     }
 
     /**
@@ -532,7 +532,7 @@ public class TLVUtilTest {
      */
     @Test
     public void testCalculateLengthHex_WithSpaces_Success() {
-        String result = TLVUtil.calculateLengthHex("00 00 00 00 05 00");
+        String result = TLV.calculateLengthHex("00 00 00 00 05 00");
         assertEquals("06", result);
     }
 
@@ -545,6 +545,6 @@ public class TLVUtilTest {
         for (int i = 0; i < 16777216; i++) {
             hex.append("00");
         }
-        TLVUtil.calculateLengthHex(hex.toString());
+        TLV.calculateLengthHex(hex.toString());
     }
 }

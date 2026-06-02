@@ -1,13 +1,13 @@
 package com.yishuifengxiao.common.tool.text;
 
-import com.yishuifengxiao.common.tool.lang.TLVUtil;
+import com.yishuifengxiao.common.tool.lang.TLV;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
- * TLVUtil.toTLV 方法的单元测试类
+ * TLV.toTLV 方法的单元测试类
  */
-public class TLVUtilTest {
+public class TLVUnitUtilTest {
 
     /**
      * TC01: 正常路径，长度 ≤ 127
@@ -17,7 +17,7 @@ public class TLVUtilTest {
         String tag = "9F01";
         String input = "AABBCC"; // 长度 = 3
         String expected = "9F0103AABBCC";
-        assertEquals(expected, TLVUtil.toTLV(tag, input));
+        assertEquals(expected, TLV.toTLV(tag, input));
     }
 
     /**
@@ -28,7 +28,7 @@ public class TLVUtilTest {
         String tag = "";
         String input = "AABBCCDD"; // 长度 = 4
         String expected = "04AABBCCDD";
-        assertEquals(expected, TLVUtil.toTLV(tag, input));
+        assertEquals(expected, TLV.toTLV(tag, input));
     }
 
     /**
@@ -39,7 +39,7 @@ public class TLVUtilTest {
         String tag = "9F02";
         String input = "A0B0C0D0E0F0"; // 长度 = 6
         String expected = "9F0206A0B0C0D0E0F0";
-        assertEquals(expected, TLVUtil.toTLV(tag, input));
+        assertEquals(expected, TLV.toTLV(tag, input));
     }
 
     /**
@@ -50,7 +50,7 @@ public class TLVUtilTest {
         String tag = "9F03";
         String input = "AA".repeat(128); // 长度 = 128
         String expected = "9F038180" + input;
-        assertEquals(expected, TLVUtil.toTLV(tag, input));
+        assertEquals(expected, TLV.toTLV(tag, input));
     }
 
     /**
@@ -61,7 +61,7 @@ public class TLVUtilTest {
         String tag = "9F04";
         String input = "AA".repeat(256); // 长度 = 256
         String expected = "9F04820100" + input;
-        assertEquals(expected, TLVUtil.toTLV(tag, input));
+        assertEquals(expected, TLV.toTLV(tag, input));
     }
 
     /**
@@ -72,7 +72,7 @@ public class TLVUtilTest {
         String tag = "9F05";
         String input = "AA".repeat(65536); // 长度 = 65536
         String expected = "9F0583010000" + input;
-        assertEquals(expected, TLVUtil.toTLV(tag, input));
+        assertEquals(expected, TLV.toTLV(tag, input));
     }
 
     /**
@@ -83,7 +83,7 @@ public class TLVUtilTest {
         String tag = null;
         String input = "AABB"; // 长度 = 2
         String expected = "02AABB";
-        assertEquals(expected, TLVUtil.toTLV(tag, input));
+        assertEquals(expected, TLV.toTLV(tag, input));
     }
 
     /**
@@ -94,6 +94,6 @@ public class TLVUtilTest {
         String tag = "9F06";
         String input = "";
         String expected = "9F0600";
-        assertEquals(expected, TLVUtil.toTLV(tag, input));
+        assertEquals(expected, TLV.toTLV(tag, input));
     }
 }

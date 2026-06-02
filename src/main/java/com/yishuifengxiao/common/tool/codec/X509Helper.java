@@ -3,7 +3,7 @@ package com.yishuifengxiao.common.tool.codec;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.Hex;
 import com.yishuifengxiao.common.tool.lang.OID;
-import com.yishuifengxiao.common.tool.lang.TLVUtil;
+import com.yishuifengxiao.common.tool.lang.TLV;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -695,7 +695,7 @@ public class X509Helper {
      */
     private static void extractCipkid(X509Certificate certificate, Cert info) {
         // 从TLV格式的SKID中提取标签为"04"的值作为CIPKID
-        info.setCipkid(TLVUtil.extractVal("04", info.getSkid()));
+        info.setCipkid(TLV.extractVal("04", info.getSkid()));
     }
 
     /**
@@ -716,7 +716,7 @@ public class X509Helper {
                 if (skidValue != null) {
                     String skid = Hex.bytesToHex(skidValue);
                     // 从TLV格式数据中提取值
-                    return TLVUtil.extractVal("04", skid);
+                    return TLV.extractVal("04", skid);
                 }
             }
         } catch (Exception e) {

@@ -2,7 +2,7 @@ package com.yishuifengxiao.common.tool.smartcard;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.Hex;
-import com.yishuifengxiao.common.tool.lang.TLVUtil;
+import com.yishuifengxiao.common.tool.lang.TLV;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -685,7 +685,7 @@ public class SmartCard {
      */
     public synchronized String getEid() {
         ApduResult transmit = this.transmitWithNewLogicalChannel(COMMAND_EID);
-        return TLVUtil.extractValsRecursive(transmit.getData(), "BF3E", "5A").getVal("5A");
+        return TLV.extractValsRecursive(transmit.getData(), "BF3E", "5A").getVal("5A");
     }
 
     /**
