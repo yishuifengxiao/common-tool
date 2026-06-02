@@ -111,7 +111,7 @@ public class KeyPairHelper {
     /**
      * 使用安全随机数生成ECC密钥对
      *
-     * @param curveOID      曲线OID
+     * @param curveOID     曲线OID
      * @param secureRandom 安全随机数生成器
      * @return 生成的ECC密钥对
      * @throws RuntimeException 密钥对生成失败时抛出
@@ -253,13 +253,13 @@ public class KeyPairHelper {
         PublicKey publicKey = keyPair.getPublic();
 
         if (publicKey instanceof RSAPublicKey) {
-            return getRSAPublicKeyHex((RSAPublicKey) publicKey);
+            return getRSAPublicKeyHex((RSAPublicKey) publicKey).toUpperCase();
         } else if (publicKey instanceof DSAPublicKey) {
-            return getDSAPublicKeyHex((DSAPublicKey) publicKey);
+            return getDSAPublicKeyHex((DSAPublicKey) publicKey).toUpperCase();
         } else if (publicKey instanceof ECPublicKey) {
-            return getECPublicKeyHex((ECPublicKey) publicKey);
+            return getECPublicKeyHex((ECPublicKey) publicKey).toUpperCase();
         } else {
-            return bytesToHex(publicKey.getEncoded());
+            return bytesToHex(publicKey.getEncoded()).toUpperCase();
         }
     }
 
@@ -274,11 +274,11 @@ public class KeyPairHelper {
         PrivateKey privateKey = keyPair.getPrivate();
 
         if (privateKey instanceof RSAPrivateKey) {
-            return getRSAPrivateKeyDHex((RSAPrivateKey) privateKey);
+            return getRSAPrivateKeyDHex((RSAPrivateKey) privateKey).toUpperCase();
         } else if (privateKey instanceof DSAPrivateKey) {
-            return getDSAPrivateKeyDHex((DSAPrivateKey) privateKey);
+            return getDSAPrivateKeyDHex((DSAPrivateKey) privateKey).toUpperCase();
         } else if (privateKey instanceof ECPrivateKey) {
-            return getECPrivateKeyDHex((ECPrivateKey) privateKey);
+            return getECPrivateKeyDHex((ECPrivateKey) privateKey).toUpperCase();
         } else {
             throw new UnsupportedOperationException("不支持的私钥类型: " + privateKey.getAlgorithm());
         }
@@ -292,7 +292,7 @@ public class KeyPairHelper {
      */
     private static String getRSAPublicKeyHex(RSAPublicKey rsaPublicKey) {
         BigInteger modulus = rsaPublicKey.getModulus();
-        return bigIntegerToHex(modulus);
+        return bigIntegerToHex(modulus).toUpperCase();
     }
 
     /**
@@ -303,7 +303,7 @@ public class KeyPairHelper {
      */
     private static String getRSAPrivateKeyDHex(RSAPrivateKey rsaPrivateKey) {
         BigInteger privateExponent = rsaPrivateKey.getPrivateExponent();
-        return bigIntegerToHex(privateExponent);
+        return bigIntegerToHex(privateExponent).toUpperCase();
     }
 
     /**
@@ -314,7 +314,7 @@ public class KeyPairHelper {
      */
     private static String getDSAPublicKeyHex(DSAPublicKey dsaPublicKey) {
         BigInteger y = dsaPublicKey.getY();
-        return bigIntegerToHex(y);
+        return bigIntegerToHex(y).toUpperCase();
     }
 
     /**
@@ -325,7 +325,7 @@ public class KeyPairHelper {
      */
     private static String getDSAPrivateKeyDHex(DSAPrivateKey dsaPrivateKey) {
         BigInteger x = dsaPrivateKey.getX();
-        return bigIntegerToHex(x);
+        return bigIntegerToHex(x).toUpperCase();
     }
 
     /**
@@ -342,7 +342,7 @@ public class KeyPairHelper {
         String xHex = bigIntegerToFixedLengthHex(x, 32);
         String yHex = bigIntegerToFixedLengthHex(y, 32);
 
-        return "04" + xHex + yHex;
+        return ("04" + xHex + yHex).toUpperCase();
     }
 
     /**
@@ -371,18 +371,18 @@ public class KeyPairHelper {
             bytes = result;
         }
 
-        return bytesToHex(bytes);
+        return bytesToHex(bytes).toUpperCase();
     }
 
     /**
      * 获取EC私钥D值的十六进制表示
      *
      * @param ecPrivateKey EC私钥对象
-     * @return 私钥S的十六进制字符串
+     * @return 私钥D的十六进制字符串（固定64字符，对应256位/32字节）
      */
-    private static String getECPrivateKeyDHex(ECPrivateKey ecPrivateKey) {
+    public static String getECPrivateKeyDHex(ECPrivateKey ecPrivateKey) {
         BigInteger s = ecPrivateKey.getS();
-        return bigIntegerToHex(s);
+        return bigIntegerToFixedLengthHex(s, 32).toUpperCase();
     }
 
     /**
@@ -391,9 +391,9 @@ public class KeyPairHelper {
      * @param bigInt 要转换的BigInteger
      * @return 十六进制字符串
      */
-    private static String bigIntegerToHex(BigInteger bigInt) {
+    public static String bigIntegerToHex(BigInteger bigInt) {
         byte[] bytes = bigInt.toByteArray();
-        return bytesToHex(bytes);
+        return bytesToHex(bytes).toUpperCase();
     }
 
     /**
@@ -411,7 +411,7 @@ public class KeyPairHelper {
             }
             hexString.append(hex);
         }
-        return hexString.toString();
+        return hexString.toString().toUpperCase();
     }
 
     /**

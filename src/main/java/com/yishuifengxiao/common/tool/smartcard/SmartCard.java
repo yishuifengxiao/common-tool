@@ -2,7 +2,7 @@ package com.yishuifengxiao.common.tool.smartcard;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.Hex;
-import com.yishuifengxiao.common.tool.lang.TLVUtil;
+import com.yishuifengxiao.common.tool.lang.TLV;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -87,7 +87,6 @@ public class SmartCard {
             TerminalFactory factory = TerminalFactory.getDefault();
             return factory.terminals().list().stream().map(CardTerminal::getName).toList();
         } catch (Exception e) {
-            log.warn("获取所有可访问的读卡器失败", e);
         }
         return Collections.emptyList();
     }
@@ -105,7 +104,6 @@ public class SmartCard {
             }
             return this.getCardTerminals().list(state).stream().map(CardTerminal::getName).toList();
         } catch (Exception e) {
-            log.warn("获取所有可访问的读卡器失败", e);
         }
         return Collections.emptyList();
     }
@@ -572,7 +570,7 @@ public class SmartCard {
             responseData.append(transmitResult.getData());
 
             if (!transmitResult.isSuccess()) {
-                log.warn("81E2命令{}第{}个分包执行失败，SW1=0x{}", hexCommand, i + 1,
+                log.warn("81E2命令{}第{}个分包{}执行命令{}失败，SW1=0x{}", hexCommand, i + 1, chunk, command,
                         Integer.toHexString(transmitResult.getSw1()).toUpperCase());
                 break;
             }
@@ -687,7 +685,7 @@ public class SmartCard {
      */
     public synchronized String getEid() {
         ApduResult transmit = this.transmitWithNewLogicalChannel(COMMAND_EID);
-        return TLVUtil.extractValsRecursive(transmit.getData(), "BF3E", "5A").getVal("5A");
+        return TLV.extractValsRecursive(transmit.getData(), "BF3E", "5A").getVal("5A");
     }
 
     /**
@@ -784,7 +782,7 @@ public class SmartCard {
          *
          * @return 格式化后的状态字十六进制字符串（4位大写）
          */
-        private String swHex() {
+        public String swHex() {
             return String.format("%02X%02X", this.sw1, this.sw2);
         }
     }
