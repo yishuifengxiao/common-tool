@@ -1,18 +1,15 @@
 package com.yishuifengxiao.common.tool.lang;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.BitSet;
 import java.util.Optional;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>十六进制工具类</p>
@@ -325,90 +322,6 @@ public class Hex {
         // 追加原始字符串
         sb.append(str);
         return sb.toString().toUpperCase();
-    }
-
-
-    /**
-     * 从十六进制字符串创建BitSet
-     *
-     * @param hexString 十六进制字符串
-     * @return 创建的BitSet
-     */
-    public static BitSet hexToBitSet(String hexString) {
-        if (!isHex(hexString)) {
-            log.warn("Invalid hex string: {}", hexString);
-            return null;
-        }
-
-        int len = hexString.length();
-        byte[] bytes = new byte[len / 2];
-
-        for (int i = 0; i < len; i += 2) {
-            bytes[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i + 1), 16));
-        }
-
-        return bytesToBitSet(bytes);
-    }
-
-    /**
-     * 将BitSet转换为十六进制字符串
-     *
-     * @param bitSet 要转换的BitSet
-     * @return 十六进制字符串表示
-     */
-    public static String bitSetToHex(BitSet bitSet) {
-        if (bitSet == null) {
-            return "";
-        }
-
-        // 如果BitSet为空，返回空字符串
-        if (bitSet.length() == 0) {
-            return "";
-        }
-
-        // 先将BitSet转换为byte数组
-        byte[] bytes = bitSetToBytes(bitSet);
-
-        // 再将byte数组转换为十六进制字符串
-        return bytesToHex(bytes);
-    }
-
-    /**
-     * 将BitSet转换为byte数组
-     *
-     * @param bitSet 要转换的BitSet
-     * @return 转换后的byte数组
-     */
-    public static byte[] bitSetToBytes(BitSet bitSet) {
-        if (bitSet == null) {
-            return new byte[0];
-        }
-        return bitSet.toByteArray();
-    }
-
-
-    /**
-     * 将byte数组转换为BitSet
-     *
-     * @param bytes 要转换的byte数组
-     * @return 转换后的BitSet
-     */
-    public static BitSet bytesToBitSet(byte[] bytes) {
-        if (bytes == null) {
-            return new BitSet();
-        }
-        return BitSet.valueOf(bytes);
-    }
-
-
-    /**
-     * 比较两个BitSet的内容是否相同
-     */
-    public static boolean contentEquals(BitSet bitSet1, BitSet bitSet2) {
-        if (bitSet1 == bitSet2) return true;
-        if (bitSet1 == null || bitSet2 == null) return false;
-
-        return bitSet1.equals(bitSet2);
     }
 
 
