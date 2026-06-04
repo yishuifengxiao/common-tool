@@ -75,4 +75,26 @@ public class EccKeyAgreementTest {
             System.out.println("Expected: " + expectedKey);
         }
     }
+
+    @Test
+    public void test3() throws Exception {
+        String euiccOtpkHex = "0478414C63C53046732D21A63020B6F64499C58BC15E089A399394EA4747A62C072D7BB890164361BE22797DA1A33BDDD621E79C2F33C380B61CBDFE82CC249C38";
+        String privateKeyDHex = "E88E6F18F3F8544BC679498BC95A1196DF372C17AABDA4019E4150166A32B61F";
+        String shareInfo = "88100511223344551089086029202200002122000046506478";
+
+        // 尝试两种方式：十六进制解析和普通字符串
+        String sessionKeyHex = EccKeyAgreement.eccKeyAgreement("1.2.840.10045.3.1.7", euiccOtpkHex, privateKeyDHex, shareInfo, 48);
+        System.out.println("Hex mode: " + sessionKeyHex);
+
+        String expectedKey = "D277377DBD72CB37C2809CA85A2404DD5B8C72B26A247E86149B57664D244E15FD8284645E47901D1DC491EA0382B8A6";
+
+        boolean flagHex = sessionKeyHex.equalsIgnoreCase(expectedKey);
+        System.out.println("Hex mode: " + flagHex);
+        if (flagHex) {
+            System.out.println("Test passed!");
+        } else {
+            System.out.println("Test failed!");
+            System.out.println("Expected: " + expectedKey);
+        }
+    }
 }

@@ -21,6 +21,24 @@ package com.yishuifengxiao.common.tool.text;
 public class TextUtil {
 
     /**
+     * 移除字符串中的所有空白字符和不可见字符
+     * <p>
+     * 该方法使用Unicode正则表达式匹配并删除以下字符：
+     * <ul>
+     * <li>\p{Z} - 所有Unicode空白字符（包括空格、不间断空格、制表符、换行符、回车符等）</li>
+     * <li>\p{C} - 所有不可见控制字符（如\u0000-\u001F、\u007F、\u0080-\u009F、零宽字符等）</li>
+     * </ul>
+     * </p>
+     *
+     * @param str 待处理的字符串
+     * @return 移除空白和不可见字符后的字符串；如果输入为null则返回null
+     */
+    public static String removeWhitespaceAndInvisible(String str) {
+        if (str == null) return null;
+        return str.replaceAll("[\\p{C}\\p{Z}]", "").trim();
+    }
+
+    /**
      * 高性能版本的SQL注释移除方法（使用StringBuilder）
      * 适合处理大文本，性能最优
      * 该方法会移除以"--"开头的行注释以及行内的"--"注释
@@ -104,30 +122,30 @@ public class TextUtil {
     private static int findCommentPosition(String lineStr) {
         boolean inSingleQuote = false;
         boolean inDoubleQuote = false;
-        
+
         for (int i = 0; i < lineStr.length() - 1; i++) {
             char c = lineStr.charAt(i);
             char next = lineStr.charAt(i + 1);
-            
+
             // 处理转义字符
             if (c == '\\' && i + 1 < lineStr.length()) {
                 i++; // 跳过下一个字符
                 continue;
             }
-            
+
             // 切换引号状态
             if (c == '\'' && !inDoubleQuote) {
                 inSingleQuote = !inSingleQuote;
             } else if (c == '"' && !inSingleQuote) {
                 inDoubleQuote = !inDoubleQuote;
             }
-            
+
             // 如果当前不在引号内，且遇到注释符号，则返回位置
             if (!inSingleQuote && !inDoubleQuote && c == '-' && next == '-') {
                 return i;
             }
         }
-        
+
         return -1;
     }
 
