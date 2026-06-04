@@ -1,18 +1,16 @@
 package com.yishuifengxiao.common.tool.lang;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.text.TextUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.BitSet;
 import java.util.Optional;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-
-import com.yishuifengxiao.common.tool.exception.UncheckedException;
-
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>十六进制工具类</p>
@@ -329,90 +327,6 @@ public class Hex {
 
 
     /**
-     * 从十六进制字符串创建BitSet
-     *
-     * @param hexString 十六进制字符串
-     * @return 创建的BitSet
-     */
-    public static BitSet hexToBitSet(String hexString) {
-        if (!isHex(hexString)) {
-            log.warn("Invalid hex string: {}", hexString);
-            return null;
-        }
-
-        int len = hexString.length();
-        byte[] bytes = new byte[len / 2];
-
-        for (int i = 0; i < len; i += 2) {
-            bytes[i / 2] = (byte) ((Character.digit(hexString.charAt(i), 16) << 4) + Character.digit(hexString.charAt(i + 1), 16));
-        }
-
-        return bytesToBitSet(bytes);
-    }
-
-    /**
-     * 将BitSet转换为十六进制字符串
-     *
-     * @param bitSet 要转换的BitSet
-     * @return 十六进制字符串表示
-     */
-    public static String bitSetToHex(BitSet bitSet) {
-        if (bitSet == null) {
-            return "";
-        }
-
-        // 如果BitSet为空，返回空字符串
-        if (bitSet.length() == 0) {
-            return "";
-        }
-
-        // 先将BitSet转换为byte数组
-        byte[] bytes = bitSetToBytes(bitSet);
-
-        // 再将byte数组转换为十六进制字符串
-        return bytesToHex(bytes);
-    }
-
-    /**
-     * 将BitSet转换为byte数组
-     *
-     * @param bitSet 要转换的BitSet
-     * @return 转换后的byte数组
-     */
-    public static byte[] bitSetToBytes(BitSet bitSet) {
-        if (bitSet == null) {
-            return new byte[0];
-        }
-        return bitSet.toByteArray();
-    }
-
-
-    /**
-     * 将byte数组转换为BitSet
-     *
-     * @param bytes 要转换的byte数组
-     * @return 转换后的BitSet
-     */
-    public static BitSet bytesToBitSet(byte[] bytes) {
-        if (bytes == null) {
-            return new BitSet();
-        }
-        return BitSet.valueOf(bytes);
-    }
-
-
-    /**
-     * 比较两个BitSet的内容是否相同
-     */
-    public static boolean contentEquals(BitSet bitSet1, BitSet bitSet2) {
-        if (bitSet1 == bitSet2) return true;
-        if (bitSet1 == null || bitSet2 == null) return false;
-
-        return bitSet1.equals(bitSet2);
-    }
-
-
-    /**
      * 对两个字节数组进行异或运算
      *
      * @param b1 第一个字节数组
@@ -667,4 +581,109 @@ public class Hex {
         return NumberUtil.parseHex(s);
     }
 
+    /**
+     * 对字符串进行右侧填充处理,使用字符'F'补齐至指定最小长度
+     *
+     * <p>处理逻辑:
+     * <ul>
+     *   <li>若目标长度小于等于0,直接返回原字符串或空字符串</li>
+     *   <li>若字符串为null或空,生成由'F'字符组成的指定长度字符串</li>
+     *   <li>若字符串长度小于目标长度,保留原内容并在右侧补'F'至目标长度</li>
+     *   <li>若字符串长度大于或等于目标长度,直接返回原字符串不做修改</li>
+     * </ul>
+     *
+     * <p>典型应用场景:
+     * 用于SIM卡Profile中固定长度字段的填充,如PIN码、PUK码、ADM密钥等需要统一长度的场合
+     *
+     * <p>示例:
+     * <ul>
+     *   <li>输入 null, 4 → 输出 "FFFF"</li>
+     *   <li>输入 "", 4 → 输出 "FFFF"</li>
+     *   <li>输入 "123", 6 → 输出 "123FFF"</li>
+     *   <li>输入 "12345", 3 → 输出 "12345"(超长不截断)</li>
+     * </ul>
+     *
+     * @param inputString  待处理的原始字符串,允许为null或空
+     * @param targetLength 目标最小长度,字符串将被补齐至该长度
+     * @return 填充后的字符串, 长度至少为targetLength(若原字符串超长则可能更长)
+     */
+    public static String padRightWithF(String inputString, int targetLength) {
+        // 校验目标长度参数的合法性
+        if (targetLength <= 0) {
+            return inputString == null ? "" : inputString;
+        }
+
+        // 清理输入字符串中的空白和不可见字符
+        String cleanedInput = inputString == null ? "" : TextUtil.removeWhitespaceAndInvisible(inputString);
+
+        // 若清理后的字符串长度已满足要求,直接返回
+        if (cleanedInput.length() >= targetLength) {
+            return cleanedInput;
+        }
+
+        // 构建填充结果:先添加原始内容,再在右侧补充'F'字符
+        StringBuilder paddedResult = new StringBuilder(targetLength);
+        paddedResult.append(cleanedInput);
+
+        int remainingPaddingLength = targetLength - cleanedInput.length();
+        for (int i = 0; i < remainingPaddingLength; i++) {
+            paddedResult.append('F');
+        }
+
+        return paddedResult.toString().toUpperCase();
+    }
+
+    /**
+     * 将字符串调整为固定长度：超出则截取，不足则用字符'F'右侧填充
+     *
+     * <p>处理逻辑：
+     * <ul>
+     *   <li>若目标长度小于等于0，返回空字符串</li>
+     *   <li>若输入字符串为null，转换为空字符串并清理空白和不可见字符</li>
+     *   <li>若字符串长度超过targetLength，截取前targetLength个字符</li>
+     *   <li>若字符串长度不足targetLength，在右侧追加'F'字符直至达到targetLength</li>
+     *   <li>若字符串长度恰好等于targetLength，直接返回原字符串</li>
+     * </ul>
+     *
+     * <p>典型应用场景：
+     * 用于SIM卡Profile中需要严格固定长度的字段，如SPN（服务提供者名称）、标识符等
+     * 确保数据既不超过最大长度限制，也不因过短而导致格式错误
+     *
+     * <p>示例：
+     * <ul>
+     *   <li>输入 null, 8 → 输出 "FFFFFFFF"</li>
+     *   <li>输入 "123", 8 → 输出 "123FFFFF"</li>
+     *   <li>输入 "12345678", 8 → 输出 "12345678"</li>
+     *   <li>输入 "123456789ABC", 8 → 输出 "12345678"(截断)</li>
+     * </ul>
+     *
+     * @param inputString  待处理的原始字符串，允许为null
+     * @param targetLength 目标固定长度，字符串将被严格调整为该长度
+     * @return 调整后的字符串，长度严格等于targetLength
+     */
+    public static String fixLengthWithF(String inputString, int targetLength) {
+        // 校验目标长度参数的合法性
+        if (targetLength <= 0) {
+            return "";
+        }
+
+        // 清理输入字符串中的空白和不可见字符
+        String cleanedInput = inputString == null ? "" : TextUtil.removeWhitespaceAndInvisible(inputString);
+
+        // 若清理后的字符串长度已达到或超过目标长度，进行截断处理
+        if (cleanedInput.length() >= targetLength) {
+            return cleanedInput.substring(0, targetLength);
+        }
+
+        // 构建固定长度结果：先添加原始内容，再在右侧补充'F'字符至目标长度
+        StringBuilder fixedLengthResult = new StringBuilder(targetLength);
+        fixedLengthResult.append(cleanedInput);
+
+        int remainingPaddingLength = targetLength - cleanedInput.length();
+        for (int i = 0; i < remainingPaddingLength; i++) {
+            fixedLengthResult.append('F');
+        }
+
+        return fixedLengthResult.toString().toUpperCase();
+    }
 }
