@@ -3,6 +3,8 @@
  */
 package com.yishuifengxiao.common.tool.text;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * <p>文本工具类</p>
  * <p>提供字符串处理、格式转换等文本操作功能。</p>
@@ -257,5 +259,114 @@ public class TextUtil {
         }
 
         return result.toString();
+    }
+
+    /**
+     * 在字符串前端填充指定字符至规定长度，如果已有字符串超过这个长度则返回原字符串
+     *
+     * <p>处理逻辑：
+     * <ul>
+     *   <li>将参数委托给padString方法，设置前置填充标志为true</li>
+     *   <li>从左侧（前端）开始填充指定字符，直到达到目标长度</li>
+     * </ul>
+     *
+     * <p>典型应用场景：
+     * <ul>
+     *   <li>数字字符串补零：将"123"补零为"00123"</li>
+     *   <li>十六进制数据对齐：确保数据块具有统一的起始位置</li>
+     *   <li>固定宽度字段格式化：如数据库字段、报表列对齐等</li>
+     * </ul>
+     *
+     * <p>示例：
+     * <ul>
+     *   <li>输入 "123", '0', 5 → 输出 "00123"(左侧补零)</li>
+     *   <li>输入 "ABC", ' ', 6 → 输出 "   ABC"(左侧补空格)</li>
+     *   <li>输入 "ABCDEFGH", '0', 5 → 输出 "ABCDEFGH"(超长不处理)</li>
+     *   <li>输入 "", '*', 3 → 输出 "***"(空字符串全部填充)</li>
+     * </ul>
+     *
+     * @param originalString 被填充的原始字符串，不能为null
+     * @param paddingChar    用于填充的字符，可以是任意有效字符（如'0'、' '、'*'等）
+     * @param targetLength   填充后的目标总长度，必须为非负整数
+     * @return 前端填充后的字符串，若原字符串长度已超过目标长度则返回原字符串
+     * @since 3.1.2
+     */
+    public static String padLeft(String originalString, char paddingChar, int targetLength) {
+        return padString(originalString, paddingChar, targetLength, true);
+    }
+
+    /**
+     * 在字符串后端填充指定字符至规定长度，如果已有字符串超过这个长度则返回原字符串
+     *
+     * <p>处理逻辑：
+     * <ul>
+     *   <li>将参数委托给padString方法，设置前置填充标志为false</li>
+     *   <li>从右侧（后端）开始填充指定字符，直到达到目标长度</li>
+     * </ul>
+     *
+     * <p>典型应用场景：
+     * <ul>
+     *   <li>文本右对齐填充：在文本后添加空格或特殊字符</li>
+     *   <li>数据块补齐：确保数据段达到固定长度要求</li>
+     *   <li>协议报文构造：填充报文尾部以满足格式规范</li>
+     * </ul>
+     *
+     * <p>示例：
+     * <ul>
+     *   <li>输入 "123", '0', 5 → 输出 "12300"(右侧补零)</li>
+     *   <li>输入 "ABC", ' ', 6 → 输出 "ABC   "(右侧补空格)</li>
+     *   <li>输入 "ABCDEFGH", '0', 5 → 输出 "ABCDEFGH"(超长不处理)</li>
+     *   <li>输入 "", '*', 3 → 输出 "***"(空字符串全部填充)</li>
+     * </ul>
+     *
+     * @param originalString 被填充的原始字符串，不能为null
+     * @param paddingChar    用于填充的字符，可以是任意有效字符（如'0'、' '、'*'等）
+     * @param targetLength   填充后的目标总长度，必须为非负整数
+     * @return 后端填充后的字符串，若原字符串长度已超过目标长度则返回原字符串
+     * @since 3.1.2
+     */
+    public static String padRight(String originalString, char paddingChar, int targetLength) {
+        return padString(originalString, paddingChar, targetLength, false);
+    }
+
+
+    /**
+     * 将已有字符串填充为规定长度，如果已有字符串超过这个长度则返回这个字符串
+     *
+     * <p>处理逻辑：
+     * <ul>
+     *   <li>首先获取原始字符串的长度</li>
+     *   <li>若原始字符串长度已超过目标长度，直接返回原字符串不进行填充</li>
+     *   <li>计算需要填充的字符数量(目标长度减去原始长度)</li>
+     *   <li>使用指定字符生成填充字符串</li>
+     *   <li>根据paddingPosition参数决定填充位置：true则填充在前，false则填充在后</li>
+     * </ul>
+     *
+     * <p>典型应用场景：
+     * 用于固定长度字段的格式化，如十六进制字符串补齐、数据对齐等场景
+     *
+     * <p>示例：
+     * <ul>
+     *   <li>输入 "ABC", '0', 5, true → 输出 "00ABC"(前填充)</li>
+     *   <li>输入 "ABC", '0', 5, false → 输出 "ABC00"(后填充)</li>
+     *   <li>输入 "ABCDEFG", '0', 5, true → 输出 "ABCDEFG"(超长不填充)</li>
+     *   <li>输入 "", 'F', 4, false → 输出 "FFFF"(空字符串填充)</li>
+     *   </ul>
+     *
+     * @param originalString  被填充的原始字符串，不能为null
+     * @param paddingChar     填充使用的字符，可以是任意有效字符
+     * @param targetLength    填充后的目标长度，必须为非负数
+     * @param shouldPadBefore 是否在前端填充，true表示前填充，false表示后填充
+     * @return 填充后的字符串，若原字符串长度超过目标长度则返回原字符串
+     * @since 3.1.2
+     */
+    public static String padString(String originalString, char paddingChar, int targetLength, boolean shouldPadBefore) {
+        final int originalLength = originalString.length();
+        if (originalLength > targetLength) {
+            return originalString;
+        }
+
+        String paddingContent = StringUtils.repeat(paddingChar, targetLength - originalLength);
+        return shouldPadBefore ? paddingContent.concat(originalString) : originalString.concat(paddingContent);
     }
 }
