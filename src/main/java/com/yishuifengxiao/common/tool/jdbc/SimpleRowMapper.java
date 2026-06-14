@@ -169,12 +169,8 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null) {
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            ZonedDateTime dbTime = localDateTime.atZone(databaseZoneId);
-            ZonedDateTime appTime = dbTime.withZoneSameInstant(ZoneId.systemDefault());
-            return Date.from(appTime.toInstant());
-        }
+        // 直接使用timestamp转换为Date,不做额外的时区转换
+        // JDBC驱动已经根据serverTimezone正确处理了时区
         return new Date(timestamp.getTime());
     }
 
@@ -183,12 +179,8 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
-            LocalDateTime dbLocalDateTime = timestamp.toLocalDateTime();
-            ZonedDateTime dbTime = dbLocalDateTime.atZone(databaseZoneId);
-            ZonedDateTime appTime = dbTime.withZoneSameInstant(ZoneId.systemDefault());
-            return appTime.toLocalDateTime();
-        }
+        // 直接使用timestamp的LocalDateTime,不做时区转换
+        // 因为MySQL的datetime类型本身不带时区信息,应该原样读取
         return timestamp.toLocalDateTime();
     }
 
@@ -213,11 +205,8 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            ZonedDateTime dbTime = localDateTime.atZone(databaseZoneId);
-            return dbTime.toInstant();
-        }
+        // 直接使用timestamp的Instant,不做时区转换
+        // 因为JDBC驱动已经根据serverTimezone正确处理了时区
         return timestamp.toInstant();
     }
 
@@ -226,11 +215,8 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            ZonedDateTime dbTime = localDateTime.atZone(databaseZoneId);
-            return dbTime.withZoneSameInstant(ZoneId.systemDefault());
-        }
+        // 将timestamp转换为系统默认时区的ZonedDateTime
+        // JDBC驱动已经根据serverTimezone正确处理了时区
         return timestamp.toInstant().atZone(ZoneId.systemDefault());
     }
 
