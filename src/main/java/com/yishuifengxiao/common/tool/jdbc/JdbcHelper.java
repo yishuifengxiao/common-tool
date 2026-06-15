@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
+import javax.sql.DataSource;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -70,6 +71,18 @@ public class JdbcHelper {
      */
     public JdbcHelper(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        initialize();
+    }
+
+    /**
+     * 构造方法，用于初始化JdbcHelper实例
+     *
+     * @param dataSource 数据源，用于创建JdbcTemplate实例
+     */
+    public JdbcHelper(DataSource dataSource) {
+        // 使用传入的数据源创建JdbcTemplate实例
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        // 调用initialize方法进行初始化
         initialize();
     }
 
