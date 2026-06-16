@@ -1,13 +1,5 @@
 package com.yishuifengxiao.common.tool.jdbc;
 
-import com.yishuifengxiao.common.tool.bean.ClassUtil;
-import com.yishuifengxiao.common.tool.text.TextUtil;
-import jakarta.persistence.Column;
-import jakarta.persistence.Transient;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.jdbc.core.RowMapper;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
@@ -17,13 +9,28 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.RowMapper;
+
+import com.yishuifengxiao.common.tool.bean.ClassUtil;
+import com.yishuifengxiao.common.tool.text.TextUtil;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Transient;
+import lombok.extern.slf4j.Slf4j;
 /**
  * 数据库结果集映射器，用于将ResultSet转换为Java对象
  * 支持基本类型、日期时间类型的自动转换和时区处理
@@ -179,8 +186,12 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        // 直接使用timestamp的LocalDateTime,不做时区转换
-        // 因为MySQL的datetime类型本身不带时区信息,应该原样读取
+        if (databaseZoneId != null) {
+            return timestamp.toLocalDateTime()
+                    .atZone(databaseZoneId)
+                    .withZoneSameInstant(ZoneId.systemDefault())
+                    .toLocalDateTime();
+        }
         return timestamp.toLocalDateTime();
     }
 

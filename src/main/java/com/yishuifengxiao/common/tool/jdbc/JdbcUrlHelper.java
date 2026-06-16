@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.sql.DataSource;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -13,6 +14,8 @@ import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -432,4 +435,45 @@ public class JdbcUrlHelper {
         }
     }
 
+    /**
+     * 从 DataSource 中获取 JDBC URL（通用、无反射）
+     *
+     * @param ds 数据源
+     * @return JDBC URL
+     * @throws SQLException 获取连接或元数据失败
+     */
+    public static String getJdbcUrl(DataSource ds) throws SQLException {
+        try (Connection conn = ds.getConnection()) {
+            // DatabaseMetaData.getURL() 是 JDBC 标准方法，所有驱动都实现
+            return conn.getMetaData().getURL();
+        }
+    }
+
+    /**
+     * 克隆JDBC URL并应用一些默认配置
+     *
+     * @param jdbcUrl 原始的JDBC URL字符串
+     * @return 返回应用了新配置的JDBC URL字符串
+     */
+    public static String cloneJdbcUrl(String jdbcUrl) {
+        // 解析原始JDBC URL获取连接信息对象
+        ConnInfo info = parseJdbcUrl(jdbcUrl);
+        info.useUtf8mb4().enableBatch().useBeijingTimeZone();
+        return info.buildJdbcUrl();
+    }
+
+    /**
+     * 克隆JDBC URL方法，基于现有数据源创建一个新的JDBC URL
+     * 该方法会解析原始JDBC URL，并应用特定的配置选项
+     *
+     * @param ds 数据源对象，用于获取原始JDBC URL
+     * @return String 返回配置后的新JDBC URL字符串
+     * @throws SQLException 如果获取JDBC URL或解析过程中发生错误
+     */
+    public static String cloneJdbcUrl(DataSource ds) throws SQLException {
+        // 解析原始JDBC URL获取连接信息对象
+        ConnInfo info = parseJdbcUrl(getJdbcUrl(ds));
+        info.useUtf8mb4().enableBatch().useBeijingTimeZone();
+        return info.buildJdbcUrl();
+    }
 }
