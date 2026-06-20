@@ -17,7 +17,10 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
+import javax.sql.DataSource;
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Function;
@@ -68,6 +71,18 @@ public class JdbcHelper {
      */
     public JdbcHelper(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+        initialize();
+    }
+
+    /**
+     * 构造方法，用于初始化JdbcHelper实例
+     *
+     * @param dataSource 数据源，用于创建JdbcTemplate实例
+     */
+    public JdbcHelper(DataSource dataSource) {
+        // 使用传入的数据源创建JdbcTemplate实例
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        // 调用initialize方法进行初始化
         initialize();
     }
 
@@ -138,6 +153,26 @@ public class JdbcHelper {
     }
 
     /**
+     * 转换时间类型的值以正确处理时区
+     * <p>
+     * 处理规则：
+     * 1. LocalDateTime: 转换为系统默认时区的Timestamp,避免JDBC驱动错误解释
+     * 2. 其他类型: 保持原值不变
+     * </p>
+     *
+     * @param value 原始字段值
+     * @return 转换后的值
+     */
+    private Object convertTimeValue(Object value) {
+        if (value instanceof LocalDateTime) {
+            // 将LocalDateTime视为系统默认时区的时间,转换为Timestamp
+            LocalDateTime localDateTime = (LocalDateTime) value;
+            return Timestamp.valueOf(localDateTime);
+        }
+        return value;
+    }
+
+    /**
      * 构建WHERE条件的SQL片段
      * <p>
      * 根据字段值和模糊查询模式生成对应的WHERE条件：
@@ -158,7 +193,7 @@ public class JdbcHelper {
             } else {
                 whereClause.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
             }
-            params.addValue(fieldValue.getColumnName(), fieldValue.getValue(), fieldValue.sqlType());
+            params.addValue(fieldValue.getColumnName(), convertTimeValue(fieldValue.getValue()), fieldValue.sqlType());
         }
         return whereClause.toString();
     }
@@ -266,7 +301,7 @@ public class JdbcHelper {
                 } else {
                     sql.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
                 }
-                params.addValue(fieldValue.getColumnName(), fieldValue.getValue(), fieldValue.sqlType());
+                params.addValue(fieldValue.getColumnName(), convertTimeValue(fieldValue.getValue()), fieldValue.sqlType());
             }
             return sql.toString();
         });
@@ -316,7 +351,7 @@ public class JdbcHelper {
                 } else {
                     sql.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
                 }
-                params.addValue(fieldValue.getColumnName(), fieldValue.getValue(), fieldValue.sqlType());
+                params.addValue(fieldValue.getColumnName(), convertTimeValue(fieldValue.getValue()), fieldValue.sqlType());
             }
             if (!orderBys.isEmpty()) {
                 sql.append(" ORDER BY ").append(orderBys.stream().map(s -> s.orderName + " " + s.direction).collect(Collectors.joining(", ")));
@@ -460,7 +495,7 @@ public class JdbcHelper {
             sql.append(tableName).append("` SET ");
 
             String setClause = fieldValues.stream().map(field -> {
-                params.addValue(field.getColumnName(), field.getValue(), field.sqlType());
+                params.addValue(field.getColumnName(), convertTimeValue(field.getValue()), field.sqlType());
                 return "`" + field.getColumnName() + "` = :" + field.getColumnName();
             }).collect(Collectors.joining(","));
 
@@ -504,7 +539,7 @@ public class JdbcHelper {
             sql.append(tableName).append("` SET ");
 
             String setClause = fieldValues.stream().filter(field -> !field.isNullVal()).map(field -> {
-                params.addValue(field.getColumnName(), field.getValue(), field.sqlType());
+                params.addValue(field.getColumnName(), convertTimeValue(field.getValue()), field.sqlType());
                 return "`" + field.getColumnName() + "` = :" + field.getColumnName();
             }).collect(Collectors.joining(","));
 
@@ -631,7 +666,7 @@ public class JdbcHelper {
             for (FieldValue field : fieldValues) {
                 placeholder.append("`").append(field.getColumnName()).append("`").append(",");
                 valueClause.append(":").append(field.getColumnName()).append(",");
-                params.addValue(field.getColumnName(), field.getValue(), field.sqlType());
+                params.addValue(field.getColumnName(), convertTimeValue(field.getValue()), field.sqlType());
             }
 
             // 移除最后一个逗号
@@ -721,7 +756,7 @@ public class JdbcHelper {
                 for (FieldValue field : fieldValues) {
                     placeholder.append("`").append(field.getColumnName()).append("`").append(",");
                     valueClause.append(":").append(field.getColumnName()).append(",");
-                    params.addValue(field.getColumnName(), field.getValue(), field.sqlType());
+                    params.addValue(field.getColumnName(), convertTimeValue(field.getValue()), field.sqlType());
                 }
 
                 // 移除最后一个逗号
@@ -732,7 +767,7 @@ public class JdbcHelper {
             } else if (fieldValues != null) {
                 // 后续对象只添加参数
                 for (FieldValue field : fieldValues) {
-                    params.addValue(field.getColumnName(), field.getValue(), field.sqlType());
+                    params.addValue(field.getColumnName(), convertTimeValue(field.getValue()), field.sqlType());
                 }
             }
 

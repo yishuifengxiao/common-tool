@@ -1,13 +1,5 @@
 package com.yishuifengxiao.common.tool.jdbc;
 
-import com.yishuifengxiao.common.tool.bean.ClassUtil;
-import com.yishuifengxiao.common.tool.text.TextUtil;
-import jakarta.persistence.Column;
-import jakarta.persistence.Transient;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.jdbc.core.RowMapper;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
@@ -17,13 +9,28 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.jdbc.core.RowMapper;
+
+import com.yishuifengxiao.common.tool.bean.ClassUtil;
+import com.yishuifengxiao.common.tool.text.TextUtil;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Transient;
+import lombok.extern.slf4j.Slf4j;
 /**
  * 数据库结果集映射器，用于将ResultSet转换为Java对象
  * 支持基本类型、日期时间类型的自动转换和时区处理
@@ -169,12 +176,8 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null) {
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            ZonedDateTime dbTime = localDateTime.atZone(databaseZoneId);
-            ZonedDateTime appTime = dbTime.withZoneSameInstant(ZoneId.systemDefault());
-            return Date.from(appTime.toInstant());
-        }
+        // 直接使用timestamp转换为Date,不做额外的时区转换
+        // JDBC驱动已经根据serverTimezone正确处理了时区
         return new Date(timestamp.getTime());
     }
 
@@ -183,11 +186,11 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
-            LocalDateTime dbLocalDateTime = timestamp.toLocalDateTime();
-            ZonedDateTime dbTime = dbLocalDateTime.atZone(databaseZoneId);
-            ZonedDateTime appTime = dbTime.withZoneSameInstant(ZoneId.systemDefault());
-            return appTime.toLocalDateTime();
+        if (databaseZoneId != null) {
+            return timestamp.toLocalDateTime()
+                    .atZone(databaseZoneId)
+                    .withZoneSameInstant(ZoneId.systemDefault())
+                    .toLocalDateTime();
         }
         return timestamp.toLocalDateTime();
     }
@@ -213,11 +216,8 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            ZonedDateTime dbTime = localDateTime.atZone(databaseZoneId);
-            return dbTime.toInstant();
-        }
+        // 直接使用timestamp的Instant,不做时区转换
+        // 因为JDBC驱动已经根据serverTimezone正确处理了时区
         return timestamp.toInstant();
     }
 
@@ -226,11 +226,8 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        if (databaseZoneId != null && !databaseZoneId.equals(ZoneId.systemDefault())) {
-            LocalDateTime localDateTime = timestamp.toLocalDateTime();
-            ZonedDateTime dbTime = localDateTime.atZone(databaseZoneId);
-            return dbTime.withZoneSameInstant(ZoneId.systemDefault());
-        }
+        // 将timestamp转换为系统默认时区的ZonedDateTime
+        // JDBC驱动已经根据serverTimezone正确处理了时区
         return timestamp.toInstant().atZone(ZoneId.systemDefault());
     }
 
