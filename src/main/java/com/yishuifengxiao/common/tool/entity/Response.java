@@ -1,16 +1,24 @@
 /**
+ * <p>通用响应对象工具类</p>
+ * <p>提供统一的接口响应格式封装，支持多种HTTP状态码的快捷创建方法</p>
  *
+ * @author yishui
+ * @version 1.0.0
+ * @since 1.0.0
  */
 package com.yishuifengxiao.common.tool.entity;
-
-import java.io.Serializable;
-import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.yishuifengxiao.common.tool.random.IdWorker;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
-import io.swagger.v3.oas.annotations.media.Schema;
+import java.io.Serializable;
+import java.util.Date;
+
 
 /**
  * <p>通用响应对象</p>
@@ -38,52 +46,50 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @version 1.0.0
  * @since 1.0.0
  */
-@Schema(name = "通用响应", description = "用于所有接口的通用返回数据")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Accessors(chain = true)
 public class Response<T> implements Serializable {
 
 
     /**
-     *
+     * 序列化版本号
      */
     private static final long serialVersionUID = -1306449295746670286L;
     /**
      * 请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机
      */
-    @Schema(title = "请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机")
-    @JsonProperty("request-id")
-    protected String id;
+    @JsonProperty("requestId")
+    protected String requestId;
 
     /**
-     * 请求的响应吗,这里借用HttpStatus作为状态标识
+     * 请求的响应码,这里借用HttpStatus作为状态标识
      * <p>
      * 具体的响应值的信息可以参见 <a href=
      * "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status">https://developer.mozilla
      * .org/en-US/docs/Web/HTTP/Status</a>
      */
-    @Schema(title = "请求的响应码,这里借用HttpStatus作为状态标识,具体代码的含义请参见 HttpStatus( https://developer"
-            + ".mozilla" + ".org/en-US/docs/Web/HTTP/Status)")
+
     protected Object code;
 
     /**
      * 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述
      */
-    @Schema(title = " 响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述")
     protected String msg;
 
     /**
      * 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息
      */
-    @Schema(title = " 响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息")
     @JsonProperty("data")
     protected T data;
 
     /**
      * 响应时间
      */
-    @Schema(title = "响应时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @JsonProperty("response-time")
-    protected Date date;
+    @JsonProperty("responseTime")
+    protected Date responseTime;
 
     /**
      * 构建一个通用的响应对象
@@ -253,29 +259,6 @@ public class Response<T> implements Serializable {
         return new Response<>(Const.CODE_INTERNAL_SERVER_ERROR, msg, data);
     }
 
-    /**
-     * 默认的构造函数
-     */
-    public Response() {
-
-    }
-
-    /**
-     * 全参构造函数
-     *
-     * @param id   请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机
-     * @param code 响应码
-     * @param msg  响应提示信息
-     * @param data 响应数据
-     * @param date 响应时间
-     */
-    public Response(String id, Object code, String msg, T data, Date date) {
-        this.id = id;
-        this.code = code;
-        this.msg = msg;
-        this.data = data;
-        this.date = date;
-    }
 
     /**
      * 构造函数
@@ -298,127 +281,6 @@ public class Response<T> implements Serializable {
         this(IdWorker.uuid(), code, msg, null, new Date());
     }
 
-    /**
-     * 获取请求ID
-     *
-     * @return 请求ID
-     */
-    public String getId() {
-        return id;
-    }
-
-    /**
-     * 设置请求ID
-     *
-     * @param id 请求ID
-     * @return 当前通用响应对象
-     */
-    public Response<T> setId(String id) {
-        this.id = id;
-        return this;
-    }
-
-    /**
-     * 获取响应码
-     *
-     * @return 当前响应的响应码
-     */
-    public Object getCode() {
-        return this.code;
-    }
-
-    /**
-     * 设置响应码
-     *
-     * @param code 响应码
-     * @return 当前通用响应对象
-     */
-    public Response<T> setCode(Object code) {
-        this.code = code;
-        return this;
-    }
-
-    /**
-     * 获取响应提示信息
-     *
-     * @return 响应提示信息
-     */
-    public String getMsg() {
-        return this.msg;
-    }
-
-    /**
-     * 设置响应提示信息
-     *
-     * @param msg 响应提示信息
-     * @return 当前通用响应对象
-     */
-    public Response<T> setMsg(String msg) {
-        this.msg = msg;
-        return this;
-    }
-
-    /**
-     * 设置响应提示信息
-     *
-     * @param msg 响应提示信息
-     * @return 当前通用响应对象
-     */
-    public Response<T> msg(String msg) {
-        this.msg = msg;
-        return this;
-    }
-
-    /**
-     * 获取响应数据
-     *
-     * @return 响应数据
-     */
-    public T getData() {
-        return this.data;
-    }
-
-    /**
-     * 设置响应数据
-     *
-     * @param data 响应数据
-     * @return 当前通用响应对象
-     */
-    public Response<T> setData(T data) {
-        this.data = data;
-        return this;
-    }
-
-    /**
-     * 设置响应数据
-     *
-     * @param data 响应数据
-     * @return 当前通用响应对象
-     */
-    public Response<T> data(T data) {
-        this.data = data;
-        return this;
-    }
-
-    /**
-     * 获取响应的时间
-     *
-     * @return 响应的时间
-     */
-    public Date getDate() {
-        return this.date;
-    }
-
-    /**
-     * 设置响应的时间
-     *
-     * @param date 响应的时间
-     * @return 当前通用响应对象
-     */
-    public Response<T> setDate(Date date) {
-        this.date = date;
-        return this;
-    }
 
     /**
      * 通用返回响应类的常用属性信息
@@ -479,69 +341,5 @@ public class Response<T> implements Serializable {
 
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((code == null) ? 0 : code.hashCode());
-        result = prime * result + ((data == null) ? 0 : data.hashCode());
-        result = prime * result + ((date == null) ? 0 : date.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
-        result = prime * result + ((msg == null) ? 0 : msg.hashCode());
-        return result;
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Response other = (Response) obj;
-        if (code != other.code) {
-            return false;
-        }
-        if (data == null) {
-            if (other.data != null) {
-                return false;
-            }
-        } else if (!data.equals(other.data)) {
-            return false;
-        }
-        if (date == null) {
-            if (other.date != null) {
-                return false;
-            }
-        } else if (!date.equals(other.date)) {
-            return false;
-        }
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        if (msg == null) {
-            if (other.msg != null) {
-                return false;
-            }
-        } else if (!msg.equals(other.msg)) {
-            return false;
-        }
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return "Response [id=" + id + ", code=" + code + ", msg=" + msg + ", data=" + data + ", "
-                + "date=" + date + "]";
-    }
 
 }
