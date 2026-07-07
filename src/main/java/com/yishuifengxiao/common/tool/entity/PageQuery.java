@@ -1,7 +1,6 @@
 package com.yishuifengxiao.common.tool.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -17,7 +16,6 @@ import java.util.Optional;
  * @version 1.0.0
  * @since 1.0.0
  */
-@Schema(name = "基础分页查询对象")
 @Data
 @Accessors(chain = true)
 public class PageQuery<T> extends Slice implements Serializable {
@@ -29,7 +27,6 @@ public class PageQuery<T> extends Slice implements Serializable {
     /**
      * 查询参数
      */
-    @Schema(title = "查询参数")
     protected T query;
 
     /**
@@ -98,7 +95,7 @@ public class PageQuery<T> extends Slice implements Serializable {
      * 创建一个带有查询条件和默认分页参数的分页查询对象
      * <p>使用父类Slice中定义的默认分页参数(DEFAULT_PAGE_SIZE和DEFAULT_PAGE_NUM)</p>
      *
-     * @param <T> 查询参数的类型
+     * @param <T>   查询参数的类型
      * @param query 查询条件对象
      * @return 包含指定查询条件和默认分页参数的分页查询对象
      */

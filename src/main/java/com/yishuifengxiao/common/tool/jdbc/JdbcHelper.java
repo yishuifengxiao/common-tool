@@ -4,6 +4,7 @@ import com.yishuifengxiao.common.tool.entity.Page;
 import com.yishuifengxiao.common.tool.entity.PageQuery;
 import com.yishuifengxiao.common.tool.entity.Slice;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.lang.NumberUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -301,7 +302,8 @@ public class JdbcHelper {
                 } else {
                     sql.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
                 }
-                params.addValue(fieldValue.getColumnName(), convertTimeValue(fieldValue.getValue()), fieldValue.sqlType());
+                params.addValue(fieldValue.getColumnName(), convertTimeValue(fieldValue.getValue()),
+                        fieldValue.sqlType());
             }
             return sql.toString();
         });
@@ -351,7 +353,8 @@ public class JdbcHelper {
                 } else {
                     sql.append(" AND `").append(fieldValue.getColumnName()).append("`= :").append(fieldValue.getColumnName());
                 }
-                params.addValue(fieldValue.getColumnName(), convertTimeValue(fieldValue.getValue()), fieldValue.sqlType());
+                params.addValue(fieldValue.getColumnName(), convertTimeValue(fieldValue.getValue()),
+                        fieldValue.sqlType());
             }
             if (!orderBys.isEmpty()) {
                 sql.append(" ORDER BY ").append(orderBys.stream().map(s -> s.orderName + " " + s.direction).collect(Collectors.joining(", ")));
@@ -490,7 +493,7 @@ public class JdbcHelper {
         }
         String tableName = FieldExtractor.extractTableName(t.getClass());
 
-        return this.update(params -> {
+        Result result = this.update(params -> {
             StringBuilder sql = new StringBuilder("UPDATE `");
             sql.append(tableName).append("` SET ");
 
@@ -503,6 +506,12 @@ public class JdbcHelper {
 
             return sql.toString();
         });
+        GeneratedKeyHolder keyHolder = (GeneratedKeyHolder) result.getKeyHolder();
+        List<Map<String, Object>> keyList = keyHolder.getKeyList();
+        if (null == keyList || keyList.isEmpty()) {
+            keyList.add(Map.of("key", primaryKeyValue.getValue()));
+        }
+        return result;
     }
 
 
@@ -534,7 +543,7 @@ public class JdbcHelper {
         }
         String tableName = FieldExtractor.extractTableName(t.getClass());
 
-        return this.update(params -> {
+        Result result = this.update(params -> {
             StringBuilder sql = new StringBuilder("UPDATE `");
             sql.append(tableName).append("` SET ");
 
@@ -547,6 +556,12 @@ public class JdbcHelper {
 
             return sql.toString();
         });
+        GeneratedKeyHolder keyHolder = (GeneratedKeyHolder) result.getKeyHolder();
+        List<Map<String, Object>> keyList = keyHolder.getKeyList();
+        if (null == keyList || keyList.isEmpty()) {
+            keyList.add(Map.of("key", primaryKeyValue.getValue()));
+        }
+        return result;
     }
 
 
@@ -1230,6 +1245,98 @@ public class JdbcHelper {
                 return this.keyHolder;
             }
             return defaultKeyHolder;
+        }
+
+        /**
+         * 获取第一个键值
+         *
+         * @return 返回第一个键值，如果不存在则返回null
+         */
+        private Object getFirstKeyValue() {
+            List<Map<String, Object>> keyList = this.keyHolder().getKeyList();
+            // 检查键列表是否为空或null
+            if (null == keyList || keyList.isEmpty()) {
+                return null;
+            }
+            Map<String, Object> map = keyList.get(0);
+            if (null == map || map.isEmpty()) {
+                return null;
+            }
+            return map.values().stream().filter(Objects::nonNull).findFirst().orElse(null);
+        }
+
+        /**
+         * 以指定类型获取生成的主键值
+         * <p>
+         * 执行流程：
+         * 1. 获取主键值
+         * 2. 判断主键值不为null且keyType是主键值类型的父类或相同类型
+         * 3. 如果是则返回转换后的值，否则返回null
+         * </p>
+         *
+         * @param <T>     主键值的期望类型
+         * @param keyType 期望的主键值类型，如 Integer.class、Long.class、String.class
+         * @return 转换后的主键值，如果不存在或类型不兼容则返回null
+         */
+        public <T> T getKeyAs(Class<T> keyType) {
+            Object val = getFirstKeyValue();
+            return val != null && keyType.isAssignableFrom(val.getClass()) ? keyType.cast(val) : null;
+        }
+
+        /**
+         * 获取生成的主键值，以Object形式返回
+         * <p>
+         * 该方法直接返回从 {@link #getFirstKeyValue()} 获取的原始主键值，
+         * 不做任何类型转换，适用于不确定主键类型或需要后续自行处理的场景
+         * </p>
+         *
+         * @return 主键值，如果不存在则返回null
+         */
+        public Object getKey() {
+            return getFirstKeyValue();
+        }
+
+        /**
+         * 以字符串形式获取生成的主键值
+         * <p>
+         * 执行流程：
+         * 1. 获取主键值
+         * 2. 如果主键值不为null，调用其 {@code toString()} 方法返回字符串
+         * 3. 如果主键值为null，返回null
+         * </p>
+         *
+         * @return 主键值的字符串形式，如果不存在则返回null
+         */
+        public String getKeyAsString() {
+            Object val = getFirstKeyValue();
+            return val != null ? val.toString() : null;
+        }
+
+        /**
+         * 以Long类型获取生成的主键值
+         * <p>
+         * 执行流程：
+         * 1. 获取主键值，如果为null则返回null
+         * 2. 如果主键值本身是 Number 类型，直接调用 {@code longValue()} 转换
+         * 3. 否则尝试将主键值转为字符串后通过 {@link NumberUtil#parseLong(String)} 解析
+         * 4. 如果解析失败（抛出 NumberFormatException），捕获异常并返回null
+         * </p>
+         *
+         * @return 主键值的Long类型，如果不存在或无法转换则返回null
+         */
+        public Long getKeyAsLong() {
+            Object val = getFirstKeyValue();
+            if (val == null) {
+                return null;
+            }
+            if (val instanceof Number number) {
+                return number.longValue();
+            }
+            try {
+                return NumberUtil.parseLong(val.toString());
+            } catch (NumberFormatException e) {
+                return null;
+            }
         }
     }
 
