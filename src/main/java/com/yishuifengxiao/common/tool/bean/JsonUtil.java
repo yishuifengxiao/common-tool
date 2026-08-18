@@ -3,19 +3,18 @@ package com.yishuifengxiao.common.tool.bean;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.jsonpath.JsonPath;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.*;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.datatype.jsr310.JavaTimeModule;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -61,11 +60,6 @@ public final class JsonUtil {
     static ObjectMapper default_mapper = new ObjectMapper();
 
     /**
-     * 带类型信息的ObjectMapper，序列化时会添加@class属性
-     */
-    private static ObjectMapper with_class_mapper = null;
-
-    /**
      * 忽略null值的ObjectMapper
      */
     private static ObjectMapper none_null_mapper = null;
@@ -73,29 +67,27 @@ public final class JsonUtil {
 
     static {
         try {
-            default_mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-            default_mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            default_mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-            default_mapper.configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false);
-            default_mapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, false);
-            default_mapper.setTimeZone(TimeZone.getTimeZone("GMT+8"));
-            default_mapper.registerModule(new JavaTimeModule());
-            default_mapper.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
-            default_mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-            default_mapper.configure(JsonParser.Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
-            default_mapper.configure(JsonParser.Feature.ALLOW_NUMERIC_LEADING_ZEROS, true);
-            default_mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-            default_mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-            default_mapper.configure(MapperFeature.USE_GETTERS_AS_SETTERS, false);
-            default_mapper.configure(MapperFeature.INFER_PROPERTY_MUTATORS, false);
+            // 公共基础配置
+            default_mapper = JsonMapper.builder()
+                    .changeDefaultVisibility(vc -> vc.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY))
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                    .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                    .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
+                    .defaultTimeZone(TimeZone.getTimeZone("GMT+8"))
+                    .addModule(new JavaTimeModule())
+                    .configure(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true)
+                    .configure(JsonReadFeature.ALLOW_JAVA_COMMENTS, true)
+                    .configure(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS, true)
+                    .configure(JsonReadFeature.ALLOW_LEADING_ZEROS_FOR_NUMBERS, true)
+                    .configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
+                    .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
+                    .configure(MapperFeature.USE_GETTERS_AS_SETTERS, false)
+                    .build();
 
-            with_class_mapper = default_mapper.copy();
-            with_class_mapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL,
-                    JsonTypeInfo.As.PROPERTY);
-
-            none_null_mapper = default_mapper.copy();
-            none_null_mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            none_null_mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, false);
+            // 忽略null值的mapper
+            none_null_mapper = default_mapper.rebuild()
+                    .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))
+                    .build();
         } catch (Exception e) {
             log.warn("There was a problem initializing the Object Mapper, problem {}", e);
         }
@@ -108,7 +100,7 @@ public final class JsonUtil {
      * @return ObjectMapper实例副本，可安全地进行自定义配置
      */
     public static ObjectMapper mapper() {
-        return default_mapper.copy();
+        return default_mapper.rebuild().build();
     }
 
     /**
@@ -138,10 +130,11 @@ public final class JsonUtil {
         }
         try {
             String trimmedJson = json.trim();
-            ObjectMapper tempMapper = default_mapper.copy();
-            tempMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
+            ObjectMapper tempMapper = default_mapper.rebuild()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties)
+                    .build();
             return tempMapper.readValue(trimmedJson, clazz);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to convert JSON string to Java object: clazz={}, error={}",
                     clazz.getSimpleName(), e.getMessage(), e);
         } catch (Exception e) {
@@ -180,8 +173,9 @@ public final class JsonUtil {
 
         try {
             String trimmedJson = json.trim();
-            ObjectMapper tempMapper = default_mapper.copy();
-            tempMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties);
+            ObjectMapper tempMapper = default_mapper.rebuild()
+                    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, failOnUnknownProperties)
+                    .build();
 
             JavaType javaType = tempMapper.getTypeFactory().constructCollectionType(List.class, clazz);
             return tempMapper.readValue(trimmedJson, javaType);
@@ -244,7 +238,7 @@ public final class JsonUtil {
                 return null;
             }
             return strToBean(dataStr, clazz);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to serialize extracted data to JSON: {}", e.getMessage());
             return null;
         }
@@ -273,7 +267,7 @@ public final class JsonUtil {
         try {
             String dataStr = default_mapper.writeValueAsString(data);
             return strToList(dataStr, clazz);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("Failed to serialize extracted data to JSON: {}", e.getMessage());
             return Collections.emptyList();
         }
@@ -297,7 +291,7 @@ public final class JsonUtil {
         try {
             return default_mapper.readValue(trimmedText, new TypeReference<>() {
             });
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.warn("There was a problem converting the string {} to a map, the problem is {} ", text, e.getMessage());
             if (log.isDebugEnabled()) {
                 log.debug("Detailed exception: ", e);
@@ -320,7 +314,7 @@ public final class JsonUtil {
             return false;
         }
         try {
-            JsonNode tree = with_class_mapper.readTree(text.trim());
+            JsonNode tree = default_mapper.readTree(text.trim());
             return tree != null && tree.isObject();
         } catch (Exception e) {
             return false;
@@ -349,11 +343,9 @@ public final class JsonUtil {
         }
 
         try {
-            JsonNode tree = with_class_mapper.readTree(trimmedText);
+            JsonNode tree = default_mapper.readTree(trimmedText);
             return tree.isArray();
-        } catch (JsonProcessingException e) {
-            return false;
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             return false;
         }
     }
@@ -370,9 +362,9 @@ public final class JsonUtil {
             return false;
         }
         try {
-            with_class_mapper.readTree(text.trim());
+            default_mapper.readTree(text.trim());
             return true;
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             return false;
         } catch (Exception e) {
             return false;
@@ -408,7 +400,7 @@ public final class JsonUtil {
                 return null;
             }
             return mapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("There was a problem converting data {} to a JSON format string", value, e);
             if (log.isDebugEnabled()) {
                 log.debug("There was a problem converting data {} to a JSON format string, the problem is {} ", value, e);
@@ -443,7 +435,7 @@ public final class JsonUtil {
         try {
             ObjectMapper mapper = includeNull ? default_mapper : none_null_mapper;
             return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(value);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             if (log.isDebugEnabled()) {
                 log.debug("There was a problem converting data {} to a JSON format string, the problem is {}", value, e);
             } else {
@@ -469,12 +461,10 @@ public final class JsonUtil {
             return null;
         }
         try {
-            String json = with_class_mapper.writeValueAsString(val);
-            return with_class_mapper.readValue(json, val.getClass());
-        } catch (JsonProcessingException e) {
-            throw new UncheckedException("Failed to serialize object during deep clone", e);
-        } catch (IOException e) {
-            throw new UncheckedException("Failed to deserialize object during deep clone", e);
+            String json = default_mapper.writeValueAsString(val);
+            return default_mapper.readValue(json, val.getClass());
+        } catch (JacksonException e) {
+            throw new UncheckedException("Failed to clone object via JSON round-trip", e);
         }
     }
 
