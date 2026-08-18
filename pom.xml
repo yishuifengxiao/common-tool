@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.yishuifengxiao.common</groupId>
     <artifactId>common-tool</artifactId>
-    <version>BUILD-SNAPSHOT</version>
+    <version>9.0.0</version>
     <packaging>jar</packaging>
     <description>本工具包主要集成了目前在项目开发过程中个人经常会使用到的一些工具类，对工具类进行了一下简单的封装
     </description>
@@ -42,7 +42,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.16</version>
+        <version>4.1.0</version>
     </parent>
     <properties>
         <maven.source.version>8</maven.source.version>
@@ -52,7 +52,6 @@
         <dom4j.version>2.2.0</dom4j.version>
         <lombok.version>1.18.42</lombok.version>
         <logback.version>1.5.11</logback.version>
-        <jackson.version>2.20.0</jackson.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
@@ -84,11 +83,7 @@
             <artifactId>hibernate-validator</artifactId>
             <optional>true</optional>
         </dependency>
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>${swagger.v3.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
@@ -114,15 +109,13 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <groupId>tools.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>${jackson.version}</version>
+            <version>3.0.0-rc2</version>
         </dependency>
-        <!-- 参数名支持（处理没有默认构造函数的情况） -->
         <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-parameter-names</artifactId>
-            <version>${jackson.version}</version>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
             <groupId>jakarta.persistence</groupId>
@@ -140,12 +133,7 @@
             <artifactId>spring-jdbc</artifactId>
             <optional>true</optional>
         </dependency>
-        <!-- 可选：用于处理没有getter/setter的情况 -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
-            <artifactId>jackson-module-kotlin</artifactId>
-            <version>${jackson.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

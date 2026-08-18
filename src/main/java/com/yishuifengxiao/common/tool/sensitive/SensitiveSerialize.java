@@ -1,13 +1,12 @@
 package com.yishuifengxiao.common.tool.sensitive;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.BeanProperty;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 
-import java.io.IOException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.BeanProperty;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+
 import java.util.Objects;
 
 
@@ -18,7 +17,7 @@ import java.util.Objects;
  * @version 1.0.0
  * @since 1.0.0
  */
-public class SensitiveSerialize extends JsonSerializer<Object> implements ContextualSerializer {
+public class SensitiveSerialize extends ValueSerializer<Object> {
 
     /**
      * 敏感信息枚举类型
@@ -41,8 +40,8 @@ public class SensitiveSerialize extends JsonSerializer<Object> implements Contex
     }
 
     @Override
-    public void serialize(Object value, JsonGenerator jsonGenerator, SerializerProvider serializers)
-            throws IOException {
+    public void serialize(Object value, JsonGenerator jsonGenerator, SerializationContext serializers)
+            throws JacksonException {
         switch (this.type) {
             case ID_CARD: {
                 jsonGenerator.writeString(SensitiveUtil.idCard(String.valueOf(value)));
@@ -68,8 +67,7 @@ public class SensitiveSerialize extends JsonSerializer<Object> implements Contex
     }
 
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider serializerProvider, BeanProperty beanProperty)
-            throws JsonMappingException {
+    public ValueSerializer<?> createContextual(SerializationContext serializers, BeanProperty beanProperty) {
 
         if (beanProperty != null) {
 
@@ -85,9 +83,9 @@ public class SensitiveSerialize extends JsonSerializer<Object> implements Contex
                     return new SensitiveSerialize(sensitiveInfo.value());
                 }
             }
-            return serializerProvider.findValueSerializer(beanProperty.getType(), beanProperty);
+            return serializers.findValueSerializer(beanProperty.getType());
         }
-        return serializerProvider.findNullValueSerializer(beanProperty);
+        return serializers.findNullValueSerializer(beanProperty);
 
     }
 }

@@ -3,15 +3,16 @@ package com.yishuifengxiao.common.tool.bean;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.json.JsonReadFeature;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.util.TimeZone;
 
@@ -27,27 +28,27 @@ public class JsonUtil_toJSONString_Test {
 
     @BeforeClass
     public static void setUpClass() {
-        default_mapper = new ObjectMapper();
-        default_mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        default_mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        default_mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        default_mapper.setTimeZone(TimeZone.getDefault());
-        default_mapper.registerModule(new JavaTimeModule());
-        default_mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        default_mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        default_mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        default_mapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
+        default_mapper = JsonMapper.builder()
+                .changeDefaultVisibility(vc -> vc.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY))
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .defaultTimeZone(TimeZone.getDefault())
+                .addModule(new JavaTimeModule())
+                .configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
+                .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
+                .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.ALWAYS))
+                .build();
 
-        none_null_mapper = new ObjectMapper();
-        none_null_mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        none_null_mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        none_null_mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        none_null_mapper.setTimeZone(TimeZone.getDefault());
-        none_null_mapper.registerModule(new JavaTimeModule());
-        none_null_mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        none_null_mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        none_null_mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
-        none_null_mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        none_null_mapper = JsonMapper.builder()
+                .changeDefaultVisibility(vc -> vc.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY))
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+                .defaultTimeZone(TimeZone.getDefault())
+                .addModule(new JavaTimeModule())
+                .configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
+                .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
+                .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))
+                .build();
     }
 
     /**
@@ -107,11 +108,10 @@ public class JsonUtil_toJSONString_Test {
         ObjectMapper originalMapper = JsonUtil.default_mapper;
         JsonUtil.default_mapper = mockMapper;
         try {
-            when(mockMapper.writeValueAsString(any())).thenThrow(new JsonProcessingException("test") {});
+            when(mockMapper.writeValueAsString(any())).thenThrow(new JacksonException("test") {
+            });
             String result = JsonUtil.toJSONString(true, "test");
             assertNull(result);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         } finally {
             JsonUtil.default_mapper = originalMapper;
         }
