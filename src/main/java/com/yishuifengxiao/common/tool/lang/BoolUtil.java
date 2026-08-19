@@ -1,7 +1,6 @@
 package com.yishuifengxiao.common.tool.lang;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * <p>布尔工具类</p>
@@ -36,7 +35,7 @@ public final class BoolUtil {
      */
     public static boolean isTrueText(String text) {
         text = null == text ? null : text.trim();
-        return StringUtils.equalsIgnoreCase(TRUE_TEXT, text);
+        return TRUE_TEXT.equalsIgnoreCase(text);
     }
 
     /**
@@ -57,7 +56,7 @@ public final class BoolUtil {
      */
     public static boolean isFalseText(String text) {
         text = null == text ? null : text.trim();
-        return StringUtils.equalsIgnoreCase(FALSE_TEXT, text);
+        return FALSE_TEXT.equalsIgnoreCase(text);
     }
 
     /**
@@ -120,10 +119,10 @@ public final class BoolUtil {
             text = val.toString().trim();
         }
 
-        if (StringUtils.equalsIgnoreCase(BoolUtil.TRUE_TEXT, text)) {
+        if (BoolUtil.TRUE_TEXT.equalsIgnoreCase(text)) {
             return true;
         }
-        if (StringUtils.equalsIgnoreCase(BoolUtil.FALSE_TEXT, text)) {
+        if (BoolUtil.FALSE_TEXT.equalsIgnoreCase(text)) {
             return false;
         }
 

@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * <p>
@@ -47,16 +48,16 @@ public class InStringValidator implements ConstraintValidator<InString, String> 
                 return true;
             }
             return this.sensitive ? Arrays.stream(values).filter(StringUtils::isNotBlank)
-                    .anyMatch(v -> StringUtils.equals(v, value)) :
-                    Arrays.stream(values).anyMatch(v -> StringUtils.equalsIgnoreCase(v, value));
+                    .anyMatch(v -> Objects.equals(v, value)) :
+                    Arrays.stream(values).anyMatch(v -> v != null && v.equalsIgnoreCase(value));
         }
         //不允许为空
         if (StringUtils.isBlank(value)) {
             return false;
         }
         return this.sensitive ? Arrays.stream(values).filter(StringUtils::isNotBlank)
-                .anyMatch(v -> StringUtils.equals(v, value)) :
-                Arrays.stream(values).anyMatch(v -> StringUtils.equalsIgnoreCase(v, value));
+                .anyMatch(v -> Objects.equals(v, value)) :
+                Arrays.stream(values).anyMatch(v -> v != null && v.equalsIgnoreCase(value));
     }
 
 }

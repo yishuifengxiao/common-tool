@@ -13,7 +13,6 @@ import tools.jackson.core.json.JsonReadFeature;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.*;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.util.Collections;
 import java.util.List;
@@ -74,7 +73,6 @@ public final class JsonUtil {
                     .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
                     .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
                     .defaultTimeZone(TimeZone.getTimeZone("GMT+8"))
-                    .addModule(new JavaTimeModule())
                     .configure(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true)
                     .configure(JsonReadFeature.ALLOW_JAVA_COMMENTS, true)
                     .configure(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS, true)

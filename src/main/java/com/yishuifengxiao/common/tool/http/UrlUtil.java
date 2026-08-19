@@ -124,7 +124,7 @@ public final class UrlUtil {
         domain = domain.toLowerCase();
         String[] tokens = StringUtils.splitByWholeSeparatorPreserveAllTokens(domain, ".");
         int position = tokens.length - 2;
-        if (StringUtils.containsAny(domain, COM_CN_DOMAIN, GOV_CN_DOMAIN, EDU_CN_DOMAIN)) {
+        if (domain.contains(COM_CN_DOMAIN) || domain.contains(GOV_CN_DOMAIN) || domain.contains(EDU_CN_DOMAIN)) {
             position -= 1;
         }
 
@@ -184,7 +184,7 @@ public final class UrlUtil {
         }
 
         try {
-            if (StringUtils.startsWith(url, OsUtils.LEFT_SLASH)) {
+            if (url.startsWith(OsUtils.LEFT_SLASH)) {
                 int lastSlashIndex = referrer.lastIndexOf(OsUtils.LEFT_SLASH);
                 if (lastSlashIndex <= 8) { // 协议头长度 "http://" or "https://"
                     return null;
@@ -192,7 +192,7 @@ public final class UrlUtil {
                 return referrer.substring(0, lastSlashIndex) + url;
             }
 
-            if (StringUtils.startsWith(url, RELATIVE_ADDR)) {
+            if (url.startsWith(RELATIVE_ADDR)) {
                 long count = StringUtils.countMatches(url, RELATIVE_ADDR);
                 String baseReferrer = referrer;
 

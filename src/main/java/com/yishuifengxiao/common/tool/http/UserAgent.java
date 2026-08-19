@@ -3,11 +3,11 @@
  */
 package com.yishuifengxiao.common.tool.http;
 
-import org.apache.commons.lang3.RandomUtils;
-
 import com.yishuifengxiao.common.tool.entity.RootEnum;
 
 import lombok.Getter;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * <p>浏览器标识(User-Agent)集合</p>
@@ -199,7 +199,7 @@ public enum UserAgent implements RootEnum {
      * @return 浏览器UserAgent
      */
     public static String autoUserAgent() {
-        int randomVal = RandomUtils.nextInt(0, values().length);
+        int randomVal = ThreadLocalRandom.current().nextInt(0, values().length);
         return values()[randomVal].description;
     }
 

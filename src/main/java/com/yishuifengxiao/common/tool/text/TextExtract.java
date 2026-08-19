@@ -245,6 +245,7 @@ public final class TextExtract {
         if (StringUtils.isBlank(text)) {
             return false;
         }
-        return StringUtils.containsAny(text.toLowerCase(), "Copyright".toLowerCase(), "版权所有");
+        String lower = text.toLowerCase();
+        return lower.contains("copyright") || lower.contains("版权所有");
     }
 }

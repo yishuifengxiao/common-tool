@@ -5,7 +5,6 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509TrustManager;
 
@@ -100,9 +99,9 @@ public class HttpClient {
     private String requestBody;
 
     /**
-     * 获取http客户端（单例模式）
+     * 创建一个新的http客户端实例
      *
-     * @return http客户端
+     * @return 新的http客户端实例
      */
     public final static HttpClient instance() {
         return new HttpClient();
@@ -521,11 +520,14 @@ public class HttpClient {
             userAgent = UserAgent.USER_AGENT_EDGE_VERSION_110_0.getDescription();
         }
         String url = this.url.trim();
-        // 如果是Https请求
-        if (url.startsWith("https")) {
-            getTrust();
-        }
         Connection connection = Jsoup.connect(url);
+        // 如果是Https请求，仅为此连接设置信任所有证书（不影响全局）
+        if (url.startsWith("https")) {
+            SSLContext trustContext = getTrustAllContext();
+            if (trustContext != null) {
+                connection.sslSocketFactory(trustContext.getSocketFactory());
+            }
+        }
         connection.method(getMethod(this.method));
         if (null != this.timeout) {
             if (this.timeout < 0) {
@@ -604,32 +606,44 @@ public class HttpClient {
     }
 
     /**
-     * 获取服务器信任
+     * 信任所有证书的 SSLContext（仅用于此 HttpClient 实例的 HTTPS 请求）
      */
-    private static void getTrust() {
-        try {
-            HttpsURLConnection.setDefaultHostnameVerifier((hostname, session) -> true);
-            SSLContext context = SSLContext.getInstance("TLS");
-            context.init(null, new X509TrustManager[]{new X509TrustManager() {
-                @Override
-                public void checkClientTrusted(X509Certificate[] chain, String authType) {
-                }
+    private static volatile SSLContext TRUST_ALL_CONTEXT;
 
-                @Override
-                public void checkServerTrusted(X509Certificate[] chain, String authType) {
-                }
+    /**
+     * 获取信任所有证书的 SSLContext（懒加载，全局唯一）
+     *
+     * @return 信任所有证书的 SSLContext
+     */
+    private static SSLContext getTrustAllContext() {
+        if (TRUST_ALL_CONTEXT == null) {
+            synchronized (HttpClient.class) {
+                if (TRUST_ALL_CONTEXT == null) {
+                    try {
+                        SSLContext context = SSLContext.getInstance("TLS");
+                        context.init(null, new X509TrustManager[]{new X509TrustManager() {
+                            @Override
+                            public void checkClientTrusted(X509Certificate[] chain, String authType) {
+                            }
 
-                @Override
-                public X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-            }}, new SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+                            @Override
+                            public void checkServerTrusted(X509Certificate[] chain, String authType) {
+                            }
 
-        } catch (Exception e) {
-            if (log.isErrorEnabled()) {
-                log.error("Failed to set trust manager", e);
+                            @Override
+                            public X509Certificate[] getAcceptedIssuers() {
+                                return new X509Certificate[0];
+                            }
+                        }}, new SecureRandom());
+                        TRUST_ALL_CONTEXT = context;
+                    } catch (Exception e) {
+                        if (log.isErrorEnabled()) {
+                            log.error("Failed to initialize trust-all SSLContext", e);
+                        }
+                    }
+                }
             }
         }
+        return TRUST_ALL_CONTEXT;
     }
 }
