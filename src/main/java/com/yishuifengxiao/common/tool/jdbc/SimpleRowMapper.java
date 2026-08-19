@@ -398,10 +398,8 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
                     mapping.fieldName = field.getName();
                     mapping.fieldType = field.getType();
                     mapping.isPrimitive = mapping.fieldType.isPrimitive();
-                    mapping.isAccessible = field.isAccessible();
-                    if (!mapping.isAccessible) {
-                        field.setAccessible(true);
-                    }
+                    mapping.isAccessible = true;
+                    field.setAccessible(true);
 
                     String columnName = null;
                     Column columnAnnotation = field.getAnnotation(Column.class);

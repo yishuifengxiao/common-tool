@@ -284,6 +284,6 @@ public class BeanUtilCopy01Test {
 
         BeanUtil.copy(source, target);
 
-        assertFalse(nameField.isAccessible()); // 应当还原为不可访问
+        assertFalse(nameField.canAccess(target)); // 应当还原为不可访问
     }
 }

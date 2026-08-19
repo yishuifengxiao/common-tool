@@ -121,7 +121,9 @@ public class JdbcHelper {
         }
         try {
             this.namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(this.jdbcTemplate);
-            this.databaseZoneId = ZoneIdDetector.detectDatabaseTimezone(jdbcTemplate.getDataSource().getConnection());
+            try (var conn = this.jdbcTemplate.getDataSource().getConnection()) {
+                this.databaseZoneId = ZoneIdDetector.detectDatabaseTimezone(conn);
+            }
             log.debug("{}SQL执行器初始化成功，时区: {}", LOG_PREFIX, this.databaseZoneId);
         } catch (Exception e) {
             log.error("{}SQL执行器初始化失败", LOG_PREFIX, e);

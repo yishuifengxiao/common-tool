@@ -5,13 +5,13 @@ package com.yishuifengxiao.common.tool.random;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
-import org.apache.commons.lang3.RandomUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * <p>随机工具类</p>
@@ -103,7 +103,7 @@ public class RandomUtil {
      * @return 形如yyyyMMddhhmmss100的字符串
      */
     public static final synchronized String generateTimestampWithRandom() {
-        return new StringBuffer(LocalDateTime.now(OsUtils.ZONEID_OF_CHINA).format(FORMAT)).append(RandomUtils.nextInt(100, 999)).toString();
+        return new StringBuffer(LocalDateTime.now(OsUtils.ZONEID_OF_CHINA).format(FORMAT)).append(ThreadLocalRandom.current().nextInt(100, 999)).toString();
     }
 
     /**

@@ -185,12 +185,12 @@ public class BeanUtilCopy02Test {
         AccessRestoreTarget target = new AccessRestoreTarget();
 
         Field targetField = target.getClass().getDeclaredField("name");
-        boolean originalAccessible = targetField.isAccessible();
+        boolean originalAccessible = targetField.canAccess(target);
 
         BeanUtil.copy(source, target);
 
         // 验证字段访问权限是否还原
-        assertEquals(originalAccessible, targetField.isAccessible());
+        assertEquals(originalAccessible, targetField.canAccess(target));
         assertEquals("Alice", target.name);
     }
 }

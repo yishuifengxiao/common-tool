@@ -42,6 +42,10 @@ public class SensitiveSerialize extends ValueSerializer<Object> {
     @Override
     public void serialize(Object value, JsonGenerator jsonGenerator, SerializationContext serializers)
             throws JacksonException {
+        if (this.type == null) {
+            jsonGenerator.writeString(String.valueOf(value));
+            return;
+        }
         switch (this.type) {
             case ID_CARD: {
                 jsonGenerator.writeString(SensitiveUtil.idCard(String.valueOf(value)));
@@ -69,23 +73,22 @@ public class SensitiveSerialize extends ValueSerializer<Object> {
     @Override
     public ValueSerializer<?> createContextual(SerializationContext serializers, BeanProperty beanProperty) {
 
-        if (beanProperty != null) {
-
-            // 非 String 类直接跳过
-            if (Objects.equals(beanProperty.getType().getRawClass(), String.class)) {
-                Sensitive sensitiveInfo = beanProperty.getAnnotation(Sensitive.class);
-                if (sensitiveInfo == null) {
-                    sensitiveInfo = beanProperty.getContextAnnotation(Sensitive.class);
-                }
-                // 如果能得到注解，就将注解的 value 传入 SensitiveInfoSerialize
-                if (sensitiveInfo != null) {
-
-                    return new SensitiveSerialize(sensitiveInfo.value());
-                }
-            }
-            return serializers.findValueSerializer(beanProperty.getType());
+        if (beanProperty == null) {
+            return this;
         }
-        return serializers.findNullValueSerializer(beanProperty);
+
+        // 非 String 类直接跳过
+        if (Objects.equals(beanProperty.getType().getRawClass(), String.class)) {
+            Sensitive sensitiveInfo = beanProperty.getAnnotation(Sensitive.class);
+            if (sensitiveInfo == null) {
+                sensitiveInfo = beanProperty.getContextAnnotation(Sensitive.class);
+            }
+            // 如果能得到注解，就将注解的 value 传入 SensitiveInfoSerialize
+            if (sensitiveInfo != null) {
+                return new SensitiveSerialize(sensitiveInfo.value());
+            }
+        }
+        return serializers.findValueSerializer(beanProperty.getType());
 
     }
 }

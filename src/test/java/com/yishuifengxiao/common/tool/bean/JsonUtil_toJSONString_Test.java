@@ -12,7 +12,6 @@ import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
-import tools.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.util.TimeZone;
 
@@ -33,7 +32,6 @@ public class JsonUtil_toJSONString_Test {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
                 .defaultTimeZone(TimeZone.getDefault())
-                .addModule(new JavaTimeModule())
                 .configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
                 .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
                 .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.ALWAYS))
@@ -44,7 +42,6 @@ public class JsonUtil_toJSONString_Test {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
                 .defaultTimeZone(TimeZone.getDefault())
-                .addModule(new JavaTimeModule())
                 .configure(JsonReadFeature.ALLOW_SINGLE_QUOTES, true)
                 .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
                 .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))

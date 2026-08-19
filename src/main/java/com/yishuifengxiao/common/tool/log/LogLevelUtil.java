@@ -1,6 +1,7 @@
 package com.yishuifengxiao.common.tool.log;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +60,7 @@ public class LogLevelUtil {
 
             // 使用串行流替代并行流保证线程安全
             final Set<Logger> matchedLoggers = loggers.stream()
-                    .filter(v -> StringUtils.equals(v.getName(), loggerName))
+                    .filter(v -> Objects.equals(v.getName(), loggerName))
                     .collect(Collectors.toSet());
 
             if (CollUtil.isEmpty(matchedLoggers)) {

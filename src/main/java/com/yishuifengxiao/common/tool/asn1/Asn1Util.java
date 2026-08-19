@@ -336,4 +336,91 @@ public class Asn1Util {
         throw new UncheckedException("ICCID长度必须为18、19或20位，当前长度: " + length);
     }
 
+    /**
+     * 将MCC和MNC编码为3字节的十六进制字符串（如 "133010"）
+     *
+     * @param mcc 3位数字，如 "310"
+     * @param mnc 2~3位数字，如 "013" 或 "01"
+     * @return 6位十六进制字符串（大写）
+     * @throws IllegalArgumentException 参数格式错误
+     */
+    public static String encodeMccMnc(String mcc, String mnc) {
+        mcc = StringUtils.trim(mcc);
+        mnc = StringUtils.trim(mnc);
+        // 1. 校验
+        if (mcc == null || !mcc.matches("\\d{3}")) {
+            throw new IllegalArgumentException("MCC must be exactly 3 digits");
+        }
+        if (mnc == null || !mnc.matches("\\d{2,3}")) {
+            throw new IllegalArgumentException("MNC must be 2 or 3 digits");
+        }
+
+        // 2. 提取数字数组
+        int[] mccDigits = mcc.chars().map(c -> c - '0').toArray();
+        int[] mncDigits = mnc.chars().map(c -> c - '0').toArray();
+
+        // 3. 补齐MNC到3位（2位时第三位用0xF填充）
+        int mnc3 = (mncDigits.length == 3) ? mncDigits[2] : 0xF;
+
+        // 4. 计算三个字节（用int表示，便于直接转十六进制）
+        int b1 = (mccDigits[1] << 4) | mccDigits[0];
+        int b2 = (mnc3 << 4) | mccDigits[2];
+        int b3 = (mncDigits[1] << 4) | mncDigits[0];
+
+        // 5. 格式化为6位十六进制字符串
+        return String.format("%02X%02X%02X", b1, b2, b3);
+    }
+
+    /**
+     * 将6位十六进制字符串解码为MCC和MNC
+     *
+     * <p>与 {@link #encodeMccMnc(String, String)} 互逆。当第二字节的高半字节为 0xF 时，
+     * MNC 视为2位；否则为3位。</p>
+     *
+     * @param encoded 6位十六进制字符串（大小写均可，如 "133010" 或 "13f010"）
+     * @return 长度为2的字符串数组：[0]=MCC（3位数字），[1]=MNC（2~3位数字）
+     * @throws IllegalArgumentException 参数格式错误或编码数据无效
+     */
+    public static String[] decodeMccMnc(String encoded) {
+        encoded = StringUtils.trim(encoded);
+        if (encoded == null || !encoded.matches("[0-9A-Fa-f]{6}")) {
+            throw new IllegalArgumentException("Encoded value must be exactly 6 hex digits");
+        }
+
+        // 1. 解析三个字节
+        int b1 = Integer.parseInt(encoded.substring(0, 2), 16);
+        int b2 = Integer.parseInt(encoded.substring(2, 4), 16);
+        int b3 = Integer.parseInt(encoded.substring(4, 6), 16);
+
+        // 2. 提取 MCC 数字
+        int mcc0 = b1 & 0x0F;
+        int mcc1 = (b1 >> 4) & 0x0F;
+        int mcc2 = b2 & 0x0F;
+
+        // 3. 提取 MNC 数字及第三位标记
+        int mnc3 = (b2 >> 4) & 0x0F;
+        int mnc0 = b3 & 0x0F;
+        int mnc1 = (b3 >> 4) & 0x0F;
+
+        // 4. 校验数字有效性（MCC和MNC前两位必须是0-9）
+        if (mcc0 > 9 || mcc1 > 9 || mcc2 > 9 || mnc0 > 9 || mnc1 > 9) {
+            throw new IllegalArgumentException("Decoded digits must be 0-9, invalid encoded value: " + encoded);
+        }
+
+        // 5. 根据 mnc3 判断 MNC 位数并组装结果
+        String mcc = String.format("%d%d%d", mcc0, mcc1, mcc2);
+        String mnc;
+        if (mnc3 == 0xF) {
+            // 2位MNC
+            mnc = String.format("%d%d", mnc0, mnc1);
+        } else if (mnc3 <= 9) {
+            // 3位MNC
+            mnc = String.format("%d%d%d", mnc0, mnc1, mnc3);
+        } else {
+            // 0xA~0xE 为无效填充值
+            throw new IllegalArgumentException("Invalid MNC filler digit in encoded value: " + encoded);
+        }
+
+        return new String[]{mcc, mnc};
+    }
 }

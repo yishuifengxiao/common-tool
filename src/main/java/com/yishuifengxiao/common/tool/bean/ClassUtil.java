@@ -245,7 +245,7 @@ public final class ClassUtil {
                 return null;
             }
             // 保存字段的原始访问权限，并设置为可访问以读取私有字段
-            originalAccessible = field.isAccessible();
+            originalAccessible = field.canAccess(data);
             if (!originalAccessible) {
                 field.setAccessible(true);
             }
