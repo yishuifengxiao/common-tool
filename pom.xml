@@ -45,11 +45,11 @@
         <version>4.1.0</version>
     </parent>
     <properties>
-        <maven.source.version>8</maven.source.version>
-        <maven.target.version>8</maven.target.version>
-        <jsoup.version>1.21.2</jsoup.version>
+        <maven.source.version>21</maven.source.version>
+        <maven.target.version>21</maven.target.version>
+        <jsoup.version>1.23.1</jsoup.version>
         <dom4j.version>2.2.0</dom4j.version>
-        <lombok.version>1.18.42</lombok.version>
+        <lombok.version>1.18.46</lombok.version>
         <logback.version>1.5.11</logback.version>
         <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
@@ -83,12 +83,6 @@
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>jboss-logging</artifactId>
-                    <groupId>org.jboss.logging</groupId>
-                </exclusion>
-            </exclusions>
             <optional>true</optional>
         </dependency>
         <dependency>
