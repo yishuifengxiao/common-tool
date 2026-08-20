@@ -283,7 +283,8 @@ public class TLV {
      */
     public static String toTLV(String tag, String value) {
         tag = StringUtils.isBlank(tag) ? "" : tag.trim();
-        if (!Hex.isHex(value)) {
+        value = StringUtils.isBlank(value) ? "" : value.trim();
+        if (!Hex.isHex(value) && StringUtils.isNotBlank(value)) {
             return tag;
         }
 
