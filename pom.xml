@@ -6,7 +6,9 @@
     <artifactId>common-tool</artifactId>
     <version>9.0.3</version>
     <packaging>jar</packaging>
-    <description>本工具包主要集成了目前在项目开发过程中个人经常会使用到的一些工具类，对工具类进行了一下简单的封装
+    <description>`common-tool` 是一套面向 Java 业务开发的通用工具库，覆盖
+        Bean/JSON、集合、时间、加解密与证书、HTTP、IO、JDBC、文本解析、ASN.1/TLV、智能卡、校验与脱敏等常见场景。多数 API 对 `null`
+        做了空安全处理，可直接在 Spring Boot / 普通 Java 项目中引用。
     </description>
     <name>common-tool</name>
     <url>https://gitee.com/zhiyubujian/tool</url>
