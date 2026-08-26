@@ -1,6 +1,7 @@
 package com.yishuifengxiao.common.tool.lang;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.text.TextUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -58,8 +60,8 @@ public class TLV {
             return new TlvResult().setException(new UncheckedException("illegal data"));
         }
 
-        tag = tag.toUpperCase().trim();
-        tlv = tlv.toUpperCase().trim();
+        tag = TextUtil.removeWhitespaceAndInvisible(tag);
+        tlv = TextUtil.removeWhitespaceAndInvisible(tlv);
 
         if (tag.isEmpty() || !Hex.isHex(tlv) || !Hex.isHex(tag)) {
             return new TlvResult().setException(new UncheckedException("illegal data")).setRemain(tlv);
@@ -189,7 +191,7 @@ public class TLV {
      * @return TlvResult对象，包含所有成功提取的标签-值对和可能的异常信息
      */
     public static TlvResult extractValsOnSameLevel(String tlv, String... tags) {
-        tlv = StringUtils.trim(tlv);
+        tlv = TextUtil.removeWhitespaceAndInvisible(tlv);
         if (!Hex.isHex(tlv)) {
             return new TlvResult().setException(new UncheckedException("illegal data")).setRemain(tlv);
         }
@@ -220,7 +222,7 @@ public class TLV {
      * @return TlvResult对象，包含所有层级提取的标签-值对和可能的异常信息
      */
     public static TlvResult extractValsRecursive(String tlv, String... tags) {
-        tlv = StringUtils.trim(tlv);
+        tlv = TextUtil.removeWhitespaceAndInvisible(tlv);
         if (!Hex.isHex(tlv)) {
             return new TlvResult().setException(new UncheckedException("illegal data"));
         }
@@ -253,6 +255,7 @@ public class TLV {
      * @return 包含所有匹配值的列表，如果发生错误则返回已收集的列表【不包含TAG】
      */
     public static List<String> extractValsLoop(String tag, String tlv) {
+        tlv = TextUtil.removeWhitespaceAndInvisible(tlv);
         if (!Hex.isHex(tlv) || !Hex.isHex(tag)) {
             return new ArrayList<>();
         }
@@ -282,8 +285,8 @@ public class TLV {
      * @return 返回一个符合 TLV 格式的字符串
      */
     public static String toTLV(String tag, String value) {
-        tag = StringUtils.isBlank(tag) ? "" : tag.trim();
-        value = StringUtils.isBlank(value) ? "" : value.trim();
+        tag = TextUtil.removeWhitespaceAndInvisible(tag);
+        value = TextUtil.removeWhitespaceAndInvisible(value);
         if (!Hex.isHex(value) && StringUtils.isNotBlank(value)) {
             return tag;
         }
@@ -327,6 +330,7 @@ public class TLV {
      * @return 十六进制表示的字符串
      */
     private static String toHex(String num) {
+        num = TextUtil.removeWhitespaceAndInvisible(num);
         if (num == null || num.isEmpty()) {
             return "00";
         }
@@ -358,7 +362,7 @@ public class TLV {
     /**
      * 根据输入的十六进制数据计算其TLV长度字段值
      * 长度字段格式遵循BER-TLV编码规则：
-     * - 长度 < 128: 单字节表示 (00-7F)
+     * - 长度 &lt; 128: 单字节表示 (00-7F)
      * - 128 ≤ 长度 ≤ 255: 81前缀 + 1字节长度
      * - 256 ≤ 长度 ≤ 65535: 82前缀 + 2字节长度
      * - 65536 ≤ 长度 ≤ 16777215: 83前缀 + 3字节长度
@@ -372,7 +376,7 @@ public class TLV {
         }
 
         // 移除不可见字符（非十六进制字符）
-        String cleanHex = hexData.replaceAll("[^0-9A-Fa-f]", "");
+        String cleanHex = TextUtil.removeWhitespaceAndInvisible(hexData);
         // 计算数据长度（以字节为单位）
         int byteLength = cleanHex.length() / 2;
 
@@ -416,14 +420,173 @@ public class TLV {
         return String.format(format, n);
     }
 
-    @Data
-    @AllArgsConstructor
+    /**
+     * <p>解析顶层（单层）TLV数据，返回该层级下所有标签-值对</p>
+     * <p>本方法不会递归解析嵌套的TLV，仅解析当前层级的标签-值对。</p>
+     * <p>解析规则：</p>
+     * <ul>
+     * <li>输入为十六进制字符串，可包含空白字符（解析前会被清除）</li>
+     * <li>支持BER-TLV编码：Tag可为多字节（首字节低5位为0x1F时继续读取后续字节），Length支持短格式（&lt;0x80）和长格式（0x80|numBytes）</li>
+     * <li>输入长度为奇数时，最后一个字符会被截断并放入remain中</li>
+     * <li>解析遇到数据不完整（Tag/Length/Value缺失或长度超出范围）时，将未解析的完整数据放入remain</li>
+     * <li>输入不是合法十六进制时，结果中将携带异常信息（exception）</li>
+     * </ul>
+     *
+     * @param hexStr TLV格式的十六进制字符串，允许包含空白字符
+     * @return TlvResult对象，包含：
+     * <ul>
+     * <li>map：解析出的顶层标签-值对（键为Tag的十六进制，值为Value的十六进制）</li>
+     * <li>remain：未解析的剩余数据（含奇数长度截断的字符）</li>
+     * <li>exception：解析异常，无异常时为null</li>
+     * </ul>
+     */
+    public static TlvResult parseTopLevelTlv(String hexStr) {
+        TlvResult result = new TlvResult();
+
+        // 1. 清洗空白字符
+        String clean = TextUtil.removeWhitespaceAndInvisible(hexStr);
+        if (clean.isEmpty()) {
+            return result; // 空输入，remain 为空
+        }
+
+        // 2. 处理奇数长度：截断最后一个字符，保存到 truncated
+        String truncated = "";
+        if (clean.length() % 2 != 0) {
+            truncated = clean.substring(clean.length() - 1).toUpperCase(); // 转为大写
+            clean = clean.substring(0, clean.length() - 1);                // 保留偶数部分
+        }
+
+        // 如果偶数部分也为空（即原始输入只有一个字符），直接返回剩余
+        if (clean.isEmpty()) {
+            result.setRemain(truncated);
+            return result;
+        }
+
+        // 3. 解码为字节数组
+        byte[] data;
+        try {
+            data = HexFormat.of().parseHex(clean);
+        } catch (IllegalArgumentException e) {
+            result.setException(e);
+            result.setRemain(truncated);
+            return result;
+        }
+
+        LinkedHashMap<String, String> map = result.getMap();
+        int i = 0;
+        int n = data.length;
+
+        while (i < n) {
+            int start = i;
+
+            // --- 解析 Tag ---
+            if (i >= n) {
+                // 剩余数据 = 未解析的字节 + 截断字符
+                String remainHex = encodeHexUpper(data, start, n);
+                result.setRemain(remainHex + truncated);
+                return result;
+            }
+            byte b = data[i++];
+            java.util.List<Byte> tagList = new java.util.ArrayList<>();
+            tagList.add(b);
+            if ((b & 0x1F) == 0x1F) {
+                while (true) {
+                    if (i >= n) {
+                        String remainHex = encodeHexUpper(data, start, n);
+                        result.setRemain(remainHex + truncated);
+                        return result;
+                    }
+                    b = data[i++];
+                    tagList.add(b);
+                    if ((b & 0x80) == 0) break;
+                }
+            }
+            byte[] tag = new byte[tagList.size()];
+            for (int idx = 0; idx < tag.length; idx++) {
+                tag[idx] = tagList.get(idx);
+            }
+
+            // --- 解析 Length ---
+            if (i >= n) {
+                String remainHex = encodeHexUpper(data, start, n);
+                result.setRemain(remainHex + truncated);
+                return result;
+            }
+            int firstLen = data[i] & 0xFF;
+            i++;
+            long lengthVal;
+            if (firstLen < 0x80) {
+                lengthVal = firstLen;
+            } else {
+                int numBytes = firstLen & 0x7F;
+                if (numBytes == 0) {
+                    String remainHex = encodeHexUpper(data, start, n);
+                    result.setRemain(remainHex + truncated);
+                    return result;
+                }
+                if (i + numBytes > n) {
+                    String remainHex = encodeHexUpper(data, start, n);
+                    result.setRemain(remainHex + truncated);
+                    return result;
+                }
+                lengthVal = 0;
+                for (int j = 0; j < numBytes; j++) {
+                    lengthVal = (lengthVal << 8) | (data[i] & 0xFF);
+                    i++;
+                }
+            }
+
+            // --- 检查 Value 完整性 ---
+            if (lengthVal > n - i) {
+                String remainHex = encodeHexUpper(data, start, n);
+                result.setRemain(remainHex + truncated);
+                return result;
+            }
+
+            // --- 读取 Value ---
+            int valueLen = (int) lengthVal;
+            byte[] value = new byte[valueLen];
+            System.arraycopy(data, i, value, 0, valueLen);
+            i += valueLen;
+
+            // 存入 map
+            String tagHex = encodeHexUpper(tag);
+            String valHex = encodeHexUpper(value);
+            map.put(tagHex, valHex);
+        }
+
+        // 全部解析完成，剩余数据仅为截断的字符（如果有）
+        result.setRemain(truncated);
+        return result;
+    }
+
+    /**
+     * 将字节数组编码为大写十六进制字符串
+     */
+    private static String encodeHexUpper(byte[] bytes) {
+        return HexFormat.of().withUpperCase().formatHex(bytes);
+    }
+
+    /**
+     * 将字节数组的指定范围编码为大写十六进制字符串
+     */
+    private static String encodeHexUpper(byte[] data, int from, int to) {
+        int len = to - from;
+        if (len <= 0) return "";
+        byte[] slice = new byte[len];
+        System.arraycopy(data, from, slice, 0, len);
+        return encodeHexUpper(slice);
+    }
+
     @NoArgsConstructor
+    @AllArgsConstructor
+    @Data
     @Accessors(chain = true)
     public static class TlvResult implements Serializable {
         private LinkedHashMap<String, String> map = new LinkedHashMap<>();
         private String remain = "";
         private Exception exception;
+
 
         /**
          * 获取所有TLV解析结果的副本
@@ -445,6 +608,21 @@ public class TLV {
                 return "";
             }
             return map.getOrDefault(tag.trim().toUpperCase(), "");
+        }
+
+        /**
+         * 检查是否包含指定的标签
+         *
+         * @param tag 要检查的标签字符串
+         * @return 如果标签存在且不为空则返回true，否则返回false
+         */
+        public boolean hasTag(String tag) {
+            // 检查标签是否为空或空白字符串
+            if (StringUtils.isBlank(tag)) {
+                return false;
+            }
+            // 将标签去除前后空格并转换为大写后检查是否存在于map中
+            return map.containsKey(tag.trim().toUpperCase());
         }
 
 
@@ -490,6 +668,7 @@ public class TLV {
         public boolean isSuccess() {
             return this.exception == null;
         }
+
 
     }
 

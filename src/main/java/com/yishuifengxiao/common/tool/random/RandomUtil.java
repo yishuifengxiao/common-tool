@@ -111,7 +111,7 @@ public class RandomUtil {
      *
      * @param numBytes 需要的随机字节数（结果字符串长度为 numBytes * 2）
      * @return 十六进制随机字符串（小写字母）
-     * @throws IllegalArgumentException 如果 numBytes <= 0
+     * @throws IllegalArgumentException 如果 numBytes &lt;= 0
      */
     public static String generateRandomHexString(int numBytes) {
         if (numBytes <= 0) {

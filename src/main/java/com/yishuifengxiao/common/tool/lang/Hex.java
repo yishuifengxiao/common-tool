@@ -51,6 +51,65 @@ public class Hex {
     }
 
     /**
+     * 将十六进制字符串转换为 ASCII 字符串。
+     * 每两个十六进制字符对应一个 ASCII 字符（0x00~0xFF）。
+     *
+     * @param hex 十六进制字符串，可含空白字符，不区分大小写
+     * @return 对应的 ASCII 字符串
+     * @throws IllegalArgumentException 如果 hex 为 null，或长度为奇数，或包含非法十六进制字符
+     */
+    public static String hexToAscii(String hex) {
+        if (hex == null) {
+            throw new IllegalArgumentException("hex must not be null");
+        }
+        String clean = TextUtil.removeWhitespaceAndInvisible(hex);
+        if (clean.isEmpty()) {
+            return "";
+        }
+        if (clean.length() % 2 != 0) {
+            throw new IllegalArgumentException("Hex string length must be even, but got " + clean.length());
+        }
+
+        byte[] bytes = new byte[clean.length() / 2];
+        for (int i = 0; i < clean.length(); i += 2) {
+            int high = Character.digit(clean.charAt(i), 16);
+            int low = Character.digit(clean.charAt(i + 1), 16);
+            if (high == -1 || low == -1) {
+                throw new IllegalArgumentException("Invalid hex character at position " + i);
+            }
+            bytes[i / 2] = (byte) ((high << 4) + low);
+        }
+        // 使用 US-ASCII 解码，若字节值超出 0~127 仍保留原值（扩展 ASCII）
+        return new String(bytes, StandardCharsets.US_ASCII);
+    }
+
+    /**
+     * 将 ASCII 字符串转换为大写十六进制字符串。
+     * 每个字符取其低 8 位（0~255）转换为两位十六进制。
+     *
+     * @param ascii ASCII 字符串（若包含非 ASCII 字符，则只取低字节，可能失真）
+     * @return 对应的大写十六进制字符串
+     * @throws IllegalArgumentException 如果 ascii 为 null
+     */
+    public static String asciiToHex(String ascii) {
+
+        if (ascii == null) {
+            throw new IllegalArgumentException("ascii must not be null");
+        }
+        ascii = StringUtils.trim(ascii);
+        if (ascii.isEmpty()) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(ascii.length() * 2);
+        for (char c : ascii.toCharArray()) {
+            // 只取低 8 位，确保 0~255 范围
+            int val = c & 0xFF;
+            sb.append(String.format("%02X", val));
+        }
+        return sb.toString();
+    }
+
+    /**
      * 将UTF-8编码的字符串转换为十六进制字符串
      *
      * @param str 传入的UTF-8编码字符串

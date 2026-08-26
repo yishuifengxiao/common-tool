@@ -1,14 +1,7 @@
-package com.yishuifengxiao.common.tool.log;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
+package com.yishuifengxiao.common.tool.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
-
-import com.yishuifengxiao.common.tool.collections.CollUtil;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -44,9 +37,11 @@ public class LogLevelUtil {
             return false;
         }
 
+        String targetName = loggerName.trim();
+        Level level;
         // 校验日志级别是否合法
         try {
-            Level.valueOf(logLevel.trim().toUpperCase());
+            level = Level.valueOf(logLevel.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             if (log.isWarnEnabled()) {
                 log.warn("Invalid log level provided: {}, loggerName={}", logLevel, loggerName);
@@ -56,20 +51,15 @@ public class LogLevelUtil {
 
         try {
             LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
-            final List<Logger> loggers = loggerContext.getLoggerList();
-
-            // 使用串行流替代并行流保证线程安全
-            final Set<Logger> matchedLoggers = loggers.stream()
-                    .filter(v -> Objects.equals(v.getName(), loggerName))
-                    .collect(Collectors.toSet());
-
-            if (CollUtil.isEmpty(matchedLoggers)) {
+            // 直接获取（必要时创建）目标 Logger，避免因目标 Logger 尚未实例化而无法匹配
+            // 设置到 Logger 实例上的级别会持久保存，待该 Logger 被创建后即生效
+            Logger logger = loggerContext.getLogger(targetName);
+            if (logger == null) {
                 return false;
             }
+            logger.setLevel(level);
 
-            matchedLoggers.forEach(logger -> logger.setLevel(Level.valueOf(logLevel.trim().toUpperCase())));
-
-        } catch (Throwable e) {
+        } catch (Exception e) {
             if (log.isWarnEnabled()) {
                 log.warn("There is a problem when dynamically modifying the log level. loggerName={}, logLevel={}",
                         loggerName, logLevel, e);

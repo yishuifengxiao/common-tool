@@ -1,762 +1,555 @@
-# 快速启动
-本工具包主要集成了目前在项目开发过程中个人经常会使用到的一些工具类，对工具类进行了一下简单的封装。该工具常用的工具有：
+# common-tool
 
-| 工具类路径 | 作用说明 |
-| ------------------------------------------------------------ | :--------------------: |
-| [com.yishuifengxiao.common.tool.bean](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/bean/package-summary.html) |                        java bean 操作工具|
-| [com.yishuifengxiao.common.tool.collections](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/collections/package-summary.html) | java 集合操作工具      |
-| [com.yishuifengxiao.common.tool.context](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/context/package-summary.html) | 数据存储工具           |
-| [com.yishuifengxiao.common.tool.converter](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/converter/package-summary.html) | 数据转换工具           |
-| [com.yishuifengxiao.common.tool.datetime](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/datetime/package-summary.html) | 日期时间工具           |
-| [com.yishuifengxiao.common.tool.codec](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/encoder/package-summary.html) | 加解密工具             |
-| [com.yishuifengxiao.common.tool.entity](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/entity/package-summary.html) | 基础通用对象           |
-| [com.yishuifengxiao.common.tool.exception](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/exception/package-summary.html) | 自定义异常             |
-| [com.yishuifengxiao.common.tool.exception.constant](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/exception/constant/package-summary.html) | 异常错误码常量         |
-| [com.yishuifengxiao.common.tool.http](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/http/package-summary.html) | HTTP操作工具           |
-| [com.yishuifengxiao.common.tool.io](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/io/package-summary.html) | IO流和文件操作工具     |
-| [com.yishuifengxiao.common.tool.lang](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/lang/package-summary.html) | 常见数据类型的封装工具 |
-| [com.yishuifengxiao.common.tool.log](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/log/package-summary.html) | 日志工具               |
-| [com.yishuifengxiao.common.tool.random](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/random/package-summary.html) | 随机工具               |
-| [com.yishuifengxiao.common.tool.sensitive](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/sensitive/package-summary.html) | 脱敏工具               |
-| [com.yishuifengxiao.common.tool.utils](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/utils/package-summary.html) | 自定义工具             |
-| [com.yishuifengxiao.common.tool.validate](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/validate/package-summary.html) | 自定义校验工具         |
+`common-tool` 是一套面向 Java 业务开发的通用工具库，覆盖 Bean/JSON、集合、时间、加解密与证书、HTTP、IO、JDBC、文本解析、ASN.1/TLV、智能卡、校验与脱敏等常见场景。多数 API 对 `null` 做了空安全处理，可直接在 Spring Boot / 普通 Java 项目中引用。
 
-工具包已经发布到maven中央仓库，使用方法如下：
+- **当前版本**：`9.0.3`
+- **JDK**：21
+- **坐标**：`com.yishuifengxiao.common:common-tool`
+- **仓库**：[Gitee](https://gitee.com/zhiyubujian/tool)
+- **协议**：Apache License 2.0
+
+部分能力依赖可选组件（未引入时对应模块不可用）：
+
+| 能力 | 依赖 | Maven 作用域 |
+|------|------|----------------|
+| Bean Validation 分组校验 | `hibernate-validator` | optional |
+| JDBC 实体映射 / `JdbcHelper` | `spring-jdbc`、`jakarta.persistence-api` | optional |
+
+核心依赖（会随本库引入）：Jackson、Apache Commons Lang3、Jsoup、dom4j、json-path、SLF4J / Logback。
+
+## 快速开始
 
 ```xml
 <dependency>
-	<groupId>com.yishuifengxiao.common</groupId>
-	<artifactId>common-tool</artifactId>
-	<version>4.3.0</version>
+    <groupId>com.yishuifengxiao.common</groupId>
+    <artifactId>common-tool</artifactId>
+    <version>9.0.3</version>
 </dependency>
 ```
 
-最新版的版本号参见 [https://mvnrepository.com/artifact/com.yishuifengxiao.common/common-tool](https://mvnrepository.com/artifact/com.yishuifengxiao.common/common-tool)
+最新版本见 [Maven Central](https://central.sonatype.com/artifact/com.yishuifengxiao.common/common-tool)。
 
-工具类说明文档的地址为 [https://apidoc.gitee.com/zhiyubujian/tool/](https://apidoc.gitee.com/zhiyubujian/tool/)
+---
 
-# 一 Bean操作工具
+## 模块总览
 
-## 1.1 对象转换工具
+根包：`com.yishuifengxiao.common.tool`
 
-该工具的主要目的是将源对象转换为目标对象，其主要功能如下:
+| 模块 | 包 | 作用 |
+|------|----|------|
+| Bean | `bean` | 属性拷贝、Map/Bean 互转、JSON、反射读字段、源码编译 |
+| 集合 | `collections` | 空安全集合操作、交并差 |
+| 缓存 | `context` | 进程内 ConcurrentHashMap 缓存 |
+| 时间 | `datetime` | Date / LocalDateTime 偏移、解析与格式化 |
+| 加解密 | `codec` | AES/DES/3DES、RSA/ECC、摘要、CMAC、X.509、密钥对 |
+| 实体 | `entity` | 统一响应、分页、键值对、布尔三态、枚举基接口 |
+| 异常 | `exception` | 受检 / 非受检业务异常 |
+| HTTP | `http` | 基于 Jsoup 的客户端、URL 解析、User-Agent |
+| IO | `io` | 文件与流、Base64、图片、安静关闭 |
+| JDBC | `jdbc` | 基于 JPA 注解的简易 CRUD、URL 组装、POJO 生成 |
+| 语言 | `lang` | 布尔/数字、Hex、OID、TLV |
+| 随机 | `random` | 雪花 ID、UUID、随机中文/十六进制 |
+| 脱敏 | `sensitive` | 姓名/手机/身份证/密码脱敏与 Jackson 注解 |
+| 智能卡 | `smartcard` | PC/SC 读卡器与 APDU |
+| 文本 | `text` | 命名转换、正则抽取、HTML/正文、`${}` 占位符 |
+| 杂项 | `utils` | 断言、校验抛错、身份证、线程池、GPS、网卡、OS |
+| 校验 | `validate` | Bean Validation 工具与取值范围注解 |
+| ASN.1 | `asn1` | BER 读写与对象编解码 |
 
-- 将源对象里属性值复制给目标对象
-- 将Java对象序列化为二进制数据
-- 将序列化化后的二进制数据反序列化为对象
+---
 
-工具路径:
+## 1. Bean 操作（`bean`）
 
- ```java
-  com.yishuifengxiao.common.tool.bean.BeanUtil
- ```
+### API 列表
 
-  使用示例:
+**`BeanUtil`**
 
-```java
+| 方法 | 说明 |
+|------|------|
+| `copy(source, target)` | 按同名、兼容类型字段把源对象属性拷到目标对象 |
+| `objectToByte(obj)` / `byteToObject(...)` | Java 序列化与反序列化 |
+| `mapToBean(map, clazz)` / `beanToMap(data)` | Map 与 Bean 互转 |
+| `cloneVal(val)` / `deepClone(val)` | 浅克隆 / JSON 深克隆 |
 
-CustomException e = new CustomException();
-DataException ex = new DataException();
+**`JsonUtil`**
 
-//将CustomException复制为DataException
-// 第一个参数为源对象，第二个参数为目标对象
-DataException copy = BeanUtil.copy(e, ex);
+| 方法 | 说明 |
+|------|------|
+| `mapper()` | 获取内部 `ObjectMapper` |
+| `strToBean` / `strToList` | JSON 转对象或列表 |
+| `extract` / `extractList` | 用 JsonPath 抽取字段 |
+| `jsonToMap` | JSON 对象转 Map |
+| `isJSON` / `isJSONObject` / `isJSONArray` | 判断 JSON 形态 |
+| `toJSONString` / `prettyPrinter` | 序列化（可控制是否输出 null） |
+| `deepClone(val)` | JSON 深拷贝 |
 
-//将CustomException序列化为二进制数组
-byte[] bytes = BeanUtil.objectToByte(e);
+**`ClassUtil`**：`fields`、`extractValue`、`extractNestedValue`（如 `a.b.c`）、`getValue`、`findField`。
 
-// 将转换后的二进制数据反序列化为对象
-Object object = BeanUtil.byteToObject(bytes);
+**`CustomStringJavaCompiler`**：把 Java 源码字符串编译为字节码。
 
-// 将转换后的二进制数据反序列化为指定的对象
-CustomException exception = BeanUtil.byteToObject(bytes, CustomException.class);
-```
-# 二 集合操作工具
-
-## 2.1 集合元素处理工具
-
-该工具的主要目的是对集合进行处理，让用户在无须考虑NPE的情况下安全地操作集合。主要作用如下：
-
-- 将集合转换成java8中的stream流
-- 获取集合中的第一个元素
-- 将数据转换成集合
-- 安全地创建集合
-
-
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.collections.DataUtil
-```
-
-  使用示例:
-
-```java
-// 安全地创建集合，该方法与Arrays.asList不同，
-// 创建出来的是ArrayList，可以放心地对创建出来的list进行各种操作
-//List<String> list = Arrays.asList("a", "b", "c", "d");
-List<String> list = DataUtil.asList("a", "b", "c", "d");
-
-//将集合转换成并行流
-Stream<String> parallelStream = DataUtil.parallelStream(list);
-
-//将集合转换成串行流
-Stream<String> stream = DataUtil.stream(list);
-
-// 获取集合的第一个元素
-String first = DataUtil.first(list);
-
-//将数组转换成集合
-String[] strs = {"a", "b", "c", "d"};
-List<String> asList = DataUtil.asList(strs);
-```
-
-## 2.2 空集合判断工具
-
-该工具的主要目的在于快速地判断一个集合是否为空集合或者为NULL。其主要作用如下：
-
-- 判断集合是否为空
-- 判断分页对象是否为空
-- 判断集合是否仅有一个元素
-
-工具路径:
+### 示例
 
 ```java
-com.yishuifengxiao.common.tool.collections.CollUtil
+User src = new User();
+src.setName("yi");
+User dest = BeanUtil.copy(src, new User());
+
+Map<String, Object> map = BeanUtil.beanToMap(src);
+User fromMap = BeanUtil.mapToBean(map, User.class);
+
+String json = JsonUtil.toJSONString(src);
+User bean = JsonUtil.strToBean(json, User.class);
+String name = JsonUtil.extract("{\"user\":{\"name\":\"yi\"}}", "$.user.name", String.class);
 ```
 
-  使用示例:
+---
+
+## 2. 集合（`collections`）
+
+### API 列表
+
+**`CollUtil`**
+
+| 方法 | 说明 |
+|------|------|
+| `toMap(k1, v1, k2, v2, ...)` | 偶数个参数构建 LinkedHashMap，奇数个抛 `IllegalArgumentException` |
+| `stream(...)` | Collection / 数组 / Stream 转串行流，`null` 得到空流 |
+| `toList` / `toArray` / `toSet` | 数组与集合互转 |
+| `first` / `last` / `get` | 安全取值，返回 `Optional` |
+| `asList` / `asSet` / `asArray` | 可变参数创建可变集合（非 `Arrays.asList` 固定长度） |
+| `merge(collections...)` | 合并多个集合 |
+| `forEach(collection, (index, item) -> ...)` | 带下标遍历 |
+| `isEmpty` / `isNotEmpty` | 支持 Collection、数组、Map、`Page` |
+| `isAllEmpty` / `isAnyEmpty` / `isNoneEmpty` | 多集合空判断 |
+| `isOnlyOneElement` / `gteOneElement` / `gtOneElement` / `ltOneElement` / `lteOneElement` | 元素个数判断 |
+| `size` | 空安全 size |
+
+**`ArrayUtil`**：`intersection` / `union` / `difference`，集合或数组，比较规则由 `BiPredicate` 指定。
+
+### 示例
 
 ```java
-//判断改分页对象是否为空或者null
-Page<FileRecord> page = Page.empty();
-boolean empty = EmptyUtil.isEmpty(page);
+List<String> list = CollUtil.asList("a", "b", "c");
+CollUtil.stream(list).forEach(System.out::println);
+String first = CollUtil.first(list).orElse(null);
 
-//判断该集合是否为空或者null
-List<String> list = new ArrayList<>();
-boolean empty1 = EmptyUtil.isEmpty(list);
+Map map = CollUtil.toMap("k1", "v1", "k2", 2);
 
-//判断该集合是否仅有一个元素
-boolean onlyOneElement = EmptyUtil.onlyOneElement(list);
+Collection<String> inter = ArrayUtil.intersection(
+        CollUtil.asList("a", "b"),
+        CollUtil.asList("b", "c"),
+        Objects::equals);
 ```
 
-## 2.3 字典链式构建工具
+---
 
-该工具的主要目的是能通过链式方法快速地构建一个字典对象。
+## 3. 本地缓存（`context`）
 
-工具路径:
+**`LocalCache`**：进程内 `ConcurrentHashMap`。
+
+| 方法 | 说明 |
+|------|------|
+| `put(value)` | key 为 `value.getClass().getName()` |
+| `put(key, value)` / `get(key)` | 显式 key |
+| `get(key, supplier)` | 不存在时用 Supplier 填充 |
+| `get(Class)` / `remove(Class)` | 按类型名存取 |
+| `keys` / `containsKey` / `clear` | 键集合与清理 |
 
 ```java
-com.yishuifengxiao.common.tool.collections.MapUtil
+LocalCache.put("user", user);
+User cached = (User) LocalCache.get("user");
+Config cfg = LocalCache.get("config", Config::loadDefault);
 ```
 
-  使用示例:
+---
+
+## 4. 日期时间（`datetime`）
+
+**`DateOffsetUtil`**（`java.util.Date`）与 **`LocalDateTimeUtil`**（`java.time.LocalDateTime`）能力对齐：
+
+| 方法 | 含义 |
+|------|------|
+| `todayStart` / `yesterdayStart` / `yesterdayEnd` | 今天 00:00:00、昨天起止 |
+| `last2DayStart` / `last7DayStart` / `last14DayStart` | 前天 / 7 天前 / 14 天前 0 点 |
+| `mondayStart` / `lastMondayStart` / `last2MondayStart` / `mondayStart(offsetWeeks)` | 周一 0 点 |
+| `getMonday` / `getMondayStart` | 指定日期所在周一 |
+| `dayStart` / `dayEnd` | 相对今天偏移的日界 |
+| `monthStart` / `monthStart(offset)` / `lastMonthStart` / `last2MonthStart` | 月初 |
+| `getDayStart` / `getDayEnd` / `getMonthStart` / `getYearStart` | 任意时刻的日/月/年起点 |
+| `LocalDateTimeUtil.parse(timeStr, patterns...)` | 按候选格式解析 |
+
+**`DateTimeUtil`**：`now`、`date2LocalDateTime`、`localDateTime2Date`、`getTime`、`parse` / `parseDate`、`format` / `formatDate`。
 
 ```java
-Map<String, Object> map = MapUtil.instance().put("k1", "v1").
-        put("k2", "v2").put("k3", "v3").build();
+Date today = DateOffsetUtil.todayStart();
+LocalDateTime weekStart = LocalDateTimeUtil.mondayStart();
+
+LocalDateTime ldt = DateTimeUtil.date2LocalDateTime(new Date());
+String s = DateTimeUtil.format(ldt, "yyyy-MM-dd HH:mm:ss");
+LocalDateTime parsed = DateTimeUtil.parse("2026-08-24 21:00:00", "yyyy-MM-dd HH:mm:ss");
 ```
-# 三 日期时间工具
 
-## 3.1 Date时间工具
+---
 
-该工具主要是基于`java.util.Date`实现的日期时间获取工具，其主要作用如下:
+## 5. 加解密与证书（`codec`）
 
-- 获取今天的开始时间点(00:00:00)
-- 获取昨天的开始时间点(00:00:00)和结束时间点(23:59:59)
-- 获取前天的开始时间点(00:00:00)
-- 获取7天前的那个时间的开始时间点(00:00:00)
-- 获取14天前的那个时间的开始时间点(00:00:00)
-- 获取本周一的那个时间的开始时间点(00:00:00)
-- 获取上周一的那个时间的开始时间点(00:00:00)
-- 获取过去指定时间的那个时间的开始时间点(00:00:00)
-- 获取本月1号的那个时间的开始时间点(00:00:00)
-- 获取过去指定月份的那个月份的1号的开始时间点(00:00:00)
-- 获取过去指定年份的那个时间的1月1号的那个时间的开始时间点(00:00:00)
-
-
-
-工具路径:
+| 类 | 主要 API | 说明 |
+|----|----------|------|
+| `AES` | `encrypt` / `decrypt`（可省略 key） | AES，结果 Base64；无 key 用内置默认密钥 |
+| `AesCbc` | `encrypt` / `decrypt` / `generateIV` / `padData` | AES-CBC，十六进制或字节 |
+| `DES` | `encrypt` / `decrypt`、`encryptData` / `decryptData`、`mac` | DES；`*Data` 失败抛异常，其余失败常返回 null |
+| `TripleDES` | `generate3DESKey`、`encrypt`、`decrypt` | 3DES，密钥为 Base64 |
+| `Md5` | `md5` / `md5Short`（字符串或 File） | 32 / 16 位小写 MD5 |
+| `SHA256` | `calculateSHA256` / `calculateSHA256FromHex` | SHA-256 |
+| `CMAC` | `calculate(key, data)` | AES-CMAC |
+| `RSA` | `generateKeyPair`、加解密、密钥字符串互转 | RSA |
+| `ECC` | 密钥生成、签名验签、PEM/Hex 解析、ECDH、证书匹配 | 椭圆曲线，默认曲线 secp256r1 |
+| `EccKeyAgreement` | `eccKeyAgreement(...)` | ECDH 共享密钥 |
+| `KeyPairHelper` | RSA/DSA/ECC 密钥对生成与 Hex 导出 | 密钥工厂 |
+| `X509Helper` | `parseCert`、公钥/曲线 OID/SKID 抽取、链校验、PEM/Hex 转换 | X.509 |
 
 ```java
-com.yishuifengxiao.common.tool.datetime.DateOffsetUtil
+String cipher = AES.encrypt("my-secret-key", "hello");
+String plain = AES.decrypt("my-secret-key", cipher);
+
+String md5 = Md5.md5("payload");
+String sha = SHA256.calculateSHA256("payload");
+
+KeyPair rsa = RSA.generateKeyPair(2048);
+String enc = RSA.encrypt("hello", rsa.getPublic());
+String dec = RSA.decrypt(enc, rsa.getPrivate());
+
+X509Certificate cert = X509Helper.parseCert(pemOrBase64);
+String pubHex = X509Helper.extractSubjectPublicKeyHex(cert);
 ```
 
-  使用示例:
+---
+
+## 6. 通用实体（`entity`）
+
+| 类型 | 说明 |
+|------|------|
+| `Response<T>` | 统一接口响应：`code`、`msg`、`data` |
+| `Slice` | 分页参数：默认 `size=10`、`current=1`，`startOffset` / `endOffset` |
+| `Page<S>` | 分页结果：`data`、`total`、`pages`，`map` 转换元素类型 |
+| `PageQuery<T>` | `Slice` + 查询条件 `query` |
+| `KeyValue<K,V>` / `StringKeyValue<T>` | 键值对 |
+| `BoolStat` | 布尔三态：TRUE / FALSE / UNKNOWN |
+| `RootEnum<T>` | 枚举基接口，`code()`、`equalCode`、`RootEnum.of(clazz, code)` |
+
+**`Response` 工厂方法**
+
+| 方法 | HTTP 语义 |
+|------|-----------|
+| `suc()` / `suc(data)` / `suc(msg, data)` | 200 |
+| `badParam()` / `badParam(msg)` / `badParam(msg, data)` | 400 |
+| `unAuth()` / `unAuth(msg)` / `unAuth(msg, data)` | 401 |
+| `notAllow()` / `notAllow(msg)` | 403 |
+| `notFound()` | 404 |
+| `error()` / `error(msg)` / `error(msg, data)` | 500 |
+| `of(code, msg, data)` | 自定义 |
+
+常量见 `Response.Const`（如 `CODE_OK = 200`）。
 
 ```java
-//今天的开始时间(今天的00:00:00)
-Date todayStart = DateOffsetUtil.todayStart();
-//获取昨天的开始时间(昨天的00:00:00)
-Date yesterdayStart = DateOffsetUtil.yesterdayStart();
-//获取昨天的结束时间(昨天的23:59:59)
-Date yesterdayEnd = DateOffsetUtil.yesterdayEnd();
-//获取前天的开始时间(前天的00:00:00)
-Date last2DayStart = DateOffsetUtil.last2DayStart();
-//获取7天前那一天0时0分0秒这个时间(七天前的00:00:00)
-Date last7DayStart = DateOffsetUtil.last7DayStart();
-//获取本周一的开始时间(本周一的00:00:00)
-Date mondayStart = DateOffsetUtil.mondayStart();
-//获取本月的开始时间(本月1号的00:00:00)
-Date monthStart = DateOffsetUtil.monthStart();
-//获取1个月前的那个月的开始时间(1个月前的那个月的00:00:00)
-Date monthStart1 = DateOffsetUtil.monthStart(1);
+return Response.suc(user);
+return Response.badParam("name 不能为空");
+
+Page<User> page = Page.of(users, 100, 10, 1);
+Page<UserVO> voPage = page.map(this::toVo);
+
+PageQuery<User> q = PageQuery.of(new User().setName("yi"), 10, 1);
 ```
 
-## 3.2 LocalDateTime时间工具
+---
 
-该工具主要是基于`java.time.LocalDateTime`实现的日期时间获取工具，其主要作用如下:
+## 7. 异常（`exception`）
 
-- 获取今天的开始时间点(00:00:00)
-- 获取昨天的开始时间点(00:00:00)和结束时间点(23:59:59)
-- 获取前天的开始时间点(00:00:00)
-- 获取7天前的那个时间的开始时间点(00:00:00)
-- 获取14天前的那个时间的开始时间点(00:00:00)
-- 获取本周一的那个时间的开始时间点(00:00:00)
-- 获取上周一的那个时间的开始时间点(00:00:00)
-- 获取过去指定时间的那个时间的开始时间点(00:00:00)
-- 获取本月1号的那个时间的开始时间点(00:00:00)
-- 获取过去指定月份的那个月份的1号的开始时间点(00:00:00)
-- 获取过去指定年份的那个时间的1月1号的那个时间的开始时间点(00:00:00)
+| 类 | 类型 | 工厂 |
+|----|------|------|
+| `CustomException` | 受检异常 | `of(msg)` / `of(msg, context)` |
+| `UncheckedException` | 运行时异常 | `of(msg)` / `of(code, msg)` / `of(msg, context)` |
 
+二者均可设置 `code`、`context`。`Assert`、`ValidateUtils` 失败时抛出 `UncheckedException`。
 
+---
 
-工具路径:
+## 8. HTTP（`http`）
+
+**`HttpClient`**（Jsoup）：链式构建请求；HTTPS 使用信任全部证书的 SSLContext（仅适合明确信任的内网/测试环境）。
+
+| 方法 | 说明 |
+|------|------|
+| `instance()` | 新建客户端 |
+| `url` / `get` / `post` / `put` / `delete` / `method` | 地址与动词 |
+| `form()` / `json()` | Content-Type |
+| `data(Map)` / `data(String body)` | 表单或原始 body |
+| `addHeader` / `setHeaders` / `cookies` / `timeout` / `userAgent` | 头、Cookie、超时 |
+| `execute()` / `executeAsString()` | 执行 |
+| 静态 `get` / `postForm` / `postJson` / `execute` | 一次性调用 |
+
+**`UrlUtil`**：`extractProtocolAndHost`、`extractDomain`、`extractProtocol`、`matchHttpRequest`、`urlComplete`、`queryStringToMap`、`keyword`。
+
+**`UserAgent`**：枚举常见 UA，`autoUserAgent()` 随机一个。
 
 ```java
-com.yishuifengxiao.common.tool.datetime.LocalDateTimeUtil
+String html = HttpClient.get("https://example.com");
+
+String body = HttpClient.instance()
+        .url("https://api.example.com/users")
+        .json()
+        .addHeader("Authorization", "Bearer token")
+        .data("{\"name\":\"yi\"}")
+        .post()
+        .executeAsString();
+
+Map<String, String> qs = UrlUtil.queryStringToMap("a=1&b=2");
 ```
 
-  使用示例:
+---
+
+## 9. IO（`io`）
+
+**`IoUtil`**：`suffix`、`fileToByteArray`、`inputStreamToByteArray` / `inputStreamToString`、`inputStreamToFile`、`readResourceAsString`、`copy`、`writeToFile`、`readFileAsString`、`base64ToFile`、`readFileToBase64`。
+
+**`ImageUtil`**：图片文件 / `BufferedImage` 与 Base64 互转。
+
+**`CloseUtil`**：`close(closeables...)`，可选择先 `flush`。
 
 ```java
-//今天的开始时间(今天的00:00:00)
-LocalDateTime todayStart = TemporalUtil.todayStart();
-//获取昨天的开始时间(昨天的00:00:00)
-LocalDateTime yesterdayStart = TemporalUtil.yesterdayStart();
-//获取昨天的结束时间(昨天的23:59:59)
-LocalDateTime yesterdayEnd = TemporalUtil.yesterdayEnd();
-//获取前天的开始时间(前天的00:00:00)
-LocalDateTime last2DayStart = TemporalUtil.last2DayStart();
-//获取7天前那一天0时0分0秒这个时间(七天前的00:00:00)
-LocalDateTime last7DayStart = TemporalUtil.last7DayStart();
-//获取本周一的开始时间(本周一的00:00:00)
-LocalDateTime mondayStart = TemporalUtil.mondayStart();
-//获取本月的开始时间(本月1号的00:00:00)
-LocalDateTime monthStart = TemporalUtil.monthStart();
-//获取1个月前的那个月的开始时间(1个月前的那个月的00:00:00)
-LocalDateTime monthStart1 = TemporalUtil.monthStart(1);
+String text = IoUtil.readFileAsString(new File("data.txt"));
+IoUtil.writeToFile("hello", new File("out.txt"));
+String b64 = ImageUtil.imageFileToBase64("avatar.png");
+CloseUtil.close(in, out);
 ```
 
-## 3.3 时间解析与格式化工具
+---
 
-该工具的主要目的是实现字符串与时间的转换以及不同格式时间的转换，主要功能如下
+## 10. JDBC（`jdbc`，需 `spring-jdbc`）
 
-- 获取中国时区
-- LocalDateTime与Date相互转换
-- 将时间转换成毫秒数
-- 将字符串解析为时间
-- 将时间格式化为字符串
+实体建议使用 JPA 注解：`@Entity` / `@Table`、`@Id`、`@Column`。无注解时按类名、字段名映射。
 
+**`JdbcHelper`**（基于 `NamedParameterJdbcTemplate`）
 
+| 方法 | 说明 |
+|------|------|
+| `findByPrimaryKey` | 按主键查 |
+| `count` / `findOne` / `find` | 按非空字段拼条件，`likeMode` 控制模糊匹配 |
+| `findPage` | 分页查询 |
+| `insert` / `saveOrUpdate` / `saveAll` | 插入、存在则更新、批量 |
+| `updateByPrimaryKey` / `updateByPrimaryKeySelective` | 全量 / 非空字段更新 |
+| `deleteByPrimaryKey` / `deleteByPrimaryKeys` | 按主键删 |
+| `find` / `findOne` / `findPage` / `update` / `batchUpdate` | 自定义命名参数 SQL |
+| `Order.asc("col")` / `Order.desc("col")` | 排序 |
 
-工具路径:
+`Result`：`getKey()` / `getKeyAsLong()` / `keyHolder()`。
+
+其它类：`FieldExtractor`、`SimpleRowMapper`、`JdbcUrlHelper`（链式拼 JDBC URL）、`ZoneIdDetector`、`PojoGenerator`（从表结构生成实体源码）、`JdbcError`、`FieldValue`。
 
 ```java
-com.yishuifengxiao.common.tool.datetime.DateTimeUtil
+JdbcHelper helper = new JdbcHelper(jdbcTemplate);
+
+User u = helper.findByPrimaryKey(User.class, 1L);
+List<User> list = helper.find(new User().setName("yi"), true, JdbcHelper.Order.desc("id"));
+Page<User> page = helper.findPage(new User(), false, Slice.of(10, 1));
+
+helper.insert(new User().setName("yi"));
+helper.updateByPrimaryKeySelective(u);
+helper.deleteByPrimaryKey(User.class, 1L);
+
+List<User> custom = helper.find(User.class,
+        "SELECT * FROM sys_user WHERE age > :age",
+        new MapSqlParameterSource("age", 18));
+
+String url = JdbcUrlHelper.parseJdbcUrl(rawUrl)
+        .useUtf8mb4()
+        .useBeijingTimeZone()
+        .enableBatch()
+        .buildJdbcUrl();
 ```
 
-  使用示例:
+---
+
+## 11. 语言工具（`lang`）
+
+| 类 | 主要 API |
+|----|----------|
+| `BoolUtil` | `parse`、`isTrueText` / `isFalseText`、`boolToInt`、`twoStateTrue` / `twoStateFalse` |
+| `NumberUtil` | `parseInt` / `parseLong` / `parseDouble` / `parseFloat` / `parseToBigDecimal` / `parseHex`；`gt`/`gte`/`lt`/`lte`/`equals`；`gtZero` 等；`containsAny` |
+| `Hex` | 十六进制与 UTF-8/字节/Base64/二进制互转、补齐、异或 |
+| `HexBitset` | Hex 与 `BitSet` / 比特串互转 |
+| `OID` | OID 点分与 Hex 互转 |
+| `TLV` / `TLVUnit` / `TLVFormatter` | BER-TLV 抽取、组装、格式化 |
 
 ```java
-// 获取中国时区
-ZoneId china = DateTimeUtil.zoneIdOfChina();
+Integer n = NumberUtil.parseInt("12", 0);
+boolean ok = NumberUtil.gtZero(n);
 
-// 将 Date 转换成 LocalDateTime
-LocalDateTime localDateTime = DateTimeUtil.date2LocalDateTime(new Date());
+String hex = Hex.utf8ToHex("abc");
+String text = Hex.hexToUtf8(hex);
 
-// 将 LocalDateTime 转换成 Date
-Date date = DateTimeUtil.localDateTime2Date(LocalDateTime.now());
-
-//将时间转换成毫秒数
-Long time = DateTimeUtil.getTime(date);
-Long time1 = DateTimeUtil.getTime(localDateTime);
-
-
-//将时间格式化为字符串
-String format = DateTimeUtil.format(date);
-String format1 = DateTimeUtil.format(localDateTime);
-
-//按照指定格式将时间格式化为字符串
-String format3 = DateTimeUtil.format(date, "yyyy-MM-dd HH:mm:ss");
-String format4 = DateTimeUtil.format(localDateTime, "yyyy-MM-dd HH:mm:ss");
-
-//将字符串转换成时间
-LocalDateTime parse = DateTimeUtil.parse("2021-10-10 12:12:12");
-//按照指定格式将字符串转换成时间
-LocalDateTime parse1 = DateTimeUtil.parse("2021-10-10 12:12:12", "yyyy-MM-dd HH:mm:ss");
+String tlv = TLV.toTLV("80", "010203");
+String val = TLV.extractVal("80", tlv);
 ```
-# 四 加解密工具
 
-## 4.1 AES加解密工具
+---
 
-该工具是基于AES算法实现的加解密工具。其主要作用如下：
+## 12. 日志（`log`）
 
-- 实现AES算法加密
-- 实现AES算法解密
+**`LogLevelUtil.setLevel(loggerName, logLevel)`**：运行时改 Logback 级别（如 `info`、`debug`）。
 
-工具路径:
+**`LogInfo`**：可序列化的日志信息载体。
 
 ```java
-com.yishuifengxiao.common.tool.codec.AES
+LogLevelUtil.setLevel("com.yishuifengxiao", "debug");
 ```
 
-  使用示例:
+---
+
+## 13. 随机与 ID（`random`）
+
+**`IdWorker`**：`snowflakeId()`、`snowflakeStringId()`、`uuid()`；也可 `new IdWorker(workerId, datacenterId).nextId()`。
+
+**`RandomUtil`**：`generateChineseChar`、`generateChineseText(len)`、`generateTimestamp`、`generateTimestampWithPrefix`、`generateTimestampWithRandom`、`generateRandomHexString(numBytes)`。
 
 ```java
-//使用指定的秘钥对数据进行加密
-String encrypt = AES.encrypt("秘钥", "待加密的数据");
-// 使用指定的秘钥对加密后的数据进行解密，若待解密的数据为空或解密出现问题时返回为null
-AES.decrypt("秘钥", encrypt);
+long id = IdWorker.snowflakeId();
+String uuid = IdWorker.uuid();
+String hex = RandomUtil.generateRandomHexString(16);
 ```
 
-## 4.2 DES加解密工具
+---
 
-该工具是基于DES算法实现的加解密工具。其主要作用如下：
+## 14. 脱敏（`sensitive`）
 
-- 实现DES算法加密
-- 实现DES算法解密
+**`SensitiveUtil`**：`name`、`idCard`、`phone`、`password`。
 
-工具路径:
+**`@Sensitive(SensitiveEnum.xxx)`**：Jackson 序列化时自动脱敏。枚举：`NAME`、`MOBILE_PHONE`、`ID_CARD`、`PASSWORD`。实现类：`SensitiveSerialize`。
 
 ```java
-com.yishuifengxiao.common.tool.codec.DES
+SensitiveUtil.phone("13812345678"); // 138****5678
+
+public class UserVO {
+    @Sensitive(SensitiveEnum.MOBILE_PHONE)
+    private String phone;
+}
 ```
 
-  使用示例:
+---
+
+## 15. 智能卡（`smartcard`）
+
+**`SmartCard`**：列举读卡器、连接/断开、逻辑通道、发送 APDU（十六进制）、SW=0x61 时自动 GET RESPONSE、81E2 通道、读取 eID。
 
 ```java
-//使用指定的秘钥对数据进行加密
-String encrypt = DES.encrypt("秘钥", "待加密的数据");
-// 使用指定的秘钥对加密后的数据进行解密，若待解密的数据为空或解密出现问题时返回为null
-DES.decrypt("秘钥", encrypt);
+SmartCard card = new SmartCard();
+List<String> terminals = card.getCardTerminalNames();
+card.connect(terminals.get(0));
+SmartCard.ApduResult r = card.transmit("00A4040000", true);
+card.disconnect();
 ```
 
-## 4.3 MD5加密工具
+---
 
-该工具主要是使用MD5算法对字符串进行加密操作。
+## 16. 文本（`text`）
 
-工具路径:
+| 类 | 主要 API |
+|----|----------|
+| `TextUtil` | 去空白与不可见字符、去注释、首字母大小写、驼峰/下划线、左右填充 |
+| `RegexUtil` | 编译缓存、`match`/`find`/`extract`/`extractAll`，中文/数字/日期/IPv4/URL 抽取 |
+| `HtmlExtract` | CSS / XPath 抽 HTML 或 XML |
+| `TextExtract` | 从 HTML 抽正文 |
+| `PlaceholderExtractor` | `${name}` 提取与替换 |
 
 ```java
-com.yishuifengxiao.common.tool.codec.MD5
+String col = TextUtil.underscoreName("userName"); // user_name
+List<String> urls = RegexUtil.extractAllUrls(html);
+String title = HtmlExtract.extractAnyTextByCss(html, "h1");
+
+List<String> keys = PlaceholderExtractor.extractPlaceholders("Hello ${name}");
+String out = PlaceholderExtractor.replacePlaceholders("Hello ${name}", Map.of("name", "yi"));
 ```
 
-  使用示例:
+---
+
+## 17. 杂项工具（`utils`）
+
+| 类 | 作用 |
+|----|------|
+| `Assert` | 断言失败抛 `UncheckedException`（数字与 0 比较、null/blank、集合空、仅一个元素等） |
+| `ValidateUtils` | 布尔断言、`orElseThrow`、从异常抽取信息、按 `RootEnum` 抛错 |
+| `CertNoUtil` | 身份证校验、提取生日 |
+| `ExecuteUtil` | 公共线程池、异步执行、`executeFirstMatch`、`waitForAll` |
+| `GpsUtil` | 两点距离（米 / 千米） |
+| `NetUtil` | 网卡信息、MAC、公网 IP |
+| `OsUtils` | 操作系统判断、临时目录、工作目录、`Platform` |
 
 ```java
-//对字符串进行MD5加密，输入32位小写的MD5值
-String md5 = Md5.md5("待加密码的数据");
-//对字符串进行MD5加密，输入16位小写的MD5值
-String md5Short = Md5.md5Short("待加密码的数据");
+Assert.isNotBlank("name 不能为空", name);
+Assert.gtZero("id 必须大于 0", id);
+
+ValidateUtils.isTrue(user != null, "用户不存在");
+
+boolean valid = CertNoUtil.isValid("110101199001011234");
+long meters = GpsUtil.distance(116.4, 39.9, 121.4, 31.2);
+
+ExecuteUtil.execute(() -> doWork());
 ```
-# 五 通用实体类
 
-## 5.1 通用响应对象
+---
 
-该对象的主要目的是在进行后端开发时统一响应数据的格式，使得全体应用中接口的返回数据的格式能够保持一致性，方便前端开发处理的同时让全局风格保持一定的规范性。
+## 18. 参数校验（`validate`）
 
-通用响应对象的属性及定义如下：
+**`BeanValidator`**：`validate(bean)` / `validate(bean, group)` 返回违例集合；`validateResult` 只返回第一条错误文案。
 
-| 修饰符| 数据类型   | 属性及含义 |
-| ------------------| ------------------------------  | ------------------------------------------------------------ |
-| `protected`|    ` int` | `code`请求的响应码 |
-| `protected `  |  `T`   | `data`响应数据，在基本基本信息无法满足时会出现此信息,一般情况下无此信息 |
-| `protected `|   `Date` | `date`响应时间                                               |
-| `protected `|`String`  | `id`请求ID,用于请求追踪 .无论调用接口成功与否,都会返回请求 ID,该序列号全局唯一且随机 |
-| `protected `|`String`  | `msg`响应提示信息,一般与响应码的状态对应,对响应结果进行简单地描述 |
+**`Group`**：`Create`、`Update`、`Delete`、`Query`、`All`。
 
-### 5.1.1 赋值说明
+**约束注解**（Jakarta Validation）
 
-- 响应码`code` : 在默认情况下借鉴了HttpStatus的响应值和含义，其定义可参见 [https://developer.mozilla.org/en-US/docs/Web/HTTP/Statu]( https://developer.mozilla.org/en-US/docs/Web/HTTP/Statu)
-- 响应数据`data` : 在定义中该属性是一个泛型，用户可以传输各种必需的响应数据。如果用户不需要传输数据仅仅通过响应码表达请求操作结果时，该属性可以置空或使用默认值
-- 响应信息 `msg` : 该属性在一般情况用于辅助描述响应码希望表达的含义
-
-### 5.1.2 常用创建方法
-
-|修饰符及响应 | `方法使用及说明  |
-| ------------------------- | ------------------------------------------------------------ |
-| `static Response<Object>` | `badParam()`生成一个默认的表示参数有误的响应对象(响应码400)  |
-| `static Response<Object>` | `badParam(String msg)`根据响应提示信息生成一个表示参数有误的响应对象(响应码400) |
-| `static <T> Response<T>`  | `badParam(String msg, T data)`根据响应提示信息和响应数据生成一个表示参数有误的响应对象(响应码400) |
-| `static Response<Object>` | `error()`生成一个默认表示请求业务未完成的响应对象(500响应码) |
-| `static Response<Object>` | `error(String msg)`根据响应提示信息生成一个表示服务器内部异常500时的返回信息 |
-| `static <T> Response<T>`  | `error(String msg, T data)`根据响应提示信息和响应数据生成表示服务器内部异常500时的返回信息 |
-| `static <T> Response<T>`  | `error(T data)`根据响应数据生成表示服务器内部异常500时的返回信息 |
-| `static <T> Response<T>`  | `errorData(T data)`生成一个默认表示请求业务未完成的响应对象(500响应码) |
-| `static Response<Object>` | `notAllow()`生成一个默认的表示资源不可用的响应对象(403响应码) |
-| `static Response<Object>` | `notAllow(String msg)`根据响应提示信息生成表示资源不可用的响应对象(403响应码) |
-| `static Response<Object>` | `notFoundt()`生成一个默认的表示资源不存在的响应对象(404响应码) |
-| `static <T> Response<T>`  | `of(int code, String msg, T data)`构建一个通用的响应对象     |
-| `static Response<Object>` | `suc()`生成一个默认的一个表示成功的响应对象                  |
-| `static Response<Object>` | `suc(String msg)`根据响应提示信息生成一个表示成功的响应对象  |
-| `static <T> Response<T>`  | `suc(String msg, T data)`根据响应提示信息和响应数据生成一个表示成功的响应对象 |
-| `static <T> Response<T>`  | `suc(T data)`根据响应数据生成一个表示成功的响应对象          |
-| `static <T> Response<T>`  | `sucData(T data)`根据响应提示信息生成一个表示成功的响应对象  |
-| `static Response<Object>` | `unAuth()`生成一个默认的表示资源未授权的响应对象(401响应码)  |
-| `static Response<Object>` | `unAuth(String msg)`根据响应提示信息生成一个表示资源未授权的响应对象(401响应码) |
-| `static <T> Response<T>`  | `unAuth(String msg, T data)`根据响应提示信息和响应数据生成一个表示资源未授权的响应对象(401响应码) |
-
-### 5.1.3  示例代码
-
-工具路径:
+| 注解 | 目标类型 | 含义 |
+|------|----------|------|
+| `@InInt` | Integer | 必须在 `value` 数组中，`nullable` 默认 true |
+| `@InLong` | Long | 同上 |
+| `@InString` | String | 必须在给定字符串集合中 |
+| `@InBool` | Integer | 必须是合法布尔码（配合 `BoolStat`） |
 
 ```java
-com.yishuifengxiao.common.tool.entity.Response
-```
-使用示例:
-```java
-//默认的请求成功响应，响应码为200
-Response<Object> suc = Response.suc();
-//默认的请求成功响应，响应码为200,其中:响应描述信息修改为 响应描述信息：成功
-Response<Object> suc1 = Response.suc("响应描述信息：成功");
-//默认的请求成功响应，响应码为200,其中:响应具体信息修改成功 响应具体信息:成功
-Response<String> sucData = Response.sucData("响应具体信息:成功");
-//构建一个请求成功响应，响应码为200，其中: 响应描述信息修改为 响应描述信息：成功 ，响应具体信息修改成功 响应具体信息:成功
-Response<String> suc2 = Response.suc("响应描述信息：成功", "响应具体信息:成功");
+public class CreateUser {
+    @NotBlank(groups = Group.Create.class)
+    private String name;
 
+    @InInt(value = {1, 2, 3}, message = "非法状态")
+    private Integer status;
+}
 
-//默认的请求失败响应，响应码为500
-Response<Object> error = Response.error();
-//默认的请求失败响应，响应码为500,其中：响应描述信息修改为 响应描述信息：失败
-Response<Object> error1 = Response.error("响应描述信息：失败");
-//默认的请求失败响应，响应码为500,其中：响应具体信息修改成功 响应具体信息:失败
-Response<String> errorData = Response.errorData("响应具体信息:失败");
-//默认的请求失败响应，响应码为500，其中: 响应描述信息修改为 响应描述信息：失败 ，响应具体信息修改成功 响应具体信息:失败
-Response<String> error2 = Response.error("响应描述信息：失败", "响应具体信息:失败");
-
-//通用的构建方法
-Response<Object> response = Response.of(响应码, "响应描述信息", 响应具体信息);
+Set<ConstraintViolation<CreateUser>> vs = BeanValidator.validate(cmd, Group.Create.class);
+String msg = BeanValidator.validateResult(cmd);
 ```
 
-## 5.2 通用分页对象
+---
 
-本对象主要是解决后端开发时在使用不同的分页插件时造成分页对象不同从而导致数据结构不一致的问题，本工具主要是适配了jpa里的`org.springframework.data.domain.Page`和pagehelper里的`com.github.pagehelper.PageInfo`这两个分页对象。
+## 19. ASN.1（`asn1`）
 
-该工具主要作用如下：
-
-- 适配不同类型的分页对象
-- 转换分页对象里的数据
-
-> 该分页对象中的当前页页码从1开始，默认的分页大小为20
-
-工具路径:
+| 类 | 作用 |
+|----|------|
+| `Asn1Util` | Hex/UTF-8 转 `BERReader`；对象 `writePdu`/`readPdu` 编解码；Luhn、ICCID、MCC/MNC |
+| `BERReader` / `BERWriter` | BER 标签、长度与基础类型读写 |
+| `ASNValueReader` / `ASNValueWriter` | 高层 ASN.1 值读写 |
+| `BERTag` | BER 标签 |
 
 ```java
-//创建一个默认的空的分页对象
-Page<Object> empty = Page.ofEmpty();
-
-// 转换 jpa 里的分页对象
-Page<Object> page = JpaPage.of(org.springframework.data.domain.Page.empty());
-
-//转换 pagehelper 的分页对象
-Page<Object> page1 = TkPage.of(PageInfo.of(new ArrayList<>()));
-
-
-// 转换分页对象里的数据
-Page<Object> convert = page.convert(原始数据 -> {
-    
-    return 转换后的数据
-});
+BERReader reader = Asn1Util.hexToBERReader(hexPdu);
+String hex = Asn1Util.toHexString(pduObject);
+MyPdu obj = Asn1Util.toObject(MyPdu.class, hex);
 ```
 
-## 5.3 自定义异常
+`toObject` / `toHexString` 要求目标类型提供约定的 `readPdu` / `writePdu` 方法。
 
-该工具的主要目的是统一项目中使用的各种异常，其定义如下:
+---
 
-![image-20211011144459610](https://zhiyubujian.oss-cn-hangzhou.aliyuncs.com/blog/image-20211011144459610.png)
-# 六 IO流和文件操作工具
+## 环境要求
 
-## 6.1 IO流关闭工具
-
-该工具的主要目的是在安全地关闭各种Closeable实例。
-
-
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.io.CloseUtil
-```
-
-使用示例
-
-```java
-InputStream inputStream = new FileInputStream("input");
-
-OutputStream outputStream = new FileOutputStream("out");
-
-CloseUtil.close(inputStream, outputStream);
-```
-
-## 6.2 文件处理工具
-
-该工具的主要目的是进行文件和base64字符串之间进行互相转换和获取文件的MD5值。
-
-
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.io.IoUtil
-```
-示例代码:
-```java
-File file = new File("待处理的文件");
-
-// 将文件转换成base64格式的字符串
-String base64Str = FileUtil.file2Base64(file);
-
-//将base64格式的字符串转换成文件
-File toFile = FileUtil.base64ToFile(base64Str);
-
-//获取文件的MD5值(32位小写)
-String md5 = FileUtil.getMd5(file);
-```
-
-## 6.3 base64与图片转换工具
-
-该工具的主要目的是进行图片和base64字符串之间进行互相转换
-
-
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.io.IoUtil
-```
-
-代码示例:
-
-```java
-//base64字符串转换成图片
-ImageUtil.base64ToImage("图片转成base64格式后的字符串", "目标图片的地址");
-
-//BufferedImage格式的图片转换为base64字符串，结果不包含base64信息头
-String image2Base64 = ImageUtil.image2Base64(
-    new BufferedImage(255, 255, BufferedImage.TYPE_INT_RGB));
-
-//BufferedImage格式的图片转换为base64字符串，结果包含png格式的base64信息头
-String _image2Base64 = ImageUtil.image2Base64Png(
-    new BufferedImage(255, 255, BufferedImage.TYPE_INT_RGB));
-
-//base64字符串转换为ufferedImage格式的图片
-ImageUtil.base64ToImage(image2Base64, "待保存的图片的地址");
-```
-# 七 缓存工具
-
-## 7.1 全局存储工具
-
-该工具的主要目的是构建一个基于内存的全局字典缓存工具。在使用该工具时注意防止内存泄露。
-
-
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.context.LocalCache
-```
-
-示例代码:
-
-```java
-        //存放一个数据
-        LocalStorage.put(new FileRecord());
-
-        //使用指定的索引存放一个数据
-        LocalStorage.put("k1", new FileRecord());
-
-        //根据索引获取一个数据
-        Object object = LocalStorage.get("k1");
-
-        //根据数据类型获取一个数据
-        FileRecord record = LocalStorage.get(FileRecord.class);
-
-        //根据索引从缓存中删除一个数据
-        LocalStorage.remove("k1");
-
-        //根据索引获取一个数据,然后从缓存中删除该数据
-        Object obj = LocalStorage.pop("k1");
-
-        //清除缓存中所有的数据
-        LocalStorage.clear();
-```
-
-## 7.2 上下文存储工具
-
-该工具与全局存储工具基本类似，但不同的是，在当前线程中存储的数据不能再其他线程中访问。在使用该工具时注意防止内存泄露。
-
-
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.context.SessionStorage
-```
-
-示例代码:
-
-```java
-//存放一个数据
-SessionStorage.put(new FileRecord());
-
-//使用指定的索引存放一个数据
-SessionStorage.put("k1", new FileRecord());
-
-//根据索引获取一个数据
-Object object = SessionStorage.get("k1");
-
-//根据数据类型获取一个数据
-FileRecord record = SessionStorage.get(FileRecord.class);
-
-//根据索引从缓存中删除一个数据
-SessionStorage.remove("k1");
-
-//根据索引获取一个数据,然后从缓存中删除该数据
-Object obj = SessionStorage.pop("k1");
-
-//清除缓存中所有的数据
-SessionStorage.clear();
-```
-
-# 八 常见数据封装工具
-
-该工具的主要目的是对常见的基础数据类型的数据进行处理，实现数值大小比较和字符串处理等功能。
-
-该工具包的功能如下:
-
-| 工具名称 | 功能说明        |
-| :----------------------------------------------------------: | :--------------------: |
-| [BetweenUtil](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/lang/BetweenUtil.html) | 比较工具工具类         |
-| [HumpUtil](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/lang/HumpUtil.html) | 下划线与驼峰互转工具   |
-| [NumberUtil](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/lang/NumberUtil.html) | 数字转换与操作比较工具 |
-| [ObjUtil](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/lang/ObjUtil.html) | 集合对象判断工具       |
-| [RegexUtil](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/lang/RegexUtil.html) | 正则工具               |
-| [StringUtil](https://apidoc.gitee.com/zhiyubujian/tool/com/yishuifengxiao/common/tool/lang/StringUtil.html) | 字符串工具             |
-
-## 8.1 下划线与驼峰互转工具
-
-该工具主要目的是实现下划线与驼峰互相转换。
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.lang.HumpUtil
-```
-
-示例代码:
-
-```java
-//转换为驼峰,例如:将call_back转换成 CallBack
-String camelCaseName = HumpUtil.camelCaseName("call_back");
-System.out.println(camelCaseName);
-//转换为下划线,例如:将CallBack转换成 call_back
-String underscoreName = HumpUtil.underscoreName("camelCaseName");
-System.out.println(underscoreName);
-```
-
-## 8.2 数字转换与操作比较工具
-
-该工具的主要目的是实现字符串与数字之间互相转换以及进行数据大小比较
-
-工具路径
-
-```java
-com.yishuifengxiao.common.tool.lang.NumberUtil
-```
-
-示例代码:
-
-```java
-//将字符串转换成数字
-Integer integer = NumberUtil.parseInt("11");
-//判断数字是否小于0
-boolean lessZero = NumberUtil.lessZero(integer);
-//判断数字是否小于或等于0
-boolean lessEqualZero = NumberUtil.lessEqualZero(integer);
-//判断数字是否大于0
-boolean greaterZero = NumberUtil.greaterZero(integer);
-//判断数字是否大于或等于0
-boolean greaterEqualZero = NumberUtil.greaterEqualZero(integer);
-//判断两个数字是否相等
-boolean equals = NumberUtil.equals(Integer.parseInt("2322"), Integer.parseInt("5865"));
-//将数字转成Boolean值,如果数字为null，返回为false,数字小于或等于0返回为false,数字大于0返回为true
-Boolean num2Bool = NumberUtil.num2Bool(1);
-//将boolean值转换成数字,value为true时返回1，否则为0
-int bool2Int = NumberUtil.bool2Int(true);
-```
-# 九 自定义工具
-
-## 9.1 回调工具类
-
-该工具类的主要目的是使用内置线程池执行一个回调操作，节省创建线程和线程管理所需的资源。
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.utils.ExecuteUtil
-```
-
-示例代码:
-
-```java
-ExecuteUtil.execute(() -> {
-    System.out.println("-------- 回调");
-});
-```
-
-## 9.2 身份证操作工具
-
-该工具的主要目的是对字符串格式的身份证号进行判断。主要功能如下：
-
-- 判断该字符串是否为一个合法的身份证号
-- 从字符串格式的身份证号里提取出出生日期
-
-
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.utils.CertNoUtil
-```
-
-示例代码:
-
-```java
-//判断该身份证号是否为一个正确的身份证号
-boolean valid = CertNoUtil.isValid("421111198705164213");
-System.out.println(valid);
-//从身份证号中提取出出生日期
-LocalDate birthday = CertNoUtil.extractBirthday("421111198705164213");
-System.out.println(birthday);
-```
-
-## 9.3 经纬度距离计算工具
-
-该工具的主要目的是计算两个经纬度之间距离。
-
-
-
-工具路径:
-
-```java
-com.yishuifengxiao.common.tool.utils.GpsUtil
-```
-
-示例代码:
-
-```java
-//通过经纬度计算出来的结果单位为米
-long distance = GpsUtil.distance(111, 30, 156, 35);
-```
+- JDK 21+
+- 仅使用 Bean/集合/时间等核心工具时，不必引入 Spring
+- 使用 `JdbcHelper` 时需要可用的 `DataSource` 或 `JdbcTemplate`
+- 使用 `BeanValidator` / `@InInt` 等时需要 Hibernate Validator 实现

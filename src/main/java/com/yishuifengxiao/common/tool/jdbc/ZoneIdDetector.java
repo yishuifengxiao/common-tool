@@ -253,7 +253,7 @@ public class ZoneIdDetector {
      * 基于乱码字符串的特征推断原始时区
      * 推断策略：
      * 1. 检测字节数组中是否包含负值字节（中文字符特征），推断为亚洲/上海时区
-     * 2. 对于短字符串（<=10字符），尝试匹配常见时区缩写或城市名
+     * 2. 对于短字符串（&lt;=10字符），尝试匹配常见时区缩写或城市名
      * 3. 其他情况返回null表示无法推断
      *
      * @param garbledTimezone 存在编码问题的乱码时区字符串
@@ -299,7 +299,7 @@ public class ZoneIdDetector {
      * - 城市/国家名称：CHINA、BEIJING、TOKYO、LONDON等
      * - 纯数字偏移量：8、9、-5等，转换为对应时区
      *
-     * @param shortString 简短的时区字符串（通常<=10字符）
+     * @param shortString 简短的时区字符串（通常&lt;=10字符）
      * @return 推断出的完整时区标识符，无法识别时返回null
      */
     private static String inferFromShortString(String shortString) {
@@ -455,9 +455,9 @@ public class ZoneIdDetector {
 
     /**
      * 从JDBC URL中提取serverTimezone参数的值
-     * 支持处理URL中存在多个参数的场景，正确截取时区参数值到下一个&符号之前
+     * 支持处理URL中存在多个参数的场景，正确截取时区参数值到下一个&amp;符号之前
      *
-     * @param url JDBC连接URL字符串，如jdbc:mysql://localhost:3306/db?serverTimezone=Asia/Shanghai&useSSL=false
+     * @param url JDBC连接URL字符串，如jdbc:mysql://localhost:3306/db?serverTimezone=Asia/Shanghai&amp;useSSL=false
      * @return 提取的时区参数值，URL为空或未包含时区参数时返回null
      */
     private static String extractTimezoneFromUrl(String url) {
