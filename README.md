@@ -48,7 +48,6 @@
 | IO | `io` | 文件与流、Base64、图片、安静关闭 |
 | JDBC | `jdbc` | 基于 JPA 注解的简易 CRUD、URL 组装、POJO 生成 |
 | 语言 | `lang` | 布尔/数字、Hex、OID、TLV |
-| 日志 | `log` | 运行时修改 Logback 级别 |
 | 随机 | `random` | 雪花 ID、UUID、随机中文/十六进制 |
 | 脱敏 | `sensitive` | 姓名/手机/身份证/密码脱敏与 Jackson 注解 |
 | 智能卡 | `smartcard` | PC/SC 读卡器与 APDU |

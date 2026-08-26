@@ -1,6 +1,7 @@
 package com.yishuifengxiao.common.tool.lang;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
+import com.yishuifengxiao.common.tool.text.TextUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -59,8 +60,8 @@ public class TLV {
             return new TlvResult().setException(new UncheckedException("illegal data"));
         }
 
-        tag = tag.toUpperCase().trim();
-        tlv = tlv.toUpperCase().trim();
+        tag = TextUtil.removeWhitespaceAndInvisible(tag);
+        tlv = TextUtil.removeWhitespaceAndInvisible(tlv);
 
         if (tag.isEmpty() || !Hex.isHex(tlv) || !Hex.isHex(tag)) {
             return new TlvResult().setException(new UncheckedException("illegal data")).setRemain(tlv);
@@ -190,7 +191,7 @@ public class TLV {
      * @return TlvResult对象，包含所有成功提取的标签-值对和可能的异常信息
      */
     public static TlvResult extractValsOnSameLevel(String tlv, String... tags) {
-        tlv = StringUtils.trim(tlv);
+        tlv = TextUtil.removeWhitespaceAndInvisible(tlv);
         if (!Hex.isHex(tlv)) {
             return new TlvResult().setException(new UncheckedException("illegal data")).setRemain(tlv);
         }
@@ -221,7 +222,7 @@ public class TLV {
      * @return TlvResult对象，包含所有层级提取的标签-值对和可能的异常信息
      */
     public static TlvResult extractValsRecursive(String tlv, String... tags) {
-        tlv = StringUtils.trim(tlv);
+        tlv = TextUtil.removeWhitespaceAndInvisible(tlv);
         if (!Hex.isHex(tlv)) {
             return new TlvResult().setException(new UncheckedException("illegal data"));
         }
@@ -254,6 +255,7 @@ public class TLV {
      * @return 包含所有匹配值的列表，如果发生错误则返回已收集的列表【不包含TAG】
      */
     public static List<String> extractValsLoop(String tag, String tlv) {
+        tlv = TextUtil.removeWhitespaceAndInvisible(tlv);
         if (!Hex.isHex(tlv) || !Hex.isHex(tag)) {
             return new ArrayList<>();
         }
@@ -283,8 +285,8 @@ public class TLV {
      * @return 返回一个符合 TLV 格式的字符串
      */
     public static String toTLV(String tag, String value) {
-        tag = StringUtils.isBlank(tag) ? "" : tag.trim();
-        value = StringUtils.isBlank(value) ? "" : value.trim();
+        tag = TextUtil.removeWhitespaceAndInvisible(tag);
+        value = TextUtil.removeWhitespaceAndInvisible(value);
         if (!Hex.isHex(value) && StringUtils.isNotBlank(value)) {
             return tag;
         }
@@ -328,6 +330,7 @@ public class TLV {
      * @return 十六进制表示的字符串
      */
     private static String toHex(String num) {
+        num = TextUtil.removeWhitespaceAndInvisible(num);
         if (num == null || num.isEmpty()) {
             return "00";
         }
@@ -373,7 +376,7 @@ public class TLV {
         }
 
         // 移除不可见字符（非十六进制字符）
-        String cleanHex = hexData.replaceAll("[^0-9A-Fa-f]", "");
+        String cleanHex = TextUtil.removeWhitespaceAndInvisible(hexData);
         // 计算数据长度（以字节为单位）
         int byteLength = cleanHex.length() / 2;
 
@@ -441,7 +444,7 @@ public class TLV {
         TlvResult result = new TlvResult();
 
         // 1. 清洗空白字符
-        String clean = hexStr.replaceAll("\\s+", "");
+        String clean = TextUtil.removeWhitespaceAndInvisible(hexStr);
         if (clean.isEmpty()) {
             return result; // 空输入，remain 为空
         }
