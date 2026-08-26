@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.yishuifengxiao.common</groupId>
     <artifactId>common-tool</artifactId>
-    <version>9.0.3</version>
+    <version>9.0.4</version>
     <packaging>jar</packaging>
     <description>`common-tool` 是一套面向 Java 业务开发的通用工具库，覆盖
         Bean/JSON、集合、时间、加解密与证书、HTTP、IO、JDBC、文本解析、ASN.1/TLV、智能卡、校验与脱敏等常见场景。多数 API 对 `null`
