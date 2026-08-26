@@ -23,7 +23,7 @@ import java.util.StringJoiner;
 /**
  * MySQL JDBC URL 解析与构建工具。
  * <p>
- * 支持从 jdbc:mysql://host:port/database?param1=value1&param2=value2 格式的URL中提取参数，
+ * 支持从 jdbc:mysql://host:port/database?param1=value1&amp;param2=value2 格式的URL中提取参数，
  * 并支持将提取后的参数反向构建为等价的JDBC URL，参数值会自动进行URL编码/解码以兼容特殊字符。
  */
 public class JdbcUrlHelper {
@@ -82,7 +82,7 @@ public class JdbcUrlHelper {
          * <p>
          * charset=utf8mb4：将字符集设置为UTF-8多字节字符集，支持所有UTF-8字符。
          * </p>
-         * <p>useUnicode & characterEncoding：这两个参数通常需配合使用，主要用于解决中文字符等非英文字符的乱码问题。
+         * <p>useUnicode &amp; characterEncoding：这两个参数通常需配合使用，主要用于解决中文字符等非英文字符的乱码问题。
          * <p>
          * useUnicode=true 是启用 Unicode 编码支持的总开关。
          * <p>
