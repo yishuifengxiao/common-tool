@@ -56,6 +56,10 @@ public class SmartCard {
      * GET RESPONSE命令前缀
      */
     private static final String GET_RESPONSE_PREFIX = "01C00000";
+    /**
+     * 当前连接的智能卡读卡器名称
+     */
+    private String terminalName;
 
     /**
      * 智能卡连接对象
@@ -91,6 +95,17 @@ public class SmartCard {
         return Collections.emptyList();
     }
 
+
+    /**
+     * 获取当前对象的卡片属性
+     *
+     * @return 返回当前对象的Card类型卡片属性
+     */
+    public Card card() {
+        return this.card;
+    }
+
+
     /**
      * 根据状态过滤获取智能卡读卡器名称列表
      *
@@ -115,6 +130,7 @@ public class SmartCard {
      * @return 当前SmartCard实例，支持链式调用
      */
     public synchronized SmartCard connect(String terminalName) {
+        this.terminalName = terminalName;
         CardTerminal terminal = this.getCardTerminals().getTerminal(terminalName);
         if (null == terminal) {
             this.card = null;
@@ -189,6 +205,65 @@ public class SmartCard {
             }
         }
         return this.cardChannel;
+    }
+
+    /**
+     * 打开一个新的逻辑通道
+     * 这是一个同步方法，确保在多线程环境下对卡通道的安全访问
+     * Opens a new logical channel to the card and returns it. The channel is opened by issuing a MANAGE CHANNEL command that should use the format [00 70 00 00 01].
+     *
+     * @return CardChannel 返回一个新的逻辑通道对象
+     * @throws UncheckedException 如果发生CardException，会被包装为UncheckedException抛出
+     */
+    public synchronized CardChannel openNewLogicalChannel() {
+        try {
+            // 尝试打开一个新的逻辑通道
+            return this.card.openLogicalChannel();
+        } catch (CardException e) {
+            // 捕获CardException并将其转换为UncheckedException抛出
+            throw new UncheckedException(e);
+        }
+    }
+
+    /**
+     * 获取基本卡通道的方法
+     * 该方法是同步的，确保在多线程环境下对卡通道的安全访问
+     * Returns the CardChannel for the basic logical channel. The basic logical channel has a channel number of 0.
+     *
+     * @return 返回一个基本卡通道(CardChannel)对象
+     * @throws UncheckedException 如果获取通道过程中发生任何异常，会被捕获并转换为UncheckedException抛出
+     */
+    public synchronized CardChannel getBasicChannel() {
+        try {
+            // 尝试打开一个新的逻辑通道
+            // this.card表示当前卡对象，调用其getBasicChannel()方法获取基本通道
+            return this.card.getBasicChannel();
+        } catch (Exception e) {
+            // 捕获Exception并将其转换为UncheckedException抛出
+            throw new UncheckedException(e);
+        }
+    }
+
+    /**
+     * 重置智能卡的方法
+     * 该方法是同步的，确保在多线程环境下安全执行
+     * 重置过程包括关闭现有通道、断开连接、然后重新连接
+     *
+     * @return 返回当前SmartCard对象，支持链式调用
+     */
+    public synchronized SmartCard reset() {
+        // 如果存在已建立的卡通道，则安静地关闭它
+        if (null != this.cardChannel) {
+            closeChannelQuietly(this.cardChannel);
+        }
+        // 如果存在已连接的卡，则执行断开连接操作
+        if (null != this.card) {
+            this.disconnect();
+        }
+        // 重新连接到指定名称的终端
+        this.connect(this.terminalName);
+        // 返回当前对象实例，支持方法链调用
+        return this;
     }
 
     /**
@@ -410,8 +485,7 @@ public class SmartCard {
      * @return 每个命令的执行结果列表
      */
     public synchronized List<ApduResult> transmitWithNewLogicalChannel(Supplier<String>... suppliers) {
-        List<String> commands =
-                Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        List<String> commands = Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         return transmitWithNewLogicalChannel(commands);
     }
 
@@ -479,8 +553,7 @@ public class SmartCard {
      */
     public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(Supplier<String>... suppliers) {
         // 将Supplier数组转换为命令字符串列表
-        List<String> commands =
-                Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        List<String> commands = Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         return this.transmit81E2RequestWithNewLogicalChannel(commands);
     }
 
@@ -560,8 +633,7 @@ public class SmartCard {
         for (int i = 0; i < chunks.size(); i++) {
             String prefix = (chunks.size() - 1 == i) ? "81E291" : "81E211";
             String chunk = chunks.get(i);
-            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk +
-                    "00";
+            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk + "00";
 
             ApduResult transmitResult = this.transmit(channel, command, true);
             records.addAll(transmitResult.getRecords());
@@ -570,8 +642,7 @@ public class SmartCard {
             responseData.append(transmitResult.getData());
 
             if (!transmitResult.isSuccess()) {
-                log.warn("81E2命令{}第{}个分包{}执行命令{}失败，SW1=0x{}", hexCommand, i + 1, chunk, command,
-                        Integer.toHexString(transmitResult.getSw1()).toUpperCase());
+                log.warn("81E2命令{}第{}个分包{}执行命令{}失败，SW1=0x{}", hexCommand, i + 1, chunk, command, Integer.toHexString(transmitResult.getSw1()).toUpperCase());
                 break;
             }
         }
@@ -589,7 +660,7 @@ public class SmartCard {
      * @param hexCommand 十六进制格式的长命令字符串
      * @return 分割后的命令片段列表
      */
-    private List<String> splitCommand(String hexCommand) {
+    public List<String> splitCommand(String hexCommand) {
         if (hexCommand == null || hexCommand.isEmpty()) {
             return Collections.singletonList("");
         }
@@ -688,17 +759,22 @@ public class SmartCard {
         return TLV.extractValsRecursive(transmit.getData(), "BF3E", "5A").getVal("5A");
     }
 
+
     /**
-     * 安静地关闭逻辑通道，不抛出异常
+     * 静态同步方法，用于安静地关闭卡片通道
+     * 如果通道不为空，则尝试关闭通道，并记录相应的日志信息
      *
-     * @param channel 要关闭的逻辑通道
+     * @param channel 要关闭的卡片通道对象，可能为null
      */
-    private void closeChannelQuietly(CardChannel channel) {
+    public synchronized static void closeChannelQuietly(CardChannel channel) {
         if (null != channel) {
             try {
+                // 尝试关闭通道
                 channel.close();
+                // 记录调试信息，表示通道已成功关闭
                 log.debug("逻辑通道已关闭");
             } catch (CardException e) {
+                // 捕获CardException异常，并记录警告信息
                 log.warn("关闭逻辑通道时发生异常", e);
             }
         }
