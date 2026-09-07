@@ -474,8 +474,7 @@ public class SmartCard {
             log.debug("检测到SW1=0x91，执行第{}次自动拉取", pullCount + 1);
             String getNextCommand = RETRIEVE_RESPONSE_PREFIX + Hex.numberToHexString(sw2);
             return transmitWithAutoPull(result, channel, getNextCommand, pullCount + 1);
-        }
-        if (sw1 != SW1_MORE_DATA) {
+        } else if (sw1 != SW1_MORE_DATA) {
             log.debug("命令执行完成，SW1=0x{}, SW2=0x{}", Integer.toHexString(sw1), Integer.toHexString(sw2));
             return result.setData(responseData.toString()).setSw1(sw1).setSw2(sw2).setRecords(records);
         } else {
@@ -876,6 +875,11 @@ public class SmartCard {
          */
         public String swHex() {
             return String.format("%02X%02X", this.sw1, this.sw2);
+        }
+
+        @Override
+        public String toString() {
+            return "ApduResult{" + "records=" + records + ", data=" + data + ", sw=0x" + swHex() + "}";
         }
     }
 
