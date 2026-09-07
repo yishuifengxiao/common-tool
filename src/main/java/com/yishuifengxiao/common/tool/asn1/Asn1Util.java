@@ -23,8 +23,10 @@ public class Asn1Util {
 
     private static final ConcurrentHashMap<Class<?>, Method> READ_PDU_METHOD_CACHE = new ConcurrentHashMap<>();
     private static final ConcurrentHashMap<Class<?>, Method> WRITE_PDU_METHOD_CACHE = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Class<?>, java.lang.reflect.Constructor<?>> WRITER_CONSTRUCTOR_CACHE = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Class<?>, java.lang.reflect.Constructor<?>> READER_CONSTRUCTOR_CACHE = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class<?>, java.lang.reflect.Constructor<?>> WRITER_CONSTRUCTOR_CACHE =
+            new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<Class<?>, java.lang.reflect.Constructor<?>> READER_CONSTRUCTOR_CACHE =
+            new ConcurrentHashMap<>();
 
     /**
      * 将十六进制字符串转换为BERReader对象
@@ -64,7 +66,7 @@ public class Asn1Util {
      */
     public static String toHexString(Object object) {
         if (object == null) {
-            throw new UncheckedException("object参数不能为null");
+            return "";
         }
 
         try (ByteArrayOutputStream bufferOut = new ByteArrayOutputStream()) {
@@ -98,7 +100,8 @@ public class Asn1Util {
 
             // 通过反射获取writePdu方法的第二个参数类型，并通过反射构造实例（缓存Constructor）
             Class<?> writerType = writePduMethod.getParameterTypes()[1];
-            java.lang.reflect.Constructor<?> constructor = WRITER_CONSTRUCTOR_CACHE.computeIfAbsent(writerType, type -> {
+            java.lang.reflect.Constructor<?> constructor = WRITER_CONSTRUCTOR_CACHE.computeIfAbsent(writerType,
+                    type -> {
                 try {
                     java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.OutputStream.class);
                     ctor.setAccessible(true);
@@ -209,7 +212,8 @@ public class Asn1Util {
 
             // 通过反射获取readPdu方法的参数类型，并通过反射构造Reader实例（缓存Constructor）
             Class<?> readerType = readPduMethod.getParameterTypes()[0];
-            java.lang.reflect.Constructor<?> constructor = READER_CONSTRUCTOR_CACHE.computeIfAbsent(readerType, type -> {
+            java.lang.reflect.Constructor<?> constructor = READER_CONSTRUCTOR_CACHE.computeIfAbsent(readerType,
+                    type -> {
                 try {
                     java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.InputStream.class);
                     ctor.setAccessible(true);

@@ -56,6 +56,11 @@ public class SmartCard {
      * GET RESPONSE命令前缀
      */
     private static final String GET_RESPONSE_PREFIX = "01C00000";
+
+    /**
+     * 取回数据 RESPONSE命令前缀
+     */
+    private static final String RETRIEVE_RESPONSE_PREFIX = "80120000";
     /**
      * 当前连接的智能卡读卡器名称
      */
@@ -196,7 +201,7 @@ public class SmartCard {
      * @return 当前活动的CardChannel对象，保证非null
      * @throws UncheckedException 当打开逻辑通道失败时抛出异常
      */
-    private synchronized CardChannel cardChannel() {
+    public synchronized CardChannel cardChannel() {
         if (null == this.cardChannel) {
             try {
                 this.cardChannel = this.card.openLogicalChannel();
@@ -210,7 +215,8 @@ public class SmartCard {
     /**
      * 打开一个新的逻辑通道
      * 这是一个同步方法，确保在多线程环境下对卡通道的安全访问
-     * Opens a new logical channel to the card and returns it. The channel is opened by issuing a MANAGE CHANNEL command that should use the format [00 70 00 00 01].
+     * Opens a new logical channel to the card and returns it. The channel is opened by issuing a MANAGE CHANNEL
+     * command that should use the format [00 70 00 00 01].
      *
      * @return CardChannel 返回一个新的逻辑通道对象
      * @throws UncheckedException 如果发生CardException，会被包装为UncheckedException抛出
@@ -464,6 +470,11 @@ public class SmartCard {
         responseData.append(data);
         records.add(new ExecuteRecord(hexCommand, Hex.bytesToHex(responseApdu.getBytes())));
 
+        if (sw1 == 0x91) {
+            log.debug("检测到SW1=0x91，执行第{}次自动拉取", pullCount + 1);
+            String getNextCommand = RETRIEVE_RESPONSE_PREFIX + Hex.numberToHexString(sw2);
+            return transmitWithAutoPull(result, channel, getNextCommand, pullCount + 1);
+        }
         if (sw1 != SW1_MORE_DATA) {
             log.debug("命令执行完成，SW1=0x{}, SW2=0x{}", Integer.toHexString(sw1), Integer.toHexString(sw2));
             return result.setData(responseData.toString()).setSw1(sw1).setSw2(sw2).setRecords(records);
@@ -485,7 +496,8 @@ public class SmartCard {
      * @return 每个命令的执行结果列表
      */
     public synchronized List<ApduResult> transmitWithNewLogicalChannel(Supplier<String>... suppliers) {
-        List<String> commands = Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        List<String> commands =
+                Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         return transmitWithNewLogicalChannel(commands);
     }
 
@@ -553,7 +565,8 @@ public class SmartCard {
      */
     public synchronized List<ApduResult> transmit81E2RequestWithNewLogicalChannel(Supplier<String>... suppliers) {
         // 将Supplier数组转换为命令字符串列表
-        List<String> commands = Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+        List<String> commands =
+                Arrays.stream(suppliers).filter(Objects::nonNull).map(Supplier::get).filter(StringUtils::isNotBlank).collect(Collectors.toList());
         return this.transmit81E2RequestWithNewLogicalChannel(commands);
     }
 
@@ -633,7 +646,8 @@ public class SmartCard {
         for (int i = 0; i < chunks.size(); i++) {
             String prefix = (chunks.size() - 1 == i) ? "81E291" : "81E211";
             String chunk = chunks.get(i);
-            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk + "00";
+            String command = prefix + Hex.numberToHexString(i) + Hex.numberToHexString(chunk.length() / 2) + chunk +
+                    "00";
 
             ApduResult transmitResult = this.transmit(channel, command, true);
             records.addAll(transmitResult.getRecords());
@@ -642,7 +656,9 @@ public class SmartCard {
             responseData.append(transmitResult.getData());
 
             if (!transmitResult.isSuccess()) {
-                log.warn("81E2命令{}第{}个分包{}执行命令{}失败，SW1=0x{}", hexCommand, i + 1, chunk, command, Integer.toHexString(transmitResult.getSw1()).toUpperCase());
+                log.warn("第{}个分包时执行命令{}失败，SW1=0x{},SW2=0x{}", i + 1, command,
+                        Integer.toHexString(transmitResult.getSw1()).toUpperCase(),
+                        Integer.toHexString(transmitResult.getSw2()).toUpperCase());
                 break;
             }
         }
