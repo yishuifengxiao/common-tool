@@ -36,7 +36,7 @@ public class Asn1Util {
      */
     public static BERReader hexToBERReader(String hexVal) {
         byte[] bytes = Hex.hexToBytes(hexVal);
-        return new BERReader(new java.io.ByteArrayInputStream(bytes));
+        return toBERReader(bytes);
     }
 
     /**
@@ -54,6 +54,45 @@ public class Asn1Util {
      */
     public static BERReader utf8ToBERReader(String utf8Val) {
         byte[] bytes = utf8Val.getBytes(StandardCharsets.UTF_8);
+        return toBERReader(bytes);
+    }
+
+    /**
+     * 将ASCII字符串转换为BERReader对象
+     * 该方法将输入的ASCII字符串转换为字节数组，然后创建BERReader对象用于ASN.1数据解析
+     *
+     * @param utf8Val ASCII编码的字符串，将作为ASN.1数据源进行解析
+     * @return BERReader对象，可用于读取和解析ASN.1 BER编码的数据
+     * @example // 示例：将ASCII字符串转换为BERReader进行解析
+     * String asciiString = "ASCII字符串";
+     * BERReader reader = Asn1Util.asciiToBERReader(asciiString);
+     * // 使用reader读取ASN.1结构...
+     * @see BERReader
+     * @see #hexToBERReader(String)
+     * @see #utf8ToBERReader(String)
+     */
+    public static BERReader asciiToBERReader(String utf8Val) {
+        byte[] bytes = utf8Val.getBytes(StandardCharsets.US_ASCII);
+        return toBERReader(bytes);
+    }
+
+    /**
+     * 将字节数组转换为BERReader对象
+     * 该方法直接以输入的原始字节数组作为数据源，创建BERReader对象用于ASN.1数据解析
+     *
+     * @param bytes BER编码的原始字节数组，将作为ASN.1数据源进行解析
+     * @return BERReader对象，可用于读取和解析ASN.1 BER编码的数据
+     * @example // 示例：将字节数组转换为BERReader进行解析
+     * byte[] data = new byte[]{(byte) 0x30, (byte) 0x03, ...};
+     * BERReader reader = Asn1Util.toBERReader(data);
+     * // 使用reader读取ASN.1结构...
+     * @see BERReader
+     * @see #hexToBERReader(String)
+     * @see #utf8ToBERReader(String)
+     * @see #asciiToBERReader(String)
+     */
+    public static BERReader toBERReader(byte[] bytes) {
+        bytes = null == bytes ? new byte[0] : bytes;
         return new BERReader(new java.io.ByteArrayInputStream(bytes));
     }
 
@@ -102,14 +141,14 @@ public class Asn1Util {
             Class<?> writerType = writePduMethod.getParameterTypes()[1];
             java.lang.reflect.Constructor<?> constructor = WRITER_CONSTRUCTOR_CACHE.computeIfAbsent(writerType,
                     type -> {
-                try {
-                    java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.OutputStream.class);
-                    ctor.setAccessible(true);
-                    return ctor;
-                } catch (NoSuchMethodException e) {
-                    throw new UncheckedException(String.format("无法找到%s的OutputStream构造方法", type.getName()), e);
-                }
-            });
+                        try {
+                            java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.OutputStream.class);
+                            ctor.setAccessible(true);
+                            return ctor;
+                        } catch (NoSuchMethodException e) {
+                            throw new UncheckedException(String.format("无法找到%s的OutputStream构造方法", type.getName()), e);
+                        }
+                    });
 
             Object writerInstance;
             try {
@@ -173,11 +212,8 @@ public class Asn1Util {
      * @see #hexToBERReader(String)
      */
     public static <T> T toObject(Class<T> clazz, String hex) {
-        if (clazz == null) {
-            throw new UncheckedException("类对象不能为null");
-        }
-        if (hex == null || hex.isEmpty()) {
-            throw new UncheckedException("十六进制字符串不能为null或空");
+        if (clazz == null || hex == null || hex.isEmpty()) {
+            return null;
         }
 
         try {
@@ -214,14 +250,14 @@ public class Asn1Util {
             Class<?> readerType = readPduMethod.getParameterTypes()[0];
             java.lang.reflect.Constructor<?> constructor = READER_CONSTRUCTOR_CACHE.computeIfAbsent(readerType,
                     type -> {
-                try {
-                    java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.InputStream.class);
-                    ctor.setAccessible(true);
-                    return ctor;
-                } catch (NoSuchMethodException e) {
-                    throw new UncheckedException(String.format("无法找到%s的InputStream构造方法", type.getName()), e);
-                }
-            });
+                        try {
+                            java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.InputStream.class);
+                            ctor.setAccessible(true);
+                            return ctor;
+                        } catch (NoSuchMethodException e) {
+                            throw new UncheckedException(String.format("无法找到%s的InputStream构造方法", type.getName()), e);
+                        }
+                    });
 
             byte[] bytes = Hex.hexToBytes(hex);
             Object readerInstance;

@@ -213,6 +213,16 @@ public class SmartCard {
     }
 
     /**
+     * 获取指定渠道号的方法
+     *
+     * @return 返回对应的渠道号(Integer类型)
+     */
+    public synchronized Integer getChannelNumber() {
+        // 调用cardChannel()方法获取渠道对象，然后获取渠道号
+        return cardChannel().getChannelNumber();
+    }
+
+    /**
      * 打开一个新的逻辑通道
      * 这是一个同步方法，确保在多线程环境下对卡通道的安全访问
      * Opens a new logical channel to the card and returns it. The channel is opened by issuing a MANAGE CHANNEL
@@ -345,7 +355,7 @@ public class SmartCard {
             channel = this.card.openLogicalChannel();
             ApduResult selectResult = this.transmit(channel, COMMAND_SELECT_ISR, true);
             if (!selectResult.isSuccess()) {
-                throw new UncheckedException("在81E2专用逻辑通道上执行命令失败:" + selectResult.getData() + ",sw:" + selectResult.swHex());
+                throw new UncheckedException("在新逻辑通道上选择ISR应用失败:" + selectResult.getData() + ",sw:" + selectResult.swHex());
             }
             return this.transmit(channel, hexCommand, true);
         } catch (CardException e) {
@@ -531,7 +541,10 @@ public class SmartCard {
             /*
              * 在新通道上执行ISR应用选择命令，这是81E2协议通信的前置必要步骤
              */
-            channel.transmit(this.convertToCommandApdu(COMMAND_SELECT_ISR));
+            ApduResult selectResult = this.transmit(channel, COMMAND_SELECT_ISR, true);
+            if (!selectResult.isSuccess()) {
+                throw new UncheckedException("在81E2专用逻辑通道上选择ISR应用失败:" + selectResult.getData() + ",sw:" + selectResult.swHex());
+            }
 
             /*
              * 调用单命令版本的81E2传输方法，该方法会自动处理命令分包、
