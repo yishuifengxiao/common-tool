@@ -63,10 +63,6 @@ public class SmartCard {
     private static final String RETRIEVE_RESPONSE_PREFIX = "80120000";
 
     /**
-     * TerminalFactory实例（避免重复获取）
-     */
-    private static final TerminalFactory TERMINAL_FACTORY = TerminalFactory.getDefault();
-    /**
      * 当前连接的智能卡读卡器名称
      */
     private String terminalName;
@@ -87,7 +83,7 @@ public class SmartCard {
      * @return 智能卡终端管理器
      */
     private synchronized CardTerminals getCardTerminals() {
-        return TERMINAL_FACTORY.terminals();
+        return TerminalFactory.getDefault().terminals();
     }
 
     /**
@@ -97,7 +93,7 @@ public class SmartCard {
      */
     public synchronized List<String> getCardTerminalNames() {
         try {
-            return TERMINAL_FACTORY.terminals().list().stream().map(CardTerminal::getName).toList();
+            return TerminalFactory.getDefault().terminals().list().stream().map(CardTerminal::getName).toList();
         } catch (Exception e) {
             log.error("获取智能卡读卡器名称列表失败", e);
         }
@@ -207,6 +203,10 @@ public class SmartCard {
     public synchronized CardChannel cardChannel() {
         if (null == this.cardChannel) {
             try {
+                if (null == this.card) {
+
+                    this.connect(this.terminalName);
+                }
                 this.cardChannel = this.card.openLogicalChannel();
             } catch (CardException e) {
                 throw new UncheckedException(e);
@@ -237,6 +237,10 @@ public class SmartCard {
      */
     public synchronized CardChannel openNewLogicalChannel() {
         try {
+            // 确保卡片已连接
+            if (null == this.card) {
+                this.connect(this.terminalName);
+            }
             // 尝试打开一个新的逻辑通道
             return this.card.openLogicalChannel();
         } catch (CardException e) {
@@ -256,7 +260,10 @@ public class SmartCard {
      */
     public synchronized CardChannel getBasicChannel() {
         try {
-            // 尝试打开一个新的逻辑通道
+            // 确保卡片已连接
+            if (null == this.card) {
+                this.connect(this.terminalName);
+            }
             // this.card表示当前卡对象，调用其getBasicChannel()方法获取基本通道
             return this.card.getBasicChannel();
         } catch (Exception e) {
@@ -283,7 +290,15 @@ public class SmartCard {
         }
         // 如果存在已连接的卡，则执行断开连接操作
         if (null != this.card) {
-            this.disconnect();
+            try {
+                this.card.disconnect(true);
+                log.debug("已断开智能卡连接");
+            } catch (CardException e) {
+                throw new UncheckedException("断开与该卡的连接失败", e);
+            } finally {
+                this.card = null;
+                this.cardChannel = null;
+            }
         }
         // 重新连接到指定名称的终端
         return this.connect(this.terminalName);
@@ -614,6 +629,10 @@ public class SmartCard {
             String errorExceptionMsg) {
         CardChannel channel = null;
         try {
+            // 确保卡片已连接
+            if (null == this.card) {
+                this.connect(this.terminalName);
+            }
             channel = this.card.openLogicalChannel();
             ApduResult selectResult = this.transmit(channel, COMMAND_SELECT_ISR, true);
             if (!selectResult.isSuccess()) {
@@ -644,6 +663,10 @@ public class SmartCard {
     private <T> T executeWithNewLogicalChannel(ChannelAction<T> action, String errorLogMsg, String errorExceptionMsg) {
         CardChannel channel = null;
         try {
+            // 确保卡片已连接
+            if (null == this.card) {
+                this.connect(this.terminalName);
+            }
             channel = this.card.openLogicalChannel();
             return action.execute(channel);
         } catch (CardException e) {
@@ -656,7 +679,7 @@ public class SmartCard {
 
     /**
      * 通道操作函数式接口
-     * 
+     *
      * @param <T> 返回值类型
      */
     @FunctionalInterface
@@ -908,7 +931,7 @@ public class SmartCard {
          * @return true表示成功或需要继续拉取，false表示执行失败
          */
         public boolean isSuccess() {
-            return this.sw1 == SW1_SUCCESS || this.sw1 == SW1_MORE_DATA|| this.sw1 == 0x91;
+            return this.sw1 == SW1_SUCCESS || this.sw1 == SW1_MORE_DATA || this.sw1 == 0x91;
         }
 
         /**
