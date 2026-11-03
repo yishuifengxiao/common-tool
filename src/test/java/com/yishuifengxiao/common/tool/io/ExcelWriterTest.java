@@ -500,5 +500,202 @@ class ExcelWriterTest {
                 .setMinColumnWidth(80)
                 .setMaxColumnWidth(60);
         assertThrows(IllegalArgumentException.class, () -> ExcelWriter.writeToBytes(reversed));
+
+        ExcelWriter.WriteConfig invalidChar = new ExcelWriter.WriteConfig()
+                .setHeaders("A")
+                .setListData(Collections.singletonList(Collections.singletonList("v")))
+                .setSheetName("a/b");
+        assertThrows(IllegalArgumentException.class,
+                () -> ExcelWriter.writeToBytes(invalidChar),
+                "非法字符应在临时文件创建前被拒绝");
+    }
+
+    @Test
+    @DisplayName("write(File)：新建文件沿用平台默认权限（umask），不硬编码 0664")
+    void testNewFilePermissionsFollowPlatformDefault() throws Exception {
+        Assumptions.assumeTrue(
+                Files.getFileStore(tempDir).supportsFileAttributeView(PosixFileAttributeView.class),
+                "当前文件系统不支持 POSIX 权限");
+
+        // 参照文件：普通新建文件的默认权限
+        Path reference = tempDir.resolve("reference.bin");
+        Files.createFile(reference);
+
+        Path file = tempDir.resolve("new.xlsx");
+        ExcelWriter.write(file.toFile(), new ExcelWriter.WriteConfig()
+                .setHeaders("A")
+                .setListData(Collections.singletonList(Collections.singletonList("v"))));
+
+        assertEquals(Files.getPosixFilePermissions(reference), Files.getPosixFilePermissions(file));
+    }
+
+    @Test
+    @DisplayName("write(File)：目标为目录、父目录缺失、根路径时提前拒绝")
+    void testInvalidTargetPaths() throws Exception {
+        ExcelWriter.WriteConfig cfg = new ExcelWriter.WriteConfig()
+                .setHeaders("A")
+                .setListData(Collections.singletonList(Collections.singletonList("v")));
+
+        Path dir = tempDir.resolve("dir.xlsx");
+        Files.createDirectory(dir);
+        assertThrows(IllegalArgumentException.class, () -> ExcelWriter.write(dir.toFile(), cfg));
+
+        Path missingParent = tempDir.resolve("no-such-dir").resolve("out.xlsx");
+        assertThrows(IllegalArgumentException.class,
+                () -> ExcelWriter.write(missingParent.toFile(), cfg));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> ExcelWriter.write(tempDir.getRoot().toFile(), cfg));
+    }
+
+    @Test
+    @DisplayName("write(File)：目标文件只读时拒绝覆盖，原内容保持不变")
+    void testReadOnlyTargetRefused() throws Exception {
+        Path file = tempDir.resolve("readonly.xlsx");
+        Files.writeString(file, "ORIGINAL");
+        Assumptions.assumeTrue(file.toFile().setReadOnly(), "当前环境无法设置只读属性");
+        Assumptions.assumeFalse(Files.isWritable(file), "当前身份对只读文件仍可写（如 root/管理员）");
+
+        try {
+            IOException ex = assertThrows(IOException.class, () -> ExcelWriter.write(file.toFile(),
+                    new ExcelWriter.WriteConfig()
+                            .setHeaders("A")
+                            .setListData(Collections.singletonList(Collections.singletonList("v")))));
+
+            assertAll("只读目标",
+                    () -> assertTrue(ex.getMessage().contains("不可写")),
+                    () -> assertEquals("ORIGINAL", Files.readString(file)));
+        } finally {
+            file.toFile().setWritable(true, false);
+        }
+    }
+
+    @Test
+    @DisplayName("allAsText=false：超过 2^53 的整数按文本写入，不丢精度")
+    void testLargeLongKeptAsText() throws Exception {
+        String bigId = "9007199254740993"; // 2^53 + 1，double 无法精确表示
+
+        ExcelWriter.WriteConfig cfg = new ExcelWriter.WriteConfig()
+                .setHeaders("ID")
+                .setListData(Arrays.asList(
+                        Collections.singletonList(bigId),
+                        Collections.singletonList("42")))
+                .setAllAsText(false);
+
+        try (Workbook wb = open(ExcelWriter.writeToBytes(cfg))) {
+            Sheet sheet = wb.getSheetAt(0);
+            Cell big = sheet.getRow(1).getCell(0);
+            Cell small = sheet.getRow(2).getCell(0);
+
+            assertAll("长整型精度",
+                    () -> assertEquals(CellType.STRING, big.getCellType()),
+                    () -> assertEquals(bigId, big.getStringCellValue()),
+                    () -> assertEquals(CellType.NUMERIC, small.getCellType()),
+                    () -> assertEquals(42d, small.getNumericCellValue()));
+        }
+    }
+
+    @Test
+    @DisplayName("wrap 模式：长表头行也会自适应行高")
+    void testHeaderRowHeightAdjusted() throws Exception {
+        ExcelWriter.WriteConfig cfg = new ExcelWriter.WriteConfig()
+                .setHeaders("这是一个很长的表头文字需要换行显示")
+                .setListData(Collections.singletonList(Collections.singletonList("v")))
+                .setMinColumnWidth(8)
+                .setMaxColumnWidth(8);
+
+        try (Workbook wb = open(ExcelWriter.writeToBytes(cfg))) {
+            Row header = wb.getSheetAt(0).getRow(0);
+            assertTrue(header.getHeightInPoints() > 15f,
+                    "长表头行高应大于默认单行高度，实际=" + header.getHeightInPoints());
+        }
+    }
+
+    @Test
+    @DisplayName("write(File)：格式按真实目标后缀判断（link.xlsx → real.xls 写出 xls）")
+    void testSymlinkFormatFollowsRealTarget() throws Exception {
+        Path real = tempDir.resolve("real.xls");
+        Path link = tempDir.resolve("link.xlsx");
+        try {
+            Files.createSymbolicLink(link, real.getFileName());
+        } catch (IOException | UnsupportedOperationException e) {
+            Assumptions.assumeTrue(false, "当前环境不支持创建符号链接");
+            return;
+        }
+
+        ExcelWriter.write(link.toFile(), new ExcelWriter.WriteConfig()
+                .setHeaders("A")
+                .setListData(Collections.singletonList(Collections.singletonList("v"))));
+
+        assertTrue(Files.isSymbolicLink(link), "符号链接本身应保留");
+        try (InputStream in = Files.newInputStream(real);
+             Workbook wb = WorkbookFactory.create(in)) {
+            assertTrue(wb instanceof HSSFWorkbook, "应按真实后缀生成 .xls 内容");
+        }
+    }
+
+    @Test
+    @DisplayName("write(File)：符号链接超过 8 层时报错，不替换链接")
+    void testSymlinkTooDeepFails() throws Exception {
+        Path real = tempDir.resolve("deep-real.xlsx");
+        Files.writeString(real, "ORIGINAL");
+
+        Path[] links = new Path[9];
+        try {
+            for (int i = 0; i < links.length; i++) {
+                links[i] = tempDir.resolve("deep" + i + ".xlsx");
+            }
+            for (int i = 0; i < links.length - 1; i++) {
+                Files.createSymbolicLink(links[i], links[i + 1].getFileName());
+            }
+            Files.createSymbolicLink(links[links.length - 1], real.getFileName());
+        } catch (IOException | UnsupportedOperationException e) {
+            Assumptions.assumeTrue(false, "当前环境不支持创建符号链接");
+            return;
+        }
+
+        IOException ex = assertThrows(IOException.class, () -> ExcelWriter.write(links[0].toFile(),
+                new ExcelWriter.WriteConfig()
+                        .setHeaders("A")
+                        .setListData(Collections.singletonList(Collections.singletonList("v")))));
+
+        assertAll("软链超限",
+                () -> assertTrue(ex.getMessage().contains("符号链接")),
+                () -> assertTrue(Files.isSymbolicLink(links[0]), "链接不应被替换为普通文件"),
+                () -> assertEquals("ORIGINAL", Files.readString(real), "真实文件不应被改写"));
+    }
+
+    @Test
+    @DisplayName("Map 数据中的 null 行被跳过，不产生空白数据行")
+    void testMapNullRowSkipped() throws Exception {
+        Map<String, String> row = new LinkedHashMap<>();
+        row.put("姓名", "张三");
+
+        ExcelWriter.WriteConfig cfg = new ExcelWriter.WriteConfig()
+                .setHeaders("姓名")
+                .setMapData(Arrays.asList(null, row));
+
+        try (Workbook wb = open(ExcelWriter.writeToBytes(cfg))) {
+            Sheet sheet = wb.getSheetAt(0);
+            assertEquals(1, sheet.getLastRowNum(), "表头 + 1 行有效数据");
+            assertEquals("张三", sheet.getRow(1).getCell(0).getStringCellValue());
+        }
+    }
+
+    @Test
+    @DisplayName("write(Workbook)：同名 Sheet 抛 IllegalArgumentException")
+    void testDuplicateSheetRejected() throws Exception {
+        try (Workbook wb = new XSSFWorkbook()) {
+            wb.createSheet("Sheet1");
+
+            IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                    () -> ExcelWriter.write(wb, new ExcelWriter.WriteConfig()
+                            .setSheetName("Sheet1")
+                            .setHeaders("A")
+                            .setListData(Collections.singletonList(Collections.singletonList("v")))));
+
+            assertTrue(ex.getMessage().contains("已存在"));
+            assertEquals(1, wb.getNumberOfSheets(), "不应创建重复 Sheet");
+        }
     }
 }

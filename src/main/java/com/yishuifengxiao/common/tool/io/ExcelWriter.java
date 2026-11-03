@@ -9,13 +9,14 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.*;
+import java.nio.channels.FileChannel;
 import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.PosixFileAttributeView;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 
 /**
@@ -116,7 +117,11 @@ public final class ExcelWriter {
         /** 文本溢出处理方式，默认自动换行。 */
         private TextOverflow textOverflow = TextOverflow.WRAP;
 
-        /** 是否所有单元格都以字符串格式写入，默认 true。 */
+        /**
+         * 是否所有单元格都以字符串格式写入，默认 true。
+         *
+         * <p>{@code false} 时自动识别数字/布尔；超过 2^53 的整数仍按文本写入，避免 double 精度丢失。</p>
+         */
         private boolean allAsText = true;
 
         /** 是否自动计算列宽，默认 true。 */
@@ -175,24 +180,42 @@ public final class ExcelWriter {
      *
      * <p>写入采用"同目录临时文件 + 原子替换"：失败时不会破坏已存在的目标文件。</p>
      * <ul>
-     *   <li>目标为符号链接时写入链接指向的真实文件，链接本身保留；</li>
-     *   <li>POSIX 平台保留目标文件原有权限，新建文件使用 {@code rw-rw-r--}。</li>
+     *   <li>目标为符号链接时写入链接指向的真实文件，链接本身保留；层级超过 8 层或成环时报错；</li>
+     *   <li>格式按<b>真实目标文件</b>的后缀判断，避免链接名与目标后缀不一致；</li>
+     *   <li>目标已存在且不可写时拒绝覆盖（抛 {@link IOException}）。该判断为<b>尽力而为</b>：
+     *       root/管理员身份下可能仍可写入只读文件，需要强保证时应依赖文件系统权限；</li>
+     *   <li>POSIX 平台保留目标文件原有权限；新建文件不强制覆盖权限，沿用平台默认权限（受 umask 影响）；</li>
+     *   <li>替换前对临时文件执行 {@code fsync}；但<b>不对父目录 fsync</b>，
+     *       因此"原子替换"只保证旧文件或新文件之一可见，不保证断电后更新一定持久化。</li>
      * </ul>
      */
     public static void write(File file, WriteConfig config) throws IOException {
         if (file == null) {
             throw new IllegalArgumentException("file 不能为空 / file must not be null");
         }
-        ExcelFormat format = ExcelFormat.detect(file.getName());
+        // 纯配置校验放在任何路径/文件操作之前：配置错误不应被软链解析等 I/O 错误掩盖
+        validateConfig(config);
+
+        Path target = resolveRealTarget(file.toPath().toAbsolutePath());
+        if (target.getFileName() == null) {
+            throw new IllegalArgumentException(
+                    "目标路径是文件系统根目录，无法写出文件：" + target
+                            + " / Target path is a filesystem root, cannot write file: " + target);
+        }
+        String targetName = target.getFileName().toString();
+        ExcelFormat format = ExcelFormat.detect(targetName);
         if (format == null) {
             throw new IllegalArgumentException(
                     "无法从文件名判断 Excel 格式，文件名须以 .xls 或 .xlsx 结尾："
                             + file.getName()
+                            + (targetName.equals(file.getName()) ? "" : "（实际写入 " + targetName + "）")
                             + " / Cannot determine format from file name, must end with .xls or .xlsx: "
-                            + file.getName());
+                            + targetName);
         }
 
-        Path target = resolveRealTarget(file.toPath().toAbsolutePath());
+        // 先在内存中完成可预知的配置校验与布局计算，不触碰任何文件
+        SheetLayout sheetLayout = layout(config, format);
+
         Path parent = target.getParent();
         if (parent == null || !Files.isDirectory(parent)) {
             throw new IllegalArgumentException(
@@ -204,24 +227,35 @@ public final class ExcelWriter {
                     "目标路径是目录，无法写出文件：" + target
                             + " / Target path is a directory, cannot write file: " + target);
         }
-
-        // 先在内存中完成可预知的校验与布局计算，此阶段不会创建或截断任何文件
-        SheetLayout sheetLayout = layout(config, format);
+        // 只读文件在 POSIX 下仍可被 rename 覆盖，这里显式拒绝，避免绕过只读保护
+        if (Files.exists(target) && !Files.isWritable(target)) {
+            throw new IOException(
+                    "目标文件不可写，已拒绝覆盖：" + target
+                            + " / Target file is not writable, refusing to overwrite: " + target);
+        }
 
         // 写同目录临时文件，成功后再原子替换目标文件：任何失败都不会破坏已有文件
         // 临时文件使用 .tmp 后缀，进程崩溃残留时不会被误认为正常 Excel
+        // 用 Files.createFile 创建（遵循平台 umask），而不是硬编码权限
         String fileName = target.getFileName().toString();
         String prefix = fileName.length() >= 3 ? fileName : fileName + "-tmp";
-        Path temp = Files.createTempFile(parent, prefix, ".tmp");
+        Path temp = createTempFile(parent, prefix);
         try {
             try (Workbook wb = buildWorkbook(sheetLayout, config, format);
                  OutputStream out = new BufferedOutputStream(Files.newOutputStream(temp))) {
                 wb.write(out);
             }
+            // 先让临时文件内容落盘，再替换目标文件；原子替换只保证"看到旧文件或新文件"
+            forceFile(temp);
             applyTargetPermissions(target, temp);
             moveReplacing(temp, target);
         } finally {
-            Files.deleteIfExists(temp);
+            // 清理失败不覆盖真实异常；残留的 .tmp 可安全删除
+            try {
+                Files.deleteIfExists(temp);
+            } catch (IOException ignored) {
+                // ignore：优先保留写入/替换阶段的主异常
+            }
         }
     }
 
@@ -233,24 +267,58 @@ public final class ExcelWriter {
             current = link.isAbsolute() ? link : current.getParent().resolve(link);
             current = current.normalize();
         }
+        // 超过上限或存在环时，继续替换会破坏链接本身，直接报错
+        if (Files.isSymbolicLink(current)) {
+            throw new IOException(
+                    "符号链接层级超过上限或存在环：" + target
+                            + " / Too many levels of symbolic links or a link cycle: " + target);
+        }
         return current;
+    }
+
+    /** 将临时文件内容强制刷入磁盘（POSIX 下 fsync，Windows 下同语义尽力而为）。 */
+    private static void forceFile(Path path) throws IOException {
+        try (FileChannel channel = FileChannel.open(path, StandardOpenOption.WRITE)) {
+            channel.force(true);
+        }
+    }
+
+    /**
+     * 在目标目录创建唯一临时文件（后缀固定为 {@code .tmp}）。
+     *
+     * <p>使用 {@link Files#createFile} 而非 {@link Files#createTempFile}，让文件权限由平台默认策略
+     * （umask）决定，避免新建目标文件时被硬编码权限覆盖。</p>
+     */
+    private static Path createTempFile(Path parent, String prefix) throws IOException {
+        for (int i = 0; i < 10; i++) {
+            Path candidate = parent.resolve(
+                    prefix + "-" + UUID.randomUUID().toString().replace("-", "") + ".tmp");
+            try {
+                return Files.createFile(candidate);
+            } catch (FileAlreadyExistsException e) {
+                // 名字冲突，重新生成
+            }
+        }
+        throw new IOException("无法创建临时文件，目录：" + parent
+                + " / Failed to create temporary file in directory: " + parent);
     }
 
     /**
      * 让替换后的目标文件保持原有权限。
      *
-     * <p>POSIX 平台临时文件默认权限为 600，直接替换会改变目标文件权限；
-     * 目标已存在时沿用其权限，不存在时使用 {@code rw-rw-r--}（与旧实现创建新文件的效果一致）。
-     * 非 POSIX 平台（如 Windows）不做处理。</p>
+     * <p>POSIX 平台临时文件默认权限较严格，直接替换会改变目标文件权限；
+     * 目标已存在时沿用其权限；目标不存在时不覆盖权限，沿用平台/JVM 创建临时文件时的默认权限
+     * （受进程 umask 影响），避免硬编码权限。非 POSIX 平台（如 Windows）不做处理。</p>
      */
     private static void applyTargetPermissions(Path target, Path temp) throws IOException {
         if (!Files.getFileStore(temp).supportsFileAttributeView(PosixFileAttributeView.class)) {
             return;
         }
-        Set<PosixFilePermission> permissions = Files.exists(target)
-                ? Files.getPosixFilePermissions(target)
-                : PosixFilePermissions.fromString("rw-rw-r--");
-        Files.setPosixFilePermissions(temp, permissions);
+        if (!Files.exists(target)) {
+            // 新建文件：保留临时文件的平台默认权限，不做硬编码覆盖
+            return;
+        }
+        Files.setPosixFilePermissions(temp, Files.getPosixFilePermissions(target));
     }
 
     /** 用临时文件替换目标文件；文件系统不支持原子移动时退化为普通替换。 */
@@ -302,7 +370,29 @@ public final class ExcelWriter {
         if (workbook == null) {
             throw new IllegalArgumentException("Workbook 不能为空 / Workbook must not be null");
         }
-        buildSheet(workbook, config);
+        if (config == null) {
+            throw new IllegalArgumentException("config 不能为空 / config must not be null");
+        }
+        String sheetName = config.getSheetName();
+        if (workbook.getSheet(sheetName) != null) {
+            throw new IllegalArgumentException(
+                    "工作表已存在，无法重复创建：" + sheetName
+                            + " / Sheet already exists: " + sheetName);
+        }
+        int before = workbook.getNumberOfSheets();
+        try {
+            buildSheet(workbook, config);
+        } catch (RuntimeException e) {
+            // 渲染中途失败（如样式/行列资源上限）时回滚新建的 Sheet，避免留下半成品
+            try {
+                if (workbook.getNumberOfSheets() > before) {
+                    workbook.removeSheetAt(workbook.getNumberOfSheets() - 1);
+                }
+            } catch (RuntimeException rollbackError) {
+                e.addSuppressed(rollbackError);
+            }
+            throw e;
+        }
     }
 
     // ============================================================
@@ -348,13 +438,7 @@ public final class ExcelWriter {
      * <p>此方法不创建任何文件，因此可以在打开输出目标之前安全调用。</p>
      */
     private static SheetLayout layout(WriteConfig config, ExcelFormat format) {
-        if (config == null) {
-            throw new IllegalArgumentException("config 不能为空 / config must not be null");
-        }
-        validateSheetName(config.getSheetName());
-        if (config.isAutoColumnWidth()) {
-            validateColumnWidth(config.getMinColumnWidth(), config.getMaxColumnWidth());
-        }
+        validateConfig(config);
 
         // 1. 解析有效表头
         List<String> effectiveHeaders = resolveHeaders(config);
@@ -393,7 +477,21 @@ public final class ExcelWriter {
         return new SheetLayout(effectiveHeaders, rows, maxCols);
     }
 
-    /** 校验工作表名称（POI 要求非空且不超过 31 个字符）。 */
+    /**
+     * 纯配置校验（config 非空、sheetName、列宽参数）：不触碰任何文件，
+     * 可在路径解析之前安全调用。
+     */
+    private static void validateConfig(WriteConfig config) {
+        if (config == null) {
+            throw new IllegalArgumentException("config 不能为空 / config must not be null");
+        }
+        validateSheetName(config.getSheetName());
+        if (config.isAutoColumnWidth()) {
+            validateColumnWidth(config.getMinColumnWidth(), config.getMaxColumnWidth());
+        }
+    }
+
+    /** 校验工作表名称（POI 要求非空、不超过 31 个字符且不含 Excel 禁用字符）。 */
     private static void validateSheetName(String sheetName) {
         if (sheetName == null || sheetName.isEmpty()) {
             throw new IllegalArgumentException("sheetName 不能为空 / sheetName must not be empty");
@@ -402,6 +500,16 @@ public final class ExcelWriter {
             throw new IllegalArgumentException(
                     "sheetName 长度不能超过 31 个字符，当前 " + sheetName.length()
                             + " / sheetName must not exceed 31 characters, current " + sheetName.length());
+        }
+        // Excel 禁用的工作表名字符：: \ / ? * [ ]
+        for (int i = 0; i < sheetName.length(); i++) {
+            char ch = sheetName.charAt(i);
+            if (ch == ':' || ch == '\\' || ch == '/' || ch == '?' || ch == '*'
+                    || ch == '[' || ch == ']') {
+                throw new IllegalArgumentException(
+                        "sheetName 包含 Excel 不允许的字符 [" + ch + "]：" + sheetName
+                                + " / sheetName contains an invalid character [" + ch + "]: " + sheetName);
+            }
         }
     }
 
@@ -511,8 +619,14 @@ public final class ExcelWriter {
             actualWidths[c] = w;
         }
 
-        // 9. wrap 模式下，用"实际列宽"再次遍历数据行调行高
+        // 9. wrap 模式下，用"实际列宽"调整表头行与数据行行高
         if (config.getTextOverflow() == TextOverflow.WRAP) {
+            if (headerCols > 0) {
+                Row headerRow = sheet.getRow(0);
+                if (headerRow != null) {
+                    adjustRowHeight(headerRow, maxCols, actualWidths);
+                }
+            }
             for (int r = 0; r < rows.size(); r++) {
                 Row row = sheet.getRow(r + dataStartRow);
                 if (row == null) {
@@ -562,14 +676,17 @@ public final class ExcelWriter {
         return headers;
     }
 
-    /** 统一转为 {@code List<List<String>>}。 */
+    /** 统一转为 {@code List<List<String>>}；Map 数据中的 null 行直接跳过，不产生空白行。 */
     private static List<List<String>> toRowList(WriteConfig config, List<String> effectiveHeaders) {
         if (!config.getMapData().isEmpty()) {
             List<List<String>> result = new ArrayList<>(config.getMapData().size());
             for (Map<String, String> mapRow : config.getMapData()) {
+                if (mapRow == null) {
+                    continue;
+                }
                 List<String> line = new ArrayList<>(effectiveHeaders.size());
                 for (String header : effectiveHeaders) {
-                    String v = mapRow == null ? null : mapRow.get(header);
+                    String v = mapRow.get(header);
                     line.add(v == null ? "" : v);
                 }
                 result.add(line);
@@ -626,6 +743,9 @@ public final class ExcelWriter {
     // 单元格值写入
     // ============================================================
 
+    /** double 可精确表示的最大连续整数（2^53），超出后按文本写入。 */
+    private static final long MAX_SAFE_LONG = 1L << 53;
+
     /** 写入单元格值：按 allAsText 决定统一文本还是自动识别类型。 */
     private static void writeCellValue(Cell cell, String value, WriteConfig config) {
         if (value == null) value = "";
@@ -634,7 +754,13 @@ public final class ExcelWriter {
             return;
         }
         if (isLong(value)) {
-            cell.setCellValue((double) Long.parseLong(value));
+            long v = Long.parseLong(value);
+            if (v > MAX_SAFE_LONG || v < -MAX_SAFE_LONG) {
+                // 超过 2^53 的整数无法用 double 精确表示，按文本写入保留原始精度
+                cell.setCellValue(value);
+            } else {
+                cell.setCellValue((double) v);
+            }
             return;
         }
         if (isDouble(value)) {

@@ -560,18 +560,31 @@ class ExcelReaderTest {
         ExecutorService rejected = Executors.newSingleThreadExecutor();
         rejected.shutdown();
 
+        CountDownLatch done = new CountDownLatch(1);
+        AtomicBoolean success = new AtomicBoolean(true);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
         ExcelReader.ParseResult r = ExcelReader.parse(file.toFile(),
                 new ExcelReader.HeaderConfig()
                         .setColumns(Collections.singletonList(ExcelReader.ColumnDef.requiredZh("姓名")))
                         .setAsync(true)
-                        .setExecutor(rejected),
+                        .setExecutor(rejected)
+                        .setOnBodyComplete((ok, err) -> {
+                            success.set(ok);
+                            error.set(err);
+                            done.countDown();
+                        }),
                 (idx, rowData) -> {
                 });
 
+        assertTrue(done.await(5, TimeUnit.SECONDS), "提交失败也应触发完成回调");
         assertAll("提交失败",
                 () -> assertTrue(r.isFailed()),
                 () -> assertTrue(r.getMessageZhShort().contains("提交失败")),
-                () -> assertTrue(r.getMessageEnShort().contains("submit")));
+                () -> assertTrue(r.getMessageEnShort().contains("submit")),
+                () -> assertNull(r.getLanguage(), "失败结果 language 应为 null"),
+                () -> assertFalse(success.get(), "提交失败时 success 应为 false"),
+                () -> assertNotNull(error.get(), "提交失败时应携带异常"));
     }
 
     @Test
@@ -616,9 +629,7 @@ class ExcelReaderTest {
                         .setAsync(true),
                 (idx, rowData) -> callCount.incrementAndGet());
 
-        // 给后台任务一点时间（如果有的话）
-        Thread.sleep(100);
-
+        // 表头失败时不会提交异步任务，无需等待
         assertAll("异步表头失败",
                 () -> assertFalse(r.isSuccess()),
                 () -> assertEquals(0, callCount.get(), "回调一次都不应被调用"),
@@ -832,16 +843,212 @@ class ExcelReaderTest {
         CountDownLatch asyncDone = new CountDownLatch(1);
         AtomicInteger asyncCount = new AtomicInteger(0);
         ExcelReader.ParseResult async = ExcelReader.parse(file.toFile(),
-                new ExcelReader.HeaderConfig().setColumns(columns).setAsync(true),
+                new ExcelReader.HeaderConfig().setColumns(columns).setAsync(true)
+                        .setOnBodyComplete((ok, err) -> asyncDone.countDown()),
                 (idx, rowData) -> asyncCount.incrementAndGet());
 
-        // 给异步任务一点时间
-        Thread.sleep(100);
+        assertTrue(asyncDone.await(5, TimeUnit.SECONDS), "空数据也应触发完成回调");
 
         assertAll("空数据",
                 () -> assertTrue(sync.isSuccess()),
                 () -> assertTrue(async.isSuccess()),
                 () -> assertFalse(anyCallback.get(), "同步：无数据不应回调"),
                 () -> assertEquals(0, asyncCount.get(), "异步：无数据不应回调"));
+    }
+
+    // ============================================================
+    // 13. 公式读取 / 异步完成回调 / 配置防御性
+    // ============================================================
+
+    @Test
+    @DisplayName("公式单元格：读取计算结果而不是公式文本")
+    void testFormulaCellReadsCalculatedResult() throws Exception {
+        Path file = tempDir.resolve("formula.xlsx");
+        try (Workbook wb = new XSSFWorkbook();
+             OutputStream out = Files.newOutputStream(file)) {
+            Sheet sheet = wb.createSheet("Employees");
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("姓名");
+            header.createCell(1).setCellValue("总分");
+
+            Row r1 = sheet.createRow(1);
+            r1.createCell(0).setCellValue("张三");
+            r1.createCell(1).setCellValue(80);
+
+            Row r2 = sheet.createRow(2);
+            r2.createCell(0).setCellValue("李四");
+            r2.createCell(1).setCellFormula("B2+10");
+
+            wb.getCreationHelper().createFormulaEvaluator().evaluateAll();
+            wb.write(out);
+        }
+
+        List<ExcelReader.ColumnDef> columns = Arrays.asList(
+                ExcelReader.ColumnDef.requiredZh("姓名"),
+                ExcelReader.ColumnDef.requiredZh("总分"));
+
+        List<String> totals = new ArrayList<>();
+        ExcelReader.ParseResult r = ExcelReader.parse(file.toFile(),
+                new ExcelReader.HeaderConfig().setColumns(columns),
+                (idx, rowData) -> totals.add(rowData.get(1).getValue()));
+
+        assertAll("公式求值",
+                () -> assertTrue(r.isSuccess(), () -> r.getMessageZhShort()),
+                () -> assertEquals(Arrays.asList("80", "90"), totals));
+    }
+
+    @Test
+    @DisplayName("异步完成回调：正文成功时 success=true、error=null")
+    void testAsyncBodyCompleteSuccess() throws Exception {
+        Path file = createExcel("Employees", 0,
+                new String[]{"姓名"}, new Object[][]{{"张三"}, {"李四"}});
+
+        CountDownLatch done = new CountDownLatch(1);
+        AtomicBoolean success = new AtomicBoolean(false);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+        AtomicInteger count = new AtomicInteger();
+
+        ExcelReader.ParseResult r = ExcelReader.parse(file.toFile(),
+                new ExcelReader.HeaderConfig()
+                        .setColumns(Collections.singletonList(ExcelReader.ColumnDef.requiredZh("姓名")))
+                        .setAsync(true)
+                        .setOnBodyComplete((ok, err) -> {
+                            success.set(ok);
+                            error.set(err);
+                            done.countDown();
+                        }),
+                (idx, rowData) -> count.incrementAndGet());
+
+        assertTrue(done.await(5, TimeUnit.SECONDS), "完成回调应在 5 秒内触发");
+        assertAll("成功完成",
+                () -> assertTrue(r.isSuccess()),
+                () -> assertTrue(success.get()),
+                () -> assertNull(error.get()),
+                () -> assertEquals(2, count.get()));
+    }
+
+    @Test
+    @DisplayName("异步完成回调：正文异常时 success=false 并携带异常；同步失败结果 language 为 null")
+    void testAsyncBodyCompleteFailure() throws Exception {
+        Path file = createExcel("Employees", 0,
+                new String[]{"姓名"}, new Object[][]{{"张三"}});
+
+        List<ExcelReader.ColumnDef> columns =
+                Collections.singletonList(ExcelReader.ColumnDef.requiredZh("姓名"));
+
+        CountDownLatch done = new CountDownLatch(1);
+        AtomicBoolean success = new AtomicBoolean(true);
+        AtomicReference<Throwable> error = new AtomicReference<>();
+
+        ExcelReader.parse(file.toFile(),
+                new ExcelReader.HeaderConfig()
+                        .setColumns(columns)
+                        .setAsync(true)
+                        .setOnBodyComplete((ok, err) -> {
+                            success.set(ok);
+                            error.set(err);
+                            done.countDown();
+                        }),
+                (idx, rowData) -> {
+                    throw new IllegalStateException("boom");
+                });
+
+        assertTrue(done.await(5, TimeUnit.SECONDS), "完成回调应在 5 秒内触发");
+
+        ExcelReader.ParseResult sync = ExcelReader.parse(file.toFile(),
+                new ExcelReader.HeaderConfig().setColumns(columns),
+                (idx, rowData) -> {
+                    throw new IllegalStateException("boom");
+                });
+
+        assertAll("异常完成",
+                () -> assertFalse(success.get()),
+                () -> assertNotNull(error.get()),
+                () -> assertTrue(error.get().getMessage().contains("boom")),
+                () -> assertTrue(sync.isFailed()),
+                () -> assertTrue(sync.getMessageZhShort().contains("表体解析失败")),
+                () -> assertNull(sync.getLanguage()));
+    }
+
+    @Test
+    @DisplayName("HeaderConfig：getColumns 返回不可变视图，可变参数 setter 做防御性拷贝")
+    void testColumnsDefensiveCopy() {
+        ExcelReader.ColumnDef[] defs = {ExcelReader.ColumnDef.requiredZh("姓名")};
+        ExcelReader.HeaderConfig config = new ExcelReader.HeaderConfig().setColumns(defs);
+
+        defs[0] = ExcelReader.ColumnDef.requiredZh("年龄");
+
+        assertAll("columns 防御性",
+                () -> assertEquals("姓名", config.getColumns().get(0).getChineseName()),
+                () -> assertThrows(UnsupportedOperationException.class,
+                        () -> config.getColumns().add(ExcelReader.ColumnDef.requiredZh("部门"))));
+    }
+
+    @Test
+    @DisplayName("公式错误值：CellData 判定为无效并给出错误消息")
+    void testFormulaErrorCellInvalid() throws Exception {
+        Path file = tempDir.resolve("error-formula.xlsx");
+        try (Workbook wb = new XSSFWorkbook();
+             OutputStream out = Files.newOutputStream(file)) {
+            Sheet sheet = wb.createSheet("Employees");
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("姓名");
+            header.createCell(1).setCellValue("比值");
+
+            Row r1 = sheet.createRow(1);
+            r1.createCell(0).setCellValue("张三");
+            r1.createCell(1).setCellFormula("1/0");
+
+            wb.getCreationHelper().createFormulaEvaluator().evaluateAll();
+            wb.write(out);
+        }
+
+        List<ExcelReader.ColumnDef> columns = Arrays.asList(
+                ExcelReader.ColumnDef.requiredZh("姓名"),
+                ExcelReader.ColumnDef.nullableZh("比值"));
+
+        List<ExcelReader.CellData> seen = new ArrayList<>();
+        ExcelReader.ParseResult r = ExcelReader.parse(file.toFile(),
+                new ExcelReader.HeaderConfig().setColumns(columns),
+                (idx, rowData) -> seen.add(rowData.get(1)));
+
+        assertAll("公式错误值",
+                () -> assertTrue(r.isSuccess()),
+                () -> assertEquals(1, seen.size()),
+                () -> assertFalse(seen.get(0).isValid()),
+                () -> assertTrue(seen.get(0).getValidationErrorZh().contains("错误值")));
+    }
+
+    @Test
+    @DisplayName("空白行不跳过：整行空白与未创建的空白行都会回调，必填列标记为无效")
+    void testBlankRowsDelivered() throws Exception {
+        Path file = tempDir.resolve("blank-rows.xlsx");
+        try (Workbook wb = new XSSFWorkbook();
+             OutputStream out = Files.newOutputStream(file)) {
+            Sheet sheet = wb.createSheet("Employees");
+            Row header = sheet.createRow(0);
+            header.createCell(0).setCellValue("姓名");
+            sheet.createRow(1).createCell(0).setCellValue("张三");
+            // 第 2 行：存在 Row 对象但整行空白
+            sheet.createRow(2);
+            // 第 3 行：不创建，形成空白间隙
+            sheet.createRow(4).createCell(0).setCellValue("李四");
+            wb.write(out);
+        }
+
+        List<Integer> rowIndices = new ArrayList<>();
+        List<Boolean> validFlags = new ArrayList<>();
+        ExcelReader.ParseResult r = ExcelReader.parse(file.toFile(),
+                new ExcelReader.HeaderConfig().setColumns(
+                        Collections.singletonList(ExcelReader.ColumnDef.requiredZh("姓名"))),
+                (idx, rowData) -> {
+                    rowIndices.add(idx);
+                    validFlags.add(rowData.get(0).isValid());
+                });
+
+        assertAll("空白行不跳过",
+                () -> assertTrue(r.isSuccess()),
+                () -> assertEquals(Arrays.asList(1, 2, 3, 4), rowIndices),
+                () -> assertEquals(Arrays.asList(true, false, false, true), validFlags));
     }
 }

@@ -63,7 +63,7 @@
     <dependency>
         <groupId>org.projectlombok</groupId>
         <artifactId>lombok</artifactId>
-        <version>1.18.30</version>
+        <version>1.18.46</version>
         <scope>provided</scope>
     </dependency>
 
@@ -77,7 +77,7 @@
 </dependencies>
 ```
 
-**环境要求**：JDK 8+。
+**环境要求**：JDK 21+。
 
 ---
 
@@ -166,7 +166,7 @@ ExcelReader.parse(new File("data.xlsx"), config, callback);
 byte[] bytes = Files.readAllBytes(Paths.get("data.xlsx"));
 ExcelReader.parse(bytes, config, callback);
 
-// ③ InputStream（流由调用方关闭）
+// ③ InputStream（流由调用方关闭；异步模式需等正文读完再关）
 try (InputStream in = new FileInputStream("data.xlsx")) {
     ExcelReader.parse(in, config, callback);
 }
@@ -179,10 +179,11 @@ try (Workbook wb = WorkbookFactory.create(new FileInputStream("data.xlsx"))) {
 
 **Workbook 生命周期表**：
 
-| 输入方式 | 谁负责关闭 Workbook | 何时可关闭（异步模式） |
-|---------|-----------------|---------------------|
-| `File` / `byte[]` / `InputStream` | **工具类** | 工具类自动在正文读完时关闭 |
-| `Workbook` | **调用方** | **必须等正文读完**（用 CountDownLatch 感知） |
+| 输入方式 | 谁负责关闭 Workbook | 谁负责关闭输入流 | 何时可关闭（异步模式） |
+|---------|-----------------|-----------------|---------------------|
+| `File` / `byte[]` | **工具类** | **工具类**（正文读完或提交失败后） | 工具类自动在正文读完时关闭 |
+| `InputStream` | **工具类** | **调用方** | Workbook 由工具类在正文读完时关闭；**流需调用方等正文读完后再关闭** |
+| `Workbook` | **调用方** | 不适用 | **必须等正文读完**（可用 `onBodyComplete` 或 CountDownLatch 感知） |
 
 > **异步模式 + Workbook 输入**示例：
 > ```java
@@ -244,7 +245,8 @@ col.name(HeaderLanguage.EN);    // "Name"
 | `headerRowIndex` | `0` | 表头所在行（0 开始） |
 | `sheetIndex` | `0` | 工作表索引（0 开始，超出实际数量时解析失败） |
 | `async` | `false` | 正文读取模式（见 [2.9](#29-同步与异步)） |
-| `executor` | null | 异步线程池，默认使用工具类内置的有界守护线程池 |
+| `executor` | null | 异步线程池，默认使用工具类内置的守护线程池（线程数 + 队列容量均有上限，队列满时拒绝任务） |
+| `onBodyComplete` | null | 异步正文完成回调 `(success, error) -> {}`；正文结束或提交失败时触发（仅异步模式生效） |
 
 **完整配置示例**：
 
@@ -261,6 +263,8 @@ HeaderConfig config = new HeaderConfig()
         .setHeaderRowIndex(0)                             // 表头在第 1 行
         .setAsync(false);                                 // 同步模式
 ```
+
+> **列定义不可变**：`getColumns()` 返回不可变视图，修改请重新调用 `setColumns(...)`；`setColumns(List)` 与 `setColumns(ColumnDef...)` 都会做防御性拷贝。
 
 ### 2.6 回调契约 RowCallback
 
@@ -285,7 +289,7 @@ ExcelReader.parse(file, config.setOrderRequired(false), (rowIndex, rowData) -> {
 
 - 仅在**表头校验通过**后触发
 - 表头失败 → **一次都不会触发**
-- 整行全空 → 跳过
+- 空白行（整行无内容，甚至是未创建的空白行）**不会跳过**：照常回调，必填列的 `isValid()` 为 `false`
 - **流式**：每读一行 → 立即回调 → 方法返回后 rowData 可被 GC
 
 **执行线程**：
@@ -297,10 +301,10 @@ ExcelReader.parse(file, config.setOrderRequired(false), (rowIndex, rowData) -> {
 
 | 方法 | 返回 | 说明 |
 |------|------|------|
-| `getValue()` | `String` | 单元格文本（已 trim 不可见字符，空值为 `""`） |
+| `getValue()` | `String` | 单元格文本（已 trim 不可见字符，空值为 `""`；公式单元格返回**计算结果**） |
 | `getColumn()` | `ColumnDef` | 列定义（永不为 null） |
 | `getExcelIdx()` | `int` | Excel 物理列索引（0 开始） |
-| `isValid()` | `boolean` | 非空校验结果 |
+| `isValid()` | `boolean` | 非空校验结果（必填为空或 Excel 错误值 `#DIV/0!` 等均为 `false`） |
 | `getValidationErrorZh()` | `String` | 校验失败时中文消息，通过时为 `null` |
 | `getValidationErrorEn()` | `String` | 校验失败时英文消息，通过时为 `null` |
 | `isMissingRequired()` | `boolean` | 等价于 `!isValid()` |
@@ -316,8 +320,8 @@ boolean rowOk = rowData.values().stream().allMatch(CellData::isValid);
 | 方法 | 返回 | 说明 |
 |------|------|------|
 | `isSuccess()` / `isFailed()` | `boolean` | 是否成功（异步模式下仅代表表头） |
-| `getLanguage()` | `HeaderLanguage` | 命中语言（表头失败时为 `null`） |
-| `getHeaders()` | `List<HeaderCellInfo>` | 按 columns 顺序的表头映射 |
+| `getLanguage()` | `HeaderLanguage` | 命中语言（**任何失败场景均为 `null`**） |
+| `getHeaders()` | `List<HeaderCellInfo>` | 按 columns 顺序的表头映射（失败时为该阶段已解析到的表头） |
 | `getMessageZh()` / `getMessageEn()` | `String` | **详细版**错误消息 |
 | `getMessageZhShort()` / `getMessageEnShort()` | `String` | **简写版**错误消息 |
 
@@ -352,10 +356,10 @@ System.out.println(r.getMessageZh());
 | 回调方式 | **流式逐行回调** | **流式逐行回调** |
 | `parse(...)` 返回时机 | **回调全部执行完后** | **表头通过后立即返回** |
 | `parse` 返回时数据状态 | 全部处理完 | **可能还在处理中** |
-| 正文异常感知 | 通过 `ParseResult.fail` 返回 | **打印到 stderr**（无法传播） |
+| 正文异常感知 | 通过 `ParseResult.fail` 返回 | 通过 `onBodyComplete` 回调通知（同时打印到 stderr） |
 | 返回的 `ParseResult` | 结构、方法、行为**完全相同** | 结构、方法、行为**完全相同** |
 
-> **默认线程池**：未设置 `executor` 时使用工具类内置的有界守护线程池，不会占用 `ForkJoinPool.commonPool()`。
+> **默认线程池**：未设置 `executor` 时使用工具类内置的守护线程池（线程数与队列容量均有上限，队列满时拒绝任务），不会占用 `ForkJoinPool.commonPool()`。
 
 #### 场景 1：普通读取（同步，推荐）
 
@@ -399,30 +403,37 @@ System.out.println("表头已通过，正文在后台处理中...");
 
 **适用场景**：大文件、UI 不阻塞、后台任务、批量并行处理。
 
-#### 场景 3：需要感知异步完成
+#### 场景 3：需要感知异步完成 / 异常
 
-由于异步 `parse` 立即返回，完成感知需要**自行控制**：
+由于异步 `parse` 立即返回，完成与异常感知需要 `onBodyComplete`：
 
 ```java
-AtomicInteger rowCount = new AtomicInteger(0);
-CountDownLatch allDone = new CountDownLatch(1);
+CountDownLatch done = new CountDownLatch(1);
+AtomicBoolean success = new AtomicBoolean(false);
+AtomicReference<Throwable> error = new AtomicReference<>();
 
 ExcelReader.parse(file,
-        new HeaderConfig().setColumns(columns).setAsync(true),
+        new HeaderConfig()
+                .setColumns(columns)
+                .setAsync(true)
+                .setOnBodyComplete((ok, err) -> {
+                    success.set(ok);
+                    error.set(err);
+                    done.countDown();
+                }),
         (idx, rowData) -> {
-            rowCount.incrementAndGet();
-            // 处理每行
+            // 逐行处理
         });
 
-// 无法直接感知"完成"，可改用以下方案：
-
-// 方案 A：预先知道总行数，最后一行时 countDown
-// 方案 B：手动指定一个"完成"信号（见 2.13）
-
-// 更推荐：用同步模式 + 在回调中计数
+done.await(30, TimeUnit.SECONDS);
+if (!success.get()) {
+    System.err.println("正文读取失败: " + error.get().getMessage());
+}
 ```
 
-> **建议**：如果需要"精确知道何时完成"，**直接用同步模式**——`parse` 返回时就是完成时。
+回调在**正文结束时恰好触发一次**；若任务提交失败（线程池关闭/队列满），也会以 `(false, error)` 触发一次。`callback == null` 时不会启动正文任务，也不会触发回调。回调内抛出的异常只会打印到 stderr，不影响正文流程。
+
+> **建议**：如果只需要"精确知道何时完成"，**直接用同步模式**——`parse` 返回时就是完成时。
 
 #### 场景 4：自定义线程池
 
@@ -442,16 +453,21 @@ try {
 
 #### 异步异常处理（重要）
 
-异步模式下**正文异常无法传播**给调用方，工具类会**打印到 stderr** 并终止后台任务：
+异步模式下**正文异常无法通过返回值传播**（`parse` 已经返回）。发生异常时工具类会：
 
-```
-[ExcelReader] 异步正文读取异常: ...
-java.lang.RuntimeException: ...
-```
+1. 打印到 stderr（含堆栈）：
 
-**如果必须感知正文异常，请使用同步模式**。
+   ```
+   [ExcelReader] 异步正文读取异常: ...
+   java.lang.RuntimeException: ...
+   ```
 
-> **任务提交失败**：若 `executor` 已关闭或饱和拒绝任务，`parse(...)` 不抛异常，而是返回 `ParseResult.isFailed()`（消息以"异步任务提交失败"开头），Workbook 会被立即释放。
+2. 若设置了 `onBodyComplete`，调用一次 `onComplete(false, error)`；
+3. 在 `finally` 中关闭 Workbook 与工具类打开的文件流（输入源为 `File` / `byte[]`；`InputStream` 由调用方关闭）。
+
+**需要程序化感知正文异常 → 设置 `onBodyComplete`，或改用同步模式**。
+
+> **任务提交失败**：若 `executor` 已关闭或队列已满（默认池队列容量 64），`parse(...)` 不抛异常，而是返回 `ParseResult.isFailed()`（消息以"异步任务提交失败"开头），`language` 为 `null`，Workbook 与内部文件流会被立即释放。
 
 ### 2.10 语言模式
 
@@ -601,21 +617,21 @@ ExcelReader.parse(file, config, (idx, rowData) -> hasData.set(true));
 
 **异步模式下感知"全部完成"**：
 
+使用 `onBodyComplete`（见 2.9），无需依赖总行数：
+
 ```java
-// 方案：统计回调次数，达到预期时触发信号
-AtomicInteger count = new AtomicInteger(0);
-int expectedTotal = 1000;   // 需要预先知道总数（例如先用只读表头模式统计）
 CountDownLatch allDone = new CountDownLatch(1);
 
-ExcelReader.parse(file, config.setAsync(true), (idx, rowData) -> {
-    if (count.incrementAndGet() == expectedTotal) {
-        allDone.countDown();
-    }
-});
-allDone.await(60, TimeUnit.SECONDS);
+ExcelReader.parse(file, config.setAsync(true)
+        .setOnBodyComplete((ok, err) -> allDone.countDown()),
+        (idx, rowData) -> {
+            // 逐行处理
+        });
 
-// 更简单的方案：直接用同步模式
+allDone.await(60, TimeUnit.SECONDS);
 ```
+
+> 本工具**不扫描正文统计行数**，`callback == null` 只校验表头；如确需总数，请在回调中自行计数或从业务侧获取。
 
 ### 2.14 完整示例集
 
@@ -797,10 +813,14 @@ ExcelFormat.detect("a.csv");    // null
 
 > **HSSF 边界保护**：`.xls` 最多 65536 行 × 256 列，超出时提前抛 `IllegalArgumentException`。
 
-> **写入安全**：`write(File, config)` 先在同目录写临时文件（`.tmp` 后缀，崩溃残留不会被误认为 Excel 文件），成功后再原子替换目标文件；参数校验或写入失败时，**已存在的目标文件内容不会被破坏**，也不会残留临时文件。
+> **写入安全**：`write(File, config)` 先在同目录写临时文件（`.tmp` 后缀，崩溃残留不会被误认为 Excel 文件），`fsync` 后原子替换目标文件；参数校验或写入失败时，**已存在的目标文件内容不会被破坏**。清理临时文件失败会被忽略，进程被强杀时也可能残留 `.tmp`，可直接删除。
 >
-> - 目标为符号链接时，写入链接指向的真实文件，链接本身保留。
-> - POSIX 平台保留目标文件原有权限；新建文件使用 `rw-rw-r--`（owner/ACL 不保留）。
+> - 目标为符号链接时，写入链接指向的真实文件，链接本身保留；**层级超过 8 层或存在环时报 `IOException`**。
+> - 格式按**真实目标文件**的后缀判断（链接名与真实后缀不一致时，以真实目标为准）。
+> - **目标已存在且不可写（如只读文件）时拒绝覆盖**并抛 `IOException`；该检查为尽力而为，root/管理员身份下仍可能写入。
+> - POSIX 平台保留目标文件原有权限；新建文件不硬编码权限，沿用平台默认权限（受 umask 影响，owner/ACL 不保留）。
+> - 仅对临时文件执行 `fsync`，**不对父目录 fsync**：原子替换保证"旧文件或新文件之一可见"，但不保证断电后更新一定持久化。
+> - `write(Workbook, config)` 遇到同名 Sheet 时抛 `IllegalArgumentException`，不会静默覆盖。
 
 ### 3.3 配置 WriteConfig
 
@@ -818,7 +838,7 @@ ExcelFormat.detect("a.csv");    // null
 | `maxColumnWidth` | `60` | 列宽上限（字符数） |
 | `freezeHeader` | `true` | 是否冻结首行 |
 
-> **参数校验**：`sheetName` 必须非空且不超过 31 个字符；`autoColumnWidth = true` 时要求 `1 <= minColumnWidth <= maxColumnWidth <= 255`，否则在写文件之前即抛 `IllegalArgumentException`。
+> **参数校验**：`sheetName` 必须非空、不超过 31 个字符且不含 Excel 禁用字符（`: \ / ? * [ ]`）；`autoColumnWidth = true` 时要求 `1 <= minColumnWidth <= maxColumnWidth <= 255`，否则在写文件之前即抛 `IllegalArgumentException`。
 
 **链式调用示例**：
 
@@ -862,7 +882,7 @@ WriteConfig cfg = new WriteConfig()
 ```
 
 > **互斥**：调用 `setListData(...)` 会清空 `mapData`，反之亦然。
-> **Map 模式取值**：按 `headers` 顺序逐列取 `map.get(header)`，缺失取 `""`。
+> **Map 模式取值**：按 `headers` 顺序逐列取 `map.get(header)`，缺失取 `""`；集合中的 `null` 行会被跳过，不产生空白数据行。
 
 ### 3.5 表头与数据列数不匹配
 
@@ -925,6 +945,7 @@ new WriteConfig().setTextOverflow(TextOverflow.HIDE);
 
 **行高计算**（仅 WRAP 模式）：
 
+- **表头行与数据行**都会按实际列宽估算行高
 - 按**实际列宽**（clamp 之后）估算行数
 - 每行 15pt，上限 409pt（POI 单行限制）
 
@@ -949,6 +970,8 @@ new WriteConfig()
 ```
 
 > **建议**：默认保持 `true`，除非明确要写数字/布尔类型（例如用于 Excel 公式计算）。
+>
+> **长整型保护**：`allAsText = false` 时，绝对值超过 `2^53` 的整数（如雪花 ID、订单号）**自动按文本写入**，避免 double 精度丢失；`2^53` 以内仍写为数字。
 
 ### 3.8 完整示例集
 

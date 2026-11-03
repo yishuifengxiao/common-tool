@@ -11,7 +11,9 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 通用 Excel 读取工具类。
@@ -37,7 +39,7 @@ import java.util.concurrent.Executors;
  *       <td><b>表头通过后立即返回</b>，正文在后台进行</td></tr>
  *   <tr><td>parse 返回时数据是否处理完</td><td>是</td><td><b>可能还在处理中</b></td></tr>
  *   <tr><td>正文异常感知</td><td>通过 ParseResult.fail 返回</td>
- *       <td>无法传播，打印到 stderr</td></tr>
+ *       <td>通过 {@link HeaderConfig#getOnBodyComplete()} 回调（同时打印到 stderr）</td></tr>
  * </table>
  *
  * <h2>使用建议</h2>
@@ -46,9 +48,9 @@ import java.util.concurrent.Executors;
  *   <li><b>大型文件</b>（百万行以内）：
  *     <ul>
  *       <li>UI 不阻塞 / 批量任务并行 → 用异步模式，回调中流式处理，主线程立即可继续；</li>
- *       <li>需要知道"何时处理完" → 用同步模式，或在异步模式下自行用 {@link java.util.concurrent.CountDownLatch}
- *           在回调中控制；</li>
- *       <li>需要感知正文异常 → 用同步模式；</li>
+ *       <li>需要知道"何时处理完" → 用同步模式，或在异步模式下设置
+ *           {@link HeaderConfig#setOnBodyComplete} 感知完成；</li>
+ *       <li>需要感知正文异常 → 用同步模式，或在异步模式下设置 {@link HeaderConfig#setOnBodyComplete}；</li>
  *     </ul>
  *   </li>
  *   <li><b>超大文件</b>（千万行级）：当前基于 {@link WorkbookFactory} 的整表加载可能内存不足，
@@ -75,10 +77,13 @@ import java.util.concurrent.Executors;
  *
  * <h2>Workbook 生命周期</h2>
  * <ul>
- *   <li>{@code parse(File/byte[]/InputStream, ...)}：内部创建的 Workbook 由工具类负责关闭
- *       （异步模式下在正文读取完成后关闭）；</li>
+ *   <li>{@code parse(File/byte[], ...)}：内部创建的 Workbook 与文件流均由工具类负责关闭
+ *       （同步模式在 {@code parse} 返回前，异步模式在正文读取完全结束时）；</li>
+ *   <li>{@code parse(InputStream, ...)}：内部创建的 Workbook 由工具类负责关闭；
+ *       传入的流由调用方负责关闭（异步模式下请等正文读取完成后再关闭）；</li>
  *   <li>{@code parse(Workbook, ...)}：传入的 Workbook 由调用方负责关闭。
- *       <b>异步模式下请等正文读取完成后再关闭</b>（可通过 CountDownLatch 在回调中控制）。</li>
+ *       <b>异步模式下请等正文读取完成后再关闭</b>（可设置
+ *       {@link HeaderConfig#setOnBodyComplete} 或在回调中控制）。</li>
  * </ul>
  */
 public final class ExcelReader {
@@ -293,7 +298,7 @@ public final class ExcelReader {
         private final int excelIdx;
 
         /**
-         * 非空校验结果：{@code true} 通过；{@code false} 必填列为空。
+         * 数据校验结果：{@code true} 通过；{@code false} 必填列为空或单元格为 Excel 错误值。
          */
         private final boolean valid;
 
@@ -318,7 +323,7 @@ public final class ExcelReader {
         }
 
         /**
-         * 是否"必填但为空"。等价于 {@code !isValid()}。
+         * 是否校验未通过（必填但为空，或单元格为 Excel 错误值）。等价于 {@code !isValid()}。
          */
         public boolean isMissingRequired() {
             return !valid;
@@ -360,6 +365,26 @@ public final class ExcelReader {
     }
 
     /**
+     * 异步正文读取完成回调。
+     *
+     * <p>仅在异步模式（{@link HeaderConfig#setAsync(boolean)}）下触发：
+     * 正文全部读取完成或发生异常时调用一次，用于替代"只看 stderr"的异常感知方式。</p>
+     *
+     * <p><b>注意：</b>本回调在异步线程中执行，抛出异常不会影响主流程（仅打印到 stderr）。</p>
+     */
+    @FunctionalInterface
+    public interface BodyCompleteListener {
+
+        /**
+         * 正文读取结束。
+         *
+         * @param success 正文是否全部成功读取
+         * @param error   失败时的异常；成功时为 {@code null}
+         */
+        void onComplete(boolean success, Throwable error);
+    }
+
+    /**
      * 表头单元格信息：Excel 物理列索引 + 表头文本 + 匹配到的列定义。
      */
     @Getter
@@ -398,7 +423,7 @@ public final class ExcelReader {
      * <p>包含：表头校验结果（成功 / 失败）、命中语言、表头映射、中英双语简略/详细消息。</p>
      *
      * <p><b>不提供行数 / 异步 Future / body 结果</b>——行数由调用方在回调中自行统计；
-     * 异步完成感知由调用方自行用 {@link java.util.concurrent.CountDownLatch} 控制。</p>
+     * 异步完成感知通过 {@link HeaderConfig#setOnBodyComplete} 回调。</p>
      */
     @Getter
     public static final class ParseResult {
@@ -429,7 +454,7 @@ public final class ExcelReader {
         private final String messageEnShort;
 
         /**
-         * 命中的表头语言（表头校验失败时为 null）。
+         * 命中的表头语言（任何失败场景均为 null，包括表头失败、提交失败、正文失败）。
          */
         private final HeaderLanguage language;
 
@@ -511,8 +536,9 @@ public final class ExcelReader {
     public static final class HeaderConfig {
 
         /**
-         * 列定义列表（setter 做防御性拷贝）。
+         * 列定义列表（setter 做防御性拷贝，getter 返回不可变视图）。
          */
+        @Getter(AccessLevel.NONE)
         @Setter(AccessLevel.NONE)
         private List<ColumnDef> columns = Collections.emptyList();
 
@@ -577,9 +603,23 @@ public final class ExcelReader {
         private boolean async = false;
 
         /**
-         * 异步模式使用的线程池；未设置时使用工具类内置的有界守护线程池。
+         * 异步模式使用的线程池；未设置时使用工具类内置的有界守护线程池
+         * （线程数与队列容量均有上限，队列满时拒绝任务）。
          */
         private Executor executor;
+
+        /**
+         * 异步正文读取完成回调；未设置时不通知。仅异步模式生效。
+         */
+        @Setter(AccessLevel.NONE)
+        private BodyCompleteListener onBodyComplete;
+
+        /**
+         * 列定义列表（不可变视图）。
+         */
+        public List<ColumnDef> getColumns() {
+            return Collections.unmodifiableList(columns);
+        }
 
         /**
          * 设置列定义列表（防御性拷贝）。
@@ -590,10 +630,20 @@ public final class ExcelReader {
         }
 
         /**
-         * 设置列定义列表（可变参数）。
+         * 设置列定义列表（可变参数，防御性拷贝）。
          */
         public HeaderConfig setColumns(ColumnDef... columns) {
-            this.columns = columns == null ? Collections.emptyList() : Arrays.asList(columns);
+            this.columns = columns == null
+                    ? Collections.emptyList()
+                    : new ArrayList<>(Arrays.asList(columns));
+            return this;
+        }
+
+        /**
+         * 设置异步正文读取完成回调（仅异步模式生效）。
+         */
+        public HeaderConfig setOnBodyComplete(BodyCompleteListener onBodyComplete) {
+            this.onBodyComplete = onBodyComplete;
             return this;
         }
 
@@ -656,102 +706,133 @@ public final class ExcelReader {
 
     /**
      * 从文件解析（自动识别 .xls / .xlsx）。
+     *
+     * <p>工具类内部打开的文件流会在解析完全结束后关闭：同步模式为 {@code parse} 返回前，
+     * 异步模式为正文读取结束（或任务提交失败）之后。</p>
      */
     public static ParseResult parse(File file, HeaderConfig config, RowCallback callback) throws IOException {
         if (file == null) {
             throw new IllegalArgumentException("file 不能为空 / file must not be null");
         }
-        try (InputStream in = new BufferedInputStream(new FileInputStream(file))) {
-            return parse(in, config, callback);
-        }
+        HeaderConfig cfg = config == null ? new HeaderConfig() : config;
+        // 纯配置校验前移到打开文件之前：配置错误不应等到文件全量加载后才暴露
+        LanguageMode mode = validateConfigAndDetectMode(cfg);
+        InputStream in = new BufferedInputStream(new FileInputStream(file));
+        return parseStream(in, cfg, callback, true, mode);
     }
 
     /**
      * 从字节数组解析。
+     *
+     * <p>内部创建的流在解析完全结束后关闭（语义同 {@link #parse(File, HeaderConfig, RowCallback)}）。</p>
      */
     public static ParseResult parse(byte[] bytes, HeaderConfig config, RowCallback callback) throws IOException {
         if (bytes == null) {
             throw new IllegalArgumentException("bytes 不能为空 / bytes must not be null");
         }
-        try (InputStream in = new ByteArrayInputStream(bytes)) {
-            return parse(in, config, callback);
-        }
+        HeaderConfig cfg = config == null ? new HeaderConfig() : config;
+        LanguageMode mode = validateConfigAndDetectMode(cfg);
+        return parseStream(new ByteArrayInputStream(bytes), cfg, callback, true, mode);
     }
 
     /**
-     * 从输入流解析。
+     * 从输入流解析（流由调用方负责关闭）。
+     *
+     * <p><b>异步模式</b>下请等正文读取完成（可设置
+     * {@link HeaderConfig#setOnBodyComplete}）后再关闭流。</p>
      */
     public static ParseResult parse(InputStream in, HeaderConfig config, RowCallback callback) throws IOException {
         if (in == null) {
             throw new IllegalArgumentException("InputStream 不能为空 / InputStream must not be null");
         }
+        HeaderConfig cfg = config == null ? new HeaderConfig() : config;
+        LanguageMode mode = validateConfigAndDetectMode(cfg);
+        return parseStream(in, cfg, callback, false, mode);
+    }
+
+    /**
+     * 从输入流创建 Workbook 并进入核心流程。
+     *
+     * @param ownsStream 是否由工具类负责关闭该流（File / byte[] 输入为 true，调用方传入的流为 false）
+     * @param mode       Phase 0 配置校验中已判定的语言模式
+     */
+    private static ParseResult parseStream(InputStream in, HeaderConfig cfg,
+                                           RowCallback callback, boolean ownsStream,
+                                           LanguageMode mode) throws IOException {
         Workbook workbook;
         try {
             workbook = WorkbookFactory.create(in);
         } catch (Exception e) {
+            if (ownsStream) {
+                closeQuietly(in);
+            }
             String msg = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
             return ParseResult.fail("文件解析失败：" + msg,
                     "Failed to parse file: " + msg, null, null);
+        } catch (Error e) {
+            if (ownsStream) {
+                closeQuietly(in);
+            }
+            throw e;
         }
-        return parseWorkbookInternal(workbook, config, callback, true);
+        return parseWorkbookInternal(workbook, cfg, callback, true, ownsStream ? in : null, mode);
     }
 
     /**
      * 从 Workbook 解析（不负责关闭）。
      *
      * <p><b>异步模式下</b>：调用方必须等正文读取完成后再关闭 Workbook，
-     * 否则异步读取会失败。可通过在回调中 {@code CountDownLatch.countDown()} 感知完成。</p>
+     * 否则异步读取会失败。可设置 {@link HeaderConfig#setOnBodyComplete} 感知完成。</p>
      */
     public static ParseResult parse(Workbook workbook, HeaderConfig config, RowCallback callback) {
         if (workbook == null) {
             throw new IllegalArgumentException("Workbook 不能为空 / Workbook must not be null");
         }
-        return parseWorkbookInternal(workbook, config, callback, false);
+        HeaderConfig cfg = config == null ? new HeaderConfig() : config;
+        LanguageMode mode = validateConfigAndDetectMode(cfg);
+        return parseWorkbookInternal(workbook, cfg, callback, false, null, mode);
     }
 
     // ============================================================
     // 核心流程
     // ============================================================
 
-    private static ParseResult parseWorkbookInternal(Workbook workbook, HeaderConfig config,
-                                                     RowCallback callback, boolean ownsWorkbook) {
-        HeaderConfig cfg = config == null ? new HeaderConfig() : config;
-
-        // ---------- Phase 0：参数校验 ----------
+    /**
+     * Phase 0：纯配置校验（columns 非空、无 null 元素），并判定语言模式。
+     *
+     * <p>不依赖任何文件内容，必须在打开 / 全量加载文件之前完成：
+     * 配置错误快速失败，且异常类型与文件内容无关。</p>
+     */
+    private static LanguageMode validateConfigAndDetectMode(HeaderConfig cfg) {
         List<ColumnDef> columns = cfg.getColumns();
         if (columns == null || columns.isEmpty()) {
-            if (ownsWorkbook) {
-                closeQuietly(workbook);
-            }
             throw new IllegalArgumentException(
                     "必须至少提供一个列定义 / At least one column definition is required");
         }
         for (ColumnDef c : columns) {
             if (c == null) {
-                if (ownsWorkbook) {
-                    closeQuietly(workbook);
-                }
                 throw new IllegalArgumentException(
                         "columns 中不允许包含 null 元素 / columns must not contain null elements");
             }
         }
+        return detectLanguageMode(columns);
+    }
 
+    private static ParseResult parseWorkbookInternal(Workbook workbook, HeaderConfig cfg,
+                                                     RowCallback callback, boolean ownsWorkbook,
+                                                     InputStream ownedStream, LanguageMode mode) {
         // ---------- Phase 1：表头校验（始终同步） ----------
         HeaderCheckResult headerCheck;
         try {
-            headerCheck = checkHeader(workbook, cfg);
-        } catch (RuntimeException e) {
-            if (ownsWorkbook) {
-                closeQuietly(workbook);
-            }
+            headerCheck = checkHeader(workbook, cfg, mode);
+        } catch (RuntimeException | Error e) {
+            release(ownsWorkbook, workbook, ownedStream);
             throw e;
         }
 
         // ---------- Phase 2：表头失败 → 立即返回 ----------
         if (!headerCheck.ok) {
-            if (ownsWorkbook) {
-                closeQuietly(workbook);
-            }
+            release(ownsWorkbook, workbook, ownedStream);
             return ParseResult.fail(
                     headerCheck.messageZhDetail, headerCheck.messageEnDetail,
                     headerCheck.messageZhShort, headerCheck.messageEnShort,
@@ -764,74 +845,114 @@ public final class ExcelReader {
         HeaderLanguage language = headerCheck.language;
         int headerRowIndex = cfg.getHeaderRowIndex();
         DataFormatter formatter = new DataFormatter();
+        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
 
         // 没有回调时只校验表头，不扫描正文
         if (callback == null) {
-            if (ownsWorkbook) {
-                closeQuietly(workbook);
-            }
+            release(ownsWorkbook, workbook, ownedStream);
             return ParseResult.ok(language, finalHeaders);
         }
 
         if (cfg.isAsync()) {
             // ---------- 异步：表头通过后立即返回，正文流式回调 ----------
             Executor executor = cfg.getExecutor() == null ? defaultExecutor() : cfg.getExecutor();
+            BodyCompleteListener listener = cfg.getOnBodyComplete();
             try {
                 CompletableFuture.runAsync(() -> {
+                    Throwable bodyError = null;
                     try {
-                        readDataRows(sheet, finalHeaders, headerRowIndex, formatter, callback);
+                        readDataRows(sheet, finalHeaders, headerRowIndex, formatter, evaluator, callback);
                     } catch (Throwable t) {
-                        // 异步模式下异常无法传播给调用方，打印到 stderr 避免静默失败
-                        // 需要异常感知请使用同步模式
+                        // 异步模式下异常无法通过返回值传播：写入 stderr，并通过 onBodyComplete 通知调用方
+                        bodyError = t;
                         System.err.println("[ExcelReader] 异步正文读取异常: " + t.getMessage());
                         t.printStackTrace();
                     } finally {
-                        if (ownsWorkbook) {
-                            closeQuietly(workbook);
-                        }
+                        // Sheet / Workbook / 文件流全部在正文读取完全结束后才释放
+                        release(ownsWorkbook, workbook, ownedStream);
+                        notifyBodyComplete(listener, bodyError);
                     }
                 }, executor);
             } catch (RuntimeException e) {
-                // 任务提交失败（线程池已关闭 / 饱和拒绝）：立即释放 Workbook 并返回失败结果
-                if (ownsWorkbook) {
-                    closeQuietly(workbook);
-                }
+                // 任务提交失败（线程池已关闭 / 队列已满）：立即释放 Workbook 与文件流、通知完成回调并返回失败结果
+                release(ownsWorkbook, workbook, ownedStream);
+                notifyBodyComplete(listener, e);
                 String msg = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
                 return ParseResult.fail("异步任务提交失败：" + msg,
-                        "Failed to submit async task: " + msg, language, finalHeaders);
+                        "Failed to submit async task: " + msg, null, finalHeaders);
             }
             return ParseResult.ok(language, finalHeaders);
         }
 
         // ---------- 同步：当前线程流式回调，回调全部执行完后返回 ----------
         try {
-            readDataRows(sheet, finalHeaders, headerRowIndex, formatter, callback);
+            readDataRows(sheet, finalHeaders, headerRowIndex, formatter, evaluator, callback);
             return ParseResult.ok(language, finalHeaders);
         } catch (RuntimeException e) {
             String msg = e.getMessage() == null ? e.getClass().getSimpleName() : e.getMessage();
             return ParseResult.fail("表体解析失败：" + msg,
-                    "Body parsing failed: " + msg, language, finalHeaders);
+                    "Body parsing failed: " + msg, null, finalHeaders);
         } finally {
-            if (ownsWorkbook) {
-                closeQuietly(workbook);
-            }
+            release(ownsWorkbook, workbook, ownedStream);
         }
     }
 
     /**
-     * 异步读取默认线程池：有界、守护线程，避免阻塞式正文读取占用 JVM 公共池。
+     * 释放工具类拥有的资源：先关闭 Workbook，再关闭文件流（均忽略关闭异常）。
+     */
+    private static void release(boolean ownsWorkbook, Workbook workbook, InputStream ownedStream) {
+        if (ownsWorkbook) {
+            closeQuietly(workbook);
+        }
+        if (ownedStream != null) {
+            closeQuietly(ownedStream);
+        }
+    }
+
+    /** 通知异步正文完成回调；回调自身异常不影响正文流程。 */
+    private static void notifyBodyComplete(BodyCompleteListener listener, Throwable bodyError) {
+        if (listener == null) {
+            return;
+        }
+        try {
+            listener.onComplete(bodyError == null, bodyError);
+        } catch (RuntimeException e) {
+            System.err.println("[ExcelReader] onBodyComplete 回调异常: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 异步读取默认线程池：线程数与队列容量均有上限的守护线程池，
+     * 避免阻塞式正文读取占用 JVM 公共池，也避免任务无限堆积。
      *
      * <p>库级别使用，不主动关闭；如需受控生命周期请通过
      * {@link HeaderConfig#setExecutor(Executor)} 显式传入线程池。</p>
      */
     private static final class DefaultExecutorHolder {
-        private static final ExecutorService INSTANCE = Executors.newFixedThreadPool(
-                Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors())),
-                r -> {
-                    Thread t = new Thread(r, "excel-reader-async");
-                    t.setDaemon(true);
-                    return t;
-                });
+
+        /**
+         * 排队任务上限：超过后拒绝任务，由调用方收到"提交失败"结果。
+         *
+         * <p>每个排队任务都持有已打开的 Workbook，容量过大会同时占用大量文件句柄与内存，
+         * 因此保持较小值（线程数的数倍）。</p>
+         */
+        private static final int QUEUE_CAPACITY = 64;
+
+        private static final ExecutorService INSTANCE = buildExecutor();
+
+        private static ExecutorService buildExecutor() {
+            int threads = Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()));
+            return new ThreadPoolExecutor(
+                    threads, threads,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<>(QUEUE_CAPACITY),
+                    r -> {
+                        Thread t = new Thread(r, "excel-reader-async");
+                        t.setDaemon(true);
+                        return t;
+                    },
+                    new ThreadPoolExecutor.AbortPolicy());
+        }
     }
 
     private static Executor defaultExecutor() {
@@ -905,7 +1026,7 @@ public final class ExcelReader {
     /**
      * 表头校验（同步）。
      */
-    private static HeaderCheckResult checkHeader(Workbook workbook, HeaderConfig cfg) {
+    private static HeaderCheckResult checkHeader(Workbook workbook, HeaderConfig cfg, LanguageMode mode) {
         HeaderCheckResult result = new HeaderCheckResult();
 
         if (workbook.getNumberOfSheets() == 0) {
@@ -928,6 +1049,7 @@ public final class ExcelReader {
         result.sheet = sheet;
 
         DataFormatter formatter = new DataFormatter();
+        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
         int headerRowIndex = cfg.getHeaderRowIndex();
         Row headerRow = sheet.getRow(headerRowIndex);
         if (headerRow == null) {
@@ -936,8 +1058,15 @@ public final class ExcelReader {
             return result;
         }
 
-        List<HeaderCellInfo> rawHeaders = readHeaderCells(headerRow, formatter,
-                cfg.isIgnoreBlankColumns());
+        List<HeaderCellInfo> rawHeaders;
+        try {
+            rawHeaders = readHeaderCells(headerRow, formatter, evaluator, cfg.isIgnoreBlankColumns());
+        } catch (RuntimeException e) {
+            // 表头单元格读取/公式求值失败：返回失败结果而不是把异常抛给调用方
+            result.setMessage("表头读取失败：" + e.getMessage(),
+                    "Header parsing failed: " + e.getMessage());
+            return result;
+        }
         result.rawHeaders = rawHeaders;
 
         boolean anyValidHeader = false;
@@ -951,8 +1080,6 @@ public final class ExcelReader {
             result.setMessage("表头行没有任何有效内容", "Header row contains no valid content");
             return result;
         }
-
-        LanguageMode mode = detectLanguageMode(cfg.getColumns());
 
         Validation chosen;
         HeaderLanguage language;
@@ -1029,6 +1156,7 @@ public final class ExcelReader {
     }
 
     private static List<HeaderCellInfo> readHeaderCells(Row headerRow, DataFormatter formatter,
+                                                        FormulaEvaluator evaluator,
                                                         boolean ignoreBlankColumns) {
         List<HeaderCellInfo> list = new ArrayList<>();
         int last = headerRow.getLastCellNum();
@@ -1036,7 +1164,7 @@ public final class ExcelReader {
             return list;
         }
         for (int c = 0; c < last; c++) {
-            String value = cellToString(headerRow.getCell(c), formatter);
+            String value = cellToString(headerRow.getCell(c), formatter, evaluator);
             if (value.isEmpty()) {
                 if (!ignoreBlankColumns) {
                     list.add(new HeaderCellInfo(c, "", null));
@@ -1062,7 +1190,7 @@ public final class ExcelReader {
      */
     private static void readDataRows(Sheet sheet, List<HeaderCellInfo> headers,
                                      int headerRowIndex, DataFormatter formatter,
-                                     RowCallback callback) {
+                                     FormulaEvaluator evaluator, RowCallback callback) {
         if (callback == null) {
             return;
         }
@@ -1078,27 +1206,28 @@ public final class ExcelReader {
         int start = headerRowIndex + 1;
         int last = sheet.getLastRowNum();
         for (int r = start; r <= last; r++) {
+            // 空白行（包括整行不存在的情况）也必须回调，由非空校验标记必填列缺失
             Row row = sheet.getRow(r);
-            if (row == null) {
-                continue;
-            }
 
-            // 先判断是否整行全空
-            boolean hasValue = false;
+            // 每个单元格只求值一次：文本与错误标记都来自同一次求值结果
+            String[] values = new String[n];
+            boolean[] errorCells = new boolean[n];
             for (int i = 0; i < n; i++) {
-                if (!cellToString(row.getCell(excelCols[i]), formatter).isEmpty()) {
-                    hasValue = true;
-                    break;
+                try {
+                    Cell cell = row == null ? null : row.getCell(excelCols[i]);
+                    values[i] = cellToString(cell, formatter, evaluator);
+                    errorCells[i] = isErrorCell(cell);
+                } catch (RuntimeException e) {
+                    throw new IllegalStateException(
+                            String.format("第 %d 行，Excel 列索引 %d 读取失败：%s",
+                                    r + 1, excelCols[i], e.getMessage()), e);
                 }
-            }
-            if (!hasValue) {
-                continue;
             }
 
             // 构造当前行的 rowData，逐行回调，回调完成后立即释放
             LinkedHashMap<Integer, CellData> rowData = new LinkedHashMap<>();
             for (int i = 0; i < n; i++) {
-                String value = cellToString(row.getCell(excelCols[i]), formatter);
+                String value = values[i];
                 ColumnDef def = defs[i];
                 int excelColIdx = excelCols[i];
                 int displayRow = r + 1;
@@ -1106,7 +1235,16 @@ public final class ExcelReader {
                 boolean valid = true;
                 String errZh = null;
                 String errEn = null;
-                if (!def.isNullable() && value.isEmpty()) {
+                if (errorCells[i]) {
+                    // #DIV/0!、#VALUE! 等错误值不能当作有效数据
+                    valid = false;
+                    errZh = String.format(
+                            "第 %d 行，列 [%s/%s]（Excel 列索引 %d）为 Excel 错误值（%s），请修正公式或原始数据",
+                            displayRow, def.getChineseName(), def.getEnglishName(), excelColIdx, value);
+                    errEn = String.format(
+                            "Row %d, column [%s/%s] (Excel column index %d) contains an Excel error value (%s)",
+                            displayRow, def.getChineseName(), def.getEnglishName(), excelColIdx, value);
+                } else if (!def.isNullable() && value.isEmpty()) {
                     valid = false;
                     errZh = String.format(
                             "第 %d 行，列 [%s/%s]（Excel 列索引 %d）为必填列，但内容为空",
@@ -1118,7 +1256,12 @@ public final class ExcelReader {
 
                 rowData.put(i, new CellData(value, def, excelColIdx, valid, errZh, errEn));
             }
-            callback.onRow(r, rowData);
+            try {
+                callback.onRow(r, rowData);
+            } catch (RuntimeException e) {
+                throw new IllegalStateException(
+                        String.format("第 %d 行回调处理失败：%s", r + 1, e.getMessage()), e);
+            }
             // rowData 出作用域，若无外部引用即可被 GC
         }
     }
@@ -1241,6 +1384,11 @@ public final class ExcelReader {
         return v;
     }
 
+    /**
+     * 双语表头均失败时，按实际表头语言选出一套校验结果作为错误消息来源。
+     *
+     * <p>正常情况下两套校验都会失败；仅当首选校验意外通过时，才改用另一套的失败信息。</p>
+     */
     private static Validation pickPrimary(Validation zhV, Validation enV, List<HeaderCellInfo> actual) {
         boolean actualHasChinese = false;
         for (HeaderCellInfo h : actual) {
@@ -1250,8 +1398,11 @@ public final class ExcelReader {
             }
         }
         Validation primary = actualHasChinese ? zhV : enV;
-        if (primary.errorsZhDetail.isEmpty() && !zhV.errorsZhDetail.isEmpty()) {
-            primary = zhV;
+        if (primary.errorsZhDetail.isEmpty()) {
+            Validation other = primary == zhV ? enV : zhV;
+            if (!other.errorsZhDetail.isEmpty()) {
+                return other;
+            }
         }
         return primary;
     }
@@ -1393,16 +1544,33 @@ public final class ExcelReader {
         return false;
     }
 
-    private static String cellToString(Cell cell, DataFormatter formatter) {
+    /** 读取单元格文本；公式单元格按计算结果输出。读取异常向上抛出，由调用方补充行列信息。 */
+    private static String cellToString(Cell cell, DataFormatter formatter, FormulaEvaluator evaluator) {
         if (cell == null) {
             return "";
         }
-        try {
-            String s = formatter.formatCellValue(cell);
-            return s == null ? "" : trimInvisible(s);
-        } catch (Exception e) {
-            return "";
+        String s = formatter.formatCellValue(cell, evaluator);
+        return s == null ? "" : trimInvisible(s);
+    }
+
+    /**
+     * 单元格是否为 Excel 错误值（#DIV/0!、#VALUE! 等）。
+     *
+     * <p>公式单元格使用 {@link Cell#getCachedFormulaResultType()} 判断：该值由
+     * {@link #cellToString} 中的一次求值写入，避免对同一公式重复求值。</p>
+     */
+    private static boolean isErrorCell(Cell cell) {
+        if (cell == null) {
+            return false;
         }
+        CellType type = cell.getCellType();
+        if (type == CellType.ERROR) {
+            return true;
+        }
+        if (type == CellType.FORMULA) {
+            return cell.getCachedFormulaResultType() == CellType.ERROR;
+        }
+        return false;
     }
 
     private static String trimInvisible(String s) {
@@ -1428,6 +1596,16 @@ public final class ExcelReader {
             try {
                 workbook.close();
             } catch (Exception ignore) {
+                // ignore
+            }
+        }
+    }
+
+    private static void closeQuietly(InputStream in) {
+        if (in != null) {
+            try {
+                in.close();
+            } catch (IOException ignore) {
                 // ignore
             }
         }
