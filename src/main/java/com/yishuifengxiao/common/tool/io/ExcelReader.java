@@ -72,7 +72,10 @@ import java.util.concurrent.TimeUnit;
  *       迭代顺序与 columns 完全一致；</li>
  *   <li>{@link CellData#getExcelIdx()} 是该列在 Excel 文件中的<b>实际物理列索引</b>；</li>
  *   <li>{@link CellData#isValid()} / {@link CellData#getValidationErrorZh()} /
- *       {@link CellData#getValidationErrorEn()} 携带非空校验结果与中英双语错误消息。</li>
+ *       {@link CellData#getValidationErrorEn()} 携带非空校验结果与中英双语错误消息；</li>
+ *   <li>{@link RowCallback#onRow(int, LinkedHashMap)} 的 {@code rowIndex} 为 Excel
+ *       <b>物理行号</b>（0 开始），从表头行下一行起按物理位置递增；
+ *       空白行（含未创建的间隙行）<b>不跳过</b>，照常回调。</li>
  * </ol>
  *
  * <h2>Workbook 生命周期</h2>
@@ -358,7 +361,8 @@ public final class ExcelReader {
         /**
          * 处理一行数据。
          *
-         * @param rowIndex 当前行的 Excel 物理行号（0 开始）
+         * @param rowIndex 当前行的 Excel 物理行号（0 开始）：从表头行下一行起按物理位置递增；
+         *                 空白行（含从未创建的间隙行）同样触发本回调，不跳过
          * @param rowData  当前行数据（迭代顺序与 columns 完全一致）
          */
         void onRow(int rowIndex, LinkedHashMap<Integer, CellData> rowData);

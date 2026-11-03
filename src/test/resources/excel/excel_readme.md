@@ -268,11 +268,12 @@ HeaderConfig config = new HeaderConfig()
 
 ### 2.6 回调契约 RowCallback
 
-**3 条核心约定**：
+**4 条核心约定**：
 
 1. `rowData` 是 `LinkedHashMap<Integer, CellData>`
 2. **`key` = 列在 `columns` 中的下标（0..N-1），迭代顺序与 `columns` 完全一致**
 3. **`CellData.getExcelIdx()` = 该列在 Excel 中的物理列索引**
+4. **`rowIndex` = Excel 物理行号（0 开始）**：从表头行下一行起按物理位置递增，空白行（含未创建的间隙行）不跳过
 
 **举例**：`columns = [姓名, 年龄, 部门]`，Excel 表头为 `[D:部门, A:姓名, C:年龄]`：
 
