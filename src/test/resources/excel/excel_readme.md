@@ -97,7 +97,7 @@ AtomicInteger rowCount = new AtomicInteger(0);
 
 ParseResult r = ExcelReader.parse(new File("data.xlsx"),
         new HeaderConfig().setColumns(columns),
-        (rowIndex, rowData) -> {
+        (rowIndex, rowData, finished) -> {
             rowCount.incrementAndGet();
             for (CellData cell : rowData.values()) {
                 if (!cell.isValid()) {
@@ -125,7 +125,7 @@ AtomicInteger rowCount = new AtomicInteger(0);
 
 ParseResult r = ExcelReader.parse(new File("big-data.xlsx"),
         new HeaderConfig().setColumns(columns).setAsync(true),
-        (rowIndex, rowData) -> {
+        (rowIndex, rowData, finished) -> {
             rowCount.incrementAndGet();
             // 每行处理完立即释放，不缓存
         });
@@ -191,7 +191,7 @@ try (Workbook wb = WorkbookFactory.create(new FileInputStream("data.xlsx"))) {
 >     CountDownLatch done = new CountDownLatch(1);
 >     ExcelReader.parse(wb,
 >             new HeaderConfig().setColumns(columns).setAsync(true),
->             (idx, rowData) -> {
+>             (idx, rowData, finished) -> {
 >                 // 处理最后一行时 countDown
 >                 if (isLastRow) done.countDown();
 >             });
@@ -268,21 +268,25 @@ HeaderConfig config = new HeaderConfig()
 
 ### 2.6 回调契约 RowCallback
 
-**4 条核心约定**：
+**5 条核心约定**：
 
 1. `rowData` 是 `LinkedHashMap<Integer, CellData>`
 2. **`key` = 列在 `columns` 中的下标（0..N-1），迭代顺序与 `columns` 完全一致**
 3. **`CellData.getExcelIdx()` = 该列在 Excel 中的物理列索引**
 4. **`rowIndex` = Excel 物理行号（0 开始）**：从表头行下一行起按物理位置递增，空白行（含未创建的间隙行）不跳过
+5. **`finished` = 是否已全部解析完成**：仅最后一次回调为 `true`，其余均为 `false`；正文没有数据行时也会回调一次（`rowData` 为空 map、`finished = true`）
 
 **举例**：`columns = [姓名, 年龄, 部门]`，Excel 表头为 `[D:部门, A:姓名, C:年龄]`：
 
 ```java
-ExcelReader.parse(file, config.setOrderRequired(false), (rowIndex, rowData) -> {
+ExcelReader.parse(file, config.setOrderRequired(false), (rowIndex, rowData, finished) -> {
     // rowData.keySet() 迭代顺序永远是 0, 1, 2（= columns 顺序）
     // rowData.get(0) → 姓名，excelIdx = 0（Excel A 列）
     // rowData.get(1) → 年龄，excelIdx = 2（Excel C 列）
     // rowData.get(2) → 部门，excelIdx = 3（Excel D 列）
+    if (finished) {
+        // 已全部解析完成，可在此做收尾处理
+    }
 });
 ```
 
@@ -369,7 +373,7 @@ AtomicInteger rowCount = new AtomicInteger(0);
 
 ParseResult r = ExcelReader.parse(file,
         new HeaderConfig().setColumns(columns),
-        (idx, rowData) -> rowCount.incrementAndGet());
+        (idx, rowData, finished) -> rowCount.incrementAndGet());
 
 if (r.isFailed()) {
     System.err.println(r.getMessageZhShort());     // 表头或正文异常都能拿到
@@ -388,7 +392,7 @@ AtomicInteger rowCount = new AtomicInteger(0);
 
 ParseResult r = ExcelReader.parse(file,
         new HeaderConfig().setColumns(columns).setAsync(true),
-        (idx, rowData) -> {
+        (idx, rowData, finished) -> {
             rowCount.incrementAndGet();
             // 逐行处理，内存占用恒定（每行处理完即释放）
         });
@@ -422,7 +426,7 @@ ExcelReader.parse(file,
                     error.set(err);
                     done.countDown();
                 }),
-        (idx, rowData) -> {
+        (idx, rowData, finished) -> {
             // 逐行处理
         });
 
@@ -575,7 +579,7 @@ List<ColumnDef> columns = Arrays.asList(
         ColumnDef.nullable("部门", "Department"));
 
 ExcelReader.parse(file, new HeaderConfig().setColumns(columns),
-        (rowIndex, rowData) -> {
+        (rowIndex, rowData, finished) -> {
             for (CellData cell : rowData.values()) {
                 if (!cell.isValid()) {
                     System.out.println(cell.getValidationErrorZh());
@@ -594,7 +598,7 @@ ExcelReader.parse(file, new HeaderConfig().setColumns(columns),
 ```java
 // 方式 1：AtomicInteger（推荐，并发安全）
 AtomicInteger rowCount = new AtomicInteger(0);
-ExcelReader.parse(file, config, (idx, rowData) -> {
+ExcelReader.parse(file, config, (idx, rowData, finished) -> {
     rowCount.incrementAndGet();
     // 处理每行
 });
@@ -602,7 +606,7 @@ System.out.println("行数: " + rowCount.get());
 
 // 方式 2：List 收集（同时保存数据）
 List<List<String>> rows = new ArrayList<>();
-ExcelReader.parse(file, config, (idx, rowData) -> {
+ExcelReader.parse(file, config, (idx, rowData, finished) -> {
     List<String> row = new ArrayList<>();
     for (int i = 0; i < columns.size(); i++) {
         row.add(rowData.get(i).getValue());
@@ -613,7 +617,7 @@ System.out.println("行数: " + rows.size());
 
 // 方式 3：只需要知道"是否有数据"
 AtomicBoolean hasData = new AtomicBoolean(false);
-ExcelReader.parse(file, config, (idx, rowData) -> hasData.set(true));
+ExcelReader.parse(file, config, (idx, rowData, finished) -> hasData.set(true));
 ```
 
 **异步模式下感知"全部完成"**：
@@ -625,7 +629,7 @@ CountDownLatch allDone = new CountDownLatch(1);
 
 ExcelReader.parse(file, config.setAsync(true)
         .setOnBodyComplete((ok, err) -> allDone.countDown()),
-        (idx, rowData) -> {
+        (idx, rowData, finished) -> {
             // 逐行处理
         });
 
@@ -647,7 +651,7 @@ List<ColumnDef> columns = Arrays.asList(
 AtomicInteger rowCount = new AtomicInteger(0);
 ParseResult r = ExcelReader.parse(new File("data.xlsx"),
         new HeaderConfig().setColumns(columns),
-        (rowIndex, rowData) -> {
+        (rowIndex, rowData, finished) -> {
             rowCount.incrementAndGet();
             for (CellData cell : rowData.values()) {
                 if (cell.isValid()) {
@@ -709,7 +713,7 @@ ParseResult r = ExcelReader.parse(new File("huge.xlsx"),
         new HeaderConfig()
                 .setColumns(columns)
                 .setAsync(true),
-        (idx, rowData) -> {
+        (idx, rowData, finished) -> {
             int c = rowCount.incrementAndGet();
             if (c == 1) {
                 firstRow.set(rowData.get(0).getValue());
@@ -1077,7 +1081,7 @@ public class DataTransformDemo {
                         .setOrderRequired(false)
                         .setIgnoreInvisibleChars(true)
                         .setIgnoredChars(Arrays.asList("*", "（必填）")),
-                (rowIndex, rowData) -> {
+                (rowIndex, rowData, finished) -> {
                     // 校验：任意必填列为空则跳过该行
                     boolean rowValid = rowData.values().stream()
                             .allMatch(CellData::isValid);
@@ -1139,7 +1143,7 @@ public class AsyncImportDemo {
                         .setColumns(columns)
                         .setAsync(true)                       // 异步
                         .setExecutor(pool),
-                (rowIndex, rowData) -> {
+                (rowIndex, rowData, finished) -> {
                     // 在后台线程逐行处理
                     if (rowData.values().stream().allMatch(CellData::isValid)) {
                         batch.add(new Object[]{
@@ -1175,7 +1179,7 @@ public class AsyncImportDemo {
 
 ```java
 AtomicInteger count = new AtomicInteger(0);
-ExcelReader.parse(file, config, (idx, rowData) -> count.incrementAndGet());
+ExcelReader.parse(file, config, (idx, rowData, finished) -> count.incrementAndGet());
 System.out.println("行数: " + count.get());
 ```
 
@@ -1199,7 +1203,7 @@ System.out.println("行数: " + count.get());
 AtomicInteger count = new AtomicInteger(0);
 int expected = 1000;
 CountDownLatch done = new CountDownLatch(1);
-ExcelReader.parse(file, config.setAsync(true), (idx, rowData) -> {
+ExcelReader.parse(file, config.setAsync(true), (idx, rowData, finished) -> {
     if (count.incrementAndGet() == expected) done.countDown();
 });
 done.await(60, TimeUnit.SECONDS);
@@ -1267,7 +1271,7 @@ if (r.isFailed()) {
 
 ```java
 Map<Integer, String> lastValues = new HashMap<>();
-ExcelReader.parse(file, config, (rowIndex, rowData) -> {
+ExcelReader.parse(file, config, (rowIndex, rowData, finished) -> {
     for (Map.Entry<Integer, CellData> e : rowData.entrySet()) {
         String v = e.getValue().getValue();
         if (v.isEmpty() && lastValues.containsKey(e.getKey())) {
@@ -1284,7 +1288,7 @@ ExcelReader.parse(file, config, (rowIndex, rowData) -> {
 
 ```java
 List<List<String>> invalidRows = new ArrayList<>();
-ExcelReader.parse(file, config, (rowIndex, rowData) -> {
+ExcelReader.parse(file, config, (rowIndex, rowData, finished) -> {
     if (rowData.values().stream().anyMatch(c -> !c.isValid())) {
         List<String> row = new ArrayList<>();
         for (int i = 0; i < columns.size(); i++) {
@@ -1311,7 +1315,7 @@ try (Workbook wb = new XSSFWorkbook(...)) {
     CountDownLatch done = new CountDownLatch(1);
     ExcelReader.parse(wb,
             new HeaderConfig().setColumns(columns).setAsync(true),
-            (idx, rowData) -> {
+            (idx, rowData, finished) -> {
                 // 处理最后一行时 countDown
                 if (isLastRow) done.countDown();
             });
