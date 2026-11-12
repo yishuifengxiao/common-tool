@@ -75,6 +75,10 @@ public class HexBitset {
      */
     public static String bitStringToHex(String binaryStr) {
         binaryStr = TextUtil.removeWhitespaceAndInvisible(binaryStr);
+        // 空 BIT STRING 只包含 unused bits 字节（0），没有数据字节
+        if (binaryStr == null || binaryStr.isEmpty()) {
+            return "00";
+        }
         // 计算填充到8的倍数
         StringBuilder paddedBinary = new StringBuilder(binaryStr);
         int remainder = paddedBinary.length() % 8;
@@ -116,12 +120,12 @@ public class HexBitset {
      * 将BIT STRING格式的HEX字符串转换为01二进制字符串
      * <p>
      * 规则：
-     * 1. 第一个字节表示第一个'1'出现的位置（从右往左数，从0开始）
+     * 1. 第一个字节表示数据部分末尾字节中未使用的位数（0-7）
      * 2. 后续字节为数据部分
-     * 3. 返回完整的二进制字符串
+     * 3. 返回数据部分的完整二进制字符串（包含末尾填充位），需要精确位数时由调用方按位长截断
      *
      * @param hexStr BIT STRING格式的HEX字符串，例如 "0780"
-     * @return 01二进制字符串，例如 "10000000"
+     * @return 数据部分的二进制字符串（含填充位），例如 "10000000"
      */
     public static String hexToBitString(String hexStr) {
         hexStr = TextUtil.removeWhitespaceAndInvisible(hexStr);

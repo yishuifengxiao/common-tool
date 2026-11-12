@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ASN.1工具类，提供ASN.1数据的编码和解码功能
@@ -21,10 +20,142 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class Asn1Util {
 
-    private static final ConcurrentHashMap<Class<?>, Method> READ_PDU_METHOD_CACHE = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Class<?>, Method> WRITE_PDU_METHOD_CACHE = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Class<?>, java.lang.reflect.Constructor<?>> WRITER_CONSTRUCTOR_CACHE = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<Class<?>, java.lang.reflect.Constructor<?>> READER_CONSTRUCTOR_CACHE = new ConcurrentHashMap<>();
+    /**
+     * readPdu 方法缓存，使用 ClassValue 避免持有 Class 导致类加载器无法释放
+     */
+    private static final ClassValue<Method> READ_PDU_METHOD_CACHE = new ClassValue<Method>() {
+        @Override
+        protected Method computeValue(Class<?> type) {
+            return findReadPduMethod(type);
+        }
+    };
+
+    /**
+     * writePdu 方法缓存
+     */
+    private static final ClassValue<Method> WRITE_PDU_METHOD_CACHE = new ClassValue<Method>() {
+        @Override
+        protected Method computeValue(Class<?> type) {
+            return findWritePduMethod(type);
+        }
+    };
+
+    /**
+     * BERWriter 构造方法缓存
+     */
+    private static final ClassValue<java.lang.reflect.Constructor<?>> WRITER_CONSTRUCTOR_CACHE =
+            new ClassValue<java.lang.reflect.Constructor<?>>() {
+                @Override
+                protected java.lang.reflect.Constructor<?> computeValue(Class<?> type) {
+                    try {
+                        java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.OutputStream.class);
+                        ctor.setAccessible(true);
+                        return ctor;
+                    } catch (NoSuchMethodException e) {
+                        throw new UncheckedException(String.format("无法找到%s的OutputStream构造方法", type.getName()), e);
+                    }
+                }
+            };
+
+    /**
+     * BERReader 构造方法缓存
+     */
+    private static final ClassValue<java.lang.reflect.Constructor<?>> READER_CONSTRUCTOR_CACHE =
+            new ClassValue<java.lang.reflect.Constructor<?>>() {
+                @Override
+                protected java.lang.reflect.Constructor<?> computeValue(Class<?> type) {
+                    try {
+                        java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.InputStream.class);
+                        ctor.setAccessible(true);
+                        return ctor;
+                    } catch (NoSuchMethodException e) {
+                        throw new UncheckedException(String.format("无法找到%s的InputStream构造方法", type.getName()), e);
+                    }
+                }
+            };
+
+    /**
+     * 查找类中的 writePdu 实例方法
+     *
+     * @param type 目标类型
+     * @return writePdu 方法
+     * @throws UncheckedException 当不存在符合条件的方法时
+     */
+    private static Method findWritePduMethod(Class<?> type) {
+        // 优先匹配参数类型名为BERWriter的writePdu方法（避免编译期依赖BERWriter类）
+        Method fallback = null;
+        for (Method method : type.getMethods()) {
+            if (!"writePdu".equals(method.getName())) {
+                continue;
+            }
+            // 排除静态方法，避免误匹配静态同名方法
+            if (java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
+                continue;
+            }
+            Class<?>[] paramTypes = method.getParameterTypes();
+            if (paramTypes.length != 2 || !paramTypes[0].equals(type)) {
+                continue;
+            }
+            try {
+                paramTypes[1].getConstructor(java.io.OutputStream.class);
+            } catch (NoSuchMethodException ignored) {
+                continue;
+            }
+            if ("BERWriter".equals(paramTypes[1].getSimpleName())) {
+                method.setAccessible(true);
+                return method;
+            }
+            if (fallback == null) {
+                fallback = method;
+            }
+        }
+        if (fallback != null) {
+            fallback.setAccessible(true);
+            return fallback;
+        }
+        throw new UncheckedException(String.format("类%s中不存在writePdu方法", type.getName()));
+    }
+
+    /**
+     * 查找类中的 readPdu 静态方法
+     *
+     * @param type 目标类型
+     * @return readPdu 方法
+     * @throws UncheckedException 当不存在符合条件的方法时
+     */
+    private static Method findReadPduMethod(Class<?> type) {
+        // 优先匹配参数类型名为BERReader的readPdu静态方法（避免编译期依赖BERReader类）
+        Method fallback = null;
+        for (Method method : type.getMethods()) {
+            if (!"readPdu".equals(method.getName())) {
+                continue;
+            }
+            if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())) {
+                continue;
+            }
+            Class<?>[] paramTypes = method.getParameterTypes();
+            if (paramTypes.length != 1) {
+                continue;
+            }
+            try {
+                paramTypes[0].getConstructor(java.io.InputStream.class);
+            } catch (NoSuchMethodException ignored) {
+                continue;
+            }
+            if ("BERReader".equals(paramTypes[0].getSimpleName())) {
+                method.setAccessible(true);
+                return method;
+            }
+            if (fallback == null) {
+                fallback = method;
+            }
+        }
+        if (fallback != null) {
+            fallback.setAccessible(true);
+            return fallback;
+        }
+        throw new UncheckedException(String.format("类%s中不存在readPdu静态方法", type.getName()));
+    }
 
     /**
      * 将十六进制字符串转换为BERReader对象
@@ -34,7 +165,7 @@ public class Asn1Util {
      */
     public static BERReader hexToBERReader(String hexVal) {
         byte[] bytes = Hex.hexToBytes(hexVal);
-        return new BERReader(new java.io.ByteArrayInputStream(bytes));
+        return toBERReader(bytes);
     }
 
     /**
@@ -52,6 +183,45 @@ public class Asn1Util {
      */
     public static BERReader utf8ToBERReader(String utf8Val) {
         byte[] bytes = utf8Val.getBytes(StandardCharsets.UTF_8);
+        return toBERReader(bytes);
+    }
+
+    /**
+     * 将ASCII字符串转换为BERReader对象
+     * 该方法将输入的ASCII字符串转换为字节数组，然后创建BERReader对象用于ASN.1数据解析
+     *
+     * @param utf8Val ASCII编码的字符串，将作为ASN.1数据源进行解析
+     * @return BERReader对象，可用于读取和解析ASN.1 BER编码的数据
+     * @example // 示例：将ASCII字符串转换为BERReader进行解析
+     * String asciiString = "ASCII字符串";
+     * BERReader reader = Asn1Util.asciiToBERReader(asciiString);
+     * // 使用reader读取ASN.1结构...
+     * @see BERReader
+     * @see #hexToBERReader(String)
+     * @see #utf8ToBERReader(String)
+     */
+    public static BERReader asciiToBERReader(String utf8Val) {
+        byte[] bytes = utf8Val.getBytes(StandardCharsets.US_ASCII);
+        return toBERReader(bytes);
+    }
+
+    /**
+     * 将字节数组转换为BERReader对象
+     * 该方法直接以输入的原始字节数组作为数据源，创建BERReader对象用于ASN.1数据解析
+     *
+     * @param bytes BER编码的原始字节数组，将作为ASN.1数据源进行解析
+     * @return BERReader对象，可用于读取和解析ASN.1 BER编码的数据
+     * @example // 示例：将字节数组转换为BERReader进行解析
+     * byte[] data = new byte[]{(byte) 0x30, (byte) 0x03, ...};
+     * BERReader reader = Asn1Util.toBERReader(data);
+     * // 使用reader读取ASN.1结构...
+     * @see BERReader
+     * @see #hexToBERReader(String)
+     * @see #utf8ToBERReader(String)
+     * @see #asciiToBERReader(String)
+     */
+    public static BERReader toBERReader(byte[] bytes) {
+        bytes = null == bytes ? new byte[0] : bytes;
         return new BERReader(new java.io.ByteArrayInputStream(bytes));
     }
 
@@ -64,49 +234,15 @@ public class Asn1Util {
      */
     public static String toHexString(Object object) {
         if (object == null) {
-            throw new UncheckedException("object参数不能为null");
+            return "";
         }
 
         try (ByteArrayOutputStream bufferOut = new ByteArrayOutputStream()) {
-            Method writePduMethod = WRITE_PDU_METHOD_CACHE.computeIfAbsent(object.getClass(), key -> {
-                // 优先匹配参数类型名为BERWriter的writePdu方法（避免编译期依赖BERWriter类）
-                Method fallback = null;
-                for (Method method : key.getMethods()) {
-                    if (!"writePdu".equals(method.getName())) continue;
-                    Class<?>[] paramTypes = method.getParameterTypes();
-                    if (paramTypes.length != 2 || !paramTypes[0].equals(key)) continue;
-                    try {
-                        paramTypes[1].getConstructor(java.io.OutputStream.class);
-                    } catch (NoSuchMethodException ignored) {
-                        continue;
-                    }
-                    // 优先选择参数类型名为BERWriter的方法
-                    if ("BERWriter".equals(paramTypes[1].getSimpleName())) {
-                        method.setAccessible(true);
-                        return method;
-                    }
-                    if (fallback == null) {
-                        fallback = method;
-                    }
-                }
-                if (fallback != null) {
-                    fallback.setAccessible(true);
-                    return fallback;
-                }
-                throw new UncheckedException(String.format("类%s中不存在writePdu方法", key.getName()));
-            });
+            Method writePduMethod = WRITE_PDU_METHOD_CACHE.get(object.getClass());
 
-            // 通过反射获取writePdu方法的第二个参数类型，并通过反射构造实例（缓存Constructor）
+            // 通过反射获取writePdu方法的第二个参数类型，并通过反射构造实例
             Class<?> writerType = writePduMethod.getParameterTypes()[1];
-            java.lang.reflect.Constructor<?> constructor = WRITER_CONSTRUCTOR_CACHE.computeIfAbsent(writerType, type -> {
-                try {
-                    java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.OutputStream.class);
-                    ctor.setAccessible(true);
-                    return ctor;
-                } catch (NoSuchMethodException e) {
-                    throw new UncheckedException(String.format("无法找到%s的OutputStream构造方法", type.getName()), e);
-                }
-            });
+            java.lang.reflect.Constructor<?> constructor = WRITER_CONSTRUCTOR_CACHE.get(writerType);
 
             Object writerInstance;
             try {
@@ -170,54 +306,16 @@ public class Asn1Util {
      * @see #hexToBERReader(String)
      */
     public static <T> T toObject(Class<T> clazz, String hex) {
-        if (clazz == null) {
-            throw new UncheckedException("类对象不能为null");
-        }
-        if (hex == null || hex.isEmpty()) {
-            throw new UncheckedException("十六进制字符串不能为null或空");
+        if (clazz == null || hex == null || hex.isEmpty()) {
+            throw new UncheckedException("目标类型和十六进制数据均不能为空");
         }
 
         try {
-            // 优先匹配参数类型名为BERReader的readPdu静态方法（避免编译期依赖BERReader类）
-            Method readPduMethod = READ_PDU_METHOD_CACHE.computeIfAbsent(clazz, key -> {
-                Method fallback = null;
-                for (Method method : key.getMethods()) {
-                    if (!"readPdu".equals(method.getName())) continue;
-                    if (!java.lang.reflect.Modifier.isStatic(method.getModifiers())) continue;
-                    Class<?>[] paramTypes = method.getParameterTypes();
-                    if (paramTypes.length != 1) continue;
-                    try {
-                        paramTypes[0].getConstructor(java.io.InputStream.class);
-                    } catch (NoSuchMethodException ignored) {
-                        continue;
-                    }
-                    // 优先选择参数类型名为BERReader的方法
-                    if ("BERReader".equals(paramTypes[0].getSimpleName())) {
-                        method.setAccessible(true);
-                        return method;
-                    }
-                    if (fallback == null) {
-                        fallback = method;
-                    }
-                }
-                if (fallback != null) {
-                    fallback.setAccessible(true);
-                    return fallback;
-                }
-                throw new UncheckedException(String.format("类%s中不存在readPdu静态方法", key.getName()));
-            });
+            Method readPduMethod = READ_PDU_METHOD_CACHE.get(clazz);
 
-            // 通过反射获取readPdu方法的参数类型，并通过反射构造Reader实例（缓存Constructor）
+            // 通过反射获取readPdu方法的参数类型，并通过反射构造Reader实例
             Class<?> readerType = readPduMethod.getParameterTypes()[0];
-            java.lang.reflect.Constructor<?> constructor = READER_CONSTRUCTOR_CACHE.computeIfAbsent(readerType, type -> {
-                try {
-                    java.lang.reflect.Constructor<?> ctor = type.getConstructor(java.io.InputStream.class);
-                    ctor.setAccessible(true);
-                    return ctor;
-                } catch (NoSuchMethodException e) {
-                    throw new UncheckedException(String.format("无法找到%s的InputStream构造方法", type.getName()), e);
-                }
-            });
+            java.lang.reflect.Constructor<?> constructor = READER_CONSTRUCTOR_CACHE.get(readerType);
 
             byte[] bytes = Hex.hexToBytes(hex);
             Object readerInstance;
@@ -261,6 +359,9 @@ public class Asn1Util {
     public static String generateLuhn(String strData) {
         if (strData == null || strData.isEmpty()) {
             throw new UncheckedException("输入数据不能为空");
+        }
+        if (!StringUtils.isNumeric(strData)) {
+            throw new UncheckedException("输入数据必须全部由数字字符组成: " + strData);
         }
         char[] strDataChars = strData.toCharArray();
         int len = strDataChars.length;

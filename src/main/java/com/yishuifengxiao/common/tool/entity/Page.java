@@ -74,7 +74,7 @@ public class Page<S> extends Slice implements Serializable {
     }
 
     public static <S> Page<S> of(Slice slice, Number total, List<S> data) {
-        slice = null == slice ? Slice.DEFAULT_SLICE : slice;
+        slice = null == slice ? Slice.of(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUM) : slice;
         data = null == data ? new ArrayList<>() : data;
         total = null == total ? 0L : total;
         return new Page<>(data, total, page(total, slice.size()), slice.size(), slice.current());
@@ -157,14 +157,14 @@ public class Page<S> extends Slice implements Serializable {
         if (CollUtil.isEmpty(list)) {
             return Page.ofEmpty(size);
         }
-        if (size.longValue() <= 0) {
+        if (size == null || size.longValue() <= 0) {
             size = DEFAULT_PAGE_SIZE;
         }
-        if (current.longValue() <= 0) {
+        if (current == null || current.longValue() <= 0) {
             current = DEFAULT_PAGE_NUM;
         }
         // 起始量
-        long startNum = (current.longValue() - 1) * size.longValue();
+        long startNum = Math.multiplyExact(current.longValue() - 1, size.longValue());
 
         List<S> data = null == list ? Collections.emptyList() :
                 list.stream().skip(startNum).limit(size.longValue()).collect(Collectors.toList());
@@ -208,6 +208,7 @@ public class Page<S> extends Slice implements Serializable {
      * @return 分页对象
      */
     public static <S> Page<S> of(List<S> data, Number total, Slice slice) {
+        slice = null == slice ? Slice.of(DEFAULT_PAGE_SIZE, DEFAULT_PAGE_NUM) : slice;
         return of(data, total, slice.size(), slice.current());
     }
 
@@ -222,11 +223,16 @@ public class Page<S> extends Slice implements Serializable {
         if (null == total) {
             total = 0;
         }
-        if (null == size) {
+        if (null == size || size.longValue() <= 0) {
             size = DEFAULT_PAGE_SIZE;
         }
-        return total.longValue() % size.longValue() == 0 ? total.longValue() / size.longValue() :
-                (total.longValue() / size.longValue() + 1);
+        long totalValue = total.longValue();
+        // 负数总量按 0 处理，避免直接调用本方法时得到 1 页这种与 of() 归一化不一致的结果
+        if (totalValue <= 0) {
+            return 0;
+        }
+        long sizeValue = size.longValue();
+        return totalValue % sizeValue == 0 ? totalValue / sizeValue : (totalValue / sizeValue + 1);
     }
 
 

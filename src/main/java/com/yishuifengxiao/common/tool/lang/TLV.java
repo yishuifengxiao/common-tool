@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * <p>TLV解析工具类</p>
@@ -280,19 +281,51 @@ public class TLV {
      * 将给定的标签和输入字符串转换为标签-长度-值（TLV）格式的字符串。
      * 该函数根据输入字符串的长度（以字节为单位）选择合适的长度编码方式。
      *
-     * @param tag   表示 TLV 格式中的标签部分，为字符串类型
+     * @param tag   表示 TLV 格式中的标签部分，必须是非空且长度为偶数的十六进制字符串
      * @param value 表示 TLV 格式中的值部分，应为十六进制字符串，每两个字符代表一个字节
      * @return 返回一个符合 TLV 格式的字符串
+     * @throws IllegalArgumentException 标签为空或非十六进制、值非空但不是合法十六进制时抛出
      */
     public static String toTLV(String tag, String value) {
         tag = TextUtil.removeWhitespaceAndInvisible(tag);
+        if (!Hex.isHex(tag)) {
+            throw new IllegalArgumentException("TLV标签必须是非空且长度为偶数的十六进制字符串");
+        }
+        return tag + buildLengthAndValue(value);
+    }
+
+    /**
+     * 将给定的值转换为 LV 格式（长度 + 值，不含标签）
+     *
+     * @param value 值部分的十六进制字符串，可为空
+     * @return 符合 LV 格式的字符串
+     * @throws IllegalArgumentException 值非空但不是合法十六进制时抛出
+     */
+    public static String toLV(String value) {
+        return buildLengthAndValue(value);
+    }
+
+    /**
+     * 构建长度 + 值部分
+     *
+     * @param value 值部分的十六进制字符串，可为null或空
+     * @return 长度 + 值部分的字符串
+     * @throws IllegalArgumentException 值非空但不是合法十六进制时抛出
+     */
+    private static String buildLengthAndValue(String value) {
         value = TextUtil.removeWhitespaceAndInvisible(value);
-        if (!Hex.isHex(value) && StringUtils.isNotBlank(value)) {
-            return tag;
+        if (value == null) {
+            value = "";
+        } else if (!value.isEmpty() && !Hex.isHex(value)) {
+            throw new IllegalArgumentException("TLV值必须是长度为偶数的十六进制字符串");
         }
 
         // 计算输入字符串的字节长度，由于输入是十六进制字符串，每两个字符代表一个字节
         int inputLen = value.length() / 2;
+        // BER-TLV 长格式最多支持 3 字节长度（16777215），超出后无法用 83 前缀正确表示
+        if (inputLen > 16777215) {
+            throw new UncheckedException("Length exceeds maximum supported range.");
+        }
         StringBuilder sb = new StringBuilder();
 
         // 将输入长度转换为十六进制字符串
@@ -319,8 +352,7 @@ public class TLV {
             sb.append(value);
         }
 
-        // 将标签与构建好的长度和值部分拼接起来
-        return tag + sb;
+        return sb.toString();
     }
 
     /**
@@ -452,7 +484,7 @@ public class TLV {
         // 2. 处理奇数长度：截断最后一个字符，保存到 truncated
         String truncated = "";
         if (clean.length() % 2 != 0) {
-            truncated = clean.substring(clean.length() - 1).toUpperCase(); // 转为大写
+            truncated = clean.substring(clean.length() - 1).toUpperCase(Locale.ROOT); // 转为大写
             clean = clean.substring(0, clean.length() - 1);                // 保留偶数部分
         }
 
@@ -607,7 +639,7 @@ public class TLV {
             if (StringUtils.isBlank(tag)) {
                 return "";
             }
-            return map.getOrDefault(tag.trim().toUpperCase(), "");
+            return map.getOrDefault(tag.trim().toUpperCase(Locale.ROOT), "");
         }
 
         /**
@@ -622,7 +654,7 @@ public class TLV {
                 return false;
             }
             // 将标签去除前后空格并转换为大写后检查是否存在于map中
-            return map.containsKey(tag.trim().toUpperCase());
+            return map.containsKey(tag.trim().toUpperCase(Locale.ROOT));
         }
 
 
@@ -637,8 +669,8 @@ public class TLV {
             if (StringUtils.isBlank(tag)) {
                 return this;
             }
-            String trimmedTag = tag.trim().toUpperCase();
-            String trimmedVal = val != null ? val.trim().toUpperCase() : "";
+            String trimmedTag = tag.trim().toUpperCase(Locale.ROOT);
+            String trimmedVal = val != null ? val.trim().toUpperCase(Locale.ROOT) : "";
             map.put(trimmedTag, trimmedVal);
             return this;
         }

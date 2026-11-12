@@ -5,8 +5,10 @@ import com.yishuifengxiao.common.tool.entity.PageQuery;
 import com.yishuifengxiao.common.tool.entity.Slice;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.lang.NumberUtil;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -127,8 +129,27 @@ public class JdbcHelper {
             log.debug("{}SQL执行器初始化成功，时区: {}", LOG_PREFIX, this.databaseZoneId);
         } catch (Exception e) {
             log.error("{}SQL执行器初始化失败", LOG_PREFIX, e);
-            throw new UncheckedException(JdbcError.SQL_HELPER_INIT_ERROR, "SQL执行器初始化失败");
+            // 保留原始异常作为 cause，便于定位连接或时区探测失败的根因
+            throw new UncheckedException("SQL执行器初始化失败", e).setCode(JdbcError.SQL_HELPER_INIT_ERROR.getCode());
         }
+    }
+
+    /**
+     * 获取已初始化的命名参数执行器
+     * <p>
+     * 未通过构造函数或 setJdbcTemplate 初始化时，namedParameterJdbcTemplate 为 null，
+     * 直接使用会抛出难以定位的空指针异常，此处统一转换为明确的业务异常
+     * </p>
+     *
+     * @return 命名参数执行器
+     * @throws UncheckedException 执行器未初始化时抛出
+     */
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate() {
+        if (null == this.namedParameterJdbcTemplate) {
+            throw new UncheckedException(JdbcError.SQL_HELPER_INIT_ERROR.getCode(),
+                    "SQL执行器未初始化，请先设置JdbcTemplate或使用带JdbcTemplate的构造函数");
+        }
+        return this.namedParameterJdbcTemplate;
     }
 
     /**
@@ -211,9 +232,29 @@ public class JdbcHelper {
         if (orders == null || orders.isEmpty()) {
             return "";
         }
-        String orderByClause =
-                orders.stream().map(order -> order.getOrderName() + " " + order.getDirection()).collect(Collectors.joining(", "));
+        String orderByClause = orders.stream()
+                .map(order -> escapeOrderName(order.getOrderName()) + " " + order.direction())
+                .collect(Collectors.joining(", "));
         return " ORDER BY " + orderByClause;
+    }
+
+    /**
+     * 校验并转义排序字段名
+     * <p>
+     * 排序字段名会直接拼接进SQL语句，必须限制为合法标识符（支持 table.column 形式），
+     * 否则存在SQL注入风险
+     * </p>
+     *
+     * @param orderName 排序字段名
+     * @return 使用反引号包裹的合法标识符
+     * @throws UncheckedException 字段名不符合标识符规则时抛出
+     */
+    private String escapeOrderName(String orderName) {
+        String trimmed = null == orderName ? "" : orderName.trim();
+        if (!trimmed.matches("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?")) {
+            throw new UncheckedException(JdbcError.INVALID_IDENTIFIER, "非法的排序字段名：" + orderName);
+        }
+        return Arrays.stream(trimmed.split("\\.")).map(part -> "`" + part + "`").collect(Collectors.joining("."));
     }
 
     /**
@@ -359,7 +400,9 @@ public class JdbcHelper {
                         fieldValue.sqlType());
             }
             if (!orderBys.isEmpty()) {
-                sql.append(" ORDER BY ").append(orderBys.stream().map(s -> s.orderName + " " + s.direction).collect(Collectors.joining(", ")));
+                sql.append(" ORDER BY ").append(orderBys.stream()
+                        .map(s -> escapeOrderName(s.orderName) + " " + s.direction())
+                        .collect(Collectors.joining(", ")));
             }
 
             return sql.toString();
@@ -420,10 +463,7 @@ public class JdbcHelper {
         if (pageQuery == null) {
             return Page.ofEmpty();
         }
-        T query = null;
-        if (pageQuery.query() != null) {
-            query = pageQuery.query().orElse(null);
-        }
+        T query = pageQuery.query().orElse(null);
         return this.findPage(query, likeMode, pageQuery, orders);
     }
 
@@ -494,12 +534,19 @@ public class JdbcHelper {
             return new Result(null, 0, null);
         }
         String tableName = FieldExtractor.extractTableName(t.getClass());
+        // 主键只出现在WHERE条件中，不得写入SET子句
+        List<FieldValue> setFields = fieldValues.stream()
+                .filter(field -> !field.isPrimary())
+                .collect(Collectors.toList());
+        if (setFields.isEmpty()) {
+            return new Result(null, 0, null);
+        }
 
         Result result = this.update(params -> {
             StringBuilder sql = new StringBuilder("UPDATE `");
             sql.append(tableName).append("` SET ");
 
-            String setClause = fieldValues.stream().map(field -> {
+            String setClause = setFields.stream().map(field -> {
                 params.addValue(field.getColumnName(), convertTimeValue(field.getValue()), field.sqlType());
                 return "`" + field.getColumnName() + "` = :" + field.getColumnName();
             }).collect(Collectors.joining(","));
@@ -508,12 +555,7 @@ public class JdbcHelper {
 
             return sql.toString();
         });
-        GeneratedKeyHolder keyHolder = (GeneratedKeyHolder) result.getKeyHolder();
-        List<Map<String, Object>> keyList = keyHolder.getKeyList();
-        if (null == keyList || keyList.isEmpty()) {
-            keyList.add(Map.of("key", primaryKeyValue.getValue()));
-        }
-        return result;
+        return withPrimaryKey(result, primaryKeyValue);
     }
 
 
@@ -544,12 +586,19 @@ public class JdbcHelper {
             return new Result(null, 0, null);
         }
         String tableName = FieldExtractor.extractTableName(t.getClass());
+        // 主键只出现在WHERE条件中；选择性更新只保留非空值字段
+        List<FieldValue> setFields = fieldValues.stream()
+                .filter(field -> !field.isPrimary() && !field.isNullVal())
+                .collect(Collectors.toList());
+        if (setFields.isEmpty()) {
+            return new Result(null, 0, null);
+        }
 
         Result result = this.update(params -> {
             StringBuilder sql = new StringBuilder("UPDATE `");
             sql.append(tableName).append("` SET ");
 
-            String setClause = fieldValues.stream().filter(field -> !field.isNullVal()).map(field -> {
+            String setClause = setFields.stream().map(field -> {
                 params.addValue(field.getColumnName(), convertTimeValue(field.getValue()), field.sqlType());
                 return "`" + field.getColumnName() + "` = :" + field.getColumnName();
             }).collect(Collectors.joining(","));
@@ -558,12 +607,27 @@ public class JdbcHelper {
 
             return sql.toString();
         });
-        GeneratedKeyHolder keyHolder = (GeneratedKeyHolder) result.getKeyHolder();
-        List<Map<String, Object>> keyList = keyHolder.getKeyList();
-        if (null == keyList || keyList.isEmpty()) {
-            keyList.add(Map.of("key", primaryKeyValue.getValue()));
+        return withPrimaryKey(result, primaryKeyValue);
+    }
+
+    /**
+     * 为更新结果补充主键信息
+     * <p>
+     * UPDATE 语句通常不返回数据库生成的键，此时使用WHERE条件中的主键值补齐，
+     * 保证调用方通过统一的Result接口都能取到主键
+     * </p>
+     *
+     * @param result          更新结果
+     * @param primaryKeyValue 主键字段值
+     * @return 包含主键信息的更新结果
+     */
+    private Result withPrimaryKey(Result result, FieldValue primaryKeyValue) {
+        List<Map<String, Object>> keyList = result.keyHolder().getKeyList();
+        if (null != keyList && !keyList.isEmpty()) {
+            return result;
         }
-        return result;
+        return new Result(new GeneratedKeyHolder(List.of(Map.of("key", primaryKeyValue.getValue()))),
+                result.getAffectedRows(), result.getBatchAffectedRows());
     }
 
 
@@ -587,6 +651,11 @@ public class JdbcHelper {
         if (primaryKeys == null || primaryKeys.length == 0) {
             return new Result(null, 0, null);
         }
+        // 过滤null与空白主键：`col = NULL` 永远不会匹配，参与拼接只会生成无效条件
+        List<Object> validKeys = Arrays.stream(primaryKeys).filter(this::isValidKey).collect(Collectors.toList());
+        if (validKeys.isEmpty()) {
+            return new Result(null, 0, null);
+        }
         FieldValue primaryKeyValue = FieldExtractor.extractPrimaryField(clazz);
         if (null == primaryKeyValue) {
             return new Result(null, 0, null);
@@ -597,16 +666,32 @@ public class JdbcHelper {
             StringBuilder sql = new StringBuilder("DELETE FROM `");
             sql.append(tableName).append("` WHERE ");
 
-            for (int i = 0; i < primaryKeys.length; i++) {
+            for (int i = 0; i < validKeys.size(); i++) {
                 String variableName = primaryKeyValue.getColumnName() + i;
-                params.addValue(variableName, primaryKeys[i], primaryKeyValue.sqlType());
+                params.addValue(variableName, validKeys.get(i), primaryKeyValue.sqlType());
                 sql.append("`").append(primaryKeyValue.getColumnName()).append("` = :").append(variableName);
-                if (i < primaryKeys.length - 1) {
+                if (i < validKeys.size() - 1) {
                     sql.append(" OR ");
                 }
             }
             return sql.toString();
         });
+    }
+
+    /**
+     * 判断主键值是否有效
+     * <p>
+     * null 与空白字符串会被过滤，避免生成 `col = NULL` 这类永远不匹配的条件
+     * </p>
+     *
+     * @param key 主键值
+     * @return 是否有效
+     */
+    private boolean isValidKey(Object key) {
+        if (null == key) {
+            return false;
+        }
+        return !(key instanceof String) || StringUtils.isNotBlank((String) key);
     }
 
     /**
@@ -625,8 +710,13 @@ public class JdbcHelper {
      * @param <T>         实体类型泛型参数
      * @return Result对象，包含KeyHolder、受影响的行数和批量更新的行数数组；如果主键列表为空或无有效值则返回空结果
      */
-    public <T> Result deleteByPrimaryKeys(Class<T> clazz, List primaryKeys) {
-        if (primaryKeys == null || primaryKeys.size() == 0) {
+    public <T> Result deleteByPrimaryKeys(Class<T> clazz, List<?> primaryKeys) {
+        if (primaryKeys == null || primaryKeys.isEmpty()) {
+            return new Result(null, 0, null);
+        }
+        // 过滤null与空白主键：`col = NULL` 永远不会匹配，参与拼接只会生成无效条件
+        List<?> validKeys = primaryKeys.stream().filter(this::isValidKey).collect(Collectors.toList());
+        if (validKeys.isEmpty()) {
             return new Result(null, 0, null);
         }
         FieldValue primaryKeyValue = FieldExtractor.extractPrimaryField(clazz);
@@ -639,11 +729,11 @@ public class JdbcHelper {
             StringBuilder sql = new StringBuilder("DELETE FROM `");
             sql.append(tableName).append("` WHERE ");
 
-            for (int i = 0; i < primaryKeys.size(); i++) {
+            for (int i = 0; i < validKeys.size(); i++) {
                 String variableName = primaryKeyValue.getColumnName() + i;
-                params.addValue(variableName, primaryKeys.get(i), primaryKeyValue.sqlType());
+                params.addValue(variableName, validKeys.get(i), primaryKeyValue.sqlType());
                 sql.append("`").append(primaryKeyValue.getColumnName()).append("` = :").append(variableName);
-                if (i < primaryKeys.size() - 1) {
+                if (i < validKeys.size() - 1) {
                     sql.append(" OR ");
                 }
             }
@@ -673,6 +763,13 @@ public class JdbcHelper {
         }
         List<FieldValue> fieldValues = FieldExtractor.extractFieldValue(t);
         String tableName = FieldExtractor.extractTableName(t.getClass());
+        // 自增主键值为null时不参与INSERT，交由数据库生成
+        List<FieldValue> insertFields = fieldValues.stream()
+                .filter(field -> !(field.isPrimary() && field.isNullVal()))
+                .collect(Collectors.toList());
+        if (insertFields.isEmpty()) {
+            return new Result(null, 0, null);
+        }
 
         return this.update(params -> {
             StringBuilder sql = new StringBuilder("INSERT INTO `");
@@ -680,7 +777,7 @@ public class JdbcHelper {
             StringBuilder placeholder = new StringBuilder();
             StringBuilder valueClause = new StringBuilder();
 
-            for (FieldValue field : fieldValues) {
+            for (FieldValue field : insertFields) {
                 placeholder.append("`").append(field.getColumnName()).append("`").append(",");
                 valueClause.append(":").append(field.getColumnName()).append(",");
                 params.addValue(field.getColumnName(), convertTimeValue(field.getValue()), field.sqlType());
@@ -869,10 +966,10 @@ public class JdbcHelper {
         if (null == params) {
             params = EmptySqlParameterSource.INSTANCE;
         }
-        log.trace("{tag}执行SQL查询：sql= {}, params= {}", LOG_PREFIX, sql, params);
-        List<T> list = FieldExtractor.isBasicResult(clazz) ? this.namedParameterJdbcTemplate.queryForList(sql, params
-                , clazz) : this.namedParameterJdbcTemplate.query(sql, params, new SimpleRowMapper<>(clazz,
-                this.databaseZoneId));
+        log.trace("{}执行SQL查询：sql= {}, params= {}", LOG_PREFIX, sql, params);
+        NamedParameterJdbcTemplate template = this.namedParameterJdbcTemplate();
+        List<T> list = FieldExtractor.isBasicResult(clazz) ? template.queryForList(sql, params, clazz)
+                : template.query(sql, params, new SimpleRowMapper<>(clazz, this.databaseZoneId));
         return null == list ? Collections.emptyList() : list;
     }
 
@@ -942,7 +1039,7 @@ public class JdbcHelper {
      * @return 分页结果对象，包含数据列表、总记录数和分页参数
      */
     public <T> Page<T> findPage(Class<T> clazz, Slice slice, String sql, SqlParameterSource params) {
-        slice = null == slice ? Slice.DEFAULT_SLICE : slice;
+        slice = null == slice ? Slice.of(Slice.DEFAULT_PAGE_SIZE, Slice.DEFAULT_PAGE_NUM) : slice;
         String pageSql = this.pageSql(sql, slice);
         String countSql = this.countSql(sql);
         if (null == params) {
@@ -954,22 +1051,6 @@ public class JdbcHelper {
         return Page.of(slice, total, data);
     }
 
-    /**
-     * 执行分页查询并返回分页结果（使用Map作为参数）
-     * <p>
-     * 执行流程：
-     * 1. 初始化参数源，默认为EmptySqlParameterSource
-     * 2. 如果传入的Map不为空，则将其转换为MapSqlParameterSource
-     * 3. 委托给重载的findPage方法执行具体的分页查询逻辑
-     * </p>
-     *
-     * @param clazz 目标结果类型，用于确定使用哪种查询方式；可以是基本类型或实体类
-     * @param slice 分页参数对象，包含页码和每页大小；如果为null则使用默认值
-     * @param sql   要执行的SQL查询语句，支持命名参数（如:name, :age等）
-     * @param map   参数Map，key对应SQL中的命名参数名称，value为参数值；如果为null或空则执行无参查询
-     * @param <T>   结果类型泛型参数
-     * @return 分页结果对象，包含数据列表、总记录数和分页参数
-     */
     /**
      * 执行分页查询并返回分页结果（使用Map作为参数）
      * <p>
@@ -1036,8 +1117,8 @@ public class JdbcHelper {
         if (null == params) {
             params = EmptySqlParameterSource.INSTANCE;
         }
-        log.trace("{tag}执行SQL更新：sql= {}, params= {}", LOG_PREFIX, sql, params);
-        int update = this.namedParameterJdbcTemplate.update(sql, params, keyHolder);
+        log.trace("{}执行SQL更新：sql= {}, params= {}", LOG_PREFIX, sql, params);
+        int update = this.namedParameterJdbcTemplate().update(sql, params, keyHolder);
         return new Result(keyHolder, update, new int[]{update});
     }
 
@@ -1079,9 +1160,9 @@ public class JdbcHelper {
         if (null == params) {
             params = new SqlParameterSource[0];
         }
-        log.trace("{tag}执行SQL批量更新：sql= {}, params= {}", LOG_PREFIX, sql, params);
+        log.trace("{}执行SQL批量更新：sql= {}, params= {}", LOG_PREFIX, sql, params);
+        NamedParameterJdbcTemplate template = this.namedParameterJdbcTemplate();
         List<Map<String, Object>> keyList = new ArrayList<>();
-        int totalAffectedRows = 0;
         List<Integer> affectedRowsList = new ArrayList<>();
         int batchSize = this.batchSize();
 
@@ -1091,7 +1172,7 @@ public class JdbcHelper {
             SqlParameterSource[] batch = new SqlParameterSource[end - i];
             System.arraycopy(params, i, batch, 0, batch.length);
             GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
-            int[] updates = this.namedParameterJdbcTemplate.batchUpdate(sql, batch, generatedKeyHolder);
+            int[] updates = template.batchUpdate(sql, batch, generatedKeyHolder);
 
             // 安全地添加生成的主键
             if (generatedKeyHolder.getKeyList() != null) {
@@ -1102,7 +1183,6 @@ public class JdbcHelper {
             if (null != updates) {
                 for (int update : updates) {
                     affectedRowsList.add(update);
-                    totalAffectedRows += update;
                 }
             }
         }
@@ -1203,13 +1283,13 @@ public class JdbcHelper {
     @Data
     @AllArgsConstructor
     public static class Result {
-        private final static GeneratedKeyHolder defaultKeyHolder = new GeneratedKeyHolder();
         /**
          * KeyHolder对象，用于存储生成的主键值
          * <p>
          * 当执行INSERT操作且数据库使用自增主键时，可以通过此对象获取生成的主键值
          * </p>
          */
+        @Getter(AccessLevel.NONE)
         private KeyHolder keyHolder;
 
         /**
@@ -1237,16 +1317,22 @@ public class JdbcHelper {
          * <p>
          * 执行流程：
          * 1. 如果keyHolder不为null，则返回keyHolder
-         * 2. 否则返回defaultKeyHolder
+         * 2. 否则返回一个空的KeyHolder，避免调用方拿到null
          * </p>
          *
          * @return KeyHolder对象，当执行INSERT操作且数据库使用自增主键时，可以通过此对象获取生成的主键值
          */
+        public KeyHolder getKeyHolder() {
+            return this.keyHolder();
+        }
+
+        /**
+         * 获取KeyHolder对象，与 {@link #getKeyHolder()} 等价
+         *
+         * @return 非null的KeyHolder对象
+         */
         public KeyHolder keyHolder() {
-            if (null != keyHolder) {
-                return this.keyHolder;
-            }
-            return defaultKeyHolder;
+            return null != keyHolder ? keyHolder : new GeneratedKeyHolder();
         }
 
         /**

@@ -1,7 +1,5 @@
 package com.yishuifengxiao.common.tool.utils;
 
-import java.math.BigDecimal;
-
 /**
  * <p>GPS经纬度距离计算工具类</p>
  * <p>根据两个坐标点的经纬度计算它们之间的距离，采用Haversine公式。</p>
@@ -44,8 +42,9 @@ public final class GpsUtil {
      * @param lat2 B点纬度
      * @return 通过经纬度获取的距离(单位 ： 米)
      */
-    public static   long distance(double lng1, double lat1, double lng2, double lat2) {
-        return getDistance(lng1, lat1, lng2, lat2, EARTH_RADIUS * 1000);
+    public static long distance(double lng1, double lat1, double lng2, double lat2) {
+        // 米制结果同样按四舍五入取整，避免直接截断造成 1 米内的偏差
+        return Math.round(distanceRaw(lng1, lat1, lng2, lat2, EARTH_RADIUS * 1000));
     }
 
     /**
@@ -69,9 +68,9 @@ public final class GpsUtil {
      * @param lat2 B点纬度
      * @return 通过经纬度获取的距离(单位 ： 千米)
      */
-    public static   long distanceKm(double lng1, double lat1, double lng2, double lat2) {
-
-        return getDistance(lng1, lat1, lng2, lat2, EARTH_RADIUS);
+    public static long distanceKm(double lng1, double lat1, double lng2, double lat2) {
+        // 千米制结果四舍五入到整千米：不足 0.5 千米记 0，0.5 千米及以上记 1
+        return Math.round(distanceRaw(lng1, lat1, lng2, lat2, EARTH_RADIUS));
     }
 
     /**
@@ -85,18 +84,23 @@ public final class GpsUtil {
      * b=lng1 -lng2 为两点经度之差
      * </p>
      * <p>
-     * 地球半径值这里取值为 6378.137千米；
+     * 地球半径值由调用方传入：米制传 6378.137 * 1000，千米制传 6378.137
      * </p>
-     * <p>
-     * 通过经纬度计算出来的结果单位为米
      *
-     * @param lng1 A点经度
-     * @param lat1 A点纬度
-     * @param lng2 B点经度
-     * @param lat2 B点纬度
-     * @return 通过经纬度获取的距离(单位 ： 米)
+     * @param lng1        A点经度
+     * @param lat1        A点纬度
+     * @param lng2        B点经度
+     * @param lat2        B点纬度
+     * @param earthRadius 地球半径（单位与期望的返回结果一致）
+     * @return 保留 4 位小数的距离原始值（单位由 earthRadius 决定）
      */
-    private static long getDistance(double lng1, double lat1, double lng2, double lat2, double earthRadius) {
+    private static double distanceRaw(double lng1, double lat1, double lng2, double lat2, double earthRadius) {
+        // 非法坐标（含 NaN/Infinity）会让结果被 Math.round 静默转为 0，必须在计算前拦截
+        if (!isValidLongitude(lng1) || !isValidLatitude(lat1)
+                || !isValidLongitude(lng2) || !isValidLatitude(lat2)) {
+            throw new IllegalArgumentException(
+                    "非法的经纬度坐标: lng1=" + lng1 + ", lat1=" + lat1 + ", lng2=" + lng2 + ", lat2=" + lat2);
+        }
         double radLat1 = rad(lat1);
         double radLat2 = rad(lat2);
         double a = radLat1 - radLat2;
@@ -104,12 +108,30 @@ public final class GpsUtil {
         double s = 2 * Math.asin(Math.sqrt(
                 Math.pow(Math.sin(a / 2), 2) + Math.cos(radLat1) * Math.cos(radLat2) * Math.pow(Math.sin(b / 2), 2)));
         s = s * earthRadius;
-        s = Math.round(s * 10000d) / 10000d;
-        // s = s*1000; 乘以1000是换算成米
-        return new BigDecimal(s).longValue();
+        return Math.round(s * 10000d) / 10000d;
     }
 
     private static double rad(double d) {
         return d * Math.PI / 180.0;
+    }
+
+    /**
+     * 校验经度是否在合法范围内
+     *
+     * @param lng 经度
+     * @return 合法返回true
+     */
+    private static boolean isValidLongitude(double lng) {
+        return Double.isFinite(lng) && lng >= -180.0 && lng <= 180.0;
+    }
+
+    /**
+     * 校验纬度是否在合法范围内
+     *
+     * @param lat 纬度
+     * @return 合法返回true
+     */
+    private static boolean isValidLatitude(double lat) {
+        return Double.isFinite(lat) && lat >= -90.0 && lat <= 90.0;
     }
 }

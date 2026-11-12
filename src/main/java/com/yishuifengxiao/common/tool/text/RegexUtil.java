@@ -2,10 +2,10 @@ package com.yishuifengxiao.common.tool.text;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -107,27 +107,44 @@ public final class RegexUtil {
 
 
     /**
-     * 存储正则Pattern的集合 key ：正则表达式 value ：Pattern对象
+     * Pattern缓存的最大容量，超过后按LRU淘汰，防止动态传入不同正则导致缓存无限增长
      */
-    private static final Map<String, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
+    private static final int PATTERN_CACHE_SIZE = 256;
+
+    /**
+     * 存储正则Pattern的集合 key ：正则表达式 value ：Pattern对象，采用有界LRU策略
+     */
+    private static final Map<String, Pattern> PATTERN_CACHE =
+            new LinkedHashMap<String, Pattern>(16, 0.75f, true) {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Pattern> eldest) {
+                    return size() > PATTERN_CACHE_SIZE;
+                }
+            };
 
     /**
      * 根据正则表达式获取Pattern对象
      *
      * @param regex 正则表达式
      * @return Pattern对象
+     * @throws IllegalArgumentException 当正则表达式为空或语法非法时抛出
      */
     public static Pattern pattern(String regex) {
         if (StringUtils.isBlank(regex)) {
-            throw new RuntimeException("正则表达式不能为空");
+            throw new IllegalArgumentException("正则表达式不能为空");
         }
-        regex = regex.trim();
-        Pattern pattern = PATTERN_CACHE.get(regex);
-        if (pattern == null) {
-            pattern = Pattern.compile(regex);
-            PATTERN_CACHE.put(regex, pattern);
+        String key = regex.trim();
+        // LinkedHashMap 非线程安全，读写统一加锁；Pattern 本身不可变，可安全共享
+        synchronized (PATTERN_CACHE) {
+            Pattern pattern = PATTERN_CACHE.get(key);
+            if (pattern == null) {
+                pattern = Pattern.compile(key);
+                PATTERN_CACHE.put(key, pattern);
+            }
+            return pattern;
         }
-        return pattern;
     }
 
     /**
@@ -206,6 +223,11 @@ public final class RegexUtil {
     }
 
     /**
+     * 数字token的字符范围，用于先按完整数字片段切分，避免把1.2.3拆成1.2和.3
+     */
+    private final static String REGEX_NUMBER_TOKEN = "[0-9.eE+-]+";
+
+    /**
      * <p>提取字符中包含的所有实数数</p>
      *
      * @param text 待提取的字符串
@@ -216,12 +238,9 @@ public final class RegexUtil {
             return Collections.emptyList();
         }
 
-        // 先找出所有疑似数字的子串
-        List<String> candidates = extractAll(REGEX_NUMBER, text);
-
-        // 过滤掉非法数字（含有多个小数点）
-        return candidates.stream()
-                .filter(candidate -> !candidate.matches(REGEX_ILLEGAL_NUMBER))
+        // 先按完整数字token切分，再只保留符合数字语法且可解析的token；多数值点token会被整体丢弃
+        return extractAll(REGEX_NUMBER_TOKEN, text).stream()
+                .filter(candidate -> candidate.matches(REGEX_NUMBER))
                 .map(NumberUtil::parseToBigDecimal)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

@@ -1,7 +1,7 @@
 package com.yishuifengxiao.common.tool.utils;
 
 import java.io.File;
-import java.time.ZoneId;
+import java.util.Locale;
 
 /**
  * <p>操作系统工具类</p>
@@ -11,7 +11,6 @@ import java.time.ZoneId;
  * <li>支持多种操作系统判断（Windows、Linux、MacOS等）</li>
  * <li>获取系统目录路径（临时目录、用户目录、工作目录）</li>
  * <li>提供常用字符常量（路径分隔符、符号等）</li>
- * <li>提供时区常量</li>
  * </ul>
  *
  * @author qingteng
@@ -20,19 +19,9 @@ import java.time.ZoneId;
  */
 public final class OsUtils {
     /**
-     * 默认的时区,上海
-     */
-    public static final String DEFAULT_ZONE = "Asia/Shanghai";
-
-    /**
-     * 获取北京时间的ZoneId
-     */
-    public static final ZoneId ZONEID_OF_CHINA = ZoneId.of(DEFAULT_ZONE);
-
-    /**
      * 获取操作系统的名字
      */
-    private static final String OS = System.getProperty("os.name").toLowerCase();
+    private static final String OS = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 
     /**
      * 左斜杠 (英文输入法 / )

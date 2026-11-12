@@ -58,6 +58,28 @@ public class ExecuteUtil {
     }
 
     /**
+     * 平滑关闭内置线程池
+     * <p>
+     * 不再接受新任务，等待已提交任务执行完成后关闭。
+     * </p>
+     */
+    public static void shutdown() {
+        POOL.shutdown();
+    }
+
+    /**
+     * 立即关闭内置线程池
+     * <p>
+     * 尝试终止正在执行的任务，并返回未开始执行的任务列表。
+     * </p>
+     *
+     * @return 未开始执行的任务列表
+     */
+    public static java.util.List<Runnable> shutdownNow() {
+        return POOL.shutdownNow();
+    }
+
+    /**
      * 执行任务
      *
      * @param runnable 待执行的任务
@@ -129,6 +151,8 @@ public class ExecuteUtil {
         public Thread newThread(Runnable r) {
             Thread thread = new Thread(r);
             thread.setName("callback-" + threadNumber.incrementAndGet());
+            // 使用守护线程，避免线程池阻止JVM退出
+            thread.setDaemon(true);
             return thread;
         }
     }
@@ -224,8 +248,11 @@ public class ExecuteUtil {
         }
         try {
             CompletableFuture.allOf(futures).join(); // 实际阻塞等待全部完成
-        } catch (Exception ignored) {
-            // 忽略中断或异常，符合原设计意图
+        } catch (Throwable ignored) {
+            // 忽略任务异常（符合原设计意图），但保留中断状态，避免调用方感知不到中断
+            if (Thread.currentThread().isInterrupted()) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 }

@@ -79,8 +79,8 @@ public class Hex {
             }
             bytes[i / 2] = (byte) ((high << 4) + low);
         }
-        // 使用 US-ASCII 解码，若字节值超出 0~127 仍保留原值（扩展 ASCII）
-        return new String(bytes, StandardCharsets.US_ASCII);
+        // 使用 ISO-8859-1（Latin-1）解码，覆盖 0x00~0xFF 全字节范围（扩展 ASCII）
+        return new String(bytes, StandardCharsets.ISO_8859_1);
     }
 
     /**
@@ -96,7 +96,6 @@ public class Hex {
         if (ascii == null) {
             throw new IllegalArgumentException("ascii must not be null");
         }
-        ascii = StringUtils.trim(ascii);
         if (ascii.isEmpty()) {
             return "";
         }
@@ -141,11 +140,22 @@ public class Hex {
         if (null == hexStr) {
             return null;
         }
-        byte[] resultBytes = new byte[hexStr.length() / 2];
+        String clean = TextUtil.removeWhitespaceAndInvisible(hexStr);
+        if (clean.isEmpty()) {
+            return "";
+        }
+        if (clean.length() % 2 != 0) {
+            throw new IllegalArgumentException("Hex string length must be even, but got " + clean.length());
+        }
+        byte[] resultBytes = new byte[clean.length() / 2];
         // 将十六进制字符串按每两位分割并转换为字节数组
-        for (int i = 0; i < hexStr.length(); i += 2) {
-            String hexPair = hexStr.substring(i, i + 2);
-            resultBytes[i / 2] = (byte) Integer.parseInt(hexPair, 16);
+        for (int i = 0; i < clean.length(); i += 2) {
+            int high = Character.digit(clean.charAt(i), 16);
+            int low = Character.digit(clean.charAt(i + 1), 16);
+            if (high == -1 || low == -1) {
+                throw new IllegalArgumentException("Invalid hex character at position " + i);
+            }
+            resultBytes[i / 2] = (byte) ((high << 4) + low);
         }
 
         return new String(resultBytes, StandardCharsets.UTF_8);
@@ -187,8 +197,9 @@ public class Hex {
         // 移除可能存在的空格
         hex = hex.replaceAll("\\s", "");
 
-        // 检查十六进制字符串长度是否为偶数
+        // isHex 已保证长度为偶数且只包含十六进制字符
         if (!isHex(hex)) {
+            log.warn("非法的十六进制字符串: {}", hex);
             return null;
         }
 
@@ -199,11 +210,6 @@ public class Hex {
             // 每两个字符解析为一个字节
             int firstDigit = Character.digit(hex.charAt(i), 16);
             int secondDigit = Character.digit(hex.charAt(i + 1), 16);
-
-            if (firstDigit == -1 || secondDigit == -1) {
-                return null;
-            }
-
             data[i / 2] = (byte) ((firstDigit << 4) + secondDigit);
         }
 
@@ -314,27 +320,25 @@ public class Hex {
      * @return 填充后的hex字符串（保持原始的前缀格式），如果输入无效则返回null
      */
     public static String padHexLeft(String hexString, int targetBytes) {
-        if (hexString == null || !isHex(hexString)) {
+        if (hexString == null) {
             log.warn("Invalid hex string: {}", hexString);
             return null;
         }
 
-        // 处理前缀（0x或0X）
+        // 先剥离前缀与空白再做校验：isHex 不接受 0x 前缀和内部空白，
+        // 若先调用 isHex 会让下方的前缀/空白处理永远不可达，与文档承诺不一致
         String prefix = "";
-        String cleanHex = hexString;
-
+        String cleanHex = hexString.trim();
         if (cleanHex.startsWith("0x") || cleanHex.startsWith("0X")) {
             // 保留原始的大小写格式
             prefix = cleanHex.substring(0, 2);
             cleanHex = cleanHex.substring(2);
         }
-
-        // 移除可能存在的空格
         cleanHex = cleanHex.replaceAll("\\s+", "");
 
-        // 验证是否为有效的hex字符串
-        if (!cleanHex.matches("[0-9a-fA-F]+")) {
-            throw new IllegalArgumentException("无效的hex字符串: " + hexString);
+        if (!HEX_PATTERN.matcher(cleanHex).matches() || cleanHex.length() % 2 != 0) {
+            log.warn("Invalid hex string: {}", hexString);
+            return null;
         }
 
         // 每个字节对应2个hex字符
@@ -343,7 +347,7 @@ public class Hex {
 
         // 如果已经达到或超过目标长度，直接返回
         if (currentLength >= targetLength) {
-            return (prefix + cleanHex).toUpperCase();
+            return prefix + cleanHex.toUpperCase();
         }
 
         // 左侧填充0，使用更高效的字符串拼接方式
@@ -353,7 +357,7 @@ public class Hex {
         }
         padded.append(cleanHex);
 
-        return (prefix + padded).toUpperCase();
+        return prefix + padded.toString().toUpperCase();
     }
 
     /**
@@ -488,7 +492,9 @@ public class Hex {
      */
     private static String convertIntegerToHex(int value, Integer byteNum) {
         String hexString = Integer.toHexString(value);
-        if (byteNum != null && byteNum > 0 && hexString.length() < byteNum * 2) {
+        // 位移量按 64 取模：byteNum >= 8 时 (1L << 64) 等于 1，掩码会变成 0 把所有值抹成 0，
+        // 因此仅在掩码位移量小于 64 位时才做无符号扩展，其余长度交给最终左补零处理
+        if (byteNum != null && byteNum > 0 && byteNum < 8 && hexString.length() < byteNum * 2) {
             long unsignedValue = value & ((1L << (byteNum * 8)) - 1);
             hexString = Long.toHexString(unsignedValue);
         }
@@ -500,7 +506,8 @@ public class Hex {
      */
     private static String convertLongToHex(long value, Integer byteNum) {
         String hexString = Long.toHexString(value);
-        if (byteNum != null && byteNum > 0 && hexString.length() < byteNum * 2) {
+        // 同 convertIntegerToHex：byteNum >= 8 时位移量溢出，掩码为 0 会把结果抹成 0
+        if (byteNum != null && byteNum > 0 && byteNum < 8 && hexString.length() < byteNum * 2) {
             long mask = (1L << (byteNum * 8)) - 1;
             long unsignedValue = value & mask;
             hexString = Long.toHexString(unsignedValue);
@@ -514,7 +521,8 @@ public class Hex {
     private static String convertShortToHex(short value, Integer byteNum) {
         int unsignedValue = value & 0xFFFF;
         String hexString = Integer.toHexString(unsignedValue);
-        if (byteNum != null && byteNum > 0 && hexString.length() < byteNum * 2) {
+        // 同 convertIntegerToHex：仅在位移量小于 64 位时使用掩码
+        if (byteNum != null && byteNum > 0 && byteNum < 8 && hexString.length() < byteNum * 2) {
             long mask = (1L << (byteNum * 8)) - 1;
             unsignedValue = (int) (unsignedValue & mask);
             hexString = Integer.toHexString(unsignedValue);
@@ -528,7 +536,8 @@ public class Hex {
     private static String convertByteToHex(byte value, Integer byteNum) {
         int unsignedValue = value & 0xFF;
         String hexString = Integer.toHexString(unsignedValue);
-        if (byteNum != null && byteNum > 0 && hexString.length() < byteNum * 2) {
+        // 同 convertIntegerToHex：仅在位移量小于 64 位时使用掩码
+        if (byteNum != null && byteNum > 0 && byteNum < 8 && hexString.length() < byteNum * 2) {
             long mask = (1L << (byteNum * 8)) - 1;
             unsignedValue = (int) (unsignedValue & mask);
             hexString = Integer.toHexString(unsignedValue);

@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -109,6 +110,9 @@ public class TLVFormatter {
      * @throws IllegalArgumentException 如果输入格式无效
      */
     public static String formatTLVStr(boolean beautiful, String val) {
+        if (val == null) {
+            throw new IllegalArgumentException("TLV数据不能为空");
+        }
         String tlvRaw;
 
         // 验证输入字符串是否为有效的十六进制表示
@@ -137,7 +141,7 @@ public class TLVFormatter {
         try {
             return formatTLV(beautiful, tlvRaw);
         } catch (Exception e) {
-            log.info("Error: " + e.getMessage());
+            log.warn("TLV格式化失败", e);
             throw new IllegalArgumentException("TLV格式化失败", e);
         }
     }
@@ -323,8 +327,9 @@ public class TLVFormatter {
                 length = lenByte & 0xFF;
             }
 
-            // 有效性校验
-            if (position + length > maxPosition) {
+            // 长度来自外部输入：用减法比较避免 position + length 溢出后绕过校验，
+            // 同时拒绝 0x84 长格式最高位为 1 时得到的负数长度
+            if (length < 0 || length > maxPosition - position) {
                 throw new IllegalArgumentException("value overflow at " + position);
             }
 
@@ -580,19 +585,20 @@ public class TLVFormatter {
 
         byte firstByte = data[0];
 
-        // 检查是否为特殊值(无穷大或NaN)
-        if ((firstByte & 0x40) != 0) {
-            if ((firstByte & 0x01) != 0) {
-                return "+INF";
-            } else if ((firstByte & 0x02) != 0) {
-                return "-INF";
-            } else if ((firstByte & 0x03) != 0) {
-                return "NaN";
-            }
+        // ASN.1 REAL 特殊值按 X.690 8.5.9 由固定首字节表示：0x40=+INF、0x41=-INF、0x42=NaN
+        int special = firstByte & 0xFF;
+        if (special == 0x40) {
+            return "+INF";
+        }
+        if (special == 0x41) {
+            return "-INF";
+        }
+        if (special == 0x42) {
+            return "NaN";
         }
 
-        // 检查编码格式
-        if ((firstByte & 0x80) == 0) {
+        // X.690：首字节 bit8=1 为二进制编码，bit8=0 为十进制编码
+        if ((firstByte & 0x80) != 0) {
             // 二进制编码
             return parseBinaryReal(data);
         } else {
@@ -615,9 +621,10 @@ public class TLVFormatter {
             sign = -1.0;
         }
 
-        // 提取底数和指数
+        // 首字节布局：bit8=1、bit7=符号、bits6-5=底数、bits4-3=scale、bits2-1=指数长度格式
         int base = (firstByte >> 4) & 0x03;
-        int exponentFormat = (firstByte >> 2) & 0x03;
+        int scale = (firstByte >> 2) & 0x03;
+        int exponentFormat = firstByte & 0x03;
 
         int exponent = 0;
         long mantissa = 0;
@@ -632,7 +639,9 @@ public class TLVFormatter {
                 break;
             case 1: // 2字节指数
                 if (data.length < 3) return null;
-                exponent = ((data[1] & 0xFF) << 8) | (data[2] & 0xFF);
+                int expValue16 = ((data[1] & 0xFF) << 8) | (data[2] & 0xFF);
+                // 指数为二进制补码有符号整数，负值需做符号扩展
+                exponent = (expValue16 & 0x8000) != 0 ? expValue16 - 0x10000 : expValue16;
                 expStart = 3;
                 break;
             case 2: // 3字节指数
@@ -667,7 +676,7 @@ public class TLVFormatter {
 
                 // 计算浮点值
                 double value = mantissa * Math.pow(2, exponent);
-                return formatDouble(value * sign);
+                return formatDouble(value * Math.pow(10, scale) * sign);
 
             case 1: // 底数为8
                 if (mantissaBytes.length == 0) {
@@ -680,7 +689,7 @@ public class TLVFormatter {
                 }
 
                 double value8 = mantissa * Math.pow(8, exponent);
-                return formatDouble(value8 * sign);
+                return formatDouble(value8 * Math.pow(10, scale) * sign);
 
             case 2: // 底数为16
                 if (mantissaBytes.length == 0) {
@@ -693,7 +702,7 @@ public class TLVFormatter {
                 }
 
                 double value16 = mantissa * Math.pow(16, exponent);
-                return formatDouble(value16 * sign);
+                return formatDouble(value16 * Math.pow(10, scale) * sign);
 
             default: // 保留
                 return null;
@@ -841,18 +850,22 @@ public class TLVFormatter {
                 DateTimeFormatter.ofPattern("yyMMddHHmmxx"),
                 DateTimeFormatter.ofPattern("yyMMddHHmmssxx")
         };
+        // 与 formatters 一一对应：标记该格式是否携带时区偏移
+        boolean[] hasOffset = {false, false, true, true};
 
-        for (DateTimeFormatter formatter : formatters) {
+        for (int i = 0; i < formatters.length; i++) {
             try {
-                // 对于带时区的格式
-                if (formatter.toString().contains("xx")) {
-                    LocalDateTime dateTime = LocalDateTime.parse(timeStr, formatter);
+                if (hasOffset[i]) {
+                    // 带偏移的格式必须用 OffsetDateTime 解析，LocalDateTime 会丢弃偏移导致时间错误
+                    OffsetDateTime dateTime = OffsetDateTime.parse(timeStr, formatters[i]);
                     return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss XXX"));
-                } else {
-                    // 对于UTC时间
-                    LocalDateTime dateTime = LocalDateTime.parse(timeStr, formatter);
-                    return dateTime.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'"));
                 }
+                LocalDateTime dateTime = LocalDateTime.parse(timeStr, formatters[i]);
+                // RFC 5280：UTCTime 的 50-99 表示 1950-1999，而 yy 默认解析到 2000-2099
+                if (dateTime.getYear() > 2049) {
+                    dateTime = dateTime.minusYears(100);
+                }
+                return dateTime.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'UTC'"));
             } catch (Exception e) {
                 // 继续尝试下一个格式
             }
@@ -878,18 +891,18 @@ public class TLVFormatter {
                 DateTimeFormatter.ofPattern("yyyyMMddHHmmxx"),
                 DateTimeFormatter.ofPattern("yyyyMMddHHmmssxx")
         };
+        // 与 formatters 一一对应：标记该格式是否携带时区偏移
+        boolean[] hasOffset = {false, false, false, false, true, true};
 
-        for (DateTimeFormatter formatter : formatters) {
+        for (int i = 0; i < formatters.length; i++) {
             try {
-                // 对于带时区的格式
-                if (formatter.toString().contains("xx")) {
-                    LocalDateTime dateTime = LocalDateTime.parse(timeStr, formatter);
+                if (hasOffset[i]) {
+                    // 带偏移的格式必须用 OffsetDateTime 解析，LocalDateTime 会丢弃偏移导致时间错误
+                    OffsetDateTime dateTime = OffsetDateTime.parse(timeStr, formatters[i]);
                     return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS XXX"));
-                } else {
-                    // 对于UTC时间
-                    LocalDateTime dateTime = LocalDateTime.parse(timeStr, formatter);
-                    return dateTime.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS 'UTC'"));
                 }
+                LocalDateTime dateTime = LocalDateTime.parse(timeStr, formatters[i]);
+                return dateTime.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS 'UTC'"));
             } catch (Exception e) {
                 // 继续尝试下一个格式
             }
@@ -905,9 +918,9 @@ public class TLVFormatter {
         }
 
         // 解码OID字节
-        List<Integer> oidList = new ArrayList<>();
+        List<Long> oidList = new ArrayList<>();
         for (int i = 0; i < data.length; ) {
-            int value = 0;
+            long value = 0;
             while (true) {
                 if (i >= data.length) {
                     return null; // 防止越界访问
@@ -915,6 +928,9 @@ public class TLVFormatter {
                 byte b = data[i];
                 value = (value << 7) | (b & 0x7F);
                 i++;
+                if (value > Integer.MAX_VALUE) {
+                    return null;
+                }
                 if ((b & 0x80) == 0) {
                     break;
                 }
@@ -924,9 +940,19 @@ public class TLVFormatter {
 
         // 处理第一个字节的特殊编码 (40 * X + Y)
         if (!oidList.isEmpty()) {
-            int first = oidList.get(0);
-            int x = first / 40;
-            int y = first % 40;
+            long first = oidList.get(0);
+            long x;
+            long y;
+            if (first < 40) {
+                x = 0;
+                y = first;
+            } else if (first < 80) {
+                x = 1;
+                y = first - 40;
+            } else {
+                x = 2;
+                y = first - 80;
+            }
 
             // 替换第一个节点为 x 和 y
             oidList.set(0, y);
@@ -970,13 +996,16 @@ public class TLVFormatter {
         }
         // 将字节切片转换为字符串
         String result = new String(data, StandardCharsets.US_ASCII);
-        return result.toUpperCase();
+        return result.toUpperCase(Locale.ROOT);
     }
 
     // ========== 工具方法 ==========
 
     // 移除不可见字符
     private static String removeInvisibleChars(String str) {
+        if (str == null) {
+            return "";
+        }
         return str.replaceAll("\\s+", "");
     }
 
@@ -1014,8 +1043,12 @@ public class TLVFormatter {
 
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(hex.charAt(i), 16) << 4)
-                    + Character.digit(hex.charAt(i + 1), 16));
+            int high = Character.digit(hex.charAt(i), 16);
+            int low = Character.digit(hex.charAt(i + 1), 16);
+            if (high < 0 || low < 0) {
+                throw new IllegalArgumentException("非法的十六进制字符: " + hex.substring(i, i + 2));
+            }
+            data[i / 2] = (byte) ((high << 4) + low);
         }
         return data;
     }

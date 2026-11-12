@@ -111,9 +111,12 @@ public class ValidateUtils {
         if (!conditionMet) {
             if (errorMsg instanceof RootEnum) {
                 throw new UncheckedException((RootEnum) errorMsg);
-            } else if (errorMsg instanceof String) {
+            }
+            if (errorMsg instanceof String) {
                 throw new UncheckedException((String) errorMsg);
             }
+            // 未知类型的提示信息不能静默忽略，否则验证失败时不会抛出异常
+            throw new UncheckedException("验证失败: " + errorMsg);
         }
     }
 

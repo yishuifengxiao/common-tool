@@ -87,7 +87,7 @@ public class Response<T> implements Serializable {
     /**
      * 响应时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonProperty("responseTime")
     protected Date responseTime;
 

@@ -66,12 +66,20 @@ public class ArrayUtil {
             throw new IllegalArgumentException("predicate cannot be null");
         }
 
-        Set<T> sources = new HashSet<>();
+        List<T> sources = new ArrayList<>();
         if (src != null) {
-            sources.addAll(src);
+            for (T v : src) {
+                if (v != null && sources.stream().noneMatch(s -> predicate.test(s, v))) {
+                    sources.add(v);
+                }
+            }
         }
         if (target != null) {
-            sources.addAll(target);
+            for (T v : target) {
+                if (v != null && sources.stream().noneMatch(s -> predicate.test(s, v))) {
+                    sources.add(v);
+                }
+            }
         }
         return sources;
     }
@@ -87,8 +95,11 @@ public class ArrayUtil {
      * @return target中不存在于src中的元素集合
      */
     public static <T> Collection<T> difference(Collection<T> src, Collection<T> target, BiPredicate<? super T, ? super T> predicate) {
+        if (null == predicate) {
+            throw new IllegalArgumentException("predicate cannot be null");
+        }
         if (null == src) {
-            return null == target ? new HashSet<>() : target;
+            return null == target ? new HashSet<>() : target.stream().filter(Objects::nonNull).collect(Collectors.toSet());
         }
         if (null == target) {
             return new HashSet<>();

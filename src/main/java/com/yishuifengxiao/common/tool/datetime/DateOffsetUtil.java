@@ -2,10 +2,9 @@ package com.yishuifengxiao.common.tool.datetime;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
-
-import com.yishuifengxiao.common.tool.utils.OsUtils;
 
 /**
  * <p>Date日期时间偏移工具类</p>
@@ -35,7 +34,7 @@ public class DateOffsetUtil {
      * @return 今天0时0分0秒这个时间
      */
     public static Date todayStart() {
-        return getDayStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now(OsUtils.ZONEID_OF_CHINA)));
+        return getDayStart(DateTimeUtil.localDateTime2Date(LocalDateTime.now()));
     }
 
     /**
@@ -285,23 +284,23 @@ public class DateOffsetUtil {
             return null;
         }
 
-        return DateTimeUtil.localDateTime2Date(LocalDateTime.of(dateTime.toInstant().atZone(OsUtils.ZONEID_OF_CHINA).toLocalDate(), LocalTime.MIN));
+        return DateTimeUtil.localDateTime2Date(LocalDateTime.of(dateTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalTime.MIN));
     }
 
     /**
      * <p>
-     * 获取一个输入日期的23:59:59
+     * 获取一个输入日期的23:59:59.999
      * </p>
-     * 例如输入时间为2020-10-10 12:12:12 则返回时间为 2020-10-10 23:59:59
+     * 例如输入时间为2020-10-10 12:12:12 则返回时间为 2020-10-10 23:59:59.999
      *
      * @param dateTime 输入日期
-     * @return 输入日期的23时59分59秒
+     * @return 输入日期的23时59分59.999秒
      */
     public static Date getDayEnd(Date dateTime) {
         if (null == dateTime) {
             return null;
         }
-        return DateTimeUtil.localDateTime2Date(LocalDateTime.of(dateTime.toInstant().atZone(OsUtils.ZONEID_OF_CHINA).toLocalDate(), LocalTime.MAX));
+        return DateTimeUtil.localDateTime2Date(LocalDateTime.of(dateTime.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), LocalTime.MAX).withNano(999_999_000));
     }
 
     /**

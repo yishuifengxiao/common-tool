@@ -11,9 +11,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -24,8 +22,45 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 public class FieldExtractor {
-    private static final Map<String, List<FieldValue>> FIELDS_MAP = new ConcurrentHashMap<>();
-    private static final Map<String, String> TABLE_MAP = new ConcurrentHashMap<>();
+    /**
+     * 字段定义缓存：使用ClassValue实现，随类卸载自动释放，避免静态Map无界增长与类加载器泄漏
+     */
+    private static final ClassValue<List<FieldValue>> FIELDS_CACHE = new ClassValue<>() {
+        @Override
+        protected List<FieldValue> computeValue(Class<?> type) {
+            try {
+                // 获取类的所有字段（包括继承的字段），并转换为主键标识的FieldValue
+                return Collections.unmodifiableList(ClassUtil.fields(type, true).stream()
+                        .map(field -> new FieldValue(field, isPrimary(field)))
+                        .collect(Collectors.toList()));
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to extract fields from class: " + type.getName(), e);
+            }
+        }
+    };
+
+    /**
+     * 表名缓存：使用ClassValue实现，随类卸载自动释放
+     */
+    private static final ClassValue<String> TABLE_CACHE = new ClassValue<>() {
+        @Override
+        protected String computeValue(Class<?> type) {
+            String name = Optional.ofNullable(AnnotationUtils.findAnnotation(type, jakarta.persistence.Table.class))
+                    .map(jakarta.persistence.Table::name)
+                    .filter(StringUtils::isNotBlank)
+                    .orElse(null);
+            if (StringUtils.isBlank(name)) {
+                name = Optional.ofNullable(AnnotationUtils.findAnnotation(type, Entity.class))
+                        .map(Entity::name)
+                        .filter(StringUtils::isNotBlank)
+                        .orElse(null);
+            }
+            if (StringUtils.isBlank(name)) {
+                name = TextUtil.underscoreName(type.getSimpleName());
+            }
+            return name;
+        }
+    };
 
     /**
      * 从实体对象中提取字段值
@@ -82,19 +117,7 @@ public class FieldExtractor {
             return Collections.emptyList();
         }
         // 使用缓存避免重复提取，提高性能
-        return FIELDS_MAP.computeIfAbsent(clazz.getName(), key -> {
-            try {
-                // 获取类的所有字段（包括继承的字段）
-                List<Field> fields = ClassUtil.fields(clazz, true);
-                // 过滤并转换字段为FieldValue对象
-                return fields.stream()
-                        // 转换为FieldValue对象，同时判断是否为主键
-                        .map(field -> new FieldValue(field, isPrimary(field)))
-                        .collect(Collectors.toList());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to extract fields from class: " + clazz.getName(), e);
-            }
-        });
+        return FIELDS_CACHE.get(clazz);
     }
 
     /**
@@ -105,22 +128,10 @@ public class FieldExtractor {
      * @return 表名
      */
     public static <T> String extractTableName(Class<T> clazz) {
-        return TABLE_MAP.computeIfAbsent(clazz.getName(), key -> {
-            String name = Optional.ofNullable(AnnotationUtils.findAnnotation(clazz, jakarta.persistence.Table.class))
-                    .map(jakarta.persistence.Table::name)
-                    .filter(StringUtils::isNotBlank)
-                    .orElse(null);
-            if (StringUtils.isBlank(name)) {
-                name = Optional.ofNullable(AnnotationUtils.findAnnotation(clazz, Entity.class))
-                        .map(Entity::name)
-                        .filter(StringUtils::isNotBlank)
-                        .orElse(null);
-            }
-            if (StringUtils.isBlank(name)) {
-                name = TextUtil.underscoreName(clazz.getSimpleName());
-            }
-            return name;
-        });
+        if (null == clazz) {
+            return null;
+        }
+        return TABLE_CACHE.get(clazz);
     }
 
     /**

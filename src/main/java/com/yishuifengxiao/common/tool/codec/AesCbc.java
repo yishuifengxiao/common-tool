@@ -21,8 +21,16 @@ public class AesCbc {
     // 算法/模式/填充
     private static final String ALGORITHM = "AES";
     private static final String TRANSFORMATION = "AES/CBC/NoPadding";
-    public static String key = "0123456789ABCDEF"; // 16字节密钥（AES-128）
-    public static String iv = "1234567890ABCDEF";  // 16字节IV
+
+    /**
+     * AES 分组长度（字节）
+     */
+    private static final int BLOCK_SIZE = 16;
+
+    /**
+     * 空初始向量（16字节全零），用于兼容未传入 IV 的历史密文
+     */
+    private static final byte[] ZERO_IV = new byte[BLOCK_SIZE];
 
     /**
      * AES CBC无填充加密
@@ -35,24 +43,19 @@ public class AesCbc {
      * @throws RuntimeException         当加密过程中发生错误时
      */
     public static byte[] encrypt(byte[] data, byte[] key, byte[] iv) {
-        // 检查参数有效性
+        if (null == data) {
+            throw new IllegalArgumentException("明文不能为空");
+        }
         // 检查数据长度是否为16的倍数
-        if (data.length % 16 != 0) {
+        if (data.length % BLOCK_SIZE != 0) {
             throw new IllegalArgumentException("明文长度必须是16字节的倍数");
         }
 
         // 检查密钥长度（AES支持128位、192位、256位）
-        if (key.length != 16 && key.length != 24 && key.length != 32) {
+        if (null == key || (key.length != 16 && key.length != 24 && key.length != 32)) {
             throw new IllegalArgumentException("密钥长度必须是16字节（AES-128）、24字节（AES-192）或32字节（AES-256）");
         }
-        if (null == iv || iv.length == 0) {
-            iv = Hex.hexToBytes(StringUtils.repeat("00", 16));
-        }
-
-        // 检查初始向量长度（必须是16字节）
-        if (iv.length != 16) {
-            throw new IllegalArgumentException("初始向量长度必须是16字节");
-        }
+        iv = normalizeIv(iv);
 
         try {
             // 创建密钥规范
@@ -101,19 +104,20 @@ public class AesCbc {
      * @return 解密后的字节数组
      */
     public static byte[] decrypt(byte[] encryptedData, byte[] key, byte[] iv) throws Exception {
+        if (null == encryptedData) {
+            throw new IllegalArgumentException("密文不能为空");
+        }
         // 检查数据长度是否为16的倍数
-        if (encryptedData.length % 16 != 0) {
+        if (encryptedData.length % BLOCK_SIZE != 0) {
             throw new IllegalArgumentException("密文长度必须是16字节的倍数");
         }
         // 检查密钥长度（AES支持128位、192位、256位）
-        if (key.length != 16 && key.length != 24 && key.length != 32) {
+        if (null == key || (key.length != 16 && key.length != 24 && key.length != 32)) {
             throw new IllegalArgumentException("密钥长度必须是16字节（AES-128）、24字节（AES-192）或32字节（AES-256）");
         }
 
-        // 检查初始向量长度（必须是16字节）
-        if (iv.length != 16) {
-            throw new IllegalArgumentException("初始向量长度必须是16字节");
-        }
+        // 与加密保持一致：空 IV 使用16字节全零 IV，兼容历史密文
+        iv = normalizeIv(iv);
         // 创建密钥规范
         SecretKeySpec secretKeySpec = new SecretKeySpec(key, ALGORITHM);
 
@@ -142,8 +146,29 @@ public class AesCbc {
      */
     public static String decrypt(String encryptedHexData, String key, String iv) throws Exception {
         byte[] encryptedData = Hex.hexToBytes(encryptedHexData);
-        byte[] decrypted = decrypt(encryptedData, Hex.hexToBytes(key), Hex.hexToBytes(iv));
+        byte[] decrypted = decrypt(encryptedData, Hex.hexToBytes(key),
+                StringUtils.isNotBlank(iv) ? Hex.hexToBytes(iv) : null);
         return Hex.bytesToHex(decrypted);
+    }
+
+    /**
+     * 归一化初始向量
+     * <p>
+     * 为兼容历史密文，null 或空数组统一视为16字节全零 IV；长度不为16字节则拒绝。
+     * </p>
+     *
+     * @param iv 原始初始向量
+     * @return 长度为16字节的初始向量
+     * @throws IllegalArgumentException 当 IV 长度不为16字节时
+     */
+    private static byte[] normalizeIv(byte[] iv) {
+        if (null == iv || iv.length == 0) {
+            return ZERO_IV.clone();
+        }
+        if (iv.length != BLOCK_SIZE) {
+            throw new IllegalArgumentException("初始向量长度必须是16字节");
+        }
+        return iv;
     }
 
     /**
@@ -165,14 +190,24 @@ public class AesCbc {
     }
 
     /**
-     * 移除填充数据
+     * 移除填充数据（宽松模式）
+     * <p>
+     * 填充不合法时按“无填充”处理并返回原数据，适用于不确定输入是否带填充的场景。
+     * 若需要校验密文完整性，请使用 {@link #unpadDataStrict(byte[])}。
+     * </p>
+     *
+     * @param data 待去填充的数据
+     * @return 去填充后的数据，填充不合法时返回原数据
      */
     public static byte[] unpadData(byte[] data) {
+        if (null == data || data.length == 0) {
+            return data;
+        }
         int paddingSize = data[data.length - 1] & 0xFF;
 
-        // 验证填充是否有效
-        if (paddingSize > 16 || paddingSize < 1) {
-            return data; // 没有有效的填充，返回原数据
+        // 验证填充是否有效：填充长度必须在1~16之间且不能超过数据长度，否则视为无填充
+        if (paddingSize < 1 || paddingSize > BLOCK_SIZE || paddingSize > data.length) {
+            return data;
         }
 
         // 检查填充字节是否正确
@@ -182,6 +217,34 @@ public class AesCbc {
             }
         }
 
+        byte[] unpaddedData = new byte[data.length - paddingSize];
+        System.arraycopy(data, 0, unpaddedData, 0, unpaddedData.length);
+        return unpaddedData;
+    }
+
+    /**
+     * 移除填充数据（严格模式）
+     * <p>
+     * 填充不合法时抛出 {@link IllegalArgumentException}，避免把损坏或篡改的密文当作明文返回。
+     * </p>
+     *
+     * @param data 待去填充的数据
+     * @return 去填充后的数据，空输入返回原值
+     * @throws IllegalArgumentException 填充不合法时抛出
+     */
+    public static byte[] unpadDataStrict(byte[] data) {
+        if (null == data || data.length == 0) {
+            return data;
+        }
+        int paddingSize = data[data.length - 1] & 0xFF;
+        if (paddingSize < 1 || paddingSize > BLOCK_SIZE || paddingSize > data.length) {
+            throw new IllegalArgumentException("非法的填充数据: 填充长度越界");
+        }
+        for (int i = data.length - paddingSize; i < data.length; i++) {
+            if (data[i] != paddingSize) {
+                throw new IllegalArgumentException("非法的填充数据: 填充字节不一致");
+            }
+        }
         byte[] unpaddedData = new byte[data.length - paddingSize];
         System.arraycopy(data, 0, unpaddedData, 0, unpaddedData.length);
         return unpaddedData;

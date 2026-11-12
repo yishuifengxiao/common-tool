@@ -366,14 +366,12 @@ public class HttpClientTest {
 
     /**
      * 测试边界场景：静态GET方法处理无效URL
-     * 验证当URL无效时不会抛出异常
+     * 验证当URL无效时抛出统一异常，避免调用方拿到null后继续处理
      */
     @Test
     public void testGetStatic_InvalidUrl() {
-        String result = HttpClient.get("https://invalid.url.that.does.not.exist");
-        
-        // 无效URL应该返回null而不是抛出异常
-        assertNull(result);
+        assertThrows(com.yishuifengxiao.common.tool.exception.UncheckedException.class,
+                () -> HttpClient.get("https://invalid.url.that.does.not.exist"));
     }
 
     /**
@@ -620,36 +618,30 @@ public class HttpClientTest {
 
     /**
      * 测试边界场景：execute方法处理无效URL
-     * 验证当URL无效时execute()方法返回null而不是抛出异常
+     * 验证当URL无效时execute()方法抛出统一异常
      */
     @Test
     public void testExecute_InvalidUrl() {
-        HttpClient client = HttpClient.instance();
-        
-        Connection.Response response = client
-            .url("https://invalid.url.that.does.not.exist")
-            .get()
-            .execute();
-        
-        // 无效URL应该返回null而不是抛出异常
-        assertNull(response);
+        assertThrows(com.yishuifengxiao.common.tool.exception.UncheckedException.class, () -> {
+            HttpClient.instance()
+                    .url("https://invalid.url.that.does.not.exist")
+                    .get()
+                    .execute();
+        });
     }
 
     /**
      * 测试边界场景：executeAsString方法处理无效URL
-     * 验证当URL无效时executeAsString()方法返回null而不是抛出异常
+     * 验证当URL无效时executeAsString()方法抛出统一异常
      */
     @Test
     public void testExecuteAsString_InvalidUrl() {
-        HttpClient client = HttpClient.instance();
-        
-        String result = client
-            .url("https://invalid.url.that.does.not.exist")
-            .get()
-            .executeAsString();
-        
-        // 无效URL应该返回null而不是抛出异常
-        assertNull(result);
+        assertThrows(com.yishuifengxiao.common.tool.exception.UncheckedException.class, () -> {
+            HttpClient.instance()
+                    .url("https://invalid.url.that.does.not.exist")
+                    .get()
+                    .executeAsString();
+        });
     }
 
     /**

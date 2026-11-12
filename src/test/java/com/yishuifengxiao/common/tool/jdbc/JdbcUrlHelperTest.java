@@ -202,8 +202,8 @@ class JdbcUrlHelperTest {
 
         assertTrue(url.contains("name="));
         assertTrue(url.contains("msg="));
-        // 空格编码为 '+'
-        assertTrue(url.contains("msg=hello+world"));
+        // 空格编码为 %20，避免与 JDBC URL 中的字面量 + 混淆
+        assertTrue(url.contains("msg=hello%20world"));
     }
 
     @Test
@@ -215,7 +215,7 @@ class JdbcUrlHelperTest {
 
         String url = JdbcUrlHelper.buildJdbcUrl(info);
 
-        assertTrue(url.contains("/test+db")); // 空格编码为 '+'
+        assertTrue(url.contains("/test%20db")); // 空格编码为 %20
     }
 
     @Test
@@ -272,12 +272,12 @@ class JdbcUrlHelperTest {
         assertEquals("张三", info.getParameters().get("name"));
         assertEquals("hello world", info.getParameters().get("msg"));
 
-        // 构建（注意：空格会被编码为 '+' 而非 '%20'）
+        // 构建（空格编码为 %20，避免与字面量 + 混淆）
         String rebuiltUrl = JdbcUrlHelper.buildJdbcUrl(info);
 
         // 验证构建结果包含正确编码
         assertTrue(rebuiltUrl.contains("name="));
-        assertTrue(rebuiltUrl.contains("msg=hello+world"));
+        assertTrue(rebuiltUrl.contains("msg=hello%20world"));
 
         // 再次解析验证往返一致性
         JdbcUrlHelper.ConnInfo info2 = JdbcUrlHelper.parseJdbcUrl(rebuiltUrl);
@@ -375,7 +375,7 @@ class JdbcUrlHelperTest {
         System.out.println("解析后参数: " + info.getParameters());
         String rebuilt = JdbcUrlHelper.buildJdbcUrl(info);
         System.out.println("重建后URL: " + rebuilt);
-        // 由于空格编码为'+'而原URL是'%20'，字符串不相同但语义一致
-        System.out.println("重建URL中的空格被编码为 '+'，与原始 '%20' 语义相同，可被JDBC驱动正确解析。");
+        // 空格统一编码为 %20，与原始编码可逆
+        System.out.println("重建URL中的空格被编码为 '%20'，与原始 '%20' 一致，可被JDBC驱动正确解析。");
     }
 }

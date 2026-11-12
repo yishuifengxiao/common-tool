@@ -120,16 +120,17 @@ public final class CollUtil {
     /**
      * 将集合转换为数组
      *
+     * <p>运行时数组类型为 {@code Object[]}，不做运行时类型转换。
+     * 需要具体类型数组的调用方请直接使用 {@code Collection.toArray(T[])}。</p>
+     *
      * @param vals 要转换的集合，可以为null
      * @return 转换后的数组，如果输入为null则返回空数组
      */
-    public static <T> T[] toArray(Collection<T> vals) {
-        // 处理null输入情况，返回空数组
+    public static Object[] toArray(Collection<?> vals) {
         if (null == vals) {
-            return (T[]) new Object[0];
+            return new Object[0];
         }
-        // 使用集合的toArray方法转换为数组
-        return vals.toArray((T[]) new Object[0]);
+        return vals.toArray();
     }
 
 
@@ -221,7 +222,7 @@ public final class CollUtil {
      */
     public static <T> T[] asArray(T... vals) {
         if (vals == null) {
-            return (T[]) new Object[0];
+            throw new IllegalArgumentException("vals cannot be null");
         }
         return vals;
     }
@@ -286,7 +287,7 @@ public final class CollUtil {
         if (null == data || index < 0 || index >= data.size()) {
             return Optional.empty();
         }
-        return Optional.of(data.get(index));
+        return Optional.ofNullable(data.get(index));
     }
 
 

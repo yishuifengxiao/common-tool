@@ -5,8 +5,10 @@ import java.security.*;
 import java.security.interfaces.*;
 import java.security.spec.ECGenParameterSpec;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>密钥对生成与操作工具类</p>
@@ -22,9 +24,10 @@ import java.util.Map;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class KeyPairHelper {
 
-    private static final Map<String, String> ECC_CURVE_OID_MAP = new HashMap<>();
+    private static final Map<String, String> ECC_CURVE_OID_MAP = new ConcurrentHashMap<>();
 
     static {
         ECC_CURVE_OID_MAP.put("1.2.840.10045.3.1.7", "secp256r1");
@@ -44,6 +47,17 @@ public class KeyPairHelper {
      * @throws RuntimeException 密钥对生成失败时抛出
      */
     public static KeyPair generateKeyPair(String algorithm, Object parameter) {
+        // 参数校验放在 try 之外，避免 IllegalArgumentException 被包装成 RuntimeException
+        if ("EC".equals(algorithm)) {
+            if (parameter instanceof Integer) {
+                throw new IllegalArgumentException("EC算法需要曲线名称或OID，而不是密钥大小");
+            }
+        } else if ("RSA".equals(algorithm) || "DSA".equals(algorithm)) {
+            if (!(parameter instanceof Integer)) {
+                throw new IllegalArgumentException(algorithm + "算法需要整数密钥大小");
+            }
+        }
+
         try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);
 
@@ -60,15 +74,9 @@ public class KeyPairHelper {
                     } else {
                         keyPairGenerator.initialize(new ECGenParameterSpec(param));
                     }
-                } else if (parameter instanceof Integer) {
-                    throw new IllegalArgumentException("EC算法需要曲线名称或OID，而不是密钥大小");
                 }
             } else if ("RSA".equals(algorithm) || "DSA".equals(algorithm)) {
-                if (parameter instanceof Integer) {
-                    keyPairGenerator.initialize((Integer) parameter);
-                } else {
-                    throw new IllegalArgumentException(algorithm + "算法需要整数密钥大小");
-                }
+                keyPairGenerator.initialize((Integer) parameter);
             }
 
             return keyPairGenerator.generateKeyPair();
@@ -117,12 +125,13 @@ public class KeyPairHelper {
      * @throws RuntimeException 密钥对生成失败时抛出
      */
     public static KeyPair generateSecureECCKeyPairByOID(String curveOID, SecureRandom secureRandom) {
-        try {
-            String curveName = ECC_CURVE_OID_MAP.get(curveOID);
-            if (curveName == null) {
-                throw new IllegalArgumentException("不支持的ECC曲线OID: " + curveOID);
-            }
+        String curveName = ECC_CURVE_OID_MAP.get(curveOID);
+        // 参数校验放在 try 之外，避免 IllegalArgumentException 被包装成 RuntimeException
+        if (curveName == null) {
+            throw new IllegalArgumentException("不支持的ECC曲线OID: " + curveOID);
+        }
 
+        try {
             KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
             ECGenParameterSpec ecSpec = new ECGenParameterSpec(curveName);
             keyPairGenerator.initialize(ecSpec, secureRandom);
@@ -143,15 +152,15 @@ public class KeyPairHelper {
         PublicKey publicKey = keyPair.getPublic();
         PrivateKey privateKey = keyPair.getPrivate();
 
-        System.out.println("算法: " + publicKey.getAlgorithm());
-        System.out.println("公钥格式: " + publicKey.getFormat());
-        System.out.println("公钥长度: " + publicKey.getEncoded().length + " bytes");
-        System.out.println("私钥格式: " + privateKey.getFormat());
-        System.out.println("私钥长度: " + privateKey.getEncoded().length + " bytes");
+        log.info("算法: {}", publicKey.getAlgorithm());
+        log.info("公钥格式: {}", publicKey.getFormat());
+        log.info("公钥长度: {} bytes", publicKey.getEncoded().length);
+        log.info("私钥格式: {}", privateKey.getFormat());
+        log.info("私钥长度: {} bytes", privateKey.getEncoded().length);
 
         if (publicKey instanceof java.security.interfaces.ECPublicKey) {
             java.security.interfaces.ECPublicKey ecPublicKey = (java.security.interfaces.ECPublicKey) publicKey;
-            System.out.println("曲线: " + ecPublicKey.getParams().toString());
+            log.info("曲线: {}", ecPublicKey.getParams());
         }
     }
 
@@ -212,14 +221,14 @@ public class KeyPairHelper {
         PublicKey publicKey = keyPair.getPublic();
         PrivateKey privateKey = keyPair.getPrivate();
 
-        System.out.println("=== 密钥详细信息 ===");
-        System.out.println("算法: " + publicKey.getAlgorithm());
-        System.out.println("公钥格式: " + publicKey.getFormat());
-        System.out.println("公钥Base64:");
-        System.out.println(encodeKeyToBase64(publicKey));
-        System.out.println("\n私钥格式: " + privateKey.getFormat());
-        System.out.println("私钥Base64:");
-        System.out.println(encodeKeyToBase64(privateKey));
+        log.info("=== 密钥详细信息 ===");
+        log.info("算法: {}", publicKey.getAlgorithm());
+        log.info("公钥格式: {}", publicKey.getFormat());
+        log.info("公钥Base64: {}", encodeKeyToBase64(publicKey));
+        log.info("私钥格式: {}", privateKey.getFormat());
+        // 私钥属于敏感信息，禁止打印，仅输出长度供排查
+        log.info("私钥长度: {} bytes（私钥内容不输出）", privateKey.getEncoded().length);
+        log.info("========================");
     }
 
     /**
@@ -338,11 +347,23 @@ public class KeyPairHelper {
         java.security.spec.ECPoint point = ecPublicKey.getW();
         BigInteger x = point.getAffineX();
         BigInteger y = point.getAffineY();
+        // 按曲线实际字段长度计算字节数，兼容 P-256/P-384/P-521 等曲线
+        int targetBytes = getECFieldBytes(ecPublicKey.getParams());
 
-        String xHex = bigIntegerToFixedLengthHex(x, 32);
-        String yHex = bigIntegerToFixedLengthHex(y, 32);
+        String xHex = bigIntegerToFixedLengthHex(x, targetBytes);
+        String yHex = bigIntegerToFixedLengthHex(y, targetBytes);
 
         return ("04" + xHex + yHex).toUpperCase();
+    }
+
+    /**
+     * 计算ECC曲线字段的字节长度
+     *
+     * @param params 椭圆曲线参数
+     * @return 字段字节长度，例如 P-256=32、P-384=48、P-521=66
+     */
+    private static int getECFieldBytes(java.security.spec.ECParameterSpec params) {
+        return (params.getCurve().getField().getFieldSize() + 7) / 8;
     }
 
     /**
@@ -351,10 +372,12 @@ public class KeyPairHelper {
      * @param bigInt      要转换的BigInteger
      * @param targetBytes 目标字节长度
      * @return 固定长度的十六进制字符串
+     * @throws IllegalArgumentException 当数值超出目标字节长度时
      */
     private static String bigIntegerToFixedLengthHex(BigInteger bigInt, int targetBytes) {
         byte[] bytes = bigInt.toByteArray();
 
+        // 去掉 BigInteger 符号位产生的前导 0
         if (bytes.length > targetBytes && bytes[0] == 0) {
             byte[] trimmedBytes = new byte[bytes.length - 1];
             System.arraycopy(bytes, 1, trimmedBytes, 0, trimmedBytes.length);
@@ -362,9 +385,7 @@ public class KeyPairHelper {
         }
 
         if (bytes.length > targetBytes) {
-            byte[] result = new byte[targetBytes];
-            System.arraycopy(bytes, bytes.length - targetBytes, result, 0, targetBytes);
-            bytes = result;
+            throw new IllegalArgumentException("数值长度超出目标字节长度，可能存在数据错误");
         } else if (bytes.length < targetBytes) {
             byte[] result = new byte[targetBytes];
             System.arraycopy(bytes, 0, result, targetBytes - bytes.length, bytes.length);
@@ -378,11 +399,11 @@ public class KeyPairHelper {
      * 获取EC私钥D值的十六进制表示
      *
      * @param ecPrivateKey EC私钥对象
-     * @return 私钥D的十六进制字符串（固定64字符，对应256位/32字节）
+     * @return 私钥D的十六进制字符串，长度由曲线字段长度决定
      */
     public static String getECPrivateKeyDHex(ECPrivateKey ecPrivateKey) {
         BigInteger s = ecPrivateKey.getS();
-        return bigIntegerToFixedLengthHex(s, 32).toUpperCase();
+        return bigIntegerToFixedLengthHex(s, getECFieldBytes(ecPrivateKey.getParams())).toUpperCase();
     }
 
     /**
@@ -420,20 +441,18 @@ public class KeyPairHelper {
      * @param keyPair 密钥对对象
      */
     public static void printKeyPairDetails(KeyPair keyPair) {
-        System.out.println("=== 密钥对详细信息 ===");
-        System.out.println("算法: " + keyPair.getPublic().getAlgorithm());
-        System.out.println("格式: " + keyPair.getPublic().getFormat());
+        log.info("=== 密钥对详细信息 ===");
+        log.info("算法: {}", keyPair.getPublic().getAlgorithm());
+        log.info("格式: {}", keyPair.getPublic().getFormat());
 
-        System.out.println("\n--- 公钥 ---");
         String publicKeyHex = getPublicKeyHex(keyPair);
-        System.out.println("Hex 值: " + publicKeyHex);
-        System.out.println("长度: " + publicKeyHex.length() + " 字符 (" + (publicKeyHex.length() / 2) + " 字节)");
+        log.info("--- 公钥 ---");
+        log.info("Hex 值: {}", publicKeyHex);
+        log.info("长度: {} 字符 ({} 字节)", publicKeyHex.length(), publicKeyHex.length() / 2);
 
-        System.out.println("\n--- 私钥 ---");
-        String privateKeyDHex = getPrivateKeyDHex(keyPair);
-        System.out.println("D 值 Hex: " + privateKeyDHex);
-        System.out.println("长度: " + privateKeyDHex.length() + " 字符 (" + (privateKeyDHex.length() / 2) + " 字节)");
-
-        System.out.println("========================\n");
+        // 私钥属于敏感信息，禁止打印
+        log.info("--- 私钥 ---");
+        log.info("私钥内容不输出，长度: {} bytes", keyPair.getPrivate().getEncoded().length);
+        log.info("========================");
     }
 }

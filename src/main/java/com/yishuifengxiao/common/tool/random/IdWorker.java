@@ -231,7 +231,7 @@ public class IdWorker {
      *
      * @return 去掉-后的UUID
      */
-    public synchronized static String uuid() {
+    public static String uuid() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 }

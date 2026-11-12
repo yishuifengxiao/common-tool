@@ -3,6 +3,7 @@ package com.yishuifengxiao.common.tool.codec;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
 
 import javax.crypto.Cipher;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
@@ -51,9 +52,9 @@ public class RSA {
      */
     public static String encrypt(String data, PublicKey publicKey) {
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-            byte[] encryptedBytes = cipher.doFinal(data.getBytes());
+            byte[] encryptedBytes = cipher.doFinal(data.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(encryptedBytes);
         } catch (Exception e) {
             throw new UncheckedException("加密失败", e);
@@ -70,11 +71,11 @@ public class RSA {
      */
     public static String decrypt(String encryptedData, PrivateKey privateKey) {
         try {
-            Cipher cipher = Cipher.getInstance("RSA");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
             byte[] decodedBytes = Base64.getDecoder().decode(encryptedData);
             byte[] decryptedBytes = cipher.doFinal(decodedBytes);
-            return new String(decryptedBytes);
+            return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new UncheckedException("解密失败", e);
         }

@@ -54,25 +54,25 @@ import java.util.TimeZone;
 public final class JsonUtil {
 
     /**
-     * 默认ObjectMapper实例，配置了宽松的解析规则
+     * 默认ObjectMapper实例，统一使用 JVM 默认时区
      */
-    static ObjectMapper default_mapper = new ObjectMapper();
+    private static final ObjectMapper default_mapper;
 
     /**
-     * 忽略null值的ObjectMapper
+     * 忽略null值的ObjectMapper，统一使用 JVM 默认时区
      */
-    private static ObjectMapper none_null_mapper = null;
-
+    private static final ObjectMapper none_null_mapper;
 
     static {
+        ObjectMapper mapper;
         try {
             // 公共基础配置
-            default_mapper = JsonMapper.builder()
+            mapper = JsonMapper.builder()
                     .changeDefaultVisibility(vc -> vc.withVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY))
                     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                     .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
                     .configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
-                    .defaultTimeZone(TimeZone.getTimeZone("GMT+8"))
+                    .defaultTimeZone(TimeZone.getDefault())
                     .configure(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true)
                     .configure(JsonReadFeature.ALLOW_JAVA_COMMENTS, true)
                     .configure(JsonReadFeature.ALLOW_NON_NUMERIC_NUMBERS, true)
@@ -81,24 +81,40 @@ public final class JsonUtil {
                     .configure(JsonReadFeature.ALLOW_UNQUOTED_PROPERTY_NAMES, true)
                     .configure(MapperFeature.USE_GETTERS_AS_SETTERS, false)
                     .build();
-
-            // 忽略null值的mapper
-            none_null_mapper = default_mapper.rebuild()
-                    .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))
-                    .build();
         } catch (Exception e) {
+            // 初始化失败时退化为仅设置默认时区的基础实例
             log.warn("There was a problem initializing the Object Mapper, problem {}", e);
+            mapper = JsonMapper.builder().defaultTimeZone(TimeZone.getDefault()).build();
         }
 
+        ObjectMapper noneNullMapper;
+        try {
+            // 忽略null值的mapper，显式沿用 JVM 默认时区
+            noneNullMapper = mapper.rebuild()
+                    .changeDefaultPropertyInclusion(v -> v.withValueInclusion(JsonInclude.Include.NON_NULL))
+                    .defaultTimeZone(TimeZone.getDefault())
+                    .build();
+        } catch (Exception e) {
+            // 初始化失败时复用基础实例，避免 none_null_mapper 为 null 导致 NPE
+            log.warn("There was a problem initializing the Object Mapper, problem {}", e);
+            noneNullMapper = mapper;
+        }
+
+        default_mapper = mapper;
+        none_null_mapper = noneNullMapper;
     }
 
     /**
-     * 获取项目中使用的ObjectMapper实例副本
+     * 获取项目中使用的ObjectMapper实例
+     * <p>
+     * 复用同一个实例，避免每次调用都重新构建 ObjectMapper 带来的性能开销。
+     * 返回的实例为共享实例，请勿对其做破坏性配置修改。
+     * </p>
      *
-     * @return ObjectMapper实例副本，可安全地进行自定义配置
+     * @return 共享的ObjectMapper实例
      */
     public static ObjectMapper mapper() {
-        return default_mapper.rebuild().build();
+        return default_mapper;
     }
 
     /**
@@ -110,7 +126,7 @@ public final class JsonUtil {
      * @return 转换后的Java对象，若输入为空则返回null
      */
     public static <T> T strToBean(String json, Class<T> clazz) {
-        return strToBean(json, clazz, true);
+        return strToBean(json, clazz, false);
     }
 
     /**
@@ -391,9 +407,6 @@ public final class JsonUtil {
     public static String toJSONString(boolean includeNull, Object value) {
         try {
             ObjectMapper mapper = includeNull ? default_mapper : none_null_mapper;
-            if (mapper == null) {
-                throw new IllegalStateException("ObjectMapper is not properly initialized");
-            }
             if (value == null) {
                 return null;
             }

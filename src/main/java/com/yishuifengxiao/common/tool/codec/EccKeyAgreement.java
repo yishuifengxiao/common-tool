@@ -29,15 +29,24 @@ public class EccKeyAgreement {
      */
     public static String eccKeyAgreement(String curveOID, String publicKeyHex, String privateKeyDHex,
                                          String sShareInfo, int iKeyLen, boolean isHexShareInfo) throws Exception {
+        // 0. 派生长度必须为正数，否则 KDF 会静默返回空串
+        if (iKeyLen <= 0) {
+            throw new IllegalArgumentException("派生密钥长度必须大于0");
+        }
         // 1. 根据曲线OID获取EC参数
         ECParameterSpec ecParams = getECParameterSpec(curveOID);
 
         // 2. 解析对方公钥（未压缩格式，以04开头）
+        int keyLen = (ecParams.getCurve().getField().getFieldSize() + 7) / 8; // 曲线字节长度，P-256为32
         byte[] publicKeyBytes = hexStringToByteArray(publicKeyHex);
+        // 未压缩公钥长度固定为 1 + 2 * keyLen，长度不足会在后续复制时抛出数组越界
+        if (publicKeyBytes.length != 1 + 2 * keyLen) {
+            throw new IllegalArgumentException("公钥长度非法，期望 " + (1 + 2 * keyLen) + " 字节，实际 "
+                    + publicKeyBytes.length + " 字节");
+        }
         if (publicKeyBytes[0] != 0x04) {
             throw new IllegalArgumentException("Unsupported public key format, expected uncompressed (04)");
         }
-        int keyLen = (ecParams.getCurve().getField().getFieldSize() + 7) / 8; // 曲线字节长度，P-256为32
         byte[] xBytes = Arrays.copyOfRange(publicKeyBytes, 1, 1 + keyLen);
         byte[] yBytes = Arrays.copyOfRange(publicKeyBytes, 1 + keyLen, 1 + 2 * keyLen);
         BigInteger x = new BigInteger(1, xBytes);
@@ -47,6 +56,9 @@ public class EccKeyAgreement {
 
         // 3. 解析己方私钥
         BigInteger d = new BigInteger(1, hexStringToByteArray(privateKeyDHex));
+        if (d.signum() <= 0 || d.compareTo(ecParams.getOrder()) >= 0) {
+            throw new IllegalArgumentException("私钥D值超出曲线阶的有效范围");
+        }
         PrivateKey privateKey = KeyFactory.getInstance("EC").generatePrivate(new ECPrivateKeySpec(d, ecParams));
 
         // 4. ECDH密钥协商，得到共享秘密（原始X坐标，大端表示）
@@ -54,15 +66,20 @@ public class EccKeyAgreement {
         keyAgreement.init(privateKey);
         keyAgreement.doPhase(publicKey, true);
         byte[] sharedSecret = keyAgreement.generateSecret(); // 长度为keyLen的字节数组（P-256为32）
+        // NIST SP 800-56A 要求拒绝全零共享秘密（对应无效公钥/小子群攻击）
+        if (Arrays.equals(sharedSecret, new byte[sharedSecret.length])) {
+            throw new IllegalArgumentException("ECDH共享秘密为全零，对方公钥无效");
+        }
 
         // 5. 使用ANSI X9.63 KDF（基于SHA-256）派生指定长度的密钥
         byte[] sharedInfo;
+        String shareInfo = null == sShareInfo ? "" : sShareInfo;
         if (isHexShareInfo) {
-            // 如果共享信息是十六进制字符串，转换为字节数组
-            sharedInfo = hexStringToByteArray(sShareInfo);
+            // 如果共享信息是十六进制字符串，转换为字节数组（null 按空共享信息处理）
+            sharedInfo = hexStringToByteArray(shareInfo);
         } else {
             // 否则作为UTF-8字符串处理
-            sharedInfo = sShareInfo.getBytes(StandardCharsets.UTF_8);
+            sharedInfo = shareInfo.getBytes(StandardCharsets.UTF_8);
         }
         byte[] derivedKey = kdf(sharedSecret, sharedInfo, iKeyLen);
 
@@ -146,13 +163,23 @@ public class EccKeyAgreement {
         return result;
     }
 
-    // 辅助方法：十六进制字符串转字节数组
+    // 辅助方法：十六进制字符串转字节数组，长度必须为偶数且仅包含十六进制字符
     private static byte[] hexStringToByteArray(String s) {
-        int len = s.length();
-        byte[] data = new byte[len / 2];
-        for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-                    + Character.digit(s.charAt(i + 1), 16));
+        if (null == s) {
+            throw new IllegalArgumentException("十六进制字符串不能为空");
+        }
+        String hex = s.trim();
+        if ((hex.length() & 1) != 0) {
+            throw new IllegalArgumentException("十六进制字符串长度必须为偶数: " + hex.length());
+        }
+        byte[] data = new byte[hex.length() / 2];
+        for (int i = 0; i < hex.length(); i += 2) {
+            int high = Character.digit(hex.charAt(i), 16);
+            int low = Character.digit(hex.charAt(i + 1), 16);
+            if (high < 0 || low < 0) {
+                throw new IllegalArgumentException("非法的十六进制字符: " + hex.substring(i, i + 2));
+            }
+            data[i / 2] = (byte) ((high << 4) + low);
         }
         return data;
     }

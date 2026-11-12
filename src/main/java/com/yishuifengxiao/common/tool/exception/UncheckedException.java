@@ -146,7 +146,7 @@ public class UncheckedException extends RuntimeException {
      * @param code 错误码
      * @return 当前对象
      */
-    public UncheckedException setCode(Integer code) {
+    public UncheckedException setCode(Object code) {
         this.code = code;
         return this;
     }
@@ -188,7 +188,7 @@ public class UncheckedException extends RuntimeException {
      * @param msg  异常信息
      * @return CustomException实例对象
      */
-    public static UncheckedException of(Integer code, String msg) {
+    public static UncheckedException of(Object code, String msg) {
         return new UncheckedException(code, msg);
     }
 

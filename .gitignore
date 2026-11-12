@@ -8,3 +8,5 @@ bin/
 jzmq.dll
 libzmq-mt-4_3_6.dll
 .vscode/settings.json
+.trae
+docs/changelogs

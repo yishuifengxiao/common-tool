@@ -84,21 +84,23 @@ public class PlaceholderExtractor {
     /**
      * 替换占位符
      *
-     * @param input        输入字符串
-     * @param replacements 替换映射
+     * @param input        输入字符串，为空时原样返回
+     * @param replacements 替换映射，为null时按空映射处理
      * @return 替换后的字符串
      */
     public static String replacePlaceholders(String input, java.util.Map<String, String> replacements) {
         if (StringUtils.isBlank(input)) {
-            return null;
+            return input;
         }
+        java.util.Map<String, String> safeReplacements =
+                null == replacements ? java.util.Collections.emptyMap() : replacements;
         Pattern pattern = Pattern.compile("\\$\\{(.+?)\\}");
         Matcher matcher = pattern.matcher(input);
         StringBuffer result = new StringBuffer();
 
         while (matcher.find()) {
             String placeholderName = matcher.group(1);
-            String replacement = replacements.getOrDefault(placeholderName, matcher.group(0));
+            String replacement = safeReplacements.getOrDefault(placeholderName, matcher.group(0));
             matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(result);

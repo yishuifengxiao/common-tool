@@ -50,7 +50,7 @@ public class Md5 {
             return sb.toString().toLowerCase();
         } catch (Exception e) {
             if (log.isInfoEnabled()) {
-                log.info("MD5计算失败，数据: {}, 错误: {}", str, e.getMessage());
+                log.info("MD5计算失败，数据长度: {}, 错误: {}", str.length(), e.getMessage());
             }
             return null;
         }
@@ -88,7 +88,7 @@ public class Md5 {
      * @param file 待计算的文件
      * @return MD5摘要值（32位小写十六进制），计算失败返回null
      */
-    public synchronized static String md5(File file) {
+    public static String md5(File file) {
         FileInputStream inputStream = null;
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");

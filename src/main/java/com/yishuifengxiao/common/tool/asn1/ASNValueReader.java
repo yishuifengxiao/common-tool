@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
@@ -51,7 +52,7 @@ public class ASNValueReader {
      * @param in 输入流
      */
     public ASNValueReader(InputStream in) {
-        reader = new BufferedReader(new InputStreamReader(in));
+        reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     }
 
     /**
@@ -437,10 +438,19 @@ public class ASNValueReader {
      * @return 字节数组
      */
     private static byte[] hexStringToByteArray(String s) {
+        if (null == s || (s.length() & 1) != 0) {
+            throw new IllegalArgumentException("非法的HEX字符串: 长度必须为偶数");
+        }
         int len = s.length();
         byte[] data = new byte[len / 2];
         for (int i = 0; i < len; i += 2) {
-            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+            int high = Character.digit(s.charAt(i), 16);
+            int low = Character.digit(s.charAt(i + 1), 16);
+            // 非法字符若不拦截会被 Character.digit 的 -1 静默转换为错误字节
+            if (high < 0 || low < 0) {
+                throw new IllegalArgumentException("非法的HEX字符串: 包含非十六进制字符");
+            }
+            data[i / 2] = (byte) ((high << 4) + low);
         }
         return data;
     }

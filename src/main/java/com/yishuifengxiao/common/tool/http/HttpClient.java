@@ -3,6 +3,7 @@ package com.yishuifengxiao.common.tool.http;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.net.ssl.SSLContext;
@@ -12,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 
+import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.utils.Assert;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * <li>支持链式调用构建请求</li>
  * <li>支持自动User-Agent</li>
  * <li>支持表单和JSON两种提交方式</li>
- * <li>支持HTTPS请求（跳过证书验证）</li>
+ * <li>支持HTTPS请求（默认使用JDK默认信任链，可选择信任所有证书）</li>
  * <li>支持自定义请求头和Cookie</li>
  * </ul>
  *
@@ -54,6 +56,20 @@ public class HttpClient {
      * 是否使用自动User-Agent
      */
     private boolean autoUserAgent = true;
+
+    /**
+     * 是否信任所有HTTPS证书，默认关闭
+     */
+    private boolean trustAllCertificates = false;
+
+    /**
+     * 响应体最大字节数，0表示不限制
+     * <p>
+     * 默认值为0，即不限制响应体大小，以兼容大文件下载场景；
+     * 读取不受信任的服务端响应时，建议显式调用 {@link #maxBodySize(int)} 设置上限，防止内存被超大响应耗尽。
+     * </p>
+     */
+    private int maxBodySize = 0;
 
     /**
      * Content-Type
@@ -236,6 +252,31 @@ public class HttpClient {
      */
     public HttpClient autoUserAgent(boolean autoUserAgent) {
         this.autoUserAgent = autoUserAgent;
+        return this;
+    }
+
+    /**
+     * 设置是否信任所有HTTPS证书
+     * <p>
+     * 默认关闭，仅在明确需要访问自签名证书服务时开启，开启后会降低连接安全性。
+     * </p>
+     *
+     * @param trustAllCertificates 是否信任所有证书
+     * @return 当前客户端
+     */
+    public HttpClient trustAllCertificates(boolean trustAllCertificates) {
+        this.trustAllCertificates = trustAllCertificates;
+        return this;
+    }
+
+    /**
+     * 设置响应体最大字节数
+     *
+     * @param maxBodySize 最大字节数，0表示不限制
+     * @return 当前客户端
+     */
+    public HttpClient maxBodySize(int maxBodySize) {
+        this.maxBodySize = Math.max(maxBodySize, 0);
         return this;
     }
 
@@ -487,15 +528,11 @@ public class HttpClient {
      * @return 响应
      */
     public Connection.Response execute() {
-        Connection.Response response = null;
         try {
-            response = this.connection().execute();
+            return this.connection().execute();
         } catch (Throwable e) {
-            if (log.isWarnEnabled()) {
-                log.warn("There was a problem requesting {}, the problem is {}", this.url, e);
-            }
+            throw new UncheckedException(String.format("HTTP请求失败，method: %s, url: %s", this.method, this.url), e);
         }
-        return response;
     }
 
     /**
@@ -504,8 +541,7 @@ public class HttpClient {
      * @return 文本响应体
      */
     public String executeAsString() {
-        Connection.Response response = this.execute();
-        return null == response ? null : response.body();
+        return this.execute().body();
     }
 
     /**
@@ -521,8 +557,8 @@ public class HttpClient {
         }
         String url = this.url.trim();
         Connection connection = Jsoup.connect(url);
-        // 如果是Https请求，仅为此连接设置信任所有证书（不影响全局）
-        if (url.startsWith("https")) {
+        // 仅当显式开启信任所有证书时才设置，默认使用JDK默认信任链
+        if (url.startsWith("https") && this.trustAllCertificates) {
             SSLContext trustContext = getTrustAllContext();
             if (trustContext != null) {
                 connection.sslSocketFactory(trustContext.getSocketFactory());
@@ -540,7 +576,7 @@ public class HttpClient {
         connection.ignoreHttpErrors(true);
         connection.ignoreContentType(true);
         connection.followRedirects(true);
-        connection.maxBodySize(0);
+        connection.maxBodySize(this.maxBodySize);
         // 浏览器标识
 
         if (StringUtils.isNotBlank(userAgent)) {
@@ -550,7 +586,8 @@ public class HttpClient {
         if (StringUtils.isNotBlank(this.referrer)) {
             connection.referrer(this.referrer);
         }
-        Map<String, String> headers = null == this.headers ? new HashMap<>(0) : this.headers;
+        // 复制请求头后再注入 Content-Type，避免请求过程污染实例状态或被并发修改
+        Map<String, String> headers = null == this.headers ? new HashMap<>(0) : new HashMap<>(this.headers);
         if (StringUtils.isNotBlank(this.contentType)) {
             headers.put("Content-Type", this.contentType);
         }
@@ -588,21 +625,26 @@ public class HttpClient {
         if (StringUtils.isBlank(method)) {
             return Connection.Method.GET;
         }
-        Connection.Method connMethod = Connection.Method.GET;
-        switch (method.trim().toLowerCase()) {
+        switch (method.trim().toLowerCase(Locale.ROOT)) {
+            case "get":
+                return Connection.Method.GET;
             case "post":
-                connMethod = Connection.Method.POST;
-                break;
-            case "delete":
-                connMethod = Connection.Method.DELETE;
-                break;
+                return Connection.Method.POST;
             case "put":
-                connMethod = Connection.Method.PUT;
-                break;
+                return Connection.Method.PUT;
+            case "delete":
+                return Connection.Method.DELETE;
+            case "head":
+                return Connection.Method.HEAD;
+            case "options":
+                return Connection.Method.OPTIONS;
+            case "trace":
+                return Connection.Method.TRACE;
+            case "patch":
+                return Connection.Method.PATCH;
             default:
-                break;
+                throw new IllegalArgumentException("不支持的HTTP请求方法: " + method);
         }
-        return connMethod;
     }
 
     /**

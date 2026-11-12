@@ -5,6 +5,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Base64;
@@ -54,7 +55,7 @@ public class TripleDES {
         Cipher cipher = Cipher.getInstance(DESEDE_TRANSFORMATION);
         cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
 
-        byte[] ciphertext = cipher.doFinal(plaintext.getBytes("UTF-8"));
+        byte[] ciphertext = cipher.doFinal(plaintext.getBytes(StandardCharsets.UTF_8));
 
         // 组合IV和密文
         byte[] combined = new byte[iv.length + ciphertext.length];
@@ -78,6 +79,10 @@ public class TripleDES {
         SecretKeySpec keySpec = new SecretKeySpec(keyBytes, DESEDE_ALGORITHM);
 
         byte[] combined = Base64.getDecoder().decode(encryptedText);
+        // 密文必须至少包含IV，否则后续计算长度为负会抛出数组越界异常
+        if (combined.length <= IV_LENGTH) {
+            throw new IllegalArgumentException("密文长度非法，无法解析IV: " + combined.length);
+        }
 
         // 分离IV和密文
         byte[] iv = new byte[IV_LENGTH];
@@ -90,7 +95,7 @@ public class TripleDES {
         cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
 
         byte[] plaintext = cipher.doFinal(ciphertext);
-        return new String(plaintext, "UTF-8");
+        return new String(plaintext, StandardCharsets.UTF_8);
     }
 
 }

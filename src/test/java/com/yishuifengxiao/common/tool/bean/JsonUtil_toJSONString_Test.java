@@ -81,36 +81,30 @@ public class JsonUtil_toJSONString_Test {
     }
 
     /**
-     * 测试异常场景：ObjectMapper未初始化
-     * 预期结果：抛出IllegalStateException
-     */
-    @Test(expected = IllegalStateException.class)
-    public void testToJSONString_MapperNotInitialized() {
-        ObjectMapper originalMapper = JsonUtil.default_mapper;
-        JsonUtil.default_mapper = null;
-        try {
-            JsonUtil.toJSONString(true, "test");
-        } finally {
-            JsonUtil.default_mapper = originalMapper;
-        }
-    }
-
-    /**
-     * 测试异常场景：JSON处理异常
+     * 测试异常场景：JSON序列化失败
      * 预期结果：返回null并记录错误日志
+     * <p>
+     * default_mapper 已改为静态初始化且为 final，无法再通过置空或替换实例来模拟失败，
+     * 改为用自引用对象触发 Jackson 的无限递归异常。
+     * </p>
      */
     @Test
     public void testToJSONString_JsonProcessingException() {
-        ObjectMapper mockMapper = mock(ObjectMapper.class);
-        ObjectMapper originalMapper = JsonUtil.default_mapper;
-        JsonUtil.default_mapper = mockMapper;
-        try {
-            when(mockMapper.writeValueAsString(any())).thenThrow(new JacksonException("test") {
-            });
-            String result = JsonUtil.toJSONString(true, "test");
-            assertNull(result);
-        } finally {
-            JsonUtil.default_mapper = originalMapper;
+        assertNull(JsonUtil.toJSONString(true, new SelfReferenceObject()));
+    }
+
+    /**
+     * 自引用对象，序列化时会触发无限递归异常
+     */
+    private static class SelfReferenceObject {
+        private final SelfReferenceObject self;
+
+        SelfReferenceObject() {
+            this.self = this;
+        }
+
+        public SelfReferenceObject getSelf() {
+            return self;
         }
     }
 

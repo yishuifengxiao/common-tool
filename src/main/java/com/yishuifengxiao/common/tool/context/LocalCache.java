@@ -1,7 +1,9 @@
 package com.yishuifengxiao.common.tool.context;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
  * <li>支持懒加载缓存机制</li>
  * <li>支持按类型自动生成key</li>
  * <li>提供完整的CRUD操作</li>
+ * <li>容量上限保护，采用LRU淘汰策略，避免无界增长</li>
  * </ul>
  *
  * @author yishui
@@ -23,9 +26,22 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class LocalCache {
     /**
-     * 本地线程存储
+     * 本地缓存容量上限
      */
-    private static final ConcurrentHashMap<String, Object> LOCAL_HOLDER = new ConcurrentHashMap<>();
+    private static final int MAX_ENTRIES = 1024;
+
+    /**
+     * 本地线程存储，使用访问顺序的LRU策略
+     */
+    private static final Map<String, Object> LOCAL_HOLDER = Collections.synchronizedMap(
+            new LinkedHashMap<String, Object>(16, 0.75f, true) {
+                private static final long serialVersionUID = 1L;
+
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Object> eldest) {
+                    return size() > MAX_ENTRIES;
+                }
+            });
 
 
     /**
@@ -47,7 +63,7 @@ public final class LocalCache {
      * @param key   待存储的数据的key
      * @param value 待存储的数据
      */
-    public synchronized static void put(String key, Object value) {
+    public static void put(String key, Object value) {
         if (StringUtils.isBlank(key) || null == value) {
             return;
         }
@@ -60,7 +76,7 @@ public final class LocalCache {
      * @param key 待存储的数据的key
      * @return 获取到的存储数据
      */
-    public synchronized static Object get(String key) {
+    public static Object get(String key) {
         if (StringUtils.isBlank(key)) {
             return null;
         }
@@ -76,19 +92,21 @@ public final class LocalCache {
      * @return 获取的值
      */
     @SuppressWarnings("unchecked")
-    public synchronized static <T> T get(String key, Supplier<T> supplier) {
-        Object value = get(key.trim());
+    public static <T> T get(String key, Supplier<T> supplier) {
+        // key 为空时不使用缓存，直接返回 supplier 的计算结果，避免 NPE
+        if (StringUtils.isBlank(key)) {
+            return null == supplier ? null : supplier.get();
+        }
+        Object value = get(key);
         if (null != value) {
-            try {
-                return (T) value;
-            } catch (Exception e) {
-            }
+            // 泛型在运行期被擦除，此处的强转不会抛异常；类型不匹配由调用方的隐式强转抛 ClassCastException
+            return (T) value;
         }
         T val = null == supplier ? null : supplier.get();
         if (null == val) {
             return null;
         }
-        put(key.trim(), val);
+        put(key, val);
         return val;
     }
 
@@ -101,16 +119,12 @@ public final class LocalCache {
      * @param <T>   数据的类型
      * @return 获取到的存储数据
      */
+    @SuppressWarnings("unchecked")
     public static <T> T get(Class<T> clazz) {
         if (null == clazz) {
             return null;
         }
-        try {
-            return (T) get(clazz.getName());
-        } catch (Exception e) {
-        }
-        return null;
-
+        return (T) get(clazz.getName());
     }
 
 
@@ -119,11 +133,11 @@ public final class LocalCache {
      *
      * @param key 待移除的数据的key
      */
-    public synchronized static void remove(String key) {
+    public static void remove(String key) {
         if (StringUtils.isBlank(key)) {
             return;
         }
-        LOCAL_HOLDER.remove(key);
+        LOCAL_HOLDER.remove(key.trim());
     }
 
     /**
@@ -143,10 +157,12 @@ public final class LocalCache {
     /**
      * 获取所有存储的数据的key
      *
-     * @return 所有存储的数据的key
+     * @return 所有存储的数据的key的快照
      */
     public static Set<String> keys() {
-        return LOCAL_HOLDER.keySet();
+        synchronized (LOCAL_HOLDER) {
+            return Set.copyOf(LOCAL_HOLDER.keySet());
+        }
     }
 
     /**
@@ -159,13 +175,13 @@ public final class LocalCache {
         if (StringUtils.isBlank(key)) {
             return false;
         }
-        return LOCAL_HOLDER.containsKey(key);
+        return LOCAL_HOLDER.containsKey(key.trim());
     }
 
     /**
      * 清空所有存储的数据
      */
-    public synchronized static void clear() {
+    public static void clear() {
         LOCAL_HOLDER.clear();
     }
 }

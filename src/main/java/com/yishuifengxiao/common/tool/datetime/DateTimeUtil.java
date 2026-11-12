@@ -8,13 +8,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.utils.OsUtils;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  * <li>支持多种日期时间格式的解析</li>
  * <li>日期时间格式化输出</li>
  * <li>时间戳与日期时间互转</li>
- * <li>支持中国时区(UTC+8)</li>
+ * <li>使用JVM默认时区进行时区相关转换</li>
  * </ul>
  *
  * @author yishui
@@ -36,11 +36,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public final class DateTimeUtil {
-    /**
-     * 默认的中国时区UTC+8
-     */
-    public final static ZoneId ZONEID_OF_CHINA = OsUtils.ZONEID_OF_CHINA;
-
 
     /**
      * 默认的日期时间的字符串形式 yyyy-MM-dd HH:mm:ss形式
@@ -69,12 +64,12 @@ public final class DateTimeUtil {
 
 
     /**
-     * 获取北京时区下的当前时间
+     * 获取当前时间
      *
-     * @return 北京时区下的当前时间
+     * @return JVM默认时区下的当前时间
      */
     public static LocalDateTime now() {
-        return LocalDateTime.now(OsUtils.ZONEID_OF_CHINA);
+        return LocalDateTime.now();
     }
 
 
@@ -89,7 +84,7 @@ public final class DateTimeUtil {
             return null;
         }
         Instant instant = date.toInstant();
-        return LocalDateTime.ofInstant(instant, OsUtils.ZONEID_OF_CHINA);
+        return LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
     }
 
     /**
@@ -204,7 +199,7 @@ public final class DateTimeUtil {
      * @param pattern       格式化形式,例如yyyy-MM-dd HH:mm:ss
      * @return 指定形式的字符串
      */
-    public static synchronized String format(LocalDateTime localDateTime, String pattern) {
+    public static String format(LocalDateTime localDateTime, String pattern) {
         if (null == localDateTime) {
             return null;
         }
@@ -219,11 +214,12 @@ public final class DateTimeUtil {
      * @param pattern 格式化形式,例如yyyy-MM-dd HH:mm:ss
      * @return 指定形式的字符串
      */
-    public static synchronized String format(Date date, String pattern) {
+    public static String format(Date date, String pattern) {
         if (null == date) {
             return null;
         }
-        SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+        // 显式使用 JVM 默认 Locale，避免格式化结果依赖隐式默认值
+        SimpleDateFormat formatter = new SimpleDateFormat(pattern, Locale.getDefault());
         return formatter.format(date);
     }
 
