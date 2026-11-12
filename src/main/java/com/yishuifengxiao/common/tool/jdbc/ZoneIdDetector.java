@@ -2,6 +2,7 @@ package com.yishuifengxiao.common.tool.jdbc;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -10,7 +11,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.DateTimeException;
 import java.time.ZoneId;
+import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 时区检测器，用于检测数据库服务器的时区
@@ -21,8 +25,9 @@ import java.util.Map;
  */
 @Slf4j
 public class ZoneIdDetector {
-    /** JDBC URL中的时区参数标识 */
-    private static final String TIMEZONE_PARAM = "serverTimezone=";
+    /** JDBC URL中的时区参数匹配模式：忽略大小写，并要求以 ? 或 & 作为参数边界 */
+    private static final Pattern SERVER_TIMEZONE_PATTERN =
+            Pattern.compile("[?&]serverTimezone=([^&]*)", Pattern.CASE_INSENSITIVE);
     
     /** 不同数据库的主时区查询语句映射表 */
     private static final Map<String, String> DB_TIMEZONE_QUERIES = Map.of(
@@ -71,7 +76,8 @@ public class ZoneIdDetector {
     private static String tryGetTimezoneFromUrl(Connection connection) throws SQLException {
         try {
             String url = connection.getMetaData().getURL();
-            return url.contains("serverTimezone") ? extractTimezoneFromUrl(url) : null;
+            // 部分驱动允许 getURL() 返回 null，此处必须判空，避免 NPE 导致初始化失败
+            return extractTimezoneFromUrl(url);
         } catch (SQLException e) {
             log.warn("从URL获取时区信息失败", e);
             return null;
@@ -124,7 +130,7 @@ public class ZoneIdDetector {
             try (Statement stmt = connection.createStatement();
                  ResultSet backupRs = stmt.executeQuery(backupQuery)) {
                 if (backupRs.next()) {
-                    String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
+                    String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase(Locale.ROOT);
                     String result;
                 switch (databaseProductName) {
                     case "mysql":
@@ -231,6 +237,13 @@ public class ZoneIdDetector {
         }
         // 依次匹配各种标准时区格式模式
         String trimmed = timezone.trim();
+        // 优先交给 ZoneId 校验，可覆盖 Etc/GMT+8、America/Argentina/Buenos_Aires 等合法 IANA 时区
+        try {
+            ZoneId.of(trimmed);
+            return true;
+        } catch (DateTimeException e) {
+            // 不是合法 ZoneId，继续按兼容模式校验
+        }
         if (trimmed.matches("[a-zA-Z]+/[a-zA-Z_]+")) {
             return true;
         }
@@ -263,7 +276,7 @@ public class ZoneIdDetector {
         if (garbledTimezone == null) {
             return null;
         }
-        byte[] bytes = garbledTimezone.getBytes();
+        byte[] bytes = garbledTimezone.getBytes(StandardCharsets.UTF_8);
         if (containsChineseTimezonePattern(bytes)) {
             return "Asia/Shanghai";
         }
@@ -303,7 +316,7 @@ public class ZoneIdDetector {
      * @return 推断出的完整时区标识符，无法识别时返回null
      */
     private static String inferFromShortString(String shortString) {
-        String upper = shortString.toUpperCase();
+        String upper = shortString.toUpperCase(Locale.ROOT);
         if ("CST".equals(upper) || "CHINA".equals(upper) || "BEIJING".equals(upper)) {
             return "Asia/Shanghai";
         }
@@ -374,7 +387,7 @@ public class ZoneIdDetector {
      * @throws SQLException 获取数据库元数据失败时抛出异常
      */
     private static String getBackupTimezoneQuery(Connection connection) throws SQLException {
-        String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase();
+        String databaseProductName = connection.getMetaData().getDatabaseProductName().toLowerCase(Locale.ROOT);
         return DB_BACKUP_TIMEZONE_QUERIES.get(databaseProductName);
     }
 
@@ -393,7 +406,7 @@ public class ZoneIdDetector {
      */
     private static String inferSqlServerTimezone(int dateFirst, String language) {
         if (language != null) {
-            String lowerLanguage = language.toLowerCase();
+            String lowerLanguage = language.toLowerCase(Locale.ROOT);
             if (lowerLanguage.contains("chinese") || lowerLanguage.contains("zh-cn") || lowerLanguage.contains("zh-tw")) {
                 return "Asia/Shanghai";
             } else if (lowerLanguage.contains("japanese")) {
@@ -430,6 +443,15 @@ public class ZoneIdDetector {
         try {
             return ZoneId.of(trimmedTimezone);
         } catch (DateTimeException e) {
+            // 时区缩写（如CST）不是合法的ZoneId，尝试归一化为IANA区域ID
+            String inferredTimezone = inferFromShortString(trimmedTimezone);
+            if (inferredTimezone != null) {
+                try {
+                    return ZoneId.of(inferredTimezone);
+                } catch (DateTimeException ex) {
+                    log.debug("无法归一化时区缩写: {} -> {}", trimmedTimezone, inferredTimezone);
+                }
+            }
             log.debug("无法解析时区字符串: {}, 使用系统默认时区", trimmedTimezone);
             return null;
         }
@@ -445,7 +467,7 @@ public class ZoneIdDetector {
      */
     private static String getTimezoneQuery(Connection connection) throws SQLException {
         DatabaseMetaData metaData = connection.getMetaData();
-        String databaseProductName = metaData.getDatabaseProductName().toLowerCase();
+        String databaseProductName = metaData.getDatabaseProductName().toLowerCase(Locale.ROOT);
         String query = DB_TIMEZONE_QUERIES.get(databaseProductName);
         if (query != null) {
             return query;
@@ -464,15 +486,17 @@ public class ZoneIdDetector {
         if (url == null) {
             return null;
         }
-        int timezoneIndex = url.indexOf(TIMEZONE_PARAM);
-        if (timezoneIndex == -1) {
+        Matcher matcher = SERVER_TIMEZONE_PATTERN.matcher(url);
+        if (!matcher.find()) {
             return null;
         }
-        int startIndex = timezoneIndex + TIMEZONE_PARAM.length();
-        int endIndex = url.indexOf('&', startIndex);
-        if (endIndex == -1) {
-            return url.substring(startIndex);
+        String rawTimezone = matcher.group(1);
+        try {
+            // JDBC URL 中的 + 是字面量（如 GMT+8），不能按表单编码规则当作空格，先转义再解码
+            return URLDecoder.decode(rawTimezone.replace("+", "%2B"), StandardCharsets.UTF_8);
+        } catch (IllegalArgumentException e) {
+            log.debug("时区参数解码失败，按原值使用: {}", rawTimezone);
+            return rawTimezone;
         }
-        return url.substring(startIndex, endIndex);
     }
 }

@@ -51,8 +51,13 @@ public class CMAC {
      * @return CMAC值（十六进制字符串），计算失败返回null
      */
     public static String calculate(String keyHex, String dataHex) {
-        byte[] result = calculate(Hex.hexToBytes(keyHex), Hex.hexToBytes(dataHex));
-        return Hex.bytesToHex(result);
+        byte[] key = Hex.hexToBytes(keyHex);
+        // 空字符串按空消息处理（RFC 4493 允许空消息），非法十六进制仍返回 null
+        byte[] data = (dataHex == null || dataHex.isEmpty()) ? new byte[0] : Hex.hexToBytes(dataHex);
+        if (key == null || data == null) {
+            return null;
+        }
+        return Hex.bytesToHex(calculate(key, data));
     }
 
 
@@ -67,25 +72,23 @@ public class CMAC {
         try {
             byte[] subKey1 = generateSubKey(key, true);
             byte[] subKey2 = generateSubKey(key, false);
-            int n = (data.length + 15) / 16;
+            int n = Math.max(1, (data.length + 15) / 16);
             byte[] lastBlock = new byte[16];
-            int paddingLen = 16 - (data.length % 16);
-            if (paddingLen == 0) {
-                paddingLen = 16;
-            }
             if (data.length == 0) {
                 System.arraycopy(Zero, 0, lastBlock, 0, 16);
             } else {
                 System.arraycopy(data, (n - 1) * 16, lastBlock, 0, Math.min(16, data.length - (n - 1) * 16));
             }
-            for (int i = data.length % 16; i < 16; i++) {
-                if (i == data.length % 16) {
-                    lastBlock[i] = (byte) 0x80;
-                } else {
+            // RFC 4493：消息为 16 字节整数倍（且非空）时最后一块不填充，直接使用 K1
+            boolean completeBlock = data.length > 0 && data.length % 16 == 0;
+            if (!completeBlock) {
+                int padStart = data.length % 16;
+                lastBlock[padStart] = (byte) 0x80;
+                for (int i = padStart + 1; i < 16; i++) {
                     lastBlock[i] = 0x00;
                 }
             }
-            byte[] xorKey = (data.length % 16 == 0 && data.length != 0) ? subKey1 : subKey2;
+            byte[] xorKey = completeBlock ? subKey1 : subKey2;
             for (int i = 0; i < 16; i++) {
                 lastBlock[i] ^= xorKey[i];
             }

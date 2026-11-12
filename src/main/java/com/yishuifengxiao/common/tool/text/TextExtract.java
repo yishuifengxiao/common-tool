@@ -5,7 +5,10 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>网页正文抽取工具类</p>
@@ -23,10 +26,14 @@ import java.util.regex.Pattern;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public final class TextExtract {
 
-    private static int FREQUENT_URL = 30;
-    private static Pattern links = Pattern.compile("<[aA]\\s+[Hh][Rr][Ee][Ff]=[\"|\']?([^>\"\' ]+)[\"|\']?\\s*[^>]*>([^>]+)</a>(\\s*.{0," + FREQUENT_URL + "}\\s*<a\\s+href=[\"|\']?([^>\"\' ]+)[\"|\']?\\s*[^>]*>([^>]+)</[aA]>){2,100}", Pattern.DOTALL);
+    private static final int FREQUENT_URL = 30;
+    /**
+     * 连续链接块匹配模式：限制字符类范围，避免在超大 HTML 上因 . 与 DOTALL 组合产生严重回溯
+     */
+    private static final Pattern LINKS = Pattern.compile("<[aA]\\s+[Hh][Rr][Ee][Ff]=[\"|\']?([^>\"\' ]+)[\"|\']?\\s*[^>]*>([^>]+)</a>(\\s*[^<]{0," + FREQUENT_URL + "}\\s*<a\\s+href=[\"|\']?([^>\"\' ]+)[\"|\']?\\s*[^>]*>([^>]+)</[aA]>){2,100}");
 
     private List<String> lines = new ArrayList<String>();
 
@@ -74,7 +81,8 @@ public final class TextExtract {
             html = HtmlExtract.preprocessHtml(html);
             result = this.parse(html);
         } catch (Exception e) {
-
+            // 正文抽取失败时返回null，同时记录原因便于排查，避免异常被静默吞掉
+            log.warn("网页正文抽取失败: {}", e.getMessage());
         }
         return result;
     }
@@ -115,7 +123,8 @@ public final class TextExtract {
             this.threshold = Math.min(100, (sum / this.indexDistribution.size()) << (empty / (this.lines.size() - empty) >>> 1));
             this.threshold = Math.max(50, this.threshold);
         } catch (Exception e) {
-
+            // 空行占比计算可能因除零而失败，此时保持默认阈值并记录原因
+            log.debug("正文阈值计算失败，沿用默认阈值: {}", e.getMessage());
         }
 
         this.start = -1;
@@ -147,7 +156,7 @@ public final class TextExtract {
         source = source.replaceAll("</[sS][pP][aA][nN]>", "");
 
         int len = source.length();
-        while ((source = links.matcher(source).replaceAll("")).length() != len) {
+        while ((source = LINKS.matcher(source).replaceAll("")).length() != len) {
             len = source.length();
         }
 
@@ -174,11 +183,16 @@ public final class TextExtract {
         boolean firstMatch = true;
 
         StringBuilder buffer = new StringBuilder();
-        for (int i = 0; i < this.indexDistribution.size() - 1; i++) {
+        int size = this.indexDistribution.size();
+        for (int i = 0; i < size; i++) {
+            // 预读后续块的行数，越界位置按 0 处理，避免尾部下标越界
+            int next1 = i + 1 < size ? this.indexDistribution.get(i + 1).intValue() : 0;
+            int next2 = i + 2 < size ? this.indexDistribution.get(i + 2).intValue() : 0;
+            int next3 = i + 3 < size ? this.indexDistribution.get(i + 3).intValue() : 0;
 
             if (firstMatch && !boolstart) {
                 if (this.indexDistribution.get(i) > (this.threshold / 2) && !boolstart) {
-                    if (this.indexDistribution.get(i + 1).intValue() != 0 || this.indexDistribution.get(i + 2).intValue() != 0) {
+                    if (next1 != 0 || next2 != 0) {
                         firstMatch = false;
                         boolstart = true;
                         this.start = i;
@@ -188,14 +202,14 @@ public final class TextExtract {
 
             }
             if (this.indexDistribution.get(i) > this.threshold && !boolstart) {
-                if (this.indexDistribution.get(i + 1).intValue() != 0 || this.indexDistribution.get(i + 2).intValue() != 0 || this.indexDistribution.get(i + 3).intValue() != 0) {
+                if (next1 != 0 || next2 != 0 || next3 != 0) {
                     boolstart = true;
                     this.start = i;
                     continue;
                 }
             }
             if (boolstart) {
-                if (this.indexDistribution.get(i).intValue() == 0 || this.indexDistribution.get(i + 1).intValue() == 0) {
+                if (this.indexDistribution.get(i).intValue() == 0 || next1 == 0) {
                     this.end = i;
                     boolend = true;
                 }
@@ -245,7 +259,7 @@ public final class TextExtract {
         if (StringUtils.isBlank(text)) {
             return false;
         }
-        String lower = text.toLowerCase();
+        String lower = text.toLowerCase(Locale.ROOT);
         return lower.contains("copyright") || lower.contains("版权所有");
     }
 }

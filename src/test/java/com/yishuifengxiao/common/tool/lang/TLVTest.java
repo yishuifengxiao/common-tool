@@ -427,45 +427,53 @@ public class TLVTest {
     }
 
     /**
-     * 测试边界场景：value为null
+     * 测试边界场景：value为null时按空值处理
      */
     @Test
-    public void testToTLV_NullValue_ReturnsTagOnly() {
+    public void testToTLV_NullValue_ReturnsTagAndZeroLength() {
         String result = TLV.toTLV("9F02", null);
-        assertEquals("9F02", result);
+        assertEquals("9F0200", result);
     }
 
     /**
-     * 测试边界场景：value为空字符串
+     * 测试边界场景：value为空字符串时按空值处理
      */
     @Test
-    public void testToTLV_EmptyValue_ReturnsTagOnly() {
+    public void testToTLV_EmptyValue_ReturnsTagAndZeroLength() {
         String result = TLV.toTLV("9F02", "");
-        assertEquals("9F02", result);
+        assertEquals("9F0200", result);
     }
 
     /**
-     * 测试边界场景：tag为null或空
+     * 测试边界场景：tag为null或空白时抛出明确异常
      */
     @Test
-    public void testToTLV_NullOrBlankTag_Success() {
-        String result1 = TLV.toTLV(null, "000000000500");
-        assertEquals("06000000000500", result1);
-
-        String result2 = TLV.toTLV("", "000000000500");
-        assertEquals("06000000000500", result2);
-
-        String result3 = TLV.toTLV("   ", "000000000500");
-        assertEquals("06000000000500", result3);
+    public void testToTLV_NullOrBlankTag_ThrowsException() {
+        assertThrowsIllegalArgument(() -> TLV.toTLV(null, "000000000500"));
+        assertThrowsIllegalArgument(() -> TLV.toTLV("", "000000000500"));
+        assertThrowsIllegalArgument(() -> TLV.toTLV("   ", "000000000500"));
     }
 
     /**
-     * 测试边界场景：value为非十六进制字符串
+     * 测试边界场景：value为非十六进制字符串时抛出明确异常
      */
     @Test
-    public void testToTLV_InvalidHexValue_ReturnsTagOnly() {
-        String result = TLV.toTLV("9F02", "XYZ");
-        assertEquals("9F02", result);
+    public void testToTLV_InvalidHexValue_ThrowsException() {
+        assertThrowsIllegalArgument(() -> TLV.toTLV("9F02", "XYZ"));
+    }
+
+    /**
+     * 断言调用抛出 IllegalArgumentException
+     *
+     * @param action 待执行的动作
+     */
+    private void assertThrowsIllegalArgument(Runnable action) {
+        try {
+            action.run();
+            fail("应当抛出 IllegalArgumentException");
+        } catch (IllegalArgumentException e) {
+            // 预期异常
+        }
     }
 
     // ==================== calculateLengthHex 方法测试 ====================

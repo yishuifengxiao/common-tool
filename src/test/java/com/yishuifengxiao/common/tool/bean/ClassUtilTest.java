@@ -78,22 +78,7 @@ class ClassUtilTest {
 
     @BeforeEach
     void setUp() {
-        // 每个测试前清理缓存（通过反射）
-        try {
-            Field fieldsCacheField = ClassUtil.class.getDeclaredField("FIELDS_CACHE");
-            fieldsCacheField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            Map<String, List<Field>> cache = (Map<String, List<Field>>) fieldsCacheField.get(null);
-            cache.clear();
-
-            Field fieldLookupCacheField = ClassUtil.class.getDeclaredField("FIELD_LOOKUP_CACHE");
-            fieldLookupCacheField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            Map<String, Field> lookupCache = (Map<String, Field>) fieldLookupCacheField.get(null);
-            lookupCache.clear();
-        } catch (Exception e) {
-            fail("清理缓存失败: " + e.getMessage());
-        }
+        // 字段缓存已改为ClassValue，按类隔离且无法清空，测试之间无需清理
     }
 
     @Test

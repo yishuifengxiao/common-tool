@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * <p>
@@ -391,7 +392,7 @@ public class ASNValueWriter {
             }
         }
 
-        return text.toUpperCase();
+        return text.toUpperCase(Locale.ROOT);
     }
 
     /**

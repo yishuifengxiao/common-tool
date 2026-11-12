@@ -8,7 +8,10 @@ import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.*;
 
@@ -98,13 +101,15 @@ public class PojoGenerator {
             return;
         }
 
-        Connection conn = null;
-
         try {
             // 加载数据库驱动
             Class.forName(config.getDriver());
-            conn = DriverManager.getConnection(config.getUrl(), config.getUsername(), config.getPassword());
+        } catch (ClassNotFoundException e) {
+            log.error("数据库驱动未找到: {}", config.getDriver(), e);
+            return;
+        }
 
+        try (Connection conn = DriverManager.getConnection(config.getUrl(), config.getUsername(), config.getPassword())) {
             // 获取数据库产品名称并设置到配置中
             DatabaseMetaData dbMetaData = conn.getMetaData();
             config.setDatabaseProductName(dbMetaData.getDatabaseProductName());
@@ -119,28 +124,23 @@ public class PojoGenerator {
                 outputDir.mkdirs();
             }
 
-            // 遍历所有表，为每个表生成对应的POJO类
+            // 遍历所有表，为每个表生成对应的POJO类；单表失败不影响其余表
+            int successCount = 0;
             for (TableInfo table : tables) {
-                generatePojoForTable(table, config);
+                try {
+                    generatePojoForTable(table, config);
+                    successCount++;
+                } catch (Exception e) {
+                    log.error("生成表 {} 的POJO失败，已跳过该表", table.getOriginalName(), e);
+                }
             }
 
-            log.info("所有POJO类生成完成! 共生成 {} 个类", tables.size());
+            log.info("所有POJO类生成完成! 共生成 {}/{} 个类", successCount, tables.size());
 
-        } catch (ClassNotFoundException e) {
-            log.error("数据库驱动未找到: {}", config.getDriver(), e);
         } catch (SQLException e) {
             log.error("数据库连接失败", e);
         } catch (Exception e) {
             log.error("生成POJO过程中发生错误", e);
-        } finally {
-            // 关闭数据库连接
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    log.error("关闭数据库连接失败", e);
-                }
-            }
         }
     }
 
@@ -155,10 +155,7 @@ public class PojoGenerator {
         // 获取数据库名称
         String databaseName = conn.getCatalog();
 
-        ResultSet tablesRs = null;
-        try {
-            tablesRs = metaData.getTables(databaseName, null, "%", new String[]{"TABLE"});
-
+        try (ResultSet tablesRs = metaData.getTables(databaseName, null, "%", new String[]{"TABLE"})) {
             while (tablesRs.next()) {
                 String tableName = tablesRs.getString("TABLE_NAME");
                 String remarks = tablesRs.getString("REMARKS");
@@ -182,14 +179,6 @@ public class PojoGenerator {
                 table.setPrimaryKey(primaryKey);
 
                 tables.add(table);
-            }
-        } finally {
-            if (tablesRs != null) {
-                try {
-                    tablesRs.close();
-                } catch (SQLException e) {
-                    log.warn("关闭ResultSet失败", e);
-                }
             }
         }
 
@@ -247,10 +236,7 @@ public class PojoGenerator {
         DatabaseMetaData metaData = conn.getMetaData();
         String databaseName = conn.getCatalog();
 
-        ResultSet columnsRs = null;
-        try {
-            columnsRs = metaData.getColumns(databaseName, null, tableName, null);
-
+        try (ResultSet columnsRs = metaData.getColumns(databaseName, null, tableName, null)) {
             while (columnsRs.next()) {
                 String remarks = columnsRs.getString("REMARKS");
                 remarks = null == remarks ? null : remarks.replaceAll("(\r\n|\r|\n)", "").trim();
@@ -269,14 +255,6 @@ public class PojoGenerator {
                 column.setAutoIncrement("YES".equals(isAutoIncrement));
 
                 columns.add(column);
-            }
-        } finally {
-            if (columnsRs != null) {
-                try {
-                    columnsRs.close();
-                } catch (SQLException e) {
-                    log.warn("关闭ResultSet失败", e);
-                }
             }
         }
 
@@ -300,23 +278,24 @@ public class PojoGenerator {
             pstmt.setString(1, databaseName);
             pstmt.setString(2, tableName);
 
-            ResultSet rs = pstmt.executeQuery();
-            Map<String, String> columnTypes = new HashMap<>();
+            try (ResultSet rs = pstmt.executeQuery()) {
+                Map<String, String> columnTypes = new HashMap<>();
 
-            while (rs.next()) {
-                String columnName = rs.getString("COLUMN_NAME");
-                String columnType = rs.getString("COLUMN_TYPE");
-                columnTypes.put(columnName, columnType);
-            }
+                while (rs.next()) {
+                    String columnName = rs.getString("COLUMN_NAME");
+                    String columnType = rs.getString("COLUMN_TYPE");
+                    columnTypes.put(columnName, columnType);
+                }
 
-            // 更新列的显示宽度
-            for (ColumnInfo column : columns) {
-                String columnType = columnTypes.get(column.getColumnName());
-                if (columnType != null && isIntegerType(column.getDataType())) {
-                    // 从COLUMN_TYPE中提取显示宽度
-                    Integer displayWidth = extractDisplayWidth(columnType, column.getDataType());
-                    if (displayWidth != null) {
-                        column.setColumnSize(displayWidth);
+                // 更新列的显示宽度
+                for (ColumnInfo column : columns) {
+                    String columnType = columnTypes.get(column.getColumnName());
+                    if (columnType != null && isIntegerType(column.getDataType())) {
+                        // 从COLUMN_TYPE中提取显示宽度
+                        Integer displayWidth = extractDisplayWidth(columnType, column.getDataType());
+                        if (displayWidth != null) {
+                            column.setColumnSize(displayWidth);
+                        }
                     }
                 }
             }
@@ -355,10 +334,7 @@ public class PojoGenerator {
         DatabaseMetaData metaData = conn.getMetaData();
         String databaseName = conn.getCatalog();
 
-        ResultSet primaryKeysRs = null;
-        try {
-            primaryKeysRs = metaData.getPrimaryKeys(databaseName, null, tableName);
-
+        try (ResultSet primaryKeysRs = metaData.getPrimaryKeys(databaseName, null, tableName)) {
             PrimaryKeyInfo primaryKey = new PrimaryKeyInfo();
             List<String> primaryKeyColumns = new ArrayList<>();
 
@@ -385,14 +361,6 @@ public class PojoGenerator {
             }
 
             return primaryKey;
-        } finally {
-            if (primaryKeysRs != null) {
-                try {
-                    primaryKeysRs.close();
-                } catch (SQLException e) {
-                    log.warn("关闭ResultSet失败", e);
-                }
-            }
         }
     }
 
@@ -404,9 +372,9 @@ public class PojoGenerator {
 
         String javaCode = generatePojoCode(table, config);
 
-        // 写入文件
+        // 写入文件（显式使用UTF-8，避免平台默认编码导致中文注释乱码）
         File file = new File(config.getOutputPath(), table.getClassName() + ".java");
-        try (FileWriter writer = new FileWriter(file)) {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8)) {
             writer.write(javaCode);
         }
 
@@ -434,9 +402,9 @@ public class PojoGenerator {
         }
         cb.append(" */").newLine();
 
-        // Swagger注解
+        // Swagger注解（OpenAPI 3 / springdoc）
         if (config.isUseSwagger()) {
-            cb.append("@ApiModel(description = \"").append(table.getRemarks() != null ? table.getRemarks() :
+            cb.append("@Schema(description = \"").append(table.getRemarks() != null ? table.getRemarks() :
                     table.getClassName()).append("\")").newLine();
         }
 
@@ -479,7 +447,7 @@ public class PojoGenerator {
         // 如果不用Lombok，生成getter和setter
         if (!config.isUseLombok()) {
             for (ColumnInfo column : table.getColumns()) {
-                generateGetterSetter(cb, column);
+                generateGetterSetter(cb, column, config);
             }
         }
 
@@ -507,7 +475,7 @@ public class PojoGenerator {
         boolean needLocalTime = false;
 
         for (ColumnInfo column : table.getColumns()) {
-            String javaType = getJavaType(column.getDataType(), config);
+            String javaType = getJavaType(column, config);
             if ("BigDecimal".equals(javaType)) {
                 needBigDecimal = true;
             } else if ("Date".equals(javaType)) {
@@ -545,8 +513,7 @@ public class PojoGenerator {
             imports.add("lombok.experimental.Accessors");
         }
         if (config.isUseSwagger()) {
-            imports.add("io.swagger.annotations.ApiModel");
-            imports.add("io.swagger.annotations.ApiModelProperty");
+            imports.add("io.swagger.v3.oas.annotations.media.Schema");
         }
 
         // 写入import语句
@@ -561,7 +528,7 @@ public class PojoGenerator {
      */
     private void generateField(CodeBuilder cb, ColumnInfo column, TableInfo table, GeneratorConfig config) {
         String fieldName = toCamelCase(column.getColumnName(), false);
-        String javaType = getJavaType(column.getDataType(), config);
+        String javaType = getJavaType(column, config);
 
         // 字段注释
         if (column.getRemarks() != null && !column.getRemarks().isEmpty()) {
@@ -570,22 +537,20 @@ public class PojoGenerator {
             cb.append("     */").newLine();
         }
 
-        // Swagger注解
+        // Swagger注解（OpenAPI 3 / springdoc）
         if (config.isUseSwagger()) {
-            cb.append("    @ApiModelProperty(value = \"").append(column.getRemarks() != null ? column.getRemarks() :
+            cb.append("    @Schema(description = \"").append(column.getRemarks() != null ? column.getRemarks() :
                     fieldName).append("\")").newLine();
         }
 
-        // 主键注解
-        if (table.getPrimaryKey() != null && table.getPrimaryKey().getColumns().contains(column.getColumnName())) {
+        // 主键注解（仅在开启JPA时生成，否则会缺少jakarta.persistence导入）
+        if (config.isUseJpa() && table.getPrimaryKey() != null
+                && table.getPrimaryKey().getColumns().contains(column.getColumnName())) {
             cb.append("    @Id").newLine();
 
-            // 自增主键
+            // 自增主键使用数据库自增；非自增主键由应用赋值，无需生成器
             if (table.getPrimaryKey().isAutoIncrement()) {
                 cb.append("    @GeneratedValue(strategy = GenerationType.IDENTITY)").newLine();
-            } else {
-                // 非自增主键
-                cb.append("    @GeneratedValue(generator = \"assigned\")").newLine();
             }
         }
 
@@ -664,11 +629,11 @@ public class PojoGenerator {
             if ("MySQL".equalsIgnoreCase(config.getDatabaseProductName())) {
                 definition.append("JSON");
             } else {
-                definition.append(column.getDataType().toUpperCase());
+                definition.append(column.getDataType().toUpperCase(Locale.ROOT));
             }
         } else {
             // 基本类型
-            definition.append(column.getDataType().toUpperCase());
+            definition.append(column.getDataType().toUpperCase(Locale.ROOT));
 
             // 对于大文本类型，不添加长度
             if (!isLargeTextType(column.getDataType()) &&
@@ -698,15 +663,18 @@ public class PojoGenerator {
             definition.append(" AUTO_INCREMENT");
         }
 
-        // 默认值
+        // 默认值（函数表达式和数值不加引号，避免生成非法DDL）
         if (column.getDefaultValue() != null && !column.getDefaultValue().isEmpty()) {
-            // 处理默认值中的特殊字符
-            String defaultValue = escapeSqlString(column.getDefaultValue());
-            definition.append(" DEFAULT '").append(defaultValue).append("'");
+            String defaultValue = column.getDefaultValue().trim();
+            if (isDefaultValueExpression(defaultValue) || isNumericValue(defaultValue)) {
+                definition.append(" DEFAULT ").append(defaultValue);
+            } else {
+                definition.append(" DEFAULT '").append(escapeSqlString(defaultValue)).append("'");
+            }
         }
 
-        // 注释 - 添加到columnDefinition中
-        if (column.getRemarks() != null && !column.getRemarks().isEmpty()) {
+        // 注释 - COMMENT为MySQL专属语法，其他数据库不追加
+        if (isMySql(config) && column.getRemarks() != null && !column.getRemarks().isEmpty()) {
             definition.append(" COMMENT '").append(escapeSqlString(column.getRemarks())).append("'");
         }
 
@@ -718,7 +686,7 @@ public class PojoGenerator {
      */
     private boolean isLargeTextType(String dbType) {
         if (dbType == null) return false;
-        dbType = dbType.toLowerCase();
+        dbType = dbType.toLowerCase(Locale.ROOT);
         return dbType.contains("text") || dbType.contains("blob") || dbType.contains("clob");
     }
 
@@ -731,11 +699,33 @@ public class PojoGenerator {
     }
 
     /**
+     * 判断默认值是否为数据库函数表达式（如CURRENT_TIMESTAMP）
+     */
+    private boolean isDefaultValueExpression(String defaultValue) {
+        return defaultValue.matches("(?i)^(current_timestamp(\\(\\d*\\))?|current_date|current_time|now\\(\\)|null)$");
+    }
+
+    /**
+     * 判断字符串是否为数值字面量
+     */
+    private boolean isNumericValue(String value) {
+        return value.matches("[+-]?\\d+(\\.\\d+)?");
+    }
+
+    /**
+     * 判断当前数据库是否为MySQL
+     */
+    private boolean isMySql(GeneratorConfig config) {
+        return "MySQL".equalsIgnoreCase(config.getDatabaseProductName());
+    }
+
+    /**
      * 生成getter和setter方法
      */
-    private void generateGetterSetter(CodeBuilder cb, ColumnInfo column) {
+    private void generateGetterSetter(CodeBuilder cb, ColumnInfo column, GeneratorConfig config) {
         String fieldName = toCamelCase(column.getColumnName(), false);
-        String javaType = getJavaType(column.getDataType(), new GeneratorConfig("", "", ""));
+        // 必须与字段使用同一份配置，否则useJava8Date等开关会出现类型不一致
+        String javaType = getJavaType(column, config);
         String methodSuffix = toCamelCase(column.getColumnName(), true);
 
         // Getter
@@ -761,18 +751,18 @@ public class PojoGenerator {
         StringBuilder result = new StringBuilder();
         String[] parts = name.split("_");
 
-        for (int i = 0; i < parts.length; i++) {
-            String part = parts[i];
-            if (part.isEmpty()) continue;
-
-            if (i == 0 && !firstCharUpper) {
-                result.append(Character.toLowerCase(part.charAt(0)));
-            } else {
-                result.append(Character.toUpperCase(part.charAt(0)));
+        for (String part : parts) {
+            if (part.isEmpty()) {
+                continue;
             }
-
-            if (part.length() > 1) {
-                result.append(part.substring(1).toLowerCase());
+            // 全大写片段（如 USER）整体转小写后再拼驼峰；已有驼峰片段（如 createTime）保留原有大小写
+            String normalized = part.equals(part.toUpperCase(Locale.ROOT)) ? part.toLowerCase(Locale.ROOT) : part;
+            char firstChar = result.length() == 0 && !firstCharUpper
+                    ? Character.toLowerCase(normalized.charAt(0))
+                    : Character.toUpperCase(normalized.charAt(0));
+            result.append(firstChar);
+            if (normalized.length() > 1) {
+                result.append(normalized.substring(1));
             }
         }
 
@@ -780,24 +770,39 @@ public class PojoGenerator {
     }
 
     /**
-     * 数据库类型转Java类型
+     * 数据库列类型转Java类型
+     * <p>
+     * 依据列的JDBC类型名（不含长度部分）做精确匹配，避免 `point`、`interval`
+     * 这类类型名因包含子串 "int" 被误判为整数类型
+     * </p>
+     *
+     * @param column 列信息
+     * @param config 生成器配置
+     * @return Java类型名
      */
-    private String getJavaType(String dbType, GeneratorConfig config) {
-        if (dbType == null) return "String";
+    private String getJavaType(ColumnInfo column, GeneratorConfig config) {
+        if (column == null || column.getDataType() == null) return "String";
 
-        dbType = dbType.toLowerCase();
+        String dbType = normalizeDbType(column.getDataType());
 
-        if (dbType.contains("char") || dbType.contains("text") || dbType.contains("enum") || dbType.contains("blob") || dbType.contains("clob")) {
+        if (dbType.contains("char") || dbType.contains("text") || dbType.contains("enum") || dbType.contains("clob")) {
             return "String";
         } else if (dbType.contains("json")) {
             return "String";
+        } else if (dbType.contains("blob") || dbType.contains("binary")) {
+            // 二进制大对象映射为字节数组，String 会丢失二进制内容
+            return "byte[]";
         } else if (dbType.contains("bigint")) {
             return "Long";
-        } else if (dbType.contains("int") || dbType.contains("integer")) {
+        } else if ("tinyint".equals(dbType)) {
+            // tinyint(1) 是MySQL中Boolean的惯用表示，显示宽度为1时映射为Boolean
+            return column.getColumnSize() == 1 ? "Boolean" : "Integer";
+        } else if ("int".equals(dbType) || "integer".equals(dbType)
+                || "smallint".equals(dbType) || "mediumint".equals(dbType)) {
             return "Integer";
         } else if (dbType.contains("float")) {
             return "Float";
-        } else if (dbType.contains("double")) {
+        } else if (dbType.contains("double") || "real".equals(dbType)) {
             return "Double";
         } else if (dbType.contains("decimal") || dbType.contains("numeric")) {
             return "BigDecimal";
@@ -807,7 +812,7 @@ public class PojoGenerator {
             return config.isUseJava8Date() ? "LocalDate" : "Date";
         } else if (dbType.contains("time")) {
             return config.isUseJava8Date() ? "LocalTime" : "Date";
-        } else if (dbType.contains("bit") || dbType.contains("boolean")) {
+        } else if (dbType.contains("bit") || dbType.contains("boolean") || dbType.contains("bool")) {
             return "Boolean";
         } else {
             return "String";
@@ -815,13 +820,32 @@ public class PojoGenerator {
     }
 
     /**
+     * 归一化数据库类型名
+     * <p>
+     * 转小写并去除长度定义、unsigned/zerofill 等修饰，便于后续按类型名精确匹配
+     * </p>
+     *
+     * @param dbType 原始类型名，如 "INT UNSIGNED"、"VARCHAR(64)"
+     * @return 归一化后的类型名
+     */
+    private String normalizeDbType(String dbType) {
+        String normalized = dbType.trim().toLowerCase(Locale.ROOT);
+        int bracketIdx = normalized.indexOf('(');
+        if (bracketIdx > 0) {
+            normalized = normalized.substring(0, bracketIdx);
+        }
+        normalized = normalized.replaceAll("\\b(unsigned|zerofill)\\b", "").trim();
+        return normalized;
+    }
+
+    /**
      * 判断是否为字符串类型
      */
     private boolean isStringType(String dbType) {
         if (dbType == null) return false;
-        dbType = dbType.toLowerCase();
+        dbType = normalizeDbType(dbType);
         return dbType.contains("char") || dbType.contains("text") || dbType.contains("enum") ||
-                dbType.contains("blob") || dbType.contains("clob");
+                dbType.contains("clob");
     }
 
     /**
@@ -829,7 +853,7 @@ public class PojoGenerator {
      */
     private boolean isJsonType(String dbType) {
         if (dbType == null) return false;
-        dbType = dbType.toLowerCase();
+        dbType = dbType.toLowerCase(Locale.ROOT);
         return dbType.contains("json");
     }
 
@@ -838,18 +862,22 @@ public class PojoGenerator {
      */
     private boolean isDecimalType(String dbType) {
         if (dbType == null) return false;
-        dbType = dbType.toLowerCase();
+        dbType = dbType.toLowerCase(Locale.ROOT);
         return dbType.contains("decimal") || dbType.contains("numeric") || dbType.contains("float") || dbType.contains("double");
     }
 
     /**
      * 判断是否为整数类型
+     * <p>
+     * 使用归一化后的类型名精确匹配整数族，避免 `point`、`interval` 等
+     * 包含 "int" 子串的类型被误判
+     * </p>
      */
     private boolean isIntegerType(String dbType) {
         if (dbType == null) return false;
-        dbType = dbType.toLowerCase();
-        return dbType.contains("int") || dbType.contains("integer") || dbType.contains("bigint") || dbType.contains(
-                "tinyint") || dbType.contains("smallint") || dbType.contains("mediumint");
+        String type = normalizeDbType(dbType);
+        return "int".equals(type) || "integer".equals(type) || "bigint".equals(type)
+                || "tinyint".equals(type) || "smallint".equals(type) || "mediumint".equals(type);
     }
 
     /**

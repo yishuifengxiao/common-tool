@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.*;
@@ -20,111 +21,76 @@ import java.util.concurrent.TimeUnit;
  *
  * <h2>API 一致性承诺</h2>
  * <ul>
- * <li>返回的 {@link ParseResult} 结构、方法、行为在同步 / 异步模式下<b>完全相同</b>；</li>
- * <li>表头校验失败时两种模式行为完全一致：<b>立即返回、不读正文、不回调、不提交任务</b>；</li>
- * <li>正文读取均为<b>逐行流式回调</b>——每读一行 → {@link RowCallback#onRow}（末行回调时
- * {@code finished = true}）→ 立即释放内存；</li>
- * <li>正文行数由调用方在回调中自行统计（本工具类不内置行数统计）。</li>
+ *   <li>返回的 {@link ParseResult} 结构、方法、行为在同步 / 异步模式下<b>完全相同</b>；</li>
+ *   <li>表头校验失败时两种模式行为完全一致：<b>立即返回、不读正文、不回调、不提交任务</b>；</li>
+ *   <li>正文读取均为<b>逐行流式回调</b>——每读一行 → {@link RowCallback#onRow} → 立即释放内存；</li>
+ *   <li>正文行数由调用方在回调中自行统计（本工具类不内置行数统计）。</li>
  * </ul>
  *
  * <h2>async 参数说明</h2>
  * <table border="1">
- * <caption>两种模式的关键差异</caption>
- * <tr>
- * <th>项目</th>
- * <th>async = false（默认）</th>
- * <th>async = true</th>
- * </tr>
- * <tr>
- * <td>表头校验</td>
- * <td>当前线程同步</td>
- * <td>当前线程同步</td>
- * </tr>
- * <tr>
- * <td>表头失败</td>
- * <td>立即返回失败</td>
- * <td>立即返回失败</td>
- * </tr>
- * <tr>
- * <td>正文读取线程</td>
- * <td>当前线程</td>
- * <td>executor 线程池</td>
- * </tr>
- * <tr>
- * <td>回调方式</td>
- * <td>流式（逐行回调）</td>
- * <td>流式（逐行回调）</td>
- * </tr>
- * <tr>
- * <td>parse(...) 返回时机</td>
- * <td><b>回调全部执行完后</b>才返回</td>
- * <td><b>表头通过后立即返回</b>，正文在后台进行</td>
- * </tr>
- * <tr>
- * <td>parse 返回时数据是否处理完</td>
- * <td>是</td>
- * <td><b>可能还在处理中</b></td>
- * </tr>
- * <tr>
- * <td>正文异常感知</td>
- * <td>通过 ParseResult.fail 返回</td>
- * <td>通过 {@link HeaderConfig#getOnBodyComplete()} 回调（同时打印到 stderr）</td>
- * </tr>
+ *   <caption>两种模式的关键差异</caption>
+ *   <tr><th>项目</th><th>async = false（默认）</th><th>async = true</th></tr>
+ *   <tr><td>表头校验</td><td>当前线程同步</td><td>当前线程同步</td></tr>
+ *   <tr><td>表头失败</td><td>立即返回失败</td><td>立即返回失败</td></tr>
+ *   <tr><td>正文读取线程</td><td>当前线程</td><td>executor 线程池</td></tr>
+ *   <tr><td>回调方式</td><td>流式（逐行回调）</td><td>流式（逐行回调）</td></tr>
+ *   <tr><td>parse(...) 返回时机</td>
+ *       <td><b>回调全部执行完后</b>才返回</td>
+ *       <td><b>表头通过后立即返回</b>，正文在后台进行</td></tr>
+ *   <tr><td>parse 返回时数据是否处理完</td><td>是</td><td><b>可能还在处理中</b></td></tr>
+ *   <tr><td>正文异常感知</td><td>通过 ParseResult.fail 返回</td>
+ *       <td>通过 {@link HeaderConfig#getOnBodyComplete()} 回调（同时记录错误日志）</td></tr>
  * </table>
  *
  * <h2>使用建议</h2>
  * <ul>
- * <li><b>小型 / 中型文件</b>（万级以内）：用同步模式，最简单；</li>
- * <li><b>大型文件</b>（百万行以内）：
- * <ul>
- * <li>UI 不阻塞 / 批量任务并行 → 用异步模式，回调中流式处理，主线程立即可继续；</li>
- * <li>需要知道"何时处理完" → 用同步模式，或在异步模式下设置
- * {@link HeaderConfig#setOnBodyComplete} 感知完成；</li>
- * <li>需要感知正文异常 → 用同步模式，或在异步模式下设置 {@link HeaderConfig#setOnBodyComplete}；</li>
- * </ul>
- * </li>
- * <li><b>超大文件</b>（千万行级）：当前基于 {@link WorkbookFactory} 的整表加载可能内存不足，
- * 建议改用 POI 的 {@code XSSFReader} 事件模型（本工具类暂不支持）。</li>
+ *   <li><b>小型 / 中型文件</b>（万级以内）：用同步模式，最简单；</li>
+ *   <li><b>大型文件</b>（百万行以内）：
+ *     <ul>
+ *       <li>UI 不阻塞 / 批量任务并行 → 用异步模式，回调中流式处理，主线程立即可继续；</li>
+ *       <li>需要知道"何时处理完" → 用同步模式，或在异步模式下设置
+ *           {@link HeaderConfig#setOnBodyComplete} 感知完成；</li>
+ *       <li>需要感知正文异常 → 用同步模式，或在异步模式下设置 {@link HeaderConfig#setOnBodyComplete}；</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>超大文件</b>（千万行级）：当前基于 {@link WorkbookFactory} 的整表加载可能内存不足，
+ *       建议改用 POI 的 {@code XSSFReader} 事件模型（本工具类暂不支持）。</li>
  * </ul>
  *
  * <h2>语言模式</h2>
- * <p>
- * 根据 {@link ColumnDef} 中用户实际提供的语言自动判定：
- * </p>
+ * <p>根据 {@link ColumnDef} 中用户实际提供的语言自动判定：</p>
  * <ul>
- * <li>全双语 → 中英双套校验，任一通过即成功；</li>
- * <li>全中文 → 只做中文校验；</li>
- * <li>全英文 → 只做英文校验；</li>
- * <li>混合 → 抛 {@link IllegalArgumentException}。</li>
+ *   <li>全双语 → 中英双套校验，任一通过即成功；</li>
+ *   <li>全中文 → 只做中文校验；</li>
+ *   <li>全英文 → 只做英文校验；</li>
+ *   <li>混合 → 抛 {@link IllegalArgumentException}。</li>
  * </ul>
  *
  * <h2>关键约定</h2>
  * <ol>
- * <li>{@code rowData} 为 {@link LinkedHashMap}，<b>key 为列在 columns
- * 中的下标（0..N-1）</b>，
- * 迭代顺序与 columns 完全一致；</li>
- * <li>{@link CellData#getExcelIdx()} 是该列在 Excel 文件中的<b>实际物理列索引</b>；</li>
- * <li>{@link CellData#isValid()} / {@link CellData#getValidationErrorZh()} /
- * {@link CellData#getValidationErrorEn()} 携带非空校验结果与中英双语错误消息；</li>
- * <li>{@link RowCallback#onRow(int, LinkedHashMap, boolean)} 的 {@code rowIndex}
- * 为 Excel
- * <b>物理行号</b>（0 开始），从表头行下一行起按物理位置递增；
- * 空白行（含未创建的间隙行）<b>不跳过</b>，照常回调；</li>
- * <li>{@code finished} 标识解析是否已全部完成：<b>仅最后一次回调为 {@code true}</b>，
- * 其余均为 {@code false}；正文无数据行时也会回调一次（{@code rowData} 为空）。</li>
+ *   <li>{@code rowData} 为 {@link LinkedHashMap}，<b>key 为列在 columns 中的下标（0..N-1）</b>，
+ *       迭代顺序与 columns 完全一致；</li>
+ *   <li>{@link CellData#getExcelIdx()} 是该列在 Excel 文件中的<b>实际物理列索引</b>；</li>
+ *   <li>{@link CellData#isValid()} / {@link CellData#getValidationErrorZh()} /
+ *       {@link CellData#getValidationErrorEn()} 携带非空校验结果与中英双语错误消息；</li>
+ *   <li>{@link RowCallback#onRow(int, LinkedHashMap)} 的 {@code rowIndex} 为 Excel
+ *       <b>物理行号</b>（0 开始），从表头行下一行起按物理位置递增；
+ *       空白行（含未创建的间隙行）<b>不跳过</b>，照常回调。</li>
  * </ol>
  *
  * <h2>Workbook 生命周期</h2>
  * <ul>
- * <li>{@code parse(File/byte[], ...)}：内部创建的 Workbook 与文件流均由工具类负责关闭
- * （同步模式在 {@code parse} 返回前，异步模式在正文读取完全结束时）；</li>
- * <li>{@code parse(InputStream, ...)}：内部创建的 Workbook 由工具类负责关闭；
- * 传入的流由调用方负责关闭（异步模式下请等正文读取完成后再关闭）；</li>
- * <li>{@code parse(Workbook, ...)}：传入的 Workbook 由调用方负责关闭。
- * <b>异步模式下请等正文读取完成后再关闭</b>（可设置
- * {@link HeaderConfig#setOnBodyComplete} 或在回调中控制）。</li>
+ *   <li>{@code parse(File/byte[], ...)}：内部创建的 Workbook 与文件流均由工具类负责关闭
+ *       （同步模式在 {@code parse} 返回前，异步模式在正文读取完全结束时）；</li>
+ *   <li>{@code parse(InputStream, ...)}：内部创建的 Workbook 由工具类负责关闭；
+ *       传入的流由调用方负责关闭（异步模式下请等正文读取完成后再关闭）；</li>
+ *   <li>{@code parse(Workbook, ...)}：传入的 Workbook 由调用方负责关闭。
+ *       <b>异步模式下请等正文读取完成后再关闭</b>（可设置
+ *       {@link HeaderConfig#setOnBodyComplete} 或在回调中控制）。</li>
  * </ul>
  */
+@Slf4j
 public final class ExcelReader {
 
     /**
@@ -163,15 +129,13 @@ public final class ExcelReader {
     /**
      * 列定义：中文名、英文名、是否允许为空。
      *
-     * <p>
-     * <b>语言填写规则：</b>
-     * </p>
+     * <p><b>语言填写规则：</b></p>
      * <ul>
-     * <li>只填中文 → 只参与中文校验；</li>
-     * <li>只填英文 → 只参与英文校验；</li>
-     * <li>中英都填 → 参与中英双套校验；</li>
-     * <li>都为空 → 构造抛异常；</li>
-     * <li>同一 columns 列表中<b>不允许</b>混合"只中文"与"只英文"。</li>
+     *   <li>只填中文 → 只参与中文校验；</li>
+     *   <li>只填英文 → 只参与英文校验；</li>
+     *   <li>中英都填 → 参与中英双套校验；</li>
+     *   <li>都为空 → 构造抛异常；</li>
+     *   <li>同一 columns 列表中<b>不允许</b>混合"只中文"与"只英文"。</li>
      * </ul>
      */
     @Getter
@@ -354,7 +318,7 @@ public final class ExcelReader {
         private final String validationErrorEn;
 
         CellData(String value, ColumnDef column, int excelIdx,
-                boolean valid, String validationErrorZh, String validationErrorEn) {
+                 boolean valid, String validationErrorZh, String validationErrorEn) {
             this.value = value == null ? "" : value;
             this.column = column;
             this.excelIdx = excelIdx;
@@ -379,29 +343,18 @@ public final class ExcelReader {
     /**
      * 正文行回调。
      *
-     * <p>
-     * <b>rowData 约定：</b>key = 列在 columns 中的下标（0..N-1），迭代顺序与 columns 完全一致；
-     * value = {@link CellData}。
-     * </p>
+     * <p><b>rowData 约定：</b>key = 列在 columns 中的下标（0..N-1），迭代顺序与 columns 完全一致；
+     * value = {@link CellData}。</p>
      *
-     * <p>
-     * <b>触发时机：</b>仅在表头校验通过之后；表头失败时一次都不会调用。
-     * </p>
+     * <p><b>触发时机：</b>仅在表头校验通过之后；表头失败时一次都不会调用。</p>
      *
-     * <p>
-     * <b>完成标识：</b>最后一次回调的 {@code finished} 为 {@code true}，其余为 {@code false}；
-     * 正文无任何数据行时也会回调一次（{@code rowData} 为空 map、{@code finished = true}）。
-     * </p>
-     *
-     * <p>
-     * <b>调用方式（关键）：</b>
-     * </p>
+     * <p><b>调用方式（关键）：</b></p>
      * <ul>
-     * <li><b>流式逐行回调</b>：每读一行 → 立即触发本方法 → 方法返回后 rowData 即可被 GC；</li>
-     * <li><b>同步模式</b>：在调用方线程执行，{@code parse(...)} 返回时已全部执行完；</li>
-     * <li><b>异步模式</b>：在 {@link HeaderConfig#getExecutor()} 指定的线程池执行，
-     * {@code parse(...)} <b>不等待</b>本方法执行完就返回。
-     * 实现时需保证线程安全，且<b>不要假设调用顺序与 main 线程的时序</b>。</li>
+     *   <li><b>流式逐行回调</b>：每读一行 → 立即触发本方法 → 方法返回后 rowData 即可被 GC；</li>
+     *   <li><b>同步模式</b>：在调用方线程执行，{@code parse(...)} 返回时已全部执行完；</li>
+     *   <li><b>异步模式</b>：在 {@link HeaderConfig#getExecutor()} 指定的线程池执行，
+     *       {@code parse(...)} <b>不等待</b>本方法执行完就返回。
+     *       实现时需保证线程安全，且<b>不要假设调用顺序与 main 线程的时序</b>。</li>
      * </ul>
      */
     @FunctionalInterface
@@ -412,25 +365,18 @@ public final class ExcelReader {
          *
          * @param rowIndex 当前行的 Excel 物理行号（0 开始）：从表头行下一行起按物理位置递增；
          *                 空白行（含从未创建的间隙行）同样触发本回调，不跳过
-         * @param rowData  当前行数据（迭代顺序与 columns 完全一致）；
-         *                 无数据行时的完成回调为空 map
-         * @param finished 是否已全部解析完成：{@code true} 表示当前行是最后一行（或无数据行时的
-         *                 完成回调），之后不会再有回调；{@code false} 表示还有后续行
+         * @param rowData  当前行数据（迭代顺序与 columns 完全一致）
          */
-        void onRow(int rowIndex, LinkedHashMap<Integer, CellData> rowData, boolean finished);
+        void onRow(int rowIndex, LinkedHashMap<Integer, CellData> rowData);
     }
 
     /**
      * 异步正文读取完成回调。
      *
-     * <p>
-     * 仅在异步模式（{@link HeaderConfig#setAsync(boolean)}）下触发：
-     * 正文全部读取完成或发生异常时调用一次，用于替代"只看 stderr"的异常感知方式。
-     * </p>
+     * <p>仅在异步模式（{@link HeaderConfig#setAsync(boolean)}）下触发：
+     * 正文全部读取完成或发生异常时调用一次，用于替代"只看 stderr"的异常感知方式。</p>
      *
-     * <p>
-     * <b>注意：</b>本回调在异步线程中执行，抛出异常不会影响主流程（仅打印到 stderr）。
-     * </p>
+     * <p><b>注意：</b>本回调在异步线程中执行，抛出异常不会影响主流程（仅打印到 stderr）。</p>
      */
     @FunctionalInterface
     public interface BodyCompleteListener {
@@ -480,14 +426,10 @@ public final class ExcelReader {
     /**
      * 解析结果。同步 / 异步模式下结构、方法、行为完全一致。
      *
-     * <p>
-     * 包含：表头校验结果（成功 / 失败）、命中语言、表头映射、中英双语简略/详细消息。
-     * </p>
+     * <p>包含：表头校验结果（成功 / 失败）、命中语言、表头映射、中英双语简略/详细消息。</p>
      *
-     * <p>
-     * <b>不提供行数 / 异步 Future / body 结果</b>——行数由调用方在回调中自行统计；
-     * 异步完成感知通过 {@link HeaderConfig#setOnBodyComplete} 回调。
-     * </p>
+     * <p><b>不提供行数 / 异步 Future / body 结果</b>——行数由调用方在回调中自行统计；
+     * 异步完成感知通过 {@link HeaderConfig#setOnBodyComplete} 回调。</p>
      */
     @Getter
     public static final class ParseResult {
@@ -528,10 +470,10 @@ public final class ExcelReader {
         private final List<HeaderCellInfo> headers;
 
         private ParseResult(boolean success,
-                String messageZh, String messageEn,
-                String messageZhShort, String messageEnShort,
-                HeaderLanguage language,
-                List<HeaderCellInfo> headers) {
+                            String messageZh, String messageEn,
+                            String messageZhShort, String messageEnShort,
+                            HeaderLanguage language,
+                            List<HeaderCellInfo> headers) {
             this.success = success;
             this.messageZh = messageZh;
             this.messageEn = messageEn;
@@ -556,8 +498,8 @@ public final class ExcelReader {
          * 内部工厂：失败（简写 ≠ 详细）。
          */
         static ParseResult fail(String zhDetail, String enDetail,
-                String zhShort, String enShort,
-                HeaderLanguage language, List<HeaderCellInfo> headers) {
+                                String zhShort, String enShort,
+                                HeaderLanguage language, List<HeaderCellInfo> headers) {
             return new ParseResult(false, zhDetail, enDetail, zhShort, enShort,
                     language, headers);
         }
@@ -566,7 +508,7 @@ public final class ExcelReader {
          * 内部工厂：失败（简写 = 详细）。
          */
         static ParseResult fail(String zhDetail, String enDetail,
-                HeaderLanguage language, List<HeaderCellInfo> headers) {
+                                HeaderLanguage language, List<HeaderCellInfo> headers) {
             return fail(zhDetail, enDetail, zhDetail, enDetail, language, headers);
         }
 
@@ -591,10 +533,8 @@ public final class ExcelReader {
     /**
      * 表头与解析配置。所有开关相互独立。
      *
-     * <p>
-     * <b>注意：</b>{@link #setAsync(boolean)} 只影响<b>正文的读取线程和 parse 返回时机</b>，
-     * 不影响返回的 {@link ParseResult} 结构。详见类注释的"async 参数说明"。
-     * </p>
+     * <p><b>注意：</b>{@link #setAsync(boolean)} 只影响<b>正文的读取线程和 parse 返回时机</b>，
+     * 不影响返回的 {@link ParseResult} 结构。详见类注释的"async 参数说明"。</p>
      */
     @Getter
     @Setter
@@ -648,9 +588,7 @@ public final class ExcelReader {
         /**
          * 工作表索引（0 开始），setter 做 {@code Math.max(0, ...)} 兜底。
          *
-         * <p>
-         * 超过文件实际工作表数量时解析直接失败（不再回退到最后一张表）。
-         * </p>
+         * <p>超过文件实际工作表数量时解析直接失败（不再回退到最后一张表）。</p>
          */
         @Setter(AccessLevel.NONE)
         private int sheetIndex = 0;
@@ -659,16 +597,14 @@ public final class ExcelReader {
          * 正文读取模式开关，默认 false。
          *
          * <ul>
-         * <li>{@code false}：同步模式——正文在调用方线程逐行流式回调，
-         * {@code parse(...)} 返回时回调已全部执行完；</li>
-         * <li>{@code true}：异步模式——表头通过后<b>{@code parse(...)} 立即返回</b>，
-         * 正文在 {@link #getExecutor()} 指定的线程池<b>逐行流式回调</b>。
-         * 适合大文件、UI 不阻塞场景。</li>
+         *   <li>{@code false}：同步模式——正文在调用方线程逐行流式回调，
+         *       {@code parse(...)} 返回时回调已全部执行完；</li>
+         *   <li>{@code true}：异步模式——表头通过后<b>{@code parse(...)} 立即返回</b>，
+         *       正文在 {@link #getExecutor()} 指定的线程池<b>逐行流式回调</b>。
+         *       适合大文件、UI 不阻塞场景。</li>
          * </ul>
          *
-         * <p>
-         * 两种模式下 {@link ParseResult} 结构相同；表头失败时行为也完全一致。
-         * </p>
+         * <p>两种模式下 {@link ParseResult} 结构相同；表头失败时行为也完全一致。</p>
          */
         private boolean async = false;
 
@@ -777,10 +713,8 @@ public final class ExcelReader {
     /**
      * 从文件解析（自动识别 .xls / .xlsx）。
      *
-     * <p>
-     * 工具类内部打开的文件流会在解析完全结束后关闭：同步模式为 {@code parse} 返回前，
-     * 异步模式为正文读取结束（或任务提交失败）之后。
-     * </p>
+     * <p>工具类内部打开的文件流会在解析完全结束后关闭：同步模式为 {@code parse} 返回前，
+     * 异步模式为正文读取结束（或任务提交失败）之后。</p>
      */
     public static ParseResult parse(File file, HeaderConfig config, RowCallback callback) throws IOException {
         if (file == null) {
@@ -796,9 +730,7 @@ public final class ExcelReader {
     /**
      * 从字节数组解析。
      *
-     * <p>
-     * 内部创建的流在解析完全结束后关闭（语义同 {@link #parse(File, HeaderConfig, RowCallback)}）。
-     * </p>
+     * <p>内部创建的流在解析完全结束后关闭（语义同 {@link #parse(File, HeaderConfig, RowCallback)}）。</p>
      */
     public static ParseResult parse(byte[] bytes, HeaderConfig config, RowCallback callback) throws IOException {
         if (bytes == null) {
@@ -812,10 +744,8 @@ public final class ExcelReader {
     /**
      * 从输入流解析（流由调用方负责关闭）。
      *
-     * <p>
-     * <b>异步模式</b>下请等正文读取完成（可设置
-     * {@link HeaderConfig#setOnBodyComplete}）后再关闭流。
-     * </p>
+     * <p><b>异步模式</b>下请等正文读取完成（可设置
+     * {@link HeaderConfig#setOnBodyComplete}）后再关闭流。</p>
      */
     public static ParseResult parse(InputStream in, HeaderConfig config, RowCallback callback) throws IOException {
         if (in == null) {
@@ -833,8 +763,8 @@ public final class ExcelReader {
      * @param mode       Phase 0 配置校验中已判定的语言模式
      */
     private static ParseResult parseStream(InputStream in, HeaderConfig cfg,
-            RowCallback callback, boolean ownsStream,
-            LanguageMode mode) throws IOException {
+                                           RowCallback callback, boolean ownsStream,
+                                           LanguageMode mode) throws IOException {
         Workbook workbook;
         try {
             workbook = WorkbookFactory.create(in);
@@ -857,10 +787,8 @@ public final class ExcelReader {
     /**
      * 从 Workbook 解析（不负责关闭）。
      *
-     * <p>
-     * <b>异步模式下</b>：调用方必须等正文读取完成后再关闭 Workbook，
-     * 否则异步读取会失败。可设置 {@link HeaderConfig#setOnBodyComplete} 感知完成。
-     * </p>
+     * <p><b>异步模式下</b>：调用方必须等正文读取完成后再关闭 Workbook，
+     * 否则异步读取会失败。可设置 {@link HeaderConfig#setOnBodyComplete} 感知完成。</p>
      */
     public static ParseResult parse(Workbook workbook, HeaderConfig config, RowCallback callback) {
         if (workbook == null) {
@@ -878,10 +806,8 @@ public final class ExcelReader {
     /**
      * Phase 0：纯配置校验（columns 非空、无 null 元素），并判定语言模式。
      *
-     * <p>
-     * 不依赖任何文件内容，必须在打开 / 全量加载文件之前完成：
-     * 配置错误快速失败，且异常类型与文件内容无关。
-     * </p>
+     * <p>不依赖任何文件内容，必须在打开 / 全量加载文件之前完成：
+     * 配置错误快速失败，且异常类型与文件内容无关。</p>
      */
     private static LanguageMode validateConfigAndDetectMode(HeaderConfig cfg) {
         List<ColumnDef> columns = cfg.getColumns();
@@ -899,8 +825,8 @@ public final class ExcelReader {
     }
 
     private static ParseResult parseWorkbookInternal(Workbook workbook, HeaderConfig cfg,
-            RowCallback callback, boolean ownsWorkbook,
-            InputStream ownedStream, LanguageMode mode) {
+                                                     RowCallback callback, boolean ownsWorkbook,
+                                                     InputStream ownedStream, LanguageMode mode) {
         // ---------- Phase 1：表头校验（始终同步） ----------
         HeaderCheckResult headerCheck;
         try {
@@ -943,10 +869,9 @@ public final class ExcelReader {
                     try {
                         readDataRows(sheet, finalHeaders, headerRowIndex, formatter, evaluator, callback);
                     } catch (Throwable t) {
-                        // 异步模式下异常无法通过返回值传播：写入 stderr，并通过 onBodyComplete 通知调用方
+                        // 异步模式下异常无法通过返回值传播：记录日志，并通过 onBodyComplete 通知调用方
                         bodyError = t;
-                        System.err.println("[ExcelReader] 异步正文读取异常: " + t.getMessage());
-                        t.printStackTrace();
+                        log.error("异步正文读取异常: {}", t.getMessage(), t);
                     } finally {
                         // Sheet / Workbook / 文件流全部在正文读取完全结束后才释放
                         release(ownsWorkbook, workbook, ownedStream);
@@ -997,7 +922,7 @@ public final class ExcelReader {
         try {
             listener.onComplete(bodyError == null, bodyError);
         } catch (RuntimeException e) {
-            System.err.println("[ExcelReader] onBodyComplete 回调异常: " + e.getMessage());
+            log.warn("[ExcelReader] onBodyComplete 回调异常: {}", e.getMessage(), e);
         }
     }
 
@@ -1005,20 +930,16 @@ public final class ExcelReader {
      * 异步读取默认线程池：线程数与队列容量均有上限的守护线程池，
      * 避免阻塞式正文读取占用 JVM 公共池，也避免任务无限堆积。
      *
-     * <p>
-     * 库级别使用，不主动关闭；如需受控生命周期请通过
-     * {@link HeaderConfig#setExecutor(Executor)} 显式传入线程池。
-     * </p>
+     * <p>库级别使用，不主动关闭；如需受控生命周期请通过
+     * {@link HeaderConfig#setExecutor(Executor)} 显式传入线程池。</p>
      */
     private static final class DefaultExecutorHolder {
 
         /**
          * 排队任务上限：超过后拒绝任务，由调用方收到"提交失败"结果。
          *
-         * <p>
-         * 每个排队任务都持有已打开的 Workbook，容量过大会同时占用大量文件句柄与内存，
-         * 因此保持较小值（线程数的数倍）。
-         * </p>
+         * <p>每个排队任务都持有已打开的 Workbook，容量过大会同时占用大量文件句柄与内存，
+         * 因此保持较小值（线程数的数倍）。</p>
          */
         private static final int QUEUE_CAPACITY = 64;
 
@@ -1120,7 +1041,7 @@ public final class ExcelReader {
         int sheetIdx = cfg.getSheetIndex();
         if (sheetIdx < 0 || sheetIdx >= workbook.getNumberOfSheets()) {
             result.setMessage("工作表索引超出范围：请求第 " + (sheetIdx + 1) + " 个工作表，实际共 "
-                    + workbook.getNumberOfSheets() + " 个",
+                            + workbook.getNumberOfSheets() + " 个",
                     "Worksheet index out of range: requested #" + (sheetIdx + 1) + ", but the file has "
                             + workbook.getNumberOfSheets() + " worksheet(s)");
             return result;
@@ -1230,22 +1151,18 @@ public final class ExcelReader {
         String prefixZh = "表头校验失败" + buildIgnoreInfoZh(cfg) + "：";
         String prefixEn = "Header validation failed" + buildIgnoreInfoEn(cfg) + ": ";
         result.messageZhDetail = prefixZh + (v.errorsZhDetail.isEmpty()
-                ? "表头与要求不符"
-                : String.join("；", v.errorsZhDetail));
+                ? "表头与要求不符" : String.join("；", v.errorsZhDetail));
         result.messageZhShort = prefixZh + (v.errorsZhShort.isEmpty()
-                ? "表头与要求不符"
-                : String.join("；", v.errorsZhShort));
+                ? "表头与要求不符" : String.join("；", v.errorsZhShort));
         result.messageEnDetail = prefixEn + (v.errorsEnDetail.isEmpty()
-                ? "headers do not match the required definition"
-                : String.join("; ", v.errorsEnDetail));
+                ? "headers do not match the required definition" : String.join("; ", v.errorsEnDetail));
         result.messageEnShort = prefixEn + (v.errorsEnShort.isEmpty()
-                ? "headers do not match the required definition"
-                : String.join("; ", v.errorsEnShort));
+                ? "headers do not match the required definition" : String.join("; ", v.errorsEnShort));
     }
 
     private static List<HeaderCellInfo> readHeaderCells(Row headerRow, DataFormatter formatter,
-            FormulaEvaluator evaluator,
-            boolean ignoreBlankColumns) {
+                                                        FormulaEvaluator evaluator,
+                                                        boolean ignoreBlankColumns) {
         List<HeaderCellInfo> list = new ArrayList<>();
         int last = headerRow.getLastCellNum();
         if (last < 0) {
@@ -1271,23 +1188,14 @@ public final class ExcelReader {
     /**
      * 逐行读取表体并流式调用 {@link RowCallback#onRow}。
      *
-     * <p>
-     * <b>流式特性：</b>每读一行立即回调 → 方法返回后 rowData 可被 GC，
-     * 不缓存历史行数据。适合处理大型 Excel。
-     * </p>
+     * <p><b>流式特性：</b>每读一行立即回调 → 方法返回后 rowData 可被 GC，
+     * 不缓存历史行数据。适合处理大型 Excel。</p>
      *
-     * <p>
-     * <b>callback == null 时</b>：直接返回，不读取正文（调用方只校验表头时使用）。
-     * </p>
-     *
-     * <p>
-     * <b>无数据行时</b>：仍回调一次空 {@code rowData} 且 {@code finished = true}，
-     * 保证调用方始终能收到解析完成的通知。
-     * </p>
+     * <p><b>callback == null 时</b>：直接返回，不读取正文（调用方只校验表头时使用）。</p>
      */
     private static void readDataRows(Sheet sheet, List<HeaderCellInfo> headers,
-            int headerRowIndex, DataFormatter formatter,
-            FormulaEvaluator evaluator, RowCallback callback) {
+                                     int headerRowIndex, DataFormatter formatter,
+                                     FormulaEvaluator evaluator, RowCallback callback) {
         if (callback == null) {
             return;
         }
@@ -1302,11 +1210,6 @@ public final class ExcelReader {
 
         int start = headerRowIndex + 1;
         int last = sheet.getLastRowNum();
-        if (start > last) {
-            // 无数据行：仍回调一次（rowData 为空），用于告知调用方解析已全部完成
-            callback.onRow(start, new LinkedHashMap<>(), true);
-            return;
-        }
         for (int r = start; r <= last; r++) {
             // 空白行（包括整行不存在的情况）也必须回调，由非空校验标记必填列缺失
             Row row = sheet.getRow(r);
@@ -1322,8 +1225,7 @@ public final class ExcelReader {
                 } catch (RuntimeException e) {
                     throw new IllegalStateException(
                             String.format("第 %d 行，Excel 列索引 %d 读取失败：%s",
-                                    r + 1, excelCols[i], e.getMessage()),
-                            e);
+                                    r + 1, excelCols[i], e.getMessage()), e);
                 }
             }
 
@@ -1360,7 +1262,7 @@ public final class ExcelReader {
                 rowData.put(i, new CellData(value, def, excelColIdx, valid, errZh, errEn));
             }
             try {
-                callback.onRow(r, rowData, r == last);
+                callback.onRow(r, rowData);
             } catch (RuntimeException e) {
                 throw new IllegalStateException(
                         String.format("第 %d 行回调处理失败：%s", r + 1, e.getMessage()), e);
@@ -1410,14 +1312,11 @@ public final class ExcelReader {
                             String.format("第 %d 个表头（Excel 列索引 %d）期望为 [%s]，实际为 [%s]",
                                     i + 1, info.getColumnIndex(), expected.get(i), actualDisplay),
                             String.format("第 %d 个表头（Excel 列索引 %d）期望为 [%s]，实际为 [%s]；期望表头顺序为 %s，实际表头顺序为 %s",
-                                    i + 1, info.getColumnIndex(), expected.get(i), actualDisplay, expected,
-                                    actualOrder),
+                                    i + 1, info.getColumnIndex(), expected.get(i), actualDisplay, expected, actualOrder),
                             String.format("Header #%d (column index %d) expected [%s] but was [%s]",
                                     i + 1, info.getColumnIndex(), expected.get(i), actualDisplay),
-                            String.format(
-                                    "Header #%d (column index %d) expected [%s] but was [%s]; expected order %s, actual order %s",
-                                    i + 1, info.getColumnIndex(), expected.get(i), actualDisplay, expected,
-                                    actualOrder));
+                            String.format("Header #%d (column index %d) expected [%s] but was [%s]; expected order %s, actual order %s",
+                                    i + 1, info.getColumnIndex(), expected.get(i), actualDisplay, expected, actualOrder));
                     mismatch = true;
                     break;
                 }
@@ -1431,8 +1330,7 @@ public final class ExcelReader {
                             "缺少必需的表头: " + missing,
                             "缺少必需的表头: " + missing + "；期望表头顺序为 " + expected + "，实际表头顺序为 " + actualOrder,
                             "Missing required headers: " + missing,
-                            "Missing required headers: " + missing + "; expected order " + expected + ", actual order "
-                                    + actualOrder);
+                            "Missing required headers: " + missing + "; expected order " + expected + ", actual order " + actualOrder);
                 }
                 if (!cfg.isAllowExtraHeaders() && actual.size() > expected.size()) {
                     List<String> extra = new ArrayList<>();
@@ -1444,8 +1342,7 @@ public final class ExcelReader {
                             "存在不允许的额外表头: " + extra,
                             "存在不允许的额外表头: " + extra + "；期望表头顺序为 " + expected + "，实际表头顺序为 " + actualOrder,
                             "Unexpected extra headers: " + extra,
-                            "Unexpected extra headers: " + extra + "; expected order " + expected + ", actual order "
-                                    + actualOrder);
+                            "Unexpected extra headers: " + extra + "; expected order " + expected + ", actual order " + actualOrder);
                 }
             }
         } else {
@@ -1495,9 +1392,7 @@ public final class ExcelReader {
     /**
      * 双语表头均失败时，按实际表头语言选出一套校验结果作为错误消息来源。
      *
-     * <p>
-     * 正常情况下两套校验都会失败；仅当首选校验意外通过时，才改用另一套的失败信息。
-     * </p>
+     * <p>正常情况下两套校验都会失败；仅当首选校验意外通过时，才改用另一套的失败信息。</p>
      */
     private static Validation pickPrimary(Validation zhV, Validation enV, List<HeaderCellInfo> actual) {
         boolean actualHasChinese = false;
@@ -1666,10 +1561,8 @@ public final class ExcelReader {
     /**
      * 单元格是否为 Excel 错误值（#DIV/0!、#VALUE! 等）。
      *
-     * <p>
-     * 公式单元格使用 {@link Cell#getCachedFormulaResultType()} 判断：该值由
-     * {@link #cellToString} 中的一次求值写入，避免对同一公式重复求值。
-     * </p>
+     * <p>公式单元格使用 {@link Cell#getCachedFormulaResultType()} 判断：该值由
+     * {@link #cellToString} 中的一次求值写入，避免对同一公式重复求值。</p>
      */
     private static boolean isErrorCell(Cell cell) {
         if (cell == null) {

@@ -1,5 +1,6 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.regex.Pattern;
@@ -78,6 +79,17 @@ public final class CertNoUtil {
         String checkCode = getCheckCodeBySum(sum);
 
         if (checkCode == null || !idcard18Code.equalsIgnoreCase(checkCode)) {
+            return false;
+        }
+
+        // 校验码通过后，进一步校验出生日期是否为真实存在的日期且不晚于今天，避免 20230231 这类号码被判定为合法
+        try {
+            LocalDate birthday = LocalDate.of(Integer.parseInt(idcard17.substring(6, 10)),
+                    Integer.parseInt(idcard17.substring(10, 12)), Integer.parseInt(idcard17.substring(12, 14)));
+            if (birthday.isAfter(LocalDate.now())) {
+                return false;
+            }
+        } catch (DateTimeException e) {
             return false;
         }
 

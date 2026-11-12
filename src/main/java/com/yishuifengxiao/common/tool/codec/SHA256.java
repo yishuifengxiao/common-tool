@@ -2,6 +2,7 @@ package com.yishuifengxiao.common.tool.codec;
 
 import com.yishuifengxiao.common.tool.lang.Hex;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -20,8 +21,11 @@ public class SHA256 {
      * @return 计算得到的SHA256哈希值的十六进制表示
      */
     public static String calculateSHA256FromHex(String hex) {
-        // 将十六进制字符串转换为字节数组，再转换回十六进制字符串
-        return calculateSHA256(Hex.hexToBytes(hex));
+        byte[] data = Hex.hexToBytes(hex);
+        if (data == null) {
+            throw new IllegalArgumentException("无效的十六进制字符串");
+        }
+        return calculateSHA256(data);
     }
 
 
@@ -29,19 +33,25 @@ public class SHA256 {
      * 计算字符串的 SHA-256 哈希值
      *
      * @param input 输入字符串
-     * @return 十六进制格式的 SHA-256 哈希值
+     * @return 十六进制格式的 SHA-256 哈希值，输入为null时返回null
      */
     public static String calculateSHA256(String input) {
-        return calculateSHA256(input.getBytes());
+        if (null == input) {
+            return null;
+        }
+        return calculateSHA256(input.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
      * 计算字节数组的 SHA-256 哈希值
      *
      * @param input 输入字节数组
-     * @return 十六进制格式的 SHA-256 哈希值
+     * @return 十六进制格式的 SHA-256 哈希值，输入为null时返回null
      */
     public static String calculateSHA256(byte[] input) {
+        if (null == input) {
+            return null;
+        }
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             digest.update(input);

@@ -2,6 +2,7 @@ package com.yishuifengxiao.common.tool.lang;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * <p>OID（对象标识符）工具类</p>
@@ -31,7 +32,7 @@ public class OID {
         if (hexStr == null) {
             throw new IllegalArgumentException("hex string cannot be null");
         }
-        hexStr = hexStr.toLowerCase().replaceAll("\\s+", "");
+        hexStr = hexStr.toLowerCase(Locale.ROOT).replaceAll("\\s+", "");
 
         if (hexStr.isEmpty()) {
             throw new IllegalArgumentException("empty hex string");
@@ -63,7 +64,8 @@ public class OID {
             }
         }
         
-        if (firstByteIndex > data.length) {
+        // 循环因字节耗尽而结束，且最后一个字节仍带延续位，说明首段编码不完整
+        if ((data[data.length - 1] & 0x80) != 0) {
             throw new IllegalArgumentException("incomplete base128 encoding for first component");
         }
         
@@ -157,6 +159,10 @@ public class OID {
                 if (val < 0) {
                     throw new IllegalArgumentException("negative number not allowed");
                 }
+                // OID 每个节点按 ASN.1 规范最大为 2^32-1，超限会让后续编码产生非法结果
+                if (val > 0xFFFFFFFFL) {
+                    throw new IllegalArgumentException("OID component out of range (max 4294967295): " + part);
+                }
                 components.add(val);
             } catch (NumberFormatException e) {
                 throw new IllegalArgumentException("invalid OID component: " + part);
@@ -194,7 +200,7 @@ public class OID {
             resultArray[i] = resultBytes.get(i);
         }
 
-        return bytesToHex(resultArray).toUpperCase();
+        return bytesToHex(resultArray).toUpperCase(Locale.ROOT);
     }
 
 

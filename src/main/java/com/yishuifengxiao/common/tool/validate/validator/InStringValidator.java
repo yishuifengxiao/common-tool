@@ -43,13 +43,14 @@ public class InStringValidator implements ConstraintValidator<InString, String> 
     public boolean isValid(String value, ConstraintValidatorContext context) {
 
         if (this.nullable) {
-            //允许为空
-            if (StringUtils.isBlank(value)) {
+            //nullable 仅放行 null，空白字符串仍需要参与集合匹配
+            if (value == null) {
                 return true;
             }
             return this.sensitive ? Arrays.stream(values).filter(StringUtils::isNotBlank)
                     .anyMatch(v -> Objects.equals(v, value)) :
-                    Arrays.stream(values).anyMatch(v -> v != null && v.equalsIgnoreCase(value));
+                    Arrays.stream(values).filter(StringUtils::isNotBlank)
+                    .anyMatch(v -> v.equalsIgnoreCase(value));
         }
         //不允许为空
         if (StringUtils.isBlank(value)) {
@@ -57,7 +58,8 @@ public class InStringValidator implements ConstraintValidator<InString, String> 
         }
         return this.sensitive ? Arrays.stream(values).filter(StringUtils::isNotBlank)
                 .anyMatch(v -> Objects.equals(v, value)) :
-                Arrays.stream(values).anyMatch(v -> v != null && v.equalsIgnoreCase(value));
+                Arrays.stream(values).filter(StringUtils::isNotBlank)
+                .anyMatch(v -> v.equalsIgnoreCase(value));
     }
 
 }

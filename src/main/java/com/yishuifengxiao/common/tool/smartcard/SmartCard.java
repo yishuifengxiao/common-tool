@@ -136,17 +136,24 @@ public class SmartCard {
     public synchronized SmartCard connect(String terminalName) {
         CardTerminal terminal = this.getCardTerminals().getTerminal(terminalName);
         if (null == terminal) {
-            this.card = null;
+            // 终端不存在时释放已有物理连接，避免 card 被置空后连接泄漏
+            disconnect();
             throw new UncheckedException("未找到名称为" + terminalName + "的终端");
         }
-        if (null == this.card) {
-            try {
-                this.card = terminal.connect("*");
-            } catch (CardException e) {
-                throw new UncheckedException("建立与卡片的连接失败", e);
+        if (null != this.card) {
+            if (!Objects.equals(this.terminalName, terminalName)) {
+                // 切换到其他读卡器前必须断开旧连接，否则后续 APDU 仍发往旧卡片
+                disconnect();
+            } else {
+                return this;
             }
-            log.debug("成功连接到读卡器: {}", terminalName);
         }
+        try {
+            this.card = terminal.connect("*");
+        } catch (CardException e) {
+            throw new UncheckedException("建立与卡片的连接失败", e);
+        }
+        log.debug("成功连接到读卡器: {}", terminalName);
         this.terminalName = terminalName;
         return this;
     }
@@ -725,8 +732,8 @@ public class SmartCard {
 
             if (!transmitResult.isSuccess()) {
                 log.warn("第{}个分包时执行命令{}失败，SW1=0x{},SW2=0x{}", i + 1, command,
-                        Integer.toHexString(transmitResult.getSw1()).toUpperCase(),
-                        Integer.toHexString(transmitResult.getSw2()).toUpperCase());
+                        String.format("%02X", transmitResult.getSw1()),
+                        String.format("%02X", transmitResult.getSw2()));
                 break;
             }
         }

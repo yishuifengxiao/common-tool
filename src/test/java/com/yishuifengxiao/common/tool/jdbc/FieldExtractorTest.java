@@ -1,6 +1,5 @@
 package com.yishuifengxiao.common.tool.jdbc;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
@@ -151,28 +150,6 @@ class FieldExtractorTest {
         public ParentEntity(Long id, String parentName) {
             this.id = id;
             this.parentName = parentName;
-        }
-    }
-
-    @BeforeEach
-    void setUp() {
-        // 清理缓存
-        try {
-            Field fieldsMapField = FieldExtractor.class.getDeclaredField("FIELDS_MAP");
-            fieldsMapField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, List<FieldValue>> fieldsCache =
-                    (java.util.Map<String, List<FieldValue>>) fieldsMapField.get(null);
-            fieldsCache.clear();
-
-            Field tableMapField = FieldExtractor.class.getDeclaredField("TABLE_MAP");
-            tableMapField.setAccessible(true);
-            @SuppressWarnings("unchecked")
-            java.util.Map<String, String> tableCache =
-                    (java.util.Map<String, String>) tableMapField.get(null);
-            tableCache.clear();
-        } catch (Exception e) {
-            fail("清理缓存失败: " + e.getMessage());
         }
     }
 

@@ -1,8 +1,9 @@
 package com.yishuifengxiao.common.tool.http;
 
-import java.nio.file.Paths;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
 
@@ -121,25 +122,26 @@ public final class UrlUtil {
         if (StringUtils.isBlank(domain)) {
             return null;
         }
-        domain = domain.toLowerCase();
+        domain = domain.toLowerCase(Locale.ROOT);
         String[] tokens = StringUtils.splitByWholeSeparatorPreserveAllTokens(domain, ".");
+        if (tokens.length < 2) {
+            return null;
+        }
         int position = tokens.length - 2;
-        if (domain.contains(COM_CN_DOMAIN) || domain.contains(GOV_CN_DOMAIN) || domain.contains(EDU_CN_DOMAIN)) {
+        // 取末尾两级标签做精确比较，避免 "acom.cn" 被 "com.cn" 的子串匹配误判
+        String suffix = tokens[tokens.length - 2] + "." + tokens[tokens.length - 1];
+        if (COM_CN_DOMAIN.equals(suffix) || GOV_CN_DOMAIN.equals(suffix) || EDU_CN_DOMAIN.equals(suffix)) {
             position -= 1;
         }
 
-        if (position >= 0 && position < tokens.length) {
-            return tokens[position];
-        } else {
-            return null;
-        }
+        return position >= 0 ? tokens[position] : null;
     }
 
-        /**
+    /**
      * 从URL字符串中提取协议部分
      *
      * @param url 输入的URL字符串
-     * @return 返回URL中的协议部分，如果URL为空或解析失败则返回null
+     * @return 返回URL中的协议部分（统一小写），如果URL为空或解析失败则返回null
      */
     public static String extractProtocol(String url) {
         if (StringUtils.isBlank(url)) {
@@ -147,12 +149,10 @@ public final class UrlUtil {
         }
 
         try {
-            // 使用正则表达式匹配URL中的协议和主机部分
-            Matcher matcher = RegexUtil.PATTERN_PROTOCOL_AND_HOST.matcher(url);
-            return matcher.find() ? matcher.group(1) : null;
-        } catch (IllegalStateException e) {
-            return null;
-        } catch (Exception e) {
+            // 直接使用 URI 解析协议，兼容域名、IP、localhost 以及任意合法 scheme
+            String scheme = URI.create(url.trim()).getScheme();
+            return null == scheme ? null : scheme.toLowerCase(Locale.ROOT);
+        } catch (IllegalArgumentException e) {
             return null;
         }
     }
@@ -184,41 +184,12 @@ public final class UrlUtil {
         }
 
         try {
-            if (url.startsWith(OsUtils.LEFT_SLASH)) {
-                int lastSlashIndex = referrer.lastIndexOf(OsUtils.LEFT_SLASH);
-                if (lastSlashIndex <= 8) { // 协议头长度 "http://" or "https://"
-                    return null;
-                }
-                return referrer.substring(0, lastSlashIndex) + url;
-            }
-
-            if (url.startsWith(RELATIVE_ADDR)) {
-                long count = StringUtils.countMatches(url, RELATIVE_ADDR);
-                String baseReferrer = referrer;
-
-                for (int i = 0; i < count; i++) {
-                    int lastSlashIndex = baseReferrer.lastIndexOf(OsUtils.LEFT_SLASH);
-                    if (lastSlashIndex <= 8) {
-                        return null;
-                    }
-                    baseReferrer = baseReferrer.substring(0, lastSlashIndex);
-                }
-
-                // 安全地移除所有 "../" 并规范化路径
-                String normalizedRelativePath = Paths.get("", url).normalize().toString().replace('\\', '/');
-                if (normalizedRelativePath.startsWith("../")) {
-                    return null; // 路径越界
-                }
-
-                return baseReferrer + OsUtils.LEFT_SLASH + normalizedRelativePath;
-            }
-
-            int lastSlashIndex = referrer.lastIndexOf(OsUtils.LEFT_SLASH);
-            if (lastSlashIndex <= 8) {
+            URI baseUri = new URI(referrer);
+            if (!baseUri.isAbsolute()) {
                 return null;
             }
-            return referrer.substring(0, lastSlashIndex) + OsUtils.LEFT_SLASH + url;
-
+            // 按 RFC 3986 解析相对地址，统一处理 "/"、"../"、"." 以及协议相对地址
+            return baseUri.resolve(url).toString();
         } catch (Exception e) {
             return null;
         }
@@ -255,7 +226,7 @@ public final class UrlUtil {
             }
 
             String[] strings = token.split("=", 2);
-            if (strings.length < 1 || StringUtils.isBlank(strings[0])) {
+            if (StringUtils.isBlank(strings[0])) {
                 continue;
             }
 
@@ -263,7 +234,13 @@ public final class UrlUtil {
             String value;
 
             try {
-                key = java.net.URLDecoder.decode(strings[0].trim(), "UTF-8");
+                String rawKey = strings[0].trim();
+                try {
+                    key = java.net.URLDecoder.decode(rawKey, "UTF-8");
+                } catch (IllegalArgumentException e) {
+                    // key 含不完整转义序列时按原始值使用，避免单个参数导致整体解析失败
+                    key = rawKey;
+                }
                 // 对于值部分，如果包含不完整的转义序列，直接使用原始值
                 if (strings.length > 1) {
                     try {
@@ -280,6 +257,9 @@ public final class UrlUtil {
                 throw new RuntimeException("Unsupported encoding", e);
             }
 
+            if (StringUtils.isBlank(key)) {
+                continue;
+            }
             map.put(key, value);
         }
         return map;

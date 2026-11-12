@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -75,11 +76,14 @@ public class CustomStringJavaCompiler {
     public boolean compile() {
         Assert.isNotBlank("不是java代码", this.fullClassName);
         if (null == this.compile) {
-            StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnosticsCollector, null, null);
-            JavaFileManager javaFileManager = new StringJavaFileManage(standardFileManager);
-            JavaFileObject javaFileObject = new StringJavaFileObject(fullClassName, sourceCode);
-            JavaCompiler.CompilationTask task = compiler.getTask(null, javaFileManager, diagnosticsCollector, null, null, Arrays.asList(javaFileObject));
-            this.compile = task.call();
+            try (StandardJavaFileManager standardFileManager = compiler.getStandardFileManager(diagnosticsCollector, null, StandardCharsets.UTF_8)) {
+                JavaFileManager javaFileManager = new StringJavaFileManage(standardFileManager);
+                JavaFileObject javaFileObject = new StringJavaFileObject(fullClassName, sourceCode);
+                JavaCompiler.CompilationTask task = compiler.getTask(null, javaFileManager, diagnosticsCollector, null, null, Arrays.asList(javaFileObject));
+                this.compile = task.call();
+            } catch (IOException e) {
+                throw new RuntimeException("关闭Java文件管理器失败", e);
+            }
         }
         return this.compile;
     }

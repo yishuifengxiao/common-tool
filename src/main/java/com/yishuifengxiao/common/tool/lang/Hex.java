@@ -79,8 +79,8 @@ public class Hex {
             }
             bytes[i / 2] = (byte) ((high << 4) + low);
         }
-        // 使用 US-ASCII 解码，若字节值超出 0~127 仍保留原值（扩展 ASCII）
-        return new String(bytes, StandardCharsets.US_ASCII);
+        // 使用 ISO-8859-1（Latin-1）解码，覆盖 0x00~0xFF 全字节范围（扩展 ASCII）
+        return new String(bytes, StandardCharsets.ISO_8859_1);
     }
 
     /**
@@ -96,7 +96,6 @@ public class Hex {
         if (ascii == null) {
             throw new IllegalArgumentException("ascii must not be null");
         }
-        ascii = StringUtils.trim(ascii);
         if (ascii.isEmpty()) {
             return "";
         }
@@ -141,11 +140,22 @@ public class Hex {
         if (null == hexStr) {
             return null;
         }
-        byte[] resultBytes = new byte[hexStr.length() / 2];
+        String clean = TextUtil.removeWhitespaceAndInvisible(hexStr);
+        if (clean.isEmpty()) {
+            return "";
+        }
+        if (clean.length() % 2 != 0) {
+            throw new IllegalArgumentException("Hex string length must be even, but got " + clean.length());
+        }
+        byte[] resultBytes = new byte[clean.length() / 2];
         // 将十六进制字符串按每两位分割并转换为字节数组
-        for (int i = 0; i < hexStr.length(); i += 2) {
-            String hexPair = hexStr.substring(i, i + 2);
-            resultBytes[i / 2] = (byte) Integer.parseInt(hexPair, 16);
+        for (int i = 0; i < clean.length(); i += 2) {
+            int high = Character.digit(clean.charAt(i), 16);
+            int low = Character.digit(clean.charAt(i + 1), 16);
+            if (high == -1 || low == -1) {
+                throw new IllegalArgumentException("Invalid hex character at position " + i);
+            }
+            resultBytes[i / 2] = (byte) ((high << 4) + low);
         }
 
         return new String(resultBytes, StandardCharsets.UTF_8);
@@ -187,8 +197,9 @@ public class Hex {
         // 移除可能存在的空格
         hex = hex.replaceAll("\\s", "");
 
-        // 检查十六进制字符串长度是否为偶数
+        // isHex 已保证长度为偶数且只包含十六进制字符
         if (!isHex(hex)) {
+            log.warn("非法的十六进制字符串: {}", hex);
             return null;
         }
 
@@ -199,11 +210,6 @@ public class Hex {
             // 每两个字符解析为一个字节
             int firstDigit = Character.digit(hex.charAt(i), 16);
             int secondDigit = Character.digit(hex.charAt(i + 1), 16);
-
-            if (firstDigit == -1 || secondDigit == -1) {
-                return null;
-            }
-
             data[i / 2] = (byte) ((firstDigit << 4) + secondDigit);
         }
 

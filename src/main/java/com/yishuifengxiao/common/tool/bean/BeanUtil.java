@@ -40,6 +40,23 @@ import java.util.stream.StreamSupport;
 public final class BeanUtil {
 
     /**
+     * 基本类型与包装类型映射表，避免每次类型判断都重复创建
+     */
+    private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPER_MAP = new HashMap<>();
+
+    static {
+        PRIMITIVE_WRAPPER_MAP.put(boolean.class, Boolean.class);
+        PRIMITIVE_WRAPPER_MAP.put(byte.class, Byte.class);
+        PRIMITIVE_WRAPPER_MAP.put(char.class, Character.class);
+        PRIMITIVE_WRAPPER_MAP.put(short.class, Short.class);
+        PRIMITIVE_WRAPPER_MAP.put(int.class, Integer.class);
+        PRIMITIVE_WRAPPER_MAP.put(long.class, Long.class);
+        PRIMITIVE_WRAPPER_MAP.put(float.class, Float.class);
+        PRIMITIVE_WRAPPER_MAP.put(double.class, Double.class);
+        PRIMITIVE_WRAPPER_MAP.put(void.class, Void.class);
+    }
+
+    /**
      * 将源对象里属性值复制给目标对象
      *
      * @param <S>    源对象的类型
@@ -68,9 +85,8 @@ public final class BeanUtil {
                 continue;
             }
 
-            boolean isTargetAccessible = targetField.canAccess(target);
-            boolean isSourceAccessible = sourceField.canAccess(source);
             try {
+                // 只设置为可访问，不再恢复为 false，避免并发复制时其他线程出现 IllegalAccessException
                 targetField.setAccessible(true);
                 sourceField.setAccessible(true);
 
@@ -97,10 +113,6 @@ public final class BeanUtil {
                 if (log.isDebugEnabled()) {
                     log.debug("复制属性{}时出现问题，从{}到{}，问题原因：{}", fieldName, source.getClass().getSimpleName(), target.getClass().getSimpleName(), e.getMessage(), e);
                 }
-            } finally {
-                // 还原字段可访问性
-                targetField.setAccessible(isTargetAccessible);
-                sourceField.setAccessible(isSourceAccessible);
             }
         }
 
@@ -118,16 +130,7 @@ public final class BeanUtil {
         }
 
         // 处理基本类型和包装类型之间的兼容
-        Map<Class<?>, Class<?>> primitiveWrapperMap = new HashMap<>();
-        primitiveWrapperMap.put(boolean.class, Boolean.class);
-        primitiveWrapperMap.put(byte.class, Byte.class);
-        primitiveWrapperMap.put(char.class, Character.class);
-        primitiveWrapperMap.put(short.class, Short.class);
-        primitiveWrapperMap.put(int.class, Integer.class);
-        primitiveWrapperMap.put(long.class, Long.class);
-        primitiveWrapperMap.put(float.class, Float.class);
-        primitiveWrapperMap.put(double.class, Double.class);
-        primitiveWrapperMap.put(void.class, Void.class);
+        Map<Class<?>, Class<?>> primitiveWrapperMap = PRIMITIVE_WRAPPER_MAP;
 
         // 检查基本类型到包装类型和包装类型到基本类型的转换
         if (targetType.equals(primitiveWrapperMap.get(sourceType)) || sourceType.equals(primitiveWrapperMap.get(targetType))) {
@@ -330,7 +333,7 @@ public final class BeanUtil {
             // 处理布尔类型
             if (targetType == Boolean.class || targetType == boolean.class) {
                 // 增强：支持更多的布尔值表示
-                String lowerValue = value.trim().toLowerCase();
+                String lowerValue = value.trim().toLowerCase(Locale.ROOT);
                 return (T) Boolean.valueOf("true".equals(lowerValue) || "yes".equals(lowerValue) || "y".equals(lowerValue) || "1".equals(lowerValue));
             }
 
@@ -446,7 +449,8 @@ public final class BeanUtil {
                         if (java.util.Date.class.isAssignableFrom(targetType)) {
                             return (T) new java.util.Date(timestamp);
                         } else if (targetType == java.time.LocalDateTime.class) {
-                            return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(timestamp), java.time.ZoneId.systemDefault());
+                            return (T) java.time.LocalDateTime.ofInstant(java.time.Instant.ofEpochMilli(timestamp),
+                                    java.time.ZoneId.systemDefault());
                         } else if (targetType == java.time.Instant.class) {
                             return (T) java.time.Instant.ofEpochMilli(timestamp);
                         }
@@ -802,8 +806,11 @@ public final class BeanUtil {
     private static <T> void setFieldsFromMap(ObjectMapper mapper, T instance, Map<String, Object> map) throws Exception {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             try {
-                // 获取目标字段并设置可访问性
-                java.lang.reflect.Field field = instance.getClass().getDeclaredField(entry.getKey());
+                // 使用ClassUtil查找字段，支持父类中定义的字段
+                java.lang.reflect.Field field = ClassUtil.findField(instance.getClass(), entry.getKey());
+                if (null == field) {
+                    continue;
+                }
                 field.setAccessible(true);
 
                 Object value = entry.getValue();
@@ -813,8 +820,11 @@ public final class BeanUtil {
                 }
 
                 field.set(instance, value);
-            } catch (NoSuchFieldException e) {
-                // 忽略不存在的字段
+            } catch (IllegalArgumentException e) {
+                // 忽略类型无法转换的单字段，避免影响其他字段的赋值
+                if (log.isDebugEnabled()) {
+                    log.debug("设置字段{}失败: {}", entry.getKey(), e.getMessage());
+                }
             }
         }
     }

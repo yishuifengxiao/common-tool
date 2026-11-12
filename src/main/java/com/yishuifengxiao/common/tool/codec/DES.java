@@ -8,6 +8,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 /**
@@ -34,7 +35,12 @@ public class DES {
     private static final String TYPE = "DES";
 
     /**
-     * 密钥长度必须为8的倍数
+     * 加密转换方式，显式声明避免依赖JCE默认值
+     */
+    private static final String TRANSFORMATION = "DES/ECB/PKCS5Padding";
+
+    /**
+     * DES密钥的有效长度（字节）
      */
     private static final int LENGTH = 8;
 
@@ -42,17 +48,21 @@ public class DES {
     /**
      * 对输入的数据进行加密
      *
-     * @param key  加密的密钥，如果为空则以默认密码进行加密，如果密钥长度不是8的倍数，系统会自动补0
+     * @param key  加密的密钥，如果为空则以默认密码进行加密；不足8个字符自动补0，超过8个字符截断为前8个字符
      * @param data 需要加密的数据
      * @return 加密后的数据, null表示加密失败
      */
     public static final String encrypt(String key, String data) {
+        if (null == data) {
+            return null;
+        }
         try {
-            return Hex.bytesToHex(encrypt(data.getBytes("utf-8"), keyValidate(key).getBytes("utf-8")));
+            return Hex.bytesToHex(encrypt(data.getBytes(StandardCharsets.UTF_8),
+                    keyValidate(key).getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("There is a problem encrypting data {}  with a key, and the reason for the problem is {}",
-                        data, e);
+            // 不记录明文数据，避免敏感信息进入日志
+            if (log.isDebugEnabled()) {
+                log.debug("数据加密失败: {}", e.getMessage());
             }
         }
         return null;
@@ -71,17 +81,21 @@ public class DES {
     /**
      * 对输入的数据进行解密
      *
-     * @param key  解密的密钥，如果为空则以默认密码进行加密，如果密钥长度不是8的倍数，系统会自动补0
+     * @param key  解密的密钥，如果为空则以默认密码进行解密；不足8个字符自动补0，超过8个字符截断为前8个字符
      * @param data 需要解密的数据
      * @return 解密后的数据, null表示解密失败
      */
     public static final String decrypt(String key, String data) {
+        if (null == data) {
+            return null;
+        }
         try {
-            return new String(decrypt(Hex.hexToBytes(data), keyValidate(key).getBytes("utf-8")));
+            return new String(decrypt(Hex.hexToBytes(data), keyValidate(key).getBytes(StandardCharsets.UTF_8)),
+                    StandardCharsets.UTF_8);
         } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("There was a problem decrypting data {} using the key, and the reason " + "for the problem " +
-                        "is {}", data, e);
+            // 不记录密文数据，避免敏感信息进入日志
+            if (log.isDebugEnabled()) {
+                log.debug("数据解密失败: {}", e.getMessage());
             }
         }
         return null;
@@ -120,7 +134,7 @@ public class DES {
         SecretKey securekey = keyFactory.generateSecret(dks);
 
         // Cipher对象实际完成加密操作
-        Cipher cipher = Cipher.getInstance(TYPE);
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
         // 用密匙初始化Cipher对象
         cipher.init(Cipher.ENCRYPT_MODE, securekey, sr);
@@ -153,7 +167,7 @@ public class DES {
         SecretKey securekey = keyFactory.generateSecret(dks);
 
         // Cipher对象实际完成解密操作
-        Cipher cipher = Cipher.getInstance(TYPE);
+        Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
         // 用密匙初始化Cipher对象
         cipher.init(Cipher.DECRYPT_MODE, securekey, sr);
@@ -174,11 +188,15 @@ public class DES {
         if (StringUtils.isBlank(key)) {
             return PASSWORD_CRYPT_KEY;
         }
-        StringBuilder sb = new StringBuilder(key.trim());
-        if (key.trim().length() % LENGTH != 0) {
-            for (int i = 0; i < (LENGTH - key.trim().length() % LENGTH); i++) {
-                sb.append("0");
-            }
+        String trimmed = key.trim();
+        // DES 实际只使用密钥的前8个字节，这里统一为"不足补0、超长截断"，
+        // 避免出现密钥长度看似合法、实际生效部分与使用者预期不一致的问题
+        if (trimmed.length() >= LENGTH) {
+            return trimmed.substring(0, LENGTH);
+        }
+        StringBuilder sb = new StringBuilder(trimmed);
+        while (sb.length() < LENGTH) {
+            sb.append('0');
         }
         return sb.toString();
     }
@@ -205,10 +223,9 @@ public class DES {
      * @throws Exception 解密过程中可能抛出的异常
      */
     public final static String decryptData(String key, String data) throws Exception {
-        // 如果密钥为空或空白字符，则使用默认密钥
-        key = StringUtils.isBlank(key) ? PASSWORD_CRYPT_KEY : key;
         // 将十六进制数据转换为字节数组并解密，然后转换为字符串返回
-        return new String(decrypt(Hex.hexToBytes(data), key.getBytes()));
+        return new String(decrypt(Hex.hexToBytes(data), keyValidate(key).getBytes(StandardCharsets.UTF_8)),
+                StandardCharsets.UTF_8);
     }
 
 
@@ -233,10 +250,9 @@ public class DES {
      * @throws Exception 加密过程中可能抛出的异常
      */
     public final static String encryptData(String key, String data) throws Exception {
-        // 如果密钥为空，则使用默认密钥
-        key = StringUtils.isBlank(key) ? PASSWORD_CRYPT_KEY : key;
         // 对数据进行加密并转换为十六进制字符串
-        return Hex.bytesToHex(encrypt(data.getBytes(), key.getBytes()));
+        return Hex.bytesToHex(encrypt(data.getBytes(StandardCharsets.UTF_8),
+                keyValidate(key).getBytes(StandardCharsets.UTF_8)));
     }
 
     /**
@@ -279,7 +295,7 @@ public class DES {
         byte[] desXor = new byte[8];
         for (int i = 0; i < blockCount; i++) {
             byte[] tXor = Hex.xOr(desXor, dataBlock[i]);
-            desXor = encrypt(tXor, key.getBytes());
+            desXor = encrypt(tXor, keyValidate(key).getBytes(StandardCharsets.UTF_8));
         }
 
         // 将最终结果转换为十六进制字符串并截取前16位作为MAC值

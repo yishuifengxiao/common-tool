@@ -18,6 +18,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *   <li>包含日期字段的 POJO 可正确往返</li>
  *   <li>集合中的日期对象可正确序列化</li>
  *   <li>传统 {@link Date} 在 {@code @JsonFormat} 注解下按指定格式输出</li>
- *   <li>{@code JsonUtil.default_mapper} 配置的 GMT+8 时区生效</li>
+ *   <li>{@code JsonUtil.default_mapper} 使用 JVM 默认时区序列化 {@link Date}</li>
  * </ul>
  *
  * @author qingteng
@@ -62,7 +63,7 @@ public class JsonUtil_DateTime_Test {
         private ZonedDateTime zonedDateTime;
         private OffsetDateTime offsetDateTime;
 
-        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+        @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
         @JsonProperty("legacyDate")
         private Date date;
 
@@ -193,7 +194,14 @@ public class JsonUtil_DateTime_Test {
         dto.setOffsetDateTime(OffsetDateTime.of(2026, 8, 19, 14, 30, 0, 0, ZoneOffset.ofHours(8)));
         dto.setDate(Date.from(Instant.parse("2026-08-19T06:30:00Z")));
 
-        String json = JsonUtil.toJSONString(dto);
+        String json;
+        TimeZone original = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+            json = JsonUtil.toJSONString(dto);
+        } finally {
+            TimeZone.setDefault(original);
+        }
 
         log.info("POJO综合序列化结果: {}", json);
 
@@ -208,8 +216,8 @@ public class JsonUtil_DateTime_Test {
         assertTrue(json.contains("\"2026-08-19\""), "应包含LocalDate值");
         assertTrue(json.contains("\"14:30:00\""), "应包含LocalTime值");
 
-        // @JsonFormat 的 legacyDate 字段应按 yyyy-MM-dd HH:mm:ss 格式输出
-        assertTrue(json.contains("\"legacyDate\":\"2026-08-19 14:30:00\""),
+        // @JsonFormat 的 legacyDate 字段应按 yyyy-MM-dd HH:mm:ss 格式按默认时区输出
+        assertTrue(json.contains("\"legacyDate\":\"2026-08-19 06:30:00\""),
                 "Date字段应按@JsonFormat格式输出，实际: " + json);
     }
 
@@ -295,28 +303,29 @@ public class JsonUtil_DateTime_Test {
     // ==================== 时区与格式测试 ====================
 
     /**
-     * 验证 JsonUtil 配置的 GMT+8 时区对 Instant 序列化的影响
-     *
-     * <p>{@code Instant} 本身是 UTC 时间点，序列化结果带 Z 后缀；
-     * 但 {@code default_mapper} 配置了 {@code defaultTimeZone(GMT+8)}，
-     * 影响 {@link Date} 等基于时区的类型输出。</p>
+     * 验证 Date 类型按 JVM 默认时区序列化，不再固定东八区
      */
     @Test
-    @DisplayName("Date类型在GMT+8时区下正确序列化")
-    public void testDateWithGmt8Timezone() {
-        // 2026-08-19T06:30:00Z 对应 GMT+8 的 14:30:00
-        Date date = Date.from(Instant.parse("2026-08-19T06:30:00Z"));
-        DateTimeDto dto = new DateTimeDto();
-        dto.setDate(date);
+    @DisplayName("Date类型按默认时区正确序列化")
+    public void testDateWithDefaultTimezone() {
+        TimeZone original = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+            // 2026-08-19T06:30:00Z 在 UTC 下应为 06:30:00
+            Date date = Date.from(Instant.parse("2026-08-19T06:30:00Z"));
+            DateTimeDto dto = new DateTimeDto();
+            dto.setDate(date);
 
-        String json = JsonUtil.toJSONString(dto);
+            String json = JsonUtil.toJSONString(dto);
 
-        log.info("Date在GMT+8下序列化结果: {}", json);
+            log.info("Date在默认时区下序列化结果: {}", json);
 
-        assertNotNull(json);
-        // @JsonFormat 指定了 GMT+8，应输出 14:30:00 而非 UTC 的 06:30:00
-        assertTrue(json.contains("\"legacyDate\":\"2026-08-19 14:30:00\""),
-                "Date应在GMT+8时区下输出14:30:00，实际: " + json);
+            assertNotNull(json);
+            assertTrue(json.contains("\"legacyDate\":\"2026-08-19 06:30:00\""),
+                    "Date应按默认时区输出06:30:00，实际: " + json);
+        } finally {
+            TimeZone.setDefault(original);
+        }
     }
 
     /**

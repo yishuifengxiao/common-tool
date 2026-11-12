@@ -1,6 +1,9 @@
 package com.yishuifengxiao.common.tool.lang;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * <p>TLV数据结构封装类</p>
@@ -17,6 +20,7 @@ import java.io.Serializable;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class TLVUnit implements Serializable {
     private String data;
     private String tag;
@@ -45,7 +49,7 @@ public class TLVUnit implements Serializable {
      * @return 返回一个符合 TLVUnit 格式的字符串，不包含标签部分
      */
     public static String toTLV(String value) {
-        return TLV.toTLV(null, value);
+        return TLV.toLV(value);
     }
 
     /**
@@ -90,7 +94,7 @@ public class TLVUnit implements Serializable {
     // 清理数据
     private String cleanData(String data) {
         if (data == null) return "";
-        return data.replaceAll("\\s+|\\n", "").toUpperCase();
+        return data.replaceAll("\\s+|\\n", "").toUpperCase(Locale.ROOT);
     }
 
 
@@ -354,7 +358,7 @@ public class TLVUnit implements Serializable {
     }
 
     /**
-     * 打印TLV解析结果到标准输出
+     * 输出TLV解析结果
      * <p>
      * 该方法会格式化输出当前TLV对象的解析结果，包括：
      * 1. 解析状态（成功/失败）
@@ -365,19 +369,18 @@ public class TLVUnit implements Serializable {
      *
      * @return 返回TLV对象本身，支持链式调用
      */
-    // 打印结果
     public TLVUnit print() {
-        System.out.println("解析结果: " + (success ? "成功" : "失败"));
+        log.info("解析结果: {}", success ? "成功" : "失败");
 
         if (success) {
-            System.out.println("标签: " + (tag.isEmpty() ? "[LV结构]" : tag));
-            System.out.println("值: " + value);
-            System.out.println("值长度: " + valueLength + " 字节");
-            System.out.println("剩余数据: " + (remainingData.isEmpty() ? "[无]" : remainingData));
+            log.info("标签: {}", tag.isEmpty() ? "[LV结构]" : tag);
+            log.info("值: {}", value);
+            log.info("值长度: {} 字节", valueLength);
+            log.info("剩余数据: {}", remainingData.isEmpty() ? "[无]" : remainingData);
         } else {
-            System.out.println("错误: " + error);
+            log.info("错误: {}", error);
         }
-        System.out.println("---");
+        log.info("---");
         return this;
     }
 

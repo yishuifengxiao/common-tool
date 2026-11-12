@@ -3,11 +3,13 @@ package com.yishuifengxiao.common.tool.utils;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -34,6 +36,16 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class NetUtil {
+
+    /**
+     * 获取外网IP的连接超时时间（毫秒）
+     */
+    private static final int OUT_IP_CONNECT_TIMEOUT_MILLIS = 3000;
+
+    /**
+     * 获取外网IP的读取超时时间（毫秒）
+     */
+    private static final int OUT_IP_READ_TIMEOUT_MILLIS = 3000;
 
     /**
      * 获取网络接口信息列表
@@ -109,23 +121,27 @@ public class NetUtil {
      * @return 外网IP地址字符串，获取失败时返回空字符串
      */
     public static String getOutIp() {
+        HttpURLConnection connection = null;
         try {
             URL url = new URL("https://checkip.amazonaws.com");
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
-                String ip = in.readLine();
-                return ip;
+            connection = (HttpURLConnection) url.openConnection();
+            // 必须设置超时，避免对端无响应时线程被永久阻塞
+            connection.setConnectTimeout(OUT_IP_CONNECT_TIMEOUT_MILLIS);
+            connection.setReadTimeout(OUT_IP_READ_TIMEOUT_MILLIS);
+            connection.setRequestMethod("GET");
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
+                return in.readLine();
             }
         } catch (Exception e) {
             // 记录异常信息，便于问题排查
             log.warn("获取外网IP地址失败", e);
+        } finally {
+            if (null != connection) {
+                connection.disconnect();
+            }
         }
         return "";
-    }
-
-
-    public static void main(String[] args) {
-        List<NetworkInfo> networkInfo = getNetworkInfo();
-        System.out.println(networkInfo);
     }
 
     @Data

@@ -54,6 +54,12 @@ public class X509Helper {
     private static final Pattern PEM_PATTERN = Pattern.compile("-----BEGIN CERTIFICATE-----.*-----END " +
             "CERTIFICATE-----", Pattern.DOTALL);
 
+    /**
+     * PEM 证书头尾标记，大小写不敏感匹配；仅用于剥离标记，不改动 Base64 正文
+     */
+    private static final Pattern PEM_BLOCK_PATTERN = Pattern.compile(
+            "-----BEGIN CERTIFICATE-----|-----END CERTIFICATE-----", Pattern.CASE_INSENSITIVE);
+
     private static final Pattern HEX_PATTERN = Pattern.compile("^[0-9A-Fa-f]+$");
 
     private static final String RSA_PEM_HEADER = "-----BEGIN RSA PUBLIC KEY-----";
@@ -155,13 +161,13 @@ public class X509Helper {
     private static X509Certificate parsePemCertificate(String pemData) throws CertificateException {
         String processedPem = pemData;
 
-        // 如果没有PEM头部，则添加
-        if (!pemData.toUpperCase().contains(PEM_HEADER.toUpperCase())) {
+        // 如果没有PEM头部，则添加（大小写归一化使用 Locale.ROOT，避免土耳其语等 Locale 影响）
+        if (!pemData.toUpperCase(Locale.ROOT).contains(PEM_HEADER)) {
             processedPem = PEM_HEADER + "\n" + pemData + "\n" + PEM_FOOTER;
         }
 
-        // 提取Base64部分
-        String base64Part = processedPem.replace(PEM_HEADER, "").replace(PEM_FOOTER, "").replaceAll("\\s", "");
+        // 提取Base64部分：忽略大小写剥离头尾标记，Base64 正文保持原样
+        String base64Part = PEM_BLOCK_PATTERN.matcher(processedPem).replaceAll("").replaceAll("\\s", "");
 
         if (base64Part.isEmpty()) {
             throw new CertificateException("No Base64 data found in PEM format");
@@ -320,7 +326,12 @@ public class X509Helper {
         // 基本证书信息
         info.setSubject(certificate.getSubjectX500Principal().getName());
         info.setIssuer(certificate.getIssuerX500Principal().getName());
-        info.setSerialNumber(certificate.getSerialNumber().toString(16).toUpperCase());
+        // RFC 5280 要求序列号为正数，但现实证书存在负序列号；按绝对值输出，避免出现非法的 "-" 前缀
+        BigInteger serialNumber = certificate.getSerialNumber();
+        if (serialNumber.signum() < 0) {
+            serialNumber = serialNumber.negate();
+        }
+        info.setSerialNumber(serialNumber.toString(16).toUpperCase(Locale.ROOT));
         info.setNotBefore(certificate.getNotBefore());
         info.setNotAfter(certificate.getNotAfter());
         info.setVersion(certificate.getVersion());
@@ -383,7 +394,7 @@ public class X509Helper {
 
             info.setPublicKeyValue(publicKeyValue.toUpperCase());
         } catch (Exception e) {
-            log.info("Failed to extract public key value: " + e.getMessage());
+            log.debug("Failed to extract public key value: " + e.getMessage());
             // 如果提取失败，使用完整编码作为后备
             try {
                 byte[] publicKeyBytes = publicKey.getEncoded();
@@ -456,7 +467,7 @@ public class X509Helper {
             byte[] encoded = publicKey.getEncoded();
             return getCurveOIDFromPublicKeyEncoding(Hex.bytesToHex(encoded));
         } catch (Exception e) {
-            log.info("Failed to extract curve OID: " + e.getMessage());
+            log.debug("Failed to extract curve OID: " + e.getMessage());
             return null;
         }
     }
@@ -472,7 +483,7 @@ public class X509Helper {
             X509Certificate certificate = parseCert(certData);
             return extractCurveOID(certificate.getPublicKey());
         } catch (Exception e) {
-            log.info("Failed to extract curve OID from certificate: " + e.getMessage());
+            log.debug("Failed to extract curve OID from certificate: " + e.getMessage());
             return null;
         }
     }
@@ -613,7 +624,7 @@ public class X509Helper {
             byte[] publicKeyDER = publicKey.getEncoded();
             return Hex.bytesToHex(publicKeyDER);
         } catch (Exception e) {
-            log.info("Failed to extract RSA public key: " + e.getMessage());
+            log.debug("Failed to extract RSA public key: " + e.getMessage());
             return "";
         }
     }
@@ -660,7 +671,7 @@ public class X509Helper {
 
             return Hex.bytesToHex(buf);
         } catch (Exception e) {
-            log.info("Failed to extract ECDSA public key: " + e.getMessage());
+            log.debug("Failed to extract ECDSA public key: " + e.getMessage());
             return "";
         }
     }
@@ -683,7 +694,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            log.info("Failed to extract Subject Key Identifier: " + e.getMessage());
+            log.debug("Failed to extract Subject Key Identifier: " + e.getMessage());
         }
     }
 
@@ -720,7 +731,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            log.info("Failed to extract Certificate Issuer Public Key Identifier: " + e.getMessage());
+            log.debug("Failed to extract Certificate Issuer Public Key Identifier: " + e.getMessage());
         }
         return null;
     }
@@ -768,7 +779,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            log.info("Failed to parse Authority Key Identifier: " + e.getMessage());
+            log.debug("Failed to parse Authority Key Identifier: " + e.getMessage());
         }
         return null;
     }
@@ -813,7 +824,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            log.info("Failed to parse OCTET STRING extension: " + e.getMessage());
+            log.debug("Failed to parse OCTET STRING extension: " + e.getMessage());
         }
         return null;
     }
@@ -834,7 +845,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            log.info("Failed to extract Authority Key Identifier: " + e.getMessage());
+            log.debug("Failed to extract Authority Key Identifier: " + e.getMessage());
         }
     }
 
@@ -865,7 +876,7 @@ public class X509Helper {
 
                 // 检查所有可能的序列号属性名称
                 for (String name : possibleNames) {
-                    if (trimmedPart.toUpperCase().startsWith(name.toUpperCase())) {
+                    if (trimmedPart.toUpperCase(Locale.ROOT).startsWith(name.toUpperCase(Locale.ROOT))) {
                         // 提取属性值
                         String valuePart = trimmedPart.substring(name.length()).trim();
 
@@ -897,7 +908,7 @@ public class X509Helper {
                 }
             }
         } catch (Exception e) {
-            log.info("Failed to extract serial number from extensions: " + e.getMessage());
+            log.debug("Failed to extract serial number from extensions: " + e.getMessage());
         }
 
         return null;
@@ -953,7 +964,7 @@ public class X509Helper {
                 return result.toString();
             }
         } catch (Exception e) {
-            log.info("Failed to decode ASN.1 hex string: " + e.getMessage());
+            log.debug("Failed to decode ASN.1 hex string: " + e.getMessage());
         }
         return null;
     }
@@ -988,7 +999,7 @@ public class X509Helper {
                 }
             }
         } catch (CertificateParsingException e) {
-            log.info("Failed to parse subject alternative names: " + e.getMessage());
+            log.debug("Failed to parse subject alternative names: " + e.getMessage());
         }
 
         info.setOid(oid);
@@ -1020,7 +1031,7 @@ public class X509Helper {
                 }
             }
         } catch (CertificateParsingException e) {
-            log.info("Failed to extract OID: " + e.getMessage());
+            log.debug("Failed to extract OID: " + e.getMessage());
         }
         return oid;
     }
@@ -1037,7 +1048,7 @@ public class X509Helper {
             X509Certificate certificate = parseCert(certData);
             return extractOid(certificate);
         } catch (Exception e) {
-            log.info("Failed to extract OID " + e.getMessage());
+            log.debug("Failed to extract OID " + e.getMessage());
             return null;
         }
     }
@@ -1078,7 +1089,7 @@ public class X509Helper {
             X509Certificate certificate = parseCert(certData);
             return extractPublicKeyValue(certificate);
         } catch (Exception e) {
-            log.info("Failed to extract public key value: " + e.getMessage());
+            log.debug("Failed to extract public key value: " + e.getMessage());
             return null;
         }
     }
@@ -1094,7 +1105,7 @@ public class X509Helper {
             X509Certificate certificate = parseCert(certData);
             return extractSubjectPublicKeyHex(certificate);
         } catch (Exception e) {
-            log.info("Failed to extract subject public key hex: " + e.getMessage());
+            log.debug("Failed to extract subject public key hex: " + e.getMessage());
             return null;
         }
     }
@@ -1114,7 +1125,7 @@ public class X509Helper {
             PublicKey publicKey = certificate.getPublicKey();
             return extractSubjectPublicKeyHex(publicKey);
         } catch (Exception e) {
-            log.info("Failed to extract subject public key hex: " + e.getMessage());
+            log.debug("Failed to extract subject public key hex: " + e.getMessage());
             return null;
         }
     }
@@ -1144,7 +1155,7 @@ public class X509Helper {
 
             return publicKeyValue.toUpperCase();
         } catch (Exception e) {
-            log.info("Failed to extract subject public key hex: " + e.getMessage());
+            log.debug("Failed to extract subject public key hex: " + e.getMessage());
             return null;
         }
     }
@@ -1160,7 +1171,7 @@ public class X509Helper {
             PublicKey publicKey = parsePublicKeyFromHex(hexPublicKey);
             return extractSubjectPublicKeyHex(publicKey);
         } catch (Exception e) {
-            log.info("Failed to extract subject public key hex from HEX: " + e.getMessage());
+            log.debug("Failed to extract subject public key hex from HEX: " + e.getMessage());
             return null;
         }
     }
@@ -1176,7 +1187,7 @@ public class X509Helper {
             PublicKey publicKey = parsePublicKeyFromBase64(base64PublicKey);
             return extractSubjectPublicKeyHex(publicKey);
         } catch (Exception e) {
-            log.info("Failed to extract subject public key hex from Base64: " + e.getMessage());
+            log.debug("Failed to extract subject public key hex from Base64: " + e.getMessage());
             return null;
         }
     }
@@ -1192,7 +1203,7 @@ public class X509Helper {
             PublicKey publicKey = parsePublicKeyFromPem(pemPublicKey);
             return extractSubjectPublicKeyHex(publicKey);
         } catch (Exception e) {
-            log.info("Failed to extract subject public key hex from PEM: " + e.getMessage());
+            log.debug("Failed to extract subject public key hex from PEM: " + e.getMessage());
             return null;
         }
     }
@@ -1213,7 +1224,7 @@ public class X509Helper {
             byte[] publicKeyBytes = certificate.getPublicKey().getEncoded();
             return Hex.bytesToHex(publicKeyBytes);
         } catch (Exception e) {
-            log.info("Failed to extract public key value: " + e.getMessage());
+            log.debug("Failed to extract public key value: " + e.getMessage());
             return null;
         }
     }
@@ -1229,7 +1240,7 @@ public class X509Helper {
                 return skidValue != null ? Hex.bytesToHex(skidValue) : null;
             }
         } catch (Exception e) {
-            log.info("Failed to extract SKID: " + e.getMessage());
+            log.debug("Failed to extract SKID: " + e.getMessage());
         }
         return null;
     }
@@ -1255,7 +1266,7 @@ public class X509Helper {
                 return keyIdentifier != null ? Hex.bytesToHex(keyIdentifier) : null;
             }
         } catch (Exception e) {
-            log.info("Failed to extract CIPKID: " + e.getMessage());
+            log.debug("Failed to extract CIPKID: " + e.getMessage());
         }
         return null;
     }
@@ -1629,7 +1640,7 @@ public class X509Helper {
      * @return 对应的PEM头部字符串
      */
     private static String getPublicKeyPemHeader(PublicKey publicKey) {
-        String algorithm = publicKey.getAlgorithm().toUpperCase();
+        String algorithm = publicKey.getAlgorithm().toUpperCase(Locale.ROOT);
         switch (algorithm) {
             case "RSA":
                 return "-----BEGIN RSA PUBLIC KEY-----";
@@ -1650,7 +1661,7 @@ public class X509Helper {
      * @return 对应的PEM尾部字符串
      */
     private static String getPublicKeyPemFooter(PublicKey publicKey) {
-        String algorithm = publicKey.getAlgorithm().toUpperCase();
+        String algorithm = publicKey.getAlgorithm().toUpperCase(Locale.ROOT);
         switch (algorithm) {
             case "RSA":
                 return "-----END RSA PUBLIC KEY-----";
@@ -1685,7 +1696,7 @@ public class X509Helper {
                     publicKey.getEncoded());
             return (ECPublicKey) keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
-            log.info("Failed to convert PublicKey to ECPublicKey: " + e.getMessage());
+            log.debug("Failed to convert PublicKey to ECPublicKey: " + e.getMessage());
             return null;
         }
     }
@@ -1724,7 +1735,7 @@ public class X509Helper {
                     publicKey.getEncoded());
             return (RSAPublicKey) keyFactory.generatePublic(keySpec);
         } catch (Exception e) {
-            log.info("Failed to convert PublicKey to RSAPublicKey: " + e.getMessage());
+            log.debug("Failed to convert PublicKey to RSAPublicKey: " + e.getMessage());
             return null;
         }
     }
@@ -1977,6 +1988,7 @@ public class X509Helper {
             return new java.security.spec.RSAPublicKeySpec(modulus, exponent);
 
         } catch (Exception e) {
+            log.debug("解析 RSA PKCS#1 公钥失败: {}", e.getMessage(), e);
             return null;
         }
     }

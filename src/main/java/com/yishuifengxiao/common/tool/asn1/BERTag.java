@@ -126,6 +126,9 @@ public class BERTag {
      * @param tag 编码的标签字节数组
      */
     public BERTag(byte[] tag) {
+        if (null == tag || tag.length == 0) {
+            throw new IllegalArgumentException("tag must not be empty");
+        }
         int mask = tag[0] & 0xC0;
 
         if (mask == 0x00) {
@@ -153,11 +156,17 @@ public class BERTag {
                 throw new RuntimeException("Malformed tag: needs more bytes");
             }
 
-            tagNumber = 0;
-
-            for (int i = tag.length - 1, mult = 1; i > 0; i--, mult *= 128) {
-                tagNumber += ((tag[i] & 0x7f) * mult);
+            // 用 long 累加并显式判溢出：int 累乘 128 时超过 5 字节的标签号会溢出成负数
+            long number = 0;
+            long mult = 1;
+            for (int i = tag.length - 1; i > 0; i--) {
+                number += ((tag[i] & 0x7f) * mult);
+                if (number > Integer.MAX_VALUE) {
+                    throw new RuntimeException("Tag number too large");
+                }
+                mult <<= 7;
             }
+            tagNumber = (int) number;
         } else {
             tagNumber = mask;
         }
@@ -169,8 +178,9 @@ public class BERTag {
      * @return Byte数组
      */
     public Byte[] getByteList() {
-        if (tagNumber == -1) {
-            throw new RuntimeException("Number not set");
+        // 负数标签号（未设置或溢出）会让下面的位移循环永不终止，必须先拒绝
+        if (tagNumber < 0) {
+            throw new RuntimeException("Invalid tag number: " + tagNumber);
         }
 
         ArrayList<Byte> result = new ArrayList<>();
@@ -200,7 +210,7 @@ public class BERTag {
             }
 
             Byte last = result.get(result.size() - 1);
-            result.remove(last);
+            result.remove(result.size() - 1);
             result.add(Byte.valueOf((byte) (last.byteValue() & (byte) 0x7f)));
         }
 

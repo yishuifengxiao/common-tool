@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -39,6 +40,7 @@ import java.util.*;
  *       避免"内容长但被 maxColumnWidth 截断后行高算少了"的问题。</li>
  * </ul>
  */
+@Slf4j
 public final class ExcelWriter {
 
     /** 私有构造：工具类禁止实例化。 */
@@ -405,8 +407,18 @@ public final class ExcelWriter {
 
     private static Workbook buildWorkbook(SheetLayout sheetLayout, WriteConfig config, ExcelFormat format) {
         Workbook wb = format == ExcelFormat.XLS ? new HSSFWorkbook() : new XSSFWorkbook();
-        renderSheet(wb, sheetLayout, config);
-        return wb;
+        try {
+            renderSheet(wb, sheetLayout, config);
+            return wb;
+        } catch (RuntimeException e) {
+            // 渲染失败时释放 Workbook，避免 XSSF 临时文件与内存泄漏
+            try {
+                wb.close();
+            } catch (IOException closeError) {
+                log.warn("关闭渲染失败的Workbook时出错: {}", closeError.getMessage());
+            }
+            throw e;
+        }
     }
 
     // ============================================================

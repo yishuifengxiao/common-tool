@@ -4,6 +4,7 @@ import com.yishuifengxiao.common.tool.lang.Hex;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 
 /**
@@ -192,6 +193,9 @@ public class BERWriter {
         increaseDataSize(nBytes);
 
         int currentIndex = buffer.length - dataSize;
+        for (int i = 0; i < nBytes; i++) {
+            buffer[currentIndex + i] = 0;
+        }
         int maskId = 0;
 
         for (int i = 0; i < significantBitNumber; i++) {
@@ -209,7 +213,11 @@ public class BERWriter {
 
         increaseDataSize(1);
 
-        buffer[buffer.length - dataSize] = 0;
+        if (nPadding == 0) {
+            buffer[buffer.length - dataSize] = 0;
+        } else {
+            buffer[buffer.length - dataSize] = (byte) (8 - nPadding);
+        }
 
         return nBytes + 1;
     }
@@ -240,6 +248,9 @@ public class BERWriter {
         increaseDataSize(nBytes);
 
         int currentIndex = buffer.length - dataSize;
+        for (int i = 0; i < nBytes; i++) {
+            buffer[currentIndex + i] = 0;
+        }
         int maskId = 0;
 
         for (int i = 0; i < significantBitNumber; i++) {
@@ -292,7 +303,7 @@ public class BERWriter {
      * @return 写入的字节数
      */
     public int writeRestrictedCharacterString(String value) {
-        byte[] bytes = value.getBytes();
+        byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
         return writeOctetString(bytes);
     }
 
@@ -387,14 +398,19 @@ public class BERWriter {
         if (value.length < 2) {
             throw new RuntimeException("Object Identifier must have at least 2 arcs");
         }
-        if (value[0] > 2) {
+        if (value[0] < 0 || value[0] > 2) {
             throw new RuntimeException("Object Identifier first arc must be 0, 1 or 2");
+        }
+        for (long arc : value) {
+            if (arc < 0) {
+                throw new RuntimeException("Object Identifier arcs cannot be negative");
+            }
         }
         if (value[0] == 0 && value[1] > 39) {
             throw new RuntimeException("Object Identifier second arc must be < 40 when first arc is 0");
         }
-        if (value[0] == 1 && (value[1] == 0 || value[1] > 39)) {
-            throw new RuntimeException("Object Identifier second arc must be > 0 and < 40 when first arc is 1");
+        if (value[0] == 1 && value[1] > 39) {
+            throw new RuntimeException("Object Identifier second arc must be < 40 when first arc is 1");
         }
 
         int size = 0;
@@ -438,6 +454,18 @@ public class BERWriter {
      * @return 写入的字节数
      */
     public int writeRelativeOID(long[] value) {
+        if (value == null) {
+            throw new RuntimeException("Relative Object Identifier cannot be null");
+        }
+        if (value.length == 0) {
+            throw new RuntimeException("Relative Object Identifier must have at least 1 arc");
+        }
+        for (long arc : value) {
+            if (arc < 0) {
+                throw new RuntimeException("Relative Object Identifier arcs cannot be negative");
+            }
+        }
+
         int size = 0;
         for (int i = value.length - 1; i >= 0; i--) {
             long arc = value[i];

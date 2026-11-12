@@ -29,9 +29,24 @@ import java.util.concurrent.ConcurrentHashMap;
 public final class ClassUtil {
 
     /**
-     * 字段缓存，提高重复调用性能
+     * 字段缓存（排除特殊修饰符字段），使用ClassValue避免类加载器泄漏
      */
-    private static final Map<String, List<Field>> FIELDS_CACHE = new ConcurrentHashMap<>();
+    private static final ClassValue<List<Field>> FIELDS_CACHE = new ClassValue<List<Field>>() {
+        @Override
+        protected List<Field> computeValue(Class<?> type) {
+            return collectFields(type, true);
+        }
+    };
+
+    /**
+     * 字段缓存（包含所有字段），使用ClassValue避免类加载器泄漏
+     */
+    private static final ClassValue<List<Field>> ALL_FIELDS_CACHE = new ClassValue<List<Field>>() {
+        @Override
+        protected List<Field> computeValue(Class<?> type) {
+            return collectFields(type, false);
+        }
+    };
 
 
     /**
@@ -62,8 +77,10 @@ public final class ClassUtil {
      * @return 字段列表，返回不可修改的List；如果类没有字段则返回空列表；结果会被缓存以提高后续查询性能
      */
     public static <T> List<Field> fields(Class<T> clazz, boolean noSpecialModifier) {
-        // 从缓存中获取字段列表，避免重复反射操作提高性能
-        return getFieldsFromCache(clazz, noSpecialModifier);
+        if (clazz == null) {
+            throw new IllegalArgumentException("类对象不能为null");
+        }
+        return noSpecialModifier ? FIELDS_CACHE.get(clazz) : ALL_FIELDS_CACHE.get(clazz);
     }
 
 
@@ -119,58 +136,49 @@ public final class ClassUtil {
     }
 
     /**
-     * 从缓存中获取指定类及其父类的所有字段列表
-     * 处理流程：
-     * 1. 验证输入参数clazz是否为null，为null则抛出IllegalArgumentException
-     * 2. 构建缓存键（类名:是否排除特殊修饰符）
-     * 3. 使用ConcurrentHashMap的computeIfAbsent方法实现线程安全的缓存读取和写入
-     * 4. 如果缓存未命中，通过反射遍历类继承链获取所有字段
-     * 5. 从当前类开始，逐级向上遍历父类，直到Object类为止
-     * 6. 对每个类的字段进行过滤：根据noSpecialModifier参数决定是否排除特殊修饰符字段
-     * 7. 捕获SecurityException异常并记录警告日志，发生异常时继续遍历父类
-     * 8. 将结果包装为不可修改的List并存入缓存
+     * 收集指定类及其父类的所有字段
      *
-     * @param clazz             要获取字段的类对象，不能为null，否则抛出IllegalArgumentException
-     * @param noSpecialModifier 是否排除特殊修饰符字段；true表示排除（只返回普通字段），false表示包含所有字段
-     * @return 不可修改的字段列表；如果类没有字段则返回空列表；结果会被缓存以提高后续查询性能
-     * @throws IllegalArgumentException 当clazz参数为null时抛出
+     * @param clazz             要获取字段的类对象
+     * @param noSpecialModifier 是否排除特殊修饰符字段
+     * @return 不可修改的字段列表
      */
-    private static <T> List<Field> getFieldsFromCache(Class<T> clazz, boolean noSpecialModifier) {
-        if (clazz == null) {
-            throw new IllegalArgumentException("类对象不能为null");
-        }
+    private static List<Field> collectFields(Class<?> clazz, boolean noSpecialModifier) {
+        List<Field> result = new ArrayList<>();
+        Class<?> current = clazz;
 
-        String cacheKey = clazz.getName() + ":" + noSpecialModifier;
-
-        return FIELDS_CACHE.computeIfAbsent(cacheKey, key -> {
-            List<Field> result = new ArrayList<>();
-            Class<?> current = clazz;
-
-            while (current != null && current != Object.class) {
-                try {
-                    Field[] declaredFields = current.getDeclaredFields();
-                    for (Field field : declaredFields) {
-                        if (!noSpecialModifier || !isSpecialModifier(field)) {
-                            result.add(field);
-                        }
-                    }
-                } catch (SecurityException e) {
-                    if (log.isWarnEnabled()) {
-                        log.warn("获取字段时发生安全异常，类名：{}，将继续遍历父类", current.getName(), e);
+        while (current != null && current != Object.class) {
+            try {
+                Field[] declaredFields = current.getDeclaredFields();
+                for (Field field : declaredFields) {
+                    if (!noSpecialModifier || !isSpecialModifier(field)) {
+                        result.add(field);
                     }
                 }
-                current = current.getSuperclass();
+            } catch (SecurityException e) {
+                if (log.isWarnEnabled()) {
+                    log.warn("获取字段时发生安全异常，类名：{}，将继续遍历父类", current.getName(), e);
+                }
             }
+            current = current.getSuperclass();
+        }
 
-            return Collections.unmodifiableList(result);
-        });
+        return Collections.unmodifiableList(result);
     }
 
 
     /**
-     * 字段查找缓存
+     * 字段查找缓存，未命中时缓存空Map，避免重复反射
      */
-    private static final Map<String, Field> FIELD_LOOKUP_CACHE = new ConcurrentHashMap<>();
+    private static final ClassValue<Map<String, Field>> FIELD_LOOKUP_CACHE = new ClassValue<Map<String, Field>>() {
+        @Override
+        protected Map<String, Field> computeValue(Class<?> type) {
+            Map<String, Field> map = new HashMap<>();
+            for (Field field : fields(type)) {
+                map.putIfAbsent(field.getName(), field);
+            }
+            return Collections.unmodifiableMap(map);
+        }
+    };
 
     /**
      * 根据属性名获取对象中对应属性的值
@@ -218,8 +226,8 @@ public final class ClassUtil {
      * 提取流程：
      * 1. 如果data是Map类型，直接从Map中获取指定key的值
      * 2. 如果data是普通对象，通过反射机制获取字段值
-     * 3. 查找字段并临时设置accessible为true以访问私有字段
-     * 4. 获取字段值后恢复原始的accessible状态
+     * 3. 查找字段并设置accessible为true以访问私有字段
+     * 4. 直接返回字段值，不恢复accessible状态，避免并发访问时其他线程出现IllegalAccessException
      * 5. 发生异常时记录DEBUG日志并返回null
      *
      * @param data      需要提取属性值的对象，支持普通Java对象或Map类型；如果为null则返回null
@@ -237,16 +245,14 @@ public final class ClassUtil {
             return null;
         }
         Field field = null;
-        boolean originalAccessible = false;
         try {
             // 通过缓存机制查找指定名称的字段
             field = findField(data.getClass(), fieldName);
             if (field == null) {
                 return null;
             }
-            // 保存字段的原始访问权限，并设置为可访问以读取私有字段
-            originalAccessible = field.canAccess(data);
-            if (!originalAccessible) {
+            // 只设置为可访问，不再恢复为 false，避免并发读取时其他线程出现 IllegalAccessException
+            if (!field.canAccess(data)) {
                 field.setAccessible(true);
             }
             // 通过反射获取字段的值
@@ -263,11 +269,6 @@ public final class ClassUtil {
                 log.debug("根据属性名获取属性值时发生异常，属性名：{}，异常原因：{}", fieldName, e.getMessage());
             }
             return null;
-        } finally {
-            // 无论是否发生异常，都恢复字段的原始访问状态
-            if (field != null && !originalAccessible) {
-                field.setAccessible(originalAccessible);
-            }
         }
     }
 
@@ -286,22 +287,11 @@ public final class ClassUtil {
      * @return 找到的字段对象，如果未找到则返回null；结果会被缓存以提高后续查询性能
      */
     public static Field findField(Class<?> clazz, String fieldName) {
-        // 构建缓存键，使用类名和字段名的组合作为唯一标识
-        String cacheKey = clazz.getName() + ":" + fieldName;
-
-        // 使用缓存机制避免重复查找，提高性能
-        return FIELD_LOOKUP_CACHE.computeIfAbsent(cacheKey, key -> {
-            // 获取类的所有字段（包括继承的字段）
-            List<Field> allFields = fields(clazz);
-            // 遍历字段列表，通过名称精确匹配查找目标字段
-            for (Field field : allFields) {
-                if (field.getName().equals(fieldName)) {
-                    return field;
-                }
-            }
-            // 未找到匹配的字段，返回null
+        if (null == clazz || StringUtils.isBlank(fieldName)) {
             return null;
-        });
+        }
+        // ClassValue 按类缓存字段名到字段的映射，未命中时返回null（不会污染缓存）
+        return FIELD_LOOKUP_CACHE.get(clazz).get(fieldName);
     }
 
 

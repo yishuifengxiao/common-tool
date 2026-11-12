@@ -69,6 +69,28 @@ public class CMACTest {
 
 
     @Test
+    public void testCalculate_Rfc4493Vectors() {
+        String key = "2b7e151628aed2a6abf7158809cf4f3c";
+        // 空消息
+        assertEquals("BB1D6929E95937287FA37D129B756746",
+                CMAC.calculate(key, "").toUpperCase());
+        // 16 字节整块消息（不填充，使用 K1）
+        assertEquals("070A16B46B4D4144F79BDD9DD04A287C",
+                CMAC.calculate(key, "6bc1bee22e409f96e93d7e117393172a").toUpperCase());
+        // 40 字节消息
+        assertEquals("DFA66747DE9AE63030CA32611497C827", CMAC.calculate(key,
+                "6bc1bee22e409f96e93d7e117393172a" +
+                        "ae2d8a571e03ac9c9eb76fac45af8e51" +
+                        "30c81c46a35ce411").toUpperCase());
+        // 64 字节整块消息
+        assertEquals("51F0BEBF7E3B9D92FC49741779363CFE", CMAC.calculate(key,
+                "6bc1bee22e409f96e93d7e117393172a" +
+                        "ae2d8a571e03ac9c9eb76fac45af8e51" +
+                        "30c81c46a35ce411e5fbc1191a0a52ef" +
+                        "f69f2445df4f9b17ad2b417be66c3710").toUpperCase());
+    }
+
+    @Test
     public void testCalculate_InvalidKeyLength() {
         // 使用长度不是16字节的密钥，应该能正常工作或给出预期结果
         String shortKey = "000102030405060708090a0b0c0d0e"; // 15字节

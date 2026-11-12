@@ -120,7 +120,12 @@ public final class NumberUtil {
      * @return 解析成功则返回Integer的数据，否则为null
      */
     public static Integer parseInt(String str) {
-        return parseToBigDecimal(str).map(BigDecimal::intValue).orElse(null);
+        try {
+            // 先截断小数部分保持原有行为，再用 intValueExact 拒绝溢出，避免数值静默回绕
+            return parseToBigDecimal(str).map(value -> value.toBigInteger().intValueExact()).orElse(null);
+        } catch (ArithmeticException e) {
+            return null;
+        }
     }
 
     /**
@@ -142,7 +147,12 @@ public final class NumberUtil {
      * @return 解析成功则返回Long的数据，否则为null
      */
     public static Long parseLong(String str) {
-        return parseToBigDecimal(str).map(BigDecimal::longValue).orElse(null);
+        try {
+            // 先截断小数部分保持原有行为，再用 longValueExact 拒绝溢出，避免数值静默回绕
+            return parseToBigDecimal(str).map(value -> value.toBigInteger().longValueExact()).orElse(null);
+        } catch (ArithmeticException e) {
+            return null;
+        }
     }
 
     /**
@@ -231,6 +241,22 @@ public final class NumberUtil {
      * @param v2 第二个数，若为null直接返回为true
      * @return 第一个数大于第二个数返回为true, 否则为false
      */
+    /**
+     * 统一比较两个 Number 值：先用 BigDecimal.toString() 精确比较（避免 double 精度丢失），
+     * 遇到 Infinity 等无法转为 BigDecimal 的值时回退到原始类型比较。
+     */
+    private static int safeCompare(Number a, Number b) {
+        try {
+            return new BigDecimal(a.toString()).compareTo(new BigDecimal(b.toString()));
+        } catch (NumberFormatException e) {
+            return Double.compare(a.doubleValue(), b.doubleValue());
+        }
+    }
+
+    private static boolean isNaN(Number n) {
+        return (n instanceof Double d && d.isNaN()) || (n instanceof Float f && f.isNaN());
+    }
+
     public static boolean gt(Number v1, Number v2) {
         if (null == v1) {
             return false;
@@ -238,7 +264,10 @@ public final class NumberUtil {
         if (null == v2) {
             return true;
         }
-        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) > 0;
+        if (isNaN(v1) || isNaN(v2)) {
+            return false;
+        }
+        return safeCompare(v1, v2) > 0;
     }
 
     /**
@@ -255,7 +284,10 @@ public final class NumberUtil {
         if (null == v2) {
             return true;
         }
-        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) >= 0;
+        if (isNaN(v1) || isNaN(v2)) {
+            return false;
+        }
+        return safeCompare(v1, v2) >= 0;
     }
 
     /**
@@ -272,7 +304,10 @@ public final class NumberUtil {
         if (null == v2) {
             return false;
         }
-        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) < 0;
+        if (isNaN(v1) || isNaN(v2)) {
+            return false;
+        }
+        return safeCompare(v1, v2) < 0;
     }
 
     /**
@@ -289,7 +324,10 @@ public final class NumberUtil {
         if (null == v2) {
             return false;
         }
-        return new BigDecimal(v1.toString()).compareTo(new BigDecimal(v2.toString())) <= 0;
+        if (isNaN(v1) || isNaN(v2)) {
+            return false;
+        }
+        return safeCompare(v1, v2) <= 0;
     }
 
     /**
@@ -308,8 +346,11 @@ public final class NumberUtil {
         if (null == originalValue || null == value) {
             return false;
         }
+        if (isNaN(originalValue) || isNaN(value)) {
+            return false;
+        }
 
-        return new BigDecimal(originalValue.toString()).compareTo(new BigDecimal(value.toString())) == 0;
+        return safeCompare(originalValue, value) == 0;
     }
 
     /**

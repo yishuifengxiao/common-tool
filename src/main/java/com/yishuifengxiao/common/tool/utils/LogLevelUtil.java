@@ -1,5 +1,7 @@
 package com.yishuifengxiao.common.tool.utils;
 
+import java.util.Locale;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +43,7 @@ public class LogLevelUtil {
         Level level;
         // 校验日志级别是否合法
         try {
-            level = Level.valueOf(logLevel.trim().toUpperCase());
+            level = Level.valueOf(logLevel.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException e) {
             if (log.isWarnEnabled()) {
                 log.warn("Invalid log level provided: {}, loggerName={}", logLevel, loggerName);

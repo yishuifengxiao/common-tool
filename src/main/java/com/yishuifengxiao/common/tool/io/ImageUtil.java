@@ -4,11 +4,11 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
@@ -75,18 +75,8 @@ public final class ImageUtil {
      * @throws IOException 转换时发生问题
      */
     public static String imageFileToBase64(File image) throws IOException {
-        InputStream inputStream = null;
-        byte[] data = null;
-        // 读取图片字节数组
-        try {
-            inputStream = new FileInputStream(image);
-            data = new byte[inputStream.available()];
-            inputStream.read(data);
-        } finally {
-            CloseUtil.close(inputStream);
-        }
-        // 返回Base64编码过的字节数组字符串
-        return Base64.getEncoder().encodeToString(data);
+        // 使用 Files.readAllBytes 一次性读取，避免 available() 对大文件返回的长度不完整导致数据截断
+        return Base64.getEncoder().encodeToString(Files.readAllBytes(image.toPath()));
     }
 
     /**
@@ -191,7 +181,9 @@ public final class ImageUtil {
             return null;
         }
 
-        return new StringBuffer(BASE64_PNG_PREFIX).append(imageToBase64(image)).toString();
+        String base64 = imageToBase64(image);
+        // 转换失败时 imageToBase64 返回 null，直接拼接会得到 "data:image/png;base64,null"
+        return null == base64 ? null : BASE64_PNG_PREFIX + base64;
 
     }
 
@@ -207,6 +199,7 @@ public final class ImageUtil {
         }
         ByteArrayInputStream byteArrayInputStream = null;
         try {
+            base64 = base64.replaceFirst("^" + FORMAT_TEMPLATE, "");
             byte[] b = Base64.getDecoder().decode(base64);
             for (int i = 0; i < b.length; ++i) {
                 if (b[i] < 0) {
@@ -217,7 +210,7 @@ public final class ImageUtil {
             byteArrayInputStream = new ByteArrayInputStream(b);
             return ImageIO.read(byteArrayInputStream);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Base64字符串转换为BufferedImage失败: {}", e.getMessage());
         } finally {
             CloseUtil.close(byteArrayInputStream);
         }

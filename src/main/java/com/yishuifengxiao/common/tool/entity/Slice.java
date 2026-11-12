@@ -106,7 +106,7 @@ public class Slice implements Serializable {
      * @return 起始偏移量
      */
     public Number startOffset() {
-        return (this.current().longValue() - 1) * this.size().longValue();
+        return Math.multiplyExact(this.current().longValue() - 1, this.size().longValue());
     }
 
     /**
@@ -115,7 +115,7 @@ public class Slice implements Serializable {
      * @return 结束偏移量
      */
     public Number endOffset() {
-        return this.current().longValue() * this.size().longValue();
+        return Math.multiplyExact(this.current().longValue(), this.size().longValue());
     }
 
     /**

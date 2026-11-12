@@ -143,10 +143,8 @@ public final class HtmlExtract {
                 list.add(e.ownText());
             });
         } catch (Exception e) {
-            if (log.isInfoEnabled()) {
-                log.info("There was a problem extracting {} using the CSS Text Rules. The extraction parameter is " + "cssLlector={}, and the problem is {}", html, cssSelector, e.getMessage());
-            }
-
+            // 不输出完整HTML内容，避免日志膨胀
+            log.debug("使用CSS选择器[{}]提取文本失败: {}", cssSelector, e.getMessage());
         }
         return list;
     }
@@ -237,14 +235,19 @@ public final class HtmlExtract {
             String xhtml = preprocessHtml(html);
             SAXReader reader = new SAXReader();
             reader.setValidation(false);
+            // 禁用 DOCTYPE 声明与外部实体，防止 XXE 攻击
             try {
+                reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+                reader.setFeature("http://xml.org/sax/features/external-general-entities", false);
+                reader.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
                 reader.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             } catch (SAXException e) {
                 log.error("配置SAXReader安全特性失败", e);
             }
             return reader.read(new StringReader(xhtml));
         } catch (Exception e) {
-            log.error("There was a problem parsing HTML [{}], the problem is ", html, e);
+            // 不输出完整HTML内容，仅记录异常，避免日志膨胀
+            log.error("HTML解析失败: {}", e.getMessage(), e);
         }
         return null;
     }

@@ -4,7 +4,9 @@ import com.yishuifengxiao.common.tool.lang.Hex;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 
 /**
@@ -201,6 +203,10 @@ public class BERReader {
         }
 
         for (int i = 1; !isLastByte; i++) {
+            // 固定长度缓冲区必须显式限界，畸形长标签应转为受控 IO 异常而不是数组越界
+            if (i >= tagBuffer.length) {
+                throw new IOException("Tag too long: more than " + tagBuffer.length + " bytes");
+            }
             tagBuffer[i] = (byte) readChar();
             tagNumBytes++;
 
@@ -271,13 +277,20 @@ public class BERReader {
                 }
 
                 lengthLength = nBytes + 1;
-                lengthValue = 0;
+                long value = 0;
 
                 for (int i = nBytes; i > 0; i--) {
                     aByte = readChar();
+                    if (aByte < 0) {
+                        throw new IOException("Unexpected EOF while reading length");
+                    }
                     lengthBuffer[lengthBufferIndex++] = (byte) aByte;
-                    lengthValue += (aByte << ((i - 1) * 8));
+                    value |= (long) aByte << ((i - 1) * 8);
                 }
+                if (value > Integer.MAX_VALUE) {
+                    throw new RuntimeException("Length over Integer.MAX_VALUE not supported");
+                }
+                lengthValue = (int) value;
             } else {
                 lengthLength = 1;
                 lengthValue = aByte;
@@ -360,13 +373,8 @@ public class BERReader {
      * @throws IOException 读取异常
      */
     public String readRestrictedCharacterString(int nBytes) throws IOException {
-        byte[] buffer = new byte[nBytes];
-
-        for (int i = 0; i < nBytes; i++) {
-            buffer[i] = (byte) readChar();
-        }
-
-        return new String(buffer);
+        // 复用 readOctetString 的负长度校验与分块读取，避免直接按外部长度分配数组
+        return new String(readOctetString(nBytes), StandardCharsets.UTF_8);
     }
 
     /**
@@ -377,7 +385,7 @@ public class BERReader {
      * @throws IOException 读取异常
      */
     public String readHexString(int nBytes) throws IOException {
-        byte[] buffer = new byte[nBytes];
+        byte[] buffer = readOctetString(nBytes);
         return Hex.bytesToHex(buffer);
     }
 
@@ -393,35 +401,39 @@ public class BERReader {
             throw new RuntimeException("Length of a bitstring cannot be less than one");
         }
 
+        byte[] copy = readOctetString(nBytes);
+        int unusedBits = copy[0] & 0xFF;
+        if (unusedBits > 7) {
+            throw new RuntimeException("Unused bits of a bitstring must be between 0 and 7");
+        }
+
         if (nBytes == 1) {
-            byte b = (byte) readChar();
-            byte[] byteArray = {b};
-            return BitSet.valueOf(byteArray);
+            if (unusedBits != 0) {
+                throw new RuntimeException("Unused bits of an empty bitstring must be 0");
+            }
+            return new BitSet();
         }
 
-        byte[] copy = new byte[nBytes];
-
-        for (int i = 0; i < nBytes; i++) {
-            copy[i] = (byte) readChar();
+        byte[] data = Arrays.copyOfRange(copy, 1, nBytes);
+        int numSignificantBitInLastByte = 8 - unusedBits;
+        if (numSignificantBitInLastByte < 0 || numSignificantBitInLastByte > 8) {
+            throw new RuntimeException("Unused bits of a bitstring must be between 0 and 7");
         }
-
-        int numSignificantBitInLastByte = 8 - copy[0];
 
         BitSet result = new BitSet();
-
         int bitIndex = 0;
         int byteIndex = 0;
 
-        for (byteIndex = 1; byteIndex < (nBytes - 1); byteIndex++) {
+        for (byteIndex = 0; byteIndex < data.length - 1; byteIndex++) {
             for (int k = 0; k < 8; k++, bitIndex++) {
-                if ((copy[byteIndex] & BIT_MASK[k]) != 0x00) {
+                if ((data[byteIndex] & BIT_MASK[k]) != 0x00) {
                     result.set(bitIndex);
                 }
             }
         }
 
         for (int k = 0; k < numSignificantBitInLastByte; k++, bitIndex++) {
-            if ((copy[byteIndex] & BIT_MASK[k]) != 0x00) {
+            if ((data[byteIndex] & BIT_MASK[k]) != 0x00) {
                 result.set(bitIndex);
             }
         }
@@ -437,32 +449,45 @@ public class BERReader {
      * @throws IOException 读取异常
      */
     public long[] readObjectIdentifier(int nBytes) throws IOException {
-        ArrayList<Long> objectIdentifier = new ArrayList<>();
+        if (nBytes < 1) {
+            throw new RuntimeException("Object Identifier cannot be empty");
+        }
+
         byte[] buffer = readOctetString(nBytes);
-        long arc = -1;
-        long mult = 1;
-        for (int i = nBytes - 1; i >= 0; i--) {
-            if ((buffer[i] & 0x80) == 0x00) {
-                if (arc != -1) {
-                    objectIdentifier.add(0, arc);
-                }
-                arc = buffer[i];
-                mult = 1;
-            } else {
-                mult = Math.multiplyExact(mult, 128);
-                arc = Math.addExact(arc, Math.multiplyExact(mult, (buffer[i] & 0x7F)));
+        ArrayList<Long> objectIdentifier = new ArrayList<>();
+        long arc = 0;
+        boolean hasCompleteArc = false;
+
+        for (int i = 0; i < nBytes; i++) {
+            int currentByte = buffer[i] & 0xFF;
+            arc = Math.addExact(Math.multiplyExact(arc, 128), currentByte & 0x7F);
+            if ((currentByte & 0x80) == 0x00) {
+                objectIdentifier.add(arc);
+                arc = 0;
+                hasCompleteArc = true;
             }
         }
-        if (arc < 40) {
-            objectIdentifier.add(0, arc);
-            objectIdentifier.add(0, 0L);
-        } else if (arc < 80) {
-            objectIdentifier.add(0, arc - 40);
-            objectIdentifier.add(0, 1L);
-        } else {
-            objectIdentifier.add(0, arc - 80);
-            objectIdentifier.add(0, 2L);
+
+        if (!hasCompleteArc) {
+            throw new RuntimeException("Object Identifier is truncated");
         }
+
+        long firstEncodedArc = objectIdentifier.remove(0);
+        long firstArc;
+        long secondArc;
+        if (firstEncodedArc < 40) {
+            firstArc = 0;
+            secondArc = firstEncodedArc;
+        } else if (firstEncodedArc < 80) {
+            firstArc = 1;
+            secondArc = firstEncodedArc - 40;
+        } else {
+            firstArc = 2;
+            secondArc = firstEncodedArc - 80;
+        }
+
+        objectIdentifier.add(0, secondArc);
+        objectIdentifier.add(0, firstArc);
 
         long[] ret = new long[objectIdentifier.size()];
         int i = 0;
@@ -530,13 +555,16 @@ public class BERReader {
      * @throws IOException 读取异常
      */
     public byte[] readOctetString(int nBytes) throws IOException {
-        byte[] result = new byte[nBytes];
-
-        for (int i = 0; i < nBytes; i++) {
-            result[i] = (byte) readChar();
+        // 不定长（-1）与巨大长度均来自外部编码，必须先拒绝负值再分块读取，
+        // 避免 NegativeArraySizeException 以及几十字节输入触发一次性巨量分配
+        if (nBytes < 0) {
+            throw new IOException("Negative or indefinite length is not supported: " + nBytes);
         }
-
-        return result;
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream(Math.min(nBytes, 8192));
+        for (int i = 0; i < nBytes; i++) {
+            out.write(readChar());
+        }
+        return out.toByteArray();
     }
 
     /**

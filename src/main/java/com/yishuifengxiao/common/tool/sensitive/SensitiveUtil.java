@@ -46,10 +46,17 @@ public class SensitiveUtil {
 	 * @return 脱敏后的数据
 	 */
 	public static String idCard(String idCard) {
-		if (!CertNoUtil.isValid(idCard)) {
+		if (StringUtils.isBlank(idCard)) {
 			return idCard;
 		}
-		return idCard.replaceAll("(?<=\\w{3})\\w(?=\\w{4})", "*");
+		if (CertNoUtil.isValid(idCard)) {
+			return idCard.replaceAll("(?<=\\w{3})\\w(?=\\w{4})", "*");
+		}
+		// 非严格合法的身份证号仍可能是历史数据，长度足够时按"前三后四"兜底脱敏，避免原样返回
+		if (idCard.length() >= 8) {
+			return idCard.replaceAll("(?<=\\w{3})\\w(?=\\w{4})", "*");
+		}
+		return idCard;
 	}
 
 	/**
@@ -59,10 +66,18 @@ public class SensitiveUtil {
 	 * @return 脱敏后的数据
 	 */
 	public static String phone(final String mobile) {
-		if (StringUtils.isEmpty(mobile) || mobile.length() != PHONE_LENGTH) {
+		if (StringUtils.isEmpty(mobile)) {
 			return mobile;
 		}
-		return mobile.replaceAll("(\\d{3})\\d{4}(\\d{4})", "$1****$2");
+		// 兼容 +86、空格、连字符等历史格式：先剥离非数字，再按末11位脱敏
+		String digits = mobile.replaceAll("\\D", "");
+		if (digits.length() > PHONE_LENGTH) {
+			digits = digits.substring(digits.length() - PHONE_LENGTH);
+		}
+		if (digits.length() != PHONE_LENGTH) {
+			return mobile;
+		}
+		return digits.substring(0, 3) + "****" + digits.substring(PHONE_LENGTH - 4);
 	}
 
 	/**

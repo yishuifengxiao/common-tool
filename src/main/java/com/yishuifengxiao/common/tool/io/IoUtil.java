@@ -4,21 +4,19 @@
 package com.yishuifengxiao.common.tool.io;
 
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Base64;
-import java.util.stream.Collectors;
+import java.util.Locale;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,6 +24,7 @@ import com.yishuifengxiao.common.tool.exception.UncheckedException;
 import com.yishuifengxiao.common.tool.random.IdWorker;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * <p>文件处理工具类</p>
@@ -42,10 +41,9 @@ import jakarta.validation.constraints.NotNull;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class IoUtil {
-
     private static final int DEFAULT_BUFFER_SIZE = 4096;
-    private static final int MAX_BUFFER_SIZE = 8192;
 
     /**
      * 获取文件的后缀名
@@ -68,7 +66,7 @@ public class IoUtil {
             return null;
         }
         String suffix = StringUtils.substringAfterLast(fileName, ".");
-        return StringUtils.isNotBlank(suffix) ? suffix.toLowerCase().trim() : null;
+        return StringUtils.isNotBlank(suffix) ? suffix.toLowerCase(Locale.ROOT).trim() : null;
     }
 
     /**
@@ -106,10 +104,7 @@ public class IoUtil {
 
     /**
      * <p>
-     * 使用默认的编码将输入流转为字符串
-     * </p>
-     * <p>
-     * 默认的编码格式由<code>Charset.defaultCharset()</code>确定
+     * 使用指定的编码将输入流转为字符串
      * </p>
      *
      * @param in          输入流
@@ -118,23 +113,21 @@ public class IoUtil {
      * @throws IOException 转换中发生异常
      */
     public static String inputStreamToString(InputStream in, String charsetName) throws IOException {
-        try (InputStreamReader reader = new InputStreamReader(in, charsetName)) {
-            try (BufferedReader bw = new BufferedReader(reader)) {
-                String result = bw.lines().collect(Collectors.joining(System.lineSeparator()));
-                return result;
-            }
+        if (null == in) {
+            return null;
+        }
+        try {
+            // 一次性读取全部字节，避免 BufferedReader.lines() 改写原始换行符
+            byte[] bytes = in.readAllBytes();
+            return new String(bytes, Charset.forName(charsetName));
         } finally {
             CloseUtil.close(in);
         }
-
     }
 
     /**
      * <p>
-     * 使用默认的编码将输入流转为字符串
-     * </p>
-     * <p>
-     * 默认的编码格式由<code>Charset.defaultCharset()</code>确定
+     * 使用UTF-8编码将输入流转为字符串
      * </p>
      *
      * @param in 输入流
@@ -142,7 +135,7 @@ public class IoUtil {
      * @throws IOException 转换中发生异常
      */
     public static String inputStreamToString(InputStream in) throws IOException {
-        return inputStreamToString(in, Charset.defaultCharset().name());
+        return inputStreamToString(in, StandardCharsets.UTF_8.name());
     }
 
     /**
@@ -165,7 +158,7 @@ public class IoUtil {
      * 读取classpath目录下的资源文本
      * </p>
      * <p style="color:yellow">
-     * 这里使用了系统默认的编码
+     * 这里使用了UTF-8编码
      * </p>
      * <p>
      * 返回用于读取指定资源的输入流文本,getResource（String）文档中描述了搜索顺序。
@@ -179,7 +172,7 @@ public class IoUtil {
      * @throws IOException 读取时出现问题
      */
     public static <T> String readResourceAsString(Class<T> clazz, String name) throws IOException {
-        return readResourceAsString(clazz, name, Charset.defaultCharset().name());
+        return readResourceAsString(clazz, name, StandardCharsets.UTF_8.name());
     }
 
     /**
@@ -199,7 +192,11 @@ public class IoUtil {
      * @throws IOException 读取时出现问题
      */
     public static <T> String readResourceAsString(Class<T> clazz, String name, String charsetName) throws IOException {
-        return inputStreamToString(clazz.getClassLoader().getResourceAsStream(name), charsetName);
+        InputStream inputStream = clazz.getClassLoader().getResourceAsStream(name);
+        if (null == inputStream) {
+            throw new UncheckedException("资源不存在: " + name);
+        }
+        return inputStreamToString(inputStream, charsetName);
     }
 
     /**
@@ -209,13 +206,14 @@ public class IoUtil {
      * @param out  输出流
      * @return 复制失败返回为-1
      */
-    public static int copy(File file, OutputStream out) {
+    public static long copy(File file, OutputStream out) {
         if (null == file || null == out) {
             return -1;
         }
         try {
             return copy(new FileInputStream(file), out);
         } catch (Throwable e) {
+            log.warn("复制文件到输出流失败，文件：{}", file.getAbsolutePath(), e);
             return -1;
         }
 
@@ -224,18 +222,20 @@ public class IoUtil {
 
     /**
      * 将输入流的数据复制到输出流中
+     * <p>
+     * 注意：复制完成后会关闭入参输入流和输出流。
+     * </p>
      *
      * @param in  输入流，提供要复制的数据
      * @param out 输出流，接收复制的数据
      * @return 返回复制的字节总数
      * @throws IOException 当读取或写入过程中发生I/O错误时抛出
      */
-    public static int copy(InputStream in, OutputStream out) throws IOException {
+    public static long copy(InputStream in, OutputStream out) throws IOException {
         try {
-            int byteCount = 0;
-            // 根据可用内存动态调整缓冲区大小，但不超过最大限制
-            int bufferSize = Math.min(Math.max(DEFAULT_BUFFER_SIZE, in.available()), MAX_BUFFER_SIZE);
-            byte[] buffer = new byte[bufferSize];
+            long byteCount = 0;
+            // 使用固定缓冲区大小，避免 available() 在部分流上返回0或不可靠值
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
             int bytesRead = -1;
             // 循环读取输入流数据并写入输出流，直到读取完毕
             while ((bytesRead = in.read(buffer)) != -1) {
@@ -262,8 +262,8 @@ public class IoUtil {
         if (StringUtils.isBlank(text) || null == file) {
             return file;
         }
-        // 使用缓冲写入器将文本写入文件
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+        // 使用UTF-8编码的缓冲写入器将文本写入文件，避免依赖平台默认字符集
+        try (BufferedWriter bw = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             bw.write(text);
             bw.flush();
         }
@@ -303,7 +303,13 @@ public class IoUtil {
      * @return 转换后的文件对象
      */
     public static File base64ToFile(String base64File) {
-        File file = new File(IdWorker.uuid());
+        File file;
+        try {
+            file = File.createTempFile("tool-base64-", ".tmp");
+            file.deleteOnExit();
+        } catch (IOException e) {
+            throw new UncheckedException(e);
+        }
         // 创建文件目录
         BufferedOutputStream bos = null;
         FileOutputStream fos = null;
@@ -332,15 +338,9 @@ public class IoUtil {
      * @throws IOException 当文件读取过程中发生IO异常时抛出
      */
     public static String readFileToBase64(File file) throws IOException {
-        // 使用try-with-resources确保文件流正确关闭
-        try (FileInputStream inputFile = new FileInputStream(file)) {
-            // 创建与文件大小相同的字节数组缓冲区
-            byte[] buffer = new byte[(int) file.length()];
-            // 将文件内容读取到缓冲区中
-            inputFile.read(buffer);
-            // 将字节数组编码为Base64字符串并返回
-            return Base64.getEncoder().encodeToString(buffer);
-        }
+        // 一次性读取全部字节，避免 read() 单次读取不足导致 Base64 内容被截断
+        byte[] bytes = Files.readAllBytes(file.toPath());
+        return Base64.getEncoder().encodeToString(bytes);
     }
 
 }

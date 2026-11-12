@@ -270,8 +270,14 @@ public class JdbcUrlHelper {
          * @return 返回当前ConnInfo对象实例，支持链式调用
          */
         public synchronized ConnInfo useDefaultTimeZone() {
-            // 添加服务器时区参数，设置为默认时区（根据JVM时区）
-            addParameter("serverTimezone", "useTimezone=true");
+            // 参数容器允许为空（@NoArgsConstructor 构造后再调用本方法），先惰性初始化
+            if (null == this.getParameters()) {
+                this.setParameters(new LinkedHashMap<>());
+            }
+            // 使用JVM默认时区：移除已有的时区覆盖参数，仅启用驱动的时区转换
+            this.getParameters().remove("serverTimezone");
+            this.getParameters().remove("connectionTimeZone");
+            addParameter("useTimezone", String.valueOf(true));
             // 返回当前对象实例，以便支持链式调用
             return this;
         }
@@ -298,6 +304,11 @@ public class JdbcUrlHelper {
      */
     public static ConnInfo parseJdbcUrl(String jdbcUrl) {
         if (jdbcUrl == null || !jdbcUrl.startsWith(JDBC_MYSQL_PREFIX)) {
+            // 明确区分“不支持的格式”和“普通格式错误”，避免使用方误判为前缀写错
+            if (null != jdbcUrl && (jdbcUrl.startsWith("jdbc:mysql:loadbalance://")
+                    || jdbcUrl.startsWith("jdbc:mysql:replication://"))) {
+                throw new IllegalArgumentException("暂不支持负载均衡/主从复制格式的JDBC URL: " + jdbcUrl);
+            }
             throw new IllegalArgumentException("URL必须以 " + JDBC_MYSQL_PREFIX + " 开头");
         }
 
@@ -308,6 +319,12 @@ public class JdbcUrlHelper {
             uri = new URI(uriPart);
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("URL格式错误: " + jdbcUrl, e);
+        }
+
+        // 多主机格式（如 host1:3306,host2:3306）无法用单个 host/port 表达，明确拒绝
+        String authority = uri.getAuthority();
+        if (null != authority && (authority.contains(",") || authority.contains(";"))) {
+            throw new IllegalArgumentException("暂不支持多主机格式的JDBC URL: " + jdbcUrl);
         }
 
         String protocol = uri.getScheme();     // 如 "mysql"
@@ -350,8 +367,12 @@ public class JdbcUrlHelper {
                     key = pair;
                     value = "";
                 }
-                // 参数值需要URL解码
-                parameters.put(key, decodeValue(value));
+                // 参数键与值都按同一规则解码，保证构建/解析语义一致
+                String decodedKey = decodeValue(key);
+                if (StringUtils.isBlank(decodedKey)) {
+                    continue;
+                }
+                parameters.put(decodedKey, decodeValue(value));
             }
         }
 
@@ -385,13 +406,13 @@ public class JdbcUrlHelper {
             for (Map.Entry<String, String> entry : params.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
-                // 忽略值为null或空字符串的参数
-                if (StringUtils.isBlank(value)) {
+                // 空字符串是合法参数值（如 useSSL=），仅跳过键为空或值为null的条目
+                if (StringUtils.isBlank(key) || null == value) {
                     continue;
                 }
-                // 参数键一般无需编码，但值必须编码
+                // 参数键和值都必须编码，保证特殊字符与解析逻辑可逆
                 String encodedValue = encodeValue(value);
-                paramJoiner.add(key + "=" + encodedValue);
+                paramJoiner.add(encodeValue(key) + "=" + encodedValue);
             }
             // 只有存在有效参数时才添加问号
             if (paramJoiner.length() > 0) {
@@ -404,15 +425,14 @@ public class JdbcUrlHelper {
 
     /**
      * 对参数值进行URL解码（UTF-8）。
-     * 自动处理 '+' 为空格。
+     * JDBC URL 中 '+' 是字面量而非空格，解码前先转义为 %2B，避免 GMT+8 被解析为 "GMT 8"。
      */
     private static String decodeValue(String value) {
         if (value == null) {
             return null;
         }
         try {
-            // URLDecoder 会将 '+' 转换为空格
-            return URLDecoder.decode(value, CHARSET);
+            return URLDecoder.decode(value.replace("+", "%2B"), CHARSET);
         } catch (UnsupportedEncodingException e) {
             // 理论上UTF-8始终可用
             throw new RuntimeException("不支持的字符集: " + CHARSET, e);
@@ -421,15 +441,15 @@ public class JdbcUrlHelper {
 
     /**
      * 对参数值进行URL编码（UTF-8）。
-     * 注意：空格会被编码为 '+'，这是标准的 application/x-www-form-urlencoded 行为。
-     * 如果需要严格还原为 '%20'，可在编码后替换，但MySQL驱动同时接受两种形式，此处保持简洁。
+     * 空格统一编码为 %20（而非 application/x-www-form-urlencoded 的 '+'），
+     * 以便与 decodeValue 将 '+' 视为字面量的规则保持可逆。
      */
     private static String encodeValue(String value) {
         if (value == null) {
             return "";
         }
         try {
-            return URLEncoder.encode(value, CHARSET);
+            return URLEncoder.encode(value, CHARSET).replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException("不支持的字符集: " + CHARSET, e);
         }

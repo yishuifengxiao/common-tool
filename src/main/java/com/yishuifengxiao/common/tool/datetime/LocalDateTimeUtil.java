@@ -8,8 +8,6 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
-import com.yishuifengxiao.common.tool.utils.OsUtils;
-
 /**
  * <p>LocalDateTime日期时间偏移工具类</p>
  * <p>基于LocalDateTime类型提供日期时间偏移计算功能，用于获取特定时间点。</p>
@@ -38,7 +36,7 @@ public class LocalDateTimeUtil {
      * @return 今天0时0分0秒这个时间
      */
     public static LocalDateTime todayStart() {
-        return getDayStart(LocalDateTime.now(OsUtils.ZONEID_OF_CHINA));
+        return getDayStart(LocalDateTime.now());
     }
 
     /**
@@ -286,19 +284,19 @@ public class LocalDateTimeUtil {
 
     /**
      * <p>
-     * 获取一个输入日期的23:59:59
+     * 获取一个输入日期的23:59:59.999
      * </p>
-     * 例如输入时间为2020-10-10 12:12:12 则返回时间为 2020-10-10 23:59:59
+     * 例如输入时间为2020-10-10 12:12:12 则返回时间为 2020-10-10 23:59:59.999
      *
      * @param dateTime 输入日期
-     * @return 输入日期的23时59分59秒
+     * @return 输入日期的23时59分59.999秒
      */
     public static LocalDateTime getDayEnd(LocalDateTime dateTime) {
         if (null == dateTime) {
             return null;
         }
 
-        return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MAX).truncatedTo(ChronoUnit.SECONDS);
+        return LocalDateTime.of(dateTime.toLocalDate(), LocalTime.MAX).withNano(999_999_000);
     }
 
     /**

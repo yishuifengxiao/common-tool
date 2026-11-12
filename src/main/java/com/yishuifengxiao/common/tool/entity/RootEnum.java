@@ -44,15 +44,11 @@ public interface RootEnum<T> extends Serializable {
         if (null == clazz || null == code || !clazz.isEnum()) {
             return Optional.empty();
         }
-        try {
-            for (E item : clazz.getEnumConstants()) {
-                if (item.equalCode(code)) {
-                    return Optional.of(item);
-                }
+        for (E item : clazz.getEnumConstants()) {
+            if (item.equalCode(code)) {
+                return Optional.of(item);
             }
-        } catch (Exception e) {
         }
-
         return Optional.empty();
     }
 

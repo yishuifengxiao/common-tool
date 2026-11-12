@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.sql.JDBCType;
 import java.sql.SQLType;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -301,7 +302,7 @@ public class FieldValue implements Serializable {
             return null;
         }
 
-        String definition = columnDefinition.trim().toUpperCase();
+        String definition = columnDefinition.trim().toUpperCase(Locale.ROOT);
         String dataType = extractDataType(definition);
 
         return StringUtils.isNotBlank(dataType) ? TYPE_MAP.get(dataType) : null;
