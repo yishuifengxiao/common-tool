@@ -857,6 +857,7 @@ public class ECC {
                 }
             }
         } catch (Exception e) {
+            log.debug("密钥按十六进制格式解析失败，尝试其他格式: {}", e.getMessage());
             // 继续尝试其他格式
         }
 
@@ -870,6 +871,7 @@ public class ECC {
                 }
             }
         } catch (Exception e) {
+            log.debug("密钥按Base64格式解析失败，尝试其他格式: {}", e.getMessage());
             // 继续尝试其他格式
         }
 
@@ -1175,6 +1177,7 @@ public class ECC {
             return tempKey.getParams();
         } catch (Exception e) {
             // 如果无法动态获取，使用硬编码的参数（不推荐，但作为备选）
+            log.warn("动态获取P-256曲线参数失败，回退到硬编码参数: {}", e.getMessage());
             return getHardcodedP256ParameterSpec();
         }
     }

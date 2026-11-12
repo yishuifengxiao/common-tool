@@ -101,6 +101,7 @@ assertEquals("2024-01-01 12:30", DateTimeUtil.format(date, "yyyy-MM-dd HH:mm"));
 - `BeanUtil.setFieldsFromMap` 支持给父类字段赋值。
 - `JsonUtil.strToBean(json, clazz)`（2 参数）默认 `failOnUnknownProperties=false`，与共享 `default_mapper` 的宽松策略一致；如需严格模式请调用 3 参数版本并传 `true`。
 - `JsonUtil.mapper()` 返回进程内共享的只读配置实例（`default_mapper` 与 `none_null_mapper` 均为 `private static final`）；不要在调用方修改其配置，否则会影响所有使用者。
+- `BeanUtil.mapToBean` 在 Jackson 直接转换抛出 `IllegalArgumentException` 或 `JacksonException` 时统一走备用构造路径；备用路径仍失败时抛出 `UncheckedException`，不会向调用方泄漏 Jackson 的底层异常类型。
 
 ## 8. HTTP（`http.HttpClient`）
 
@@ -208,7 +209,9 @@ assertEquals("hello", TripleDES.decrypt(key, cipher));
 ## 15. 文本与网络工具（`RegexUtil` / `Hex` / `NetUtil` / `ImageUtil`）
 
 - `RegexUtil` 的 Pattern 缓存改为上限 256 的有界 LRU（`LinkedHashMap` + 同步），空白正则抛 `IllegalArgumentException`。
-- `Hex.hexToBytes` 对奇数长度或非法字符记录 WARN 并返回 null（既有契约不变）。
+- `Hex.hexToBytes` 对奇数长度或非法字符记录 WARN 并返回 null（既有契约不变）；空串或仅空白同样返回 null。
+- `Hex.hexToBase64` 对奇数长度或非法字符记录 WARN 并返回 null，输入前缀 `0x` 与 `0X` 均可识别；`Hex.base64ToBytes` 对 null 或空串返回 null，全部解码方式失败时记录 DEBUG 日志。
+- `Hex.utf8ToHex` 输出**小写**十六进制（与历史行为及现有测试契约一致），`hexToUtf8` 解析时不区分大小写。
 - `Hex.hexToUtf8` 对奇数长度或非法十六进制字符抛 `IllegalArgumentException`；自动去除空白和不可见字符；空串返回 `""`，null 返回 null。
 - `Hex.hexToAscii` 使用 ISO-8859-1（Latin-1）解码，覆盖 0x00~0xFF 全字节范围（扩展 ASCII），奇数长度或非法字符抛 `IllegalArgumentException`。
 - `Hex.asciiToHex` 不再对输入做 `trim`，首尾空格会被编码为 `20`，与 `hexToAscii` 保持可往返（`hexToAscii(asciiToHex(" A "))` 仍为 `" A "`）。
@@ -219,8 +222,8 @@ assertEquals("hello", TripleDES.decrypt(key, cipher));
 - `TextExtract` 的连续链接块匹配模式改为 `[^<]{0,30}` 且不再启用 `DOTALL`，避免超大 HTML 上因 `.*` 跨行匹配产生严重回溯；`FREQUENT_URL` 为常量，正则对象预编译为 `static final`。
 - `PlaceholderExtractor.replacePlaceholders(input, replacements)`：空白 `input` 原样返回；`replacements` 为 null 时按空映射处理，未匹配到的占位符保持原样（如 `${a}` 不变）。
 - `NetUtil.getOutIp()` 设置 3 秒连接/读取超时并使用 UTF-8，避免线程被永久阻塞；已移除调试用 `main` 方法。
-- `UrlUtil.urlComplete(referrer, url)` 改为基于 `java.net.URI.resolve` 按 RFC 3986 解析相对地址，正确处理 `/`、`../`、`.` 与协议相对地址（如 `//cdn.com/a.js`）；referrer 非法或 url 为空返回 null。
-- `UrlUtil.extractProtocol(url)` 基于 `java.net.URI` 解析并返回**小写**协议名（`HTTP://Example.com` → `http`），支持域名、IP、`localhost` 及任意合法 scheme；空值、空白或无协议时返回 null。
+- `UrlUtil.urlComplete(referrer, url)` 改为基于 `java.net.URI.resolve` 按 RFC 3986 解析相对地址，正确处理 `/`、`../`、`.` 与协议相对地址（如 `//cdn.com/a.js`）；referrer 非法或 url 为空返回 null，失败路径记录 DEBUG 日志。
+- `UrlUtil.extractProtocol(url)` 基于 `java.net.URI` 解析并返回**小写**协议名（`HTTP://Example.com` → `http`），支持域名、IP、`localhost` 及任意合法 scheme；空值、空白或无协议时返回 null，解析异常记录 DEBUG 日志。
 - `UrlUtil.keyword(url)` 取域名末尾两级标签做**精确后缀比较**判断 `com.cn`/`gov.cn`/`edu.cn`，不再用子串 `contains`；`www.acom.cn` 返回 `acom`，`www.mygov.cn` 返回 `mygov`，`com.cn` 这类无主域名的输入返回 null。
 - `X509Helper.parseCert` 的 PEM 头尾标记比较忽略大小写（`-----begin certificate-----` 同样可解析），Base64 正文保持大小写敏感；头标记归一化使用 `Locale.ROOT`，不受默认 Locale 影响。
 - `HexBitset.bitStringToHex("")` 返回 `"00"`（空 BIT STRING 只有 unused-bits 字节，无数据字节）。

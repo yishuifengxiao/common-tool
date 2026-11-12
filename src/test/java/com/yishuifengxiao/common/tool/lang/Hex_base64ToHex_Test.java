@@ -61,15 +61,15 @@ public class Hex_base64ToHex_Test {
     }
 
     /**
-     * 测试base64ToBytes方法 - 空或null输入
+     * 测试base64ToBytes方法 - 空或null输入（按Javadoc约定返回null）
      */
     @Test
     public void testBase64ToBytesWithNullAndEmptyInput() {
         // 测试null输入
-        assertArrayEquals(new byte[0], Hex.base64ToBytes(null));
+        assertNull(Hex.base64ToBytes(null));
 
         // 测试空字符串输入
-        assertArrayEquals(new byte[0], Hex.base64ToBytes(""));
+        assertNull(Hex.base64ToBytes(""));
     }
 
     /**

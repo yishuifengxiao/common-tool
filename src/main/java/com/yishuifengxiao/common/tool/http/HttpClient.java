@@ -601,7 +601,8 @@ public class HttpClient {
 
         }
         if (StringUtils.isNotBlank(this.requestBody)) {
-            connection.requestBody(this.requestBody.trim());
+            // 原样发送请求体，避免 trim 修改用户数据（首尾空白可能有业务含义）
+            connection.requestBody(this.requestBody);
         } else {
             if (null != this.data) {
                 this.data.forEach((k, v) -> {

@@ -70,14 +70,16 @@ public class JsonUtil_str2Bean_Test {
     }
 
     /**
-     * 测试异常场景：JSON字符串与目标类不匹配
-     * 预期结果：返回null，并记录警告日志
+     * 测试边界场景：JSON字段与目标类不匹配
+     * 预期结果：按默认宽松策略忽略未知字段，返回字段为null的对象
      */
     @Test
     public void testStr2Bean_MismatchedJson() {
         String json = "{\"name\":\"John\",\"age\":30}";
         Address result = JsonUtil.strToBean(json, Address.class);
-        assertNull(result);
+        assertNotNull(result);
+        assertNull(result.getCity());
+        assertNull(result.getStreet());
     }
 
     /**

@@ -246,9 +246,9 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
         if (timestamp == null) {
             return null;
         }
-        // 将timestamp转换为系统默认时区的ZonedDateTime
-        // JDBC驱动已经根据serverTimezone正确处理了时区
-        return timestamp.toInstant().atZone(ZoneId.systemDefault());
+        // 与 LocalDateTime 等分支保持一致：优先使用数据库时区，未指定时回退系统默认时区
+        ZoneId zone = null != databaseZoneId ? databaseZoneId : ZoneId.systemDefault();
+        return timestamp.toInstant().atZone(zone);
     }
 
     private OffsetDateTime convertToOffsetDateTime(ResultSet rs, String columnName) throws SQLException {
@@ -522,6 +522,7 @@ public class SimpleRowMapper<T> implements RowMapper<T> {
                 return parseBoolean(str);
             }
         } catch (NumberFormatException e) {
+            log.debug("列值无法转换为目标数字类型，使用默认值: value={}, targetType={}", str, targetType.getSimpleName());
             return handleNullValue(targetType, isPrimitive);
         }
         return str;

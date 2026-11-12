@@ -318,7 +318,7 @@ public class JdbcHelper {
      * @param t        查询条件对象，其非空字段将作为WHERE条件；如果为null则返回0
      * @param likeMode 是否启用模糊查询模式，true表示对字符串字段使用LIKE匹配，false表示使用精确匹配
      * @param <T>      实体类型泛型参数
-     * @return 符合条件的记录总数，如果查询对象为空或发生异常则返回0
+     * @return 符合条件的记录总数；当查询对象为空时返回0，数据库访问异常将向上抛出
      */
     public <T> Long count(T t, boolean likeMode) {
         if (t == null) {

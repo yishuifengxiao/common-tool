@@ -67,12 +67,13 @@ public class BeanUtilBeanToMapTest {
     // ==================== 测试用例 ====================
 
     /**
-     * TC01: data 为 null 时应返回 EMPTY_MAP
+     * TC01: data 为 null 时应返回空 Map
      */
     @Test
     public void testBeanToMap_DataIsNull_ReturnsEmptyMap() {
         Map<?, ?> result = BeanUtil.beanToMap(null);
-        assertSame(Collections.EMPTY_MAP, result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     /**

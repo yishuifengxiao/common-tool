@@ -127,7 +127,7 @@ public class Hex {
             sb.append(hexString.charAt((aByte & 0xf0) >> 4));
             sb.append(hexString.charAt((aByte & 0x0f) >> 0));
         }
-        return sb.toString().toUpperCase();
+        return sb.toString();
     }
 
     /**
@@ -270,8 +270,9 @@ public class Hex {
         // 最后尝试 URL 安全的 Base64 解码
         try {
             return Base64.getUrlDecoder().decode(base64String);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
             // 所有方式均失败，返回 null 表示无法解析
+            log.debug("Base64解码失败: {}", e.getMessage());
             return null;
         }
     }
@@ -288,8 +289,8 @@ public class Hex {
             return "";
         }
 
-        // 移除可能存在的空格和前缀
-        hexString = hexString.replaceAll("\\s", "").replace("0x", "");
+        // 移除可能存在的空格和前缀（前缀大小写均兼容）
+        hexString = hexString.replaceAll("\\s", "").replaceAll("(?i)0x", "");
 
         // 确保十六进制字符串长度为偶数
         if (!isHex(hexString)) {

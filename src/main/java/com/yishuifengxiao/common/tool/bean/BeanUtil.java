@@ -4,6 +4,7 @@
 package com.yishuifengxiao.common.tool.bean;
 
 
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
@@ -680,8 +681,9 @@ public final class BeanUtil {
         try {
             // 使用Jackson的convertValue方法进行转换
             return mapper.convertValue(map, clazz);
-        } catch (IllegalArgumentException e) {
-            // 如果转换失败，尝试使用备用方法
+        } catch (IllegalArgumentException | JacksonException e) {
+            // Jackson 3 的 convertValue 可能抛出 IllegalArgumentException 或 JacksonException，
+            // 两者都视为直接转换失败，统一走备用构造路径，避免异常类型逃逸导致契约不一致
             return (T) mapToBeanWithFallback(mapper, map, clazz);
         }
     }
