@@ -335,8 +335,14 @@ public class ZoneIdDetector {
         }
         // 如果字符串是纯数字，将其解释为时区偏移量并转换为对应时区
         if (shortString.matches("[+-]?\\d+")) {
-            int offset = Integer.parseInt(shortString.replace("+", ""));
-            return convertOffsetToTimezone(offset);
+            try {
+                int offset = Integer.parseInt(shortString.replace("+", ""));
+                return convertOffsetToTimezone(offset);
+            } catch (NumberFormatException e) {
+                // 超长数字会超出 int 范围，此处按无法识别处理，避免异常逃逸到 detectDatabaseTimezone
+                log.debug("无法解析数字时区偏移量: {}", shortString);
+                return null;
+            }
         }
         return null;
     }

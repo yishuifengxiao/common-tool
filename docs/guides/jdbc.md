@@ -55,7 +55,7 @@ import com.yishuifengxiao.common.tool.jdbc.PojoGenerator;
 
 ### 3.3 时区
 
-`JdbcHelper` 初始化时通过 `ZoneIdDetector` 探测数据库时区，并在 `LocalDateTime` 等类型映射时使用；探测失败时回退到 JVM 默认时区。MySQL 连接字符串中的 `serverTimezone`（旧驱动）与 `connectionTimeZone`（新驱动）均已被识别。
+`JdbcHelper` 初始化时通过 `ZoneIdDetector` 探测数据库时区，并在 `LocalDateTime` 等类型映射时使用；探测失败时回退到 JVM 默认时区。MySQL 连接字符串中的 `serverTimezone`（旧驱动）与 `connectionTimeZone`（新驱动）均已被识别。`ZoneIdDetector` 仅内置 MySQL / PostgreSQL / Oracle / SQL Server 的时区查询，**其他数据库（如 H2）按契约安全返回 `null`**，不会抛出异常。
 
 ## 4. API 说明
 

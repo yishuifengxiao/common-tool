@@ -18,12 +18,12 @@ public class Hex_asciiToHex_Test {
     }
 
     /**
-     * 测试asciiToHex方法 - 纯空白字符串（清理后为空）
+     * 测试asciiToHex方法 - 纯空白字符串（按原样编码，不做 trim）
      */
     @Test
     public void testAsciiToHexWithBlankString() {
-        assertEquals("", Hex.asciiToHex("   "));
-        assertEquals("", Hex.asciiToHex("\t\n"));
+        assertEquals("202020", Hex.asciiToHex("   "));
+        assertEquals("090A", Hex.asciiToHex("\t\n"));
     }
 
     /**
@@ -56,12 +56,12 @@ public class Hex_asciiToHex_Test {
     }
 
     /**
-     * 测试asciiToHex方法 - 含空白字符的输入（解析前会被清除）
+     * 测试asciiToHex方法 - 含空白字符的输入（保留空白，保证与hexToAscii可往返）
      */
     @Test
     public void testAsciiToHexWithWhitespace() {
-        assertEquals("48656C6C6F", Hex.asciiToHex("  Hello  "));
-        assertEquals("48656C6C6F576F726C64", Hex.asciiToHex("Hello\tWorld"));
+        assertEquals("202048656C6C6F2020", Hex.asciiToHex("  Hello  "));
+        assertEquals("48656C6C6F09576F726C64", Hex.asciiToHex("Hello\tWorld"));
     }
 
     /**

@@ -98,11 +98,11 @@ public class Hex_hexToAscii_Test {
     }
 
     /**
-     * 测试hexToAscii方法 - 高位字节（超出0~127，解码为替换字符U+FFFD）
+     * 测试hexToAscii方法 - 高位字节（ISO-8859-1解码，覆盖0x00~0xFF）
      */
     @Test
     public void testHexToAsciiWithHighByte() {
-        assertEquals("\uFFFD", Hex.hexToAscii("E4"));
-        assertEquals("\uFFFD\uFFFD\uFFFD", Hex.hexToAscii("E4BDA0"));
+        assertEquals("\u00E4", Hex.hexToAscii("E4"));
+        assertEquals("\u00E4\u00BD\u00A0", Hex.hexToAscii("E4BDA0"));
     }
 }

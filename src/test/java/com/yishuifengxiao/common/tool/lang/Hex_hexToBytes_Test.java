@@ -9,13 +9,11 @@ import static org.junit.Assert.*;
 public class Hex_hexToBytes_Test {
 
     /**
-     * 测试hexToBytes方法 - 空字符串
+     * 测试hexToBytes方法 - 空字符串（按Javadoc约定返回null）
      */
     @Test
     public void testHexToBytesWithEmptyString() {
-        byte[] result = Hex.hexToBytes("");
-        assertNotNull(result);
-        assertEquals(0, result.length);
+        assertNull(Hex.hexToBytes(""));
     }
 
     /**
@@ -28,9 +26,7 @@ public class Hex_hexToBytes_Test {
         assertArrayEquals(new byte[]{72, 101, 108, 108, 111}, result);
         
         // 测试只有空格的情况
-        byte[] emptyResult = Hex.hexToBytes("   ");
-        assertNotNull(emptyResult);
-        assertEquals(0, emptyResult.length);
+        assertNull(Hex.hexToBytes("   "));
     }
 
     /**
@@ -56,19 +52,19 @@ public class Hex_hexToBytes_Test {
     }
 
     /**
-     * 测试hexToBytes方法 - 奇数长度的十六进制字符串（应抛出异常）
+     * 测试hexToBytes方法 - 奇数长度的十六进制字符串（按Javadoc约定返回null）
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testHexToBytesWithOddLength() {
-        Hex.hexToBytes("123"); // 奇数长度，应该抛出异常
+        assertNull(Hex.hexToBytes("123")); // 奇数长度，无法转换
     }
 
     /**
-     * 测试hexToBytes方法 - 包含非法字符的字符串（应抛出异常）
+     * 测试hexToBytes方法 - 包含非法字符的字符串（按Javadoc约定返回null）
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testHexToBytesWithInvalidCharacters() {
-        Hex.hexToBytes("GG"); // 包含非十六进制字符，应该抛出异常
+        assertNull(Hex.hexToBytes("GG")); // 包含非十六进制字符，无法转换
     }
 
     /**

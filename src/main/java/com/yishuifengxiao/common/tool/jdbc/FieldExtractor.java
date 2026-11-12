@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 字段提取器和工具类，用于从实体类中提取字段信息
  *
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public class FieldExtractor {
     /**
      * 字段定义缓存：使用ClassValue实现，随类卸载自动释放，避免静态Map无界增长与类加载器泄漏
@@ -91,7 +94,8 @@ public class FieldExtractor {
                 Object value = ClassUtil.extractValue(t, fieldName);
                 return new FieldValue(fieldDef.getField(), fieldDef.isPrimary(), value);
             } catch (Exception e) {
-                // 如果提取失败，使用字段定义中的默认值
+                // 如果提取失败，使用字段定义中的默认值，并保留排障线索
+                log.debug("提取字段值失败，使用默认值，字段: {}", fieldName, e);
                 return new FieldValue(fieldDef.getField(), fieldDef.isPrimary(), fieldDef.getValue());
             }
         }).collect(Collectors.toList());

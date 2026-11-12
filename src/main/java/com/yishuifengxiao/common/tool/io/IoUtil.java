@@ -149,7 +149,13 @@ public class IoUtil {
      * @throws IOException 转换时出现问题
      */
     public static File inputStreamToFile(@NotNull InputStream inputStream, @NotNull File file) throws IOException {
-        copy(inputStream, new FileOutputStream(file));
+        try (OutputStream out = new FileOutputStream(file)) {
+            copy(inputStream, out);
+        } catch (IOException e) {
+            // 输出流创建失败时 copy 不会执行，需在此关闭输入流，避免句柄泄漏
+            CloseUtil.close(inputStream);
+            throw e;
+        }
         return file;
     }
 

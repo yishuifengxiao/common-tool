@@ -21,14 +21,11 @@ public class TLVUnitUtilTest {
     }
 
     /**
-     * TC02: 空标签
+     * TC02: 空标签（按契约抛 IllegalArgumentException）
      */
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testToTLV_EmptyTag() {
-        String tag = "";
-        String input = "AABBCCDD"; // 长度 = 4
-        String expected = "04AABBCCDD";
-        assertEquals(expected, TLV.toTLV(tag, input));
+        TLV.toTLV("", "AABBCCDD");
     }
 
     /**
@@ -76,14 +73,11 @@ public class TLVUnitUtilTest {
     }
 
     /**
-     * TC07: 标签为 null
+     * TC07: 标签为 null（按契约抛 IllegalArgumentException）
      */
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testToTLV_NullTag() {
-        String tag = null;
-        String input = "AABB"; // 长度 = 2
-        String expected = "02AABB";
-        assertEquals(expected, TLV.toTLV(tag, input));
+        TLV.toTLV(null, "AABB");
     }
 
     /**

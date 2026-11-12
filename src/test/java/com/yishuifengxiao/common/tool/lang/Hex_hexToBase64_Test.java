@@ -36,6 +36,9 @@ public class Hex_hexToBase64_Test {
         // 测试包含0x前缀的十六进制字符串
         assertEquals("SGVsbG8=", Hex.hexToBase64("0x48656c6c6f"));
 
+        // 测试包含大写0X前缀的十六进制字符串
+        assertEquals("SGVsbG8=", Hex.hexToBase64("0X48656c6c6f"));
+
         // 测试同时包含空格和0x前缀的十六进制字符串
         assertEquals("SGVsbG8=", Hex.hexToBase64("0x48 65 6c 6c 6f"));
 
@@ -75,19 +78,19 @@ public class Hex_hexToBase64_Test {
     }
 
     /**
-     * 测试hexToBase64方法 - 奇数长度的十六进制字符串（应抛出异常）
+     * 测试hexToBase64方法 - 奇数长度的十六进制字符串（按既有约定返回null）
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testHexToBase64WithOddLength() {
-        Hex.hexToBase64("123"); // 奇数长度，应该抛出异常
+        assertNull(Hex.hexToBase64("123")); // 奇数长度，无法转换
     }
 
     /**
-     * 测试hexToBase64方法 - 包含非法字符的十六进制字符串（应抛出异常）
+     * 测试hexToBase64方法 - 包含非法字符的十六进制字符串（按既有约定返回null）
      */
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testHexToBase64WithInvalidCharacters() {
-        Hex.hexToBase64("GG"); // 包含非十六进制字符，应该抛出异常
+        assertNull(Hex.hexToBase64("GG")); // 包含非十六进制字符，无法转换
     }
 
     /**

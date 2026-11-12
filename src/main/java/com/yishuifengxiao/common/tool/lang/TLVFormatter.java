@@ -871,6 +871,7 @@ public class TLVFormatter {
             }
         }
 
+        log.debug("无法解析UTCTime时间字符串: {}", timeStr);
         return null;
     }
 
@@ -908,6 +909,7 @@ public class TLVFormatter {
             }
         }
 
+        log.debug("无法解析GeneralizedTime时间字符串: {}", timeStr);
         return null;
     }
 

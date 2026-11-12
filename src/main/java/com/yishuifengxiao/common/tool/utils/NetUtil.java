@@ -99,6 +99,9 @@ public class NetUtil {
      * @return 格式化的MAC地址字符串，格式为"XX:XX:XX:XX:XX:XX"，获取失败时返回空字符串
      */
     public static String getMacAddress(NetworkInterface networkInterface) {
+        if (null == networkInterface) {
+            return "";
+        }
         try {
             byte[] mac = networkInterface.getHardwareAddress();
             if (mac == null) return "";
@@ -131,7 +134,9 @@ public class NetUtil {
             connection.setRequestMethod("GET");
             try (BufferedReader in = new BufferedReader(
                     new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8))) {
-                return in.readLine();
+                // 服务端返回空响应时 readLine 为 null，按契约返回空字符串
+                String line = in.readLine();
+                return null == line ? "" : line;
             }
         } catch (Exception e) {
             // 记录异常信息，便于问题排查

@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.yishuifengxiao.common.tool.text.RegexUtil;
 import com.yishuifengxiao.common.tool.utils.OsUtils;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * <p>URL数据工具类</p>
  * <p>提供URL相关的解析、提取和转换功能。</p>
@@ -27,8 +29,8 @@ import com.yishuifengxiao.common.tool.utils.OsUtils;
  * @version 1.0.0
  * @since 1.0.0
  */
+@Slf4j
 public final class UrlUtil {
-
     /**
      * com.cn域名表达式
      */
@@ -153,6 +155,7 @@ public final class UrlUtil {
             String scheme = URI.create(url.trim()).getScheme();
             return null == scheme ? null : scheme.toLowerCase(Locale.ROOT);
         } catch (IllegalArgumentException e) {
+            log.debug("URL协议解析失败: {}", url, e);
             return null;
         }
     }
@@ -163,7 +166,7 @@ public final class UrlUtil {
      *
      * @param referrer 来源地址
      * @param url      待补全的url
-     * @return 补全后网络地址形式的url
+     * @return 补全后网络地址形式的url；参数为空、来源地址不合法或解析失败时返回 null
      */
     public static String urlComplete(String referrer, String url) {
         if (StringUtils.isBlank(referrer) || StringUtils.isBlank(url)) {
@@ -191,6 +194,7 @@ public final class UrlUtil {
             // 按 RFC 3986 解析相对地址，统一处理 "/"、"../"、"." 以及协议相对地址
             return baseUri.resolve(url).toString();
         } catch (Exception e) {
+            log.debug("URL补全失败, referrer={}, url={}", referrer, url, e);
             return null;
         }
     }

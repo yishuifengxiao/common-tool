@@ -200,6 +200,18 @@
             <artifactId>junit-jupiter-api</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- 项目中存在大量基于 JUnit4 注解编写的测试，需 vintage 引擎才能被 surefire 执行 -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- 内存数据库，用于真实 JDBC 元数据/结果集映射集成测试 -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
 
 
     </dependencies>
