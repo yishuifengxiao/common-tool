@@ -23,7 +23,8 @@ import java.util.concurrent.TimeUnit;
  * <ul>
  *   <li>返回的 {@link ParseResult} 结构、方法、行为在同步 / 异步模式下<b>完全相同</b>；</li>
  *   <li>表头校验失败时两种模式行为完全一致：<b>立即返回、不读正文、不回调、不提交任务</b>；</li>
- *   <li>正文读取均为<b>逐行流式回调</b>——每读一行 → {@link RowCallback#onRow} → 立即释放内存；</li>
+ *   <li>正文读取均为<b>逐行流式回调</b>——每读一行 → {@link RowCallback#onRow}（末行回调时
+ * {@code finished = true}）→ 立即释放内存；</li>
  *   <li>正文行数由调用方在回调中自行统计（本工具类不内置行数统计）。</li>
  * </ul>
  *
@@ -74,7 +75,7 @@ import java.util.concurrent.TimeUnit;
  *   <li>{@link CellData#getExcelIdx()} 是该列在 Excel 文件中的<b>实际物理列索引</b>；</li>
  *   <li>{@link CellData#isValid()} / {@link CellData#getValidationErrorZh()} /
  *       {@link CellData#getValidationErrorEn()} 携带非空校验结果与中英双语错误消息；</li>
- *   <li>{@link RowCallback#onRow(int, LinkedHashMap)} 的 {@code rowIndex} 为 Excel
+ *   <li>{@link RowCallback#onRow(int, LinkedHashMap, boolean)} 的 {@code rowIndex} 为 Excel
  *       <b>物理行号</b>（0 开始），从表头行下一行起按物理位置递增；
  *       空白行（含未创建的间隙行）<b>不跳过</b>，照常回调。</li>
  * </ol>
@@ -366,8 +367,9 @@ public final class ExcelReader {
          * @param rowIndex 当前行的 Excel 物理行号（0 开始）：从表头行下一行起按物理位置递增；
          *                 空白行（含从未创建的间隙行）同样触发本回调，不跳过
          * @param rowData  当前行数据（迭代顺序与 columns 完全一致）
+         * @param finished 是否为本次解析的最后一行；无数据行时也会以空 rowData 回调一次并置为 true
          */
-        void onRow(int rowIndex, LinkedHashMap<Integer, CellData> rowData);
+        void onRow(int rowIndex, LinkedHashMap<Integer, CellData> rowData, boolean finished);
     }
 
     /**
@@ -1210,6 +1212,11 @@ public final class ExcelReader {
 
         int start = headerRowIndex + 1;
         int last = sheet.getLastRowNum();
+        if (start > last) {
+            // 无数据行：仍回调一次（rowData 为空），用于告知调用方解析已全部完成
+            callback.onRow(start, new LinkedHashMap<>(), true);
+            return;
+        }
         for (int r = start; r <= last; r++) {
             // 空白行（包括整行不存在的情况）也必须回调，由非空校验标记必填列缺失
             Row row = sheet.getRow(r);
@@ -1262,7 +1269,7 @@ public final class ExcelReader {
                 rowData.put(i, new CellData(value, def, excelColIdx, valid, errZh, errEn));
             }
             try {
-                callback.onRow(r, rowData);
+                callback.onRow(r, rowData, r == last);
             } catch (RuntimeException e) {
                 throw new IllegalStateException(
                         String.format("第 %d 行回调处理失败：%s", r + 1, e.getMessage()), e);

@@ -505,8 +505,15 @@ public class BERReader {
      * @throws IOException 读取异常
      */
     public long[] readRelativeOID(int nBytes) throws IOException {
-        ArrayList<Long> objectIdentifier = new ArrayList<>();
+        if (nBytes < 1) {
+            throw new RuntimeException("Relative Object Identifier cannot be empty");
+        }
         byte[] buffer = readOctetString(nBytes);
+        // 最后一个字节仍带延续位说明编码被截断，继续解析会把哨兵值 -1 当成合法 arc 返回
+        if ((buffer[nBytes - 1] & 0x80) != 0) {
+            throw new RuntimeException("Relative Object Identifier is truncated");
+        }
+        ArrayList<Long> objectIdentifier = new ArrayList<>();
         long arc = -1;
         long mult = 1;
         for (int i = nBytes - 1; i >= 0; i--) {

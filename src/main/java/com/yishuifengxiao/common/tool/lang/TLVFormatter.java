@@ -327,8 +327,9 @@ public class TLVFormatter {
                 length = lenByte & 0xFF;
             }
 
-            // 有效性校验
-            if (position + length > maxPosition) {
+            // 长度来自外部输入：用减法比较避免 position + length 溢出后绕过校验，
+            // 同时拒绝 0x84 长格式最高位为 1 时得到的负数长度
+            if (length < 0 || length > maxPosition - position) {
                 throw new IllegalArgumentException("value overflow at " + position);
             }
 
