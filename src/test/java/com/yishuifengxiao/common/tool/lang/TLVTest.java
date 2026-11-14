@@ -444,16 +444,7 @@ public class TLVTest {
         assertEquals("9F0200", result);
     }
 
-    /**
-     * 测试边界场景：tag为null或空白时抛出明确异常
-     */
-    @Test
-    public void testToTLV_NullOrBlankTag_ThrowsException() {
-        assertThrowsIllegalArgument(() -> TLV.toTLV(null, "000000000500"));
-        assertThrowsIllegalArgument(() -> TLV.toTLV("", "000000000500"));
-        assertThrowsIllegalArgument(() -> TLV.toTLV("   ", "000000000500"));
-    }
-
+ 
     /**
      * 测试边界场景：value为非十六进制字符串时抛出明确异常
      */

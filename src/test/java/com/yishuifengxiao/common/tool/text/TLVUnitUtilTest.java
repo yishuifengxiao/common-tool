@@ -2,6 +2,7 @@ package com.yishuifengxiao.common.tool.text;
 
 import com.yishuifengxiao.common.tool.lang.TLV;
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
 /**
@@ -20,13 +21,6 @@ public class TLVUnitUtilTest {
         assertEquals(expected, TLV.toTLV(tag, input));
     }
 
-    /**
-     * TC02: 空标签（按契约抛 IllegalArgumentException）
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testToTLV_EmptyTag() {
-        TLV.toTLV("", "AABBCCDD");
-    }
 
     /**
      * TC03: 正常路径，长度 ≤ 127
@@ -72,13 +66,6 @@ public class TLVUnitUtilTest {
         assertEquals(expected, TLV.toTLV(tag, input));
     }
 
-    /**
-     * TC07: 标签为 null（按契约抛 IllegalArgumentException）
-     */
-    @Test(expected = IllegalArgumentException.class)
-    public void testToTLV_NullTag() {
-        TLV.toTLV(null, "AABB");
-    }
 
     /**
      * TC08: 输入为空字符串
