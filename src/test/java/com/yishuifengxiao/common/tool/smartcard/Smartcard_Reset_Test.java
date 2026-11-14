@@ -29,7 +29,7 @@ public class Smartcard_Reset_Test {
             smartCard.reset();
             String eid2 = smartCard.getEid();
             assertEquals(eid, eid2);
-            SmartCard.ApduResult result = smartCard.transmitWithNewLogicalChannel("81E2910006BF3E035C015A");
+            SmartCard.ApduResult result = smartCard.transmitInNewChannelWithIsr("81E2910006BF3E035C015A").first();
             assertTrue(result.isSuccess());
         } finally {
             smartCard.disconnect();

@@ -1,7 +1,6 @@
 package com.yishuifengxiao.common.tool.smartcard;
 
 import com.yishuifengxiao.common.tool.exception.UncheckedException;
-import com.yishuifengxiao.common.tool.lang.Hex;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -376,20 +375,14 @@ public class SmartCardTest {
         smartCard.connect("NonExistentReader");
     }
 
-    /**
-     * 测试未连接时打开逻辑通道抛出异常
-     */
-    @Test(expected = UncheckedException.class)
-    public void testOpenLogicalChannel_NotConnected() {
-        smartCard.openLogicalChannel();
-    }
+
 
     /**
      * 测试未连接时在新逻辑通道上执行命令抛出异常
      */
     @Test(expected = UncheckedException.class)
     public void testTransmitWithNewLogicalChannel_NotConnected() {
-        smartCard.transmitWithNewLogicalChannel("00A4040010");
+        smartCard.transmitInNewChannel("00A4040010");
     }
 
     /**

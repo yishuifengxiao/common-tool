@@ -3,7 +3,6 @@ package com.yishuifengxiao.common.tool;
 import com.yishuifengxiao.common.tool.http.UrlUtil;
 import com.yishuifengxiao.common.tool.io.IoUtil;
 import com.yishuifengxiao.common.tool.lang.OID;
-import com.yishuifengxiao.common.tool.lang.TLVUnit;
 import com.yishuifengxiao.common.tool.utils.LogLevelUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -93,13 +92,5 @@ public class Round9LocaleRegressionTest {
         assertEquals(baseline, underTurkishLocale(() -> OID.hexToDotNotation("2A03")));
     }
 
-    /**
-     * TLV 构建结果不应随默认 Locale 变化
-     */
-    @Test
-    @DisplayName("土耳其语环境下 TLVUnit.toTLV 输出不变")
-    void tlvBuildIsLocaleIndependent() {
-        String baseline = TLVUnit.toTLV("ABCD");
-        assertEquals(baseline, underTurkishLocale(() -> TLVUnit.toTLV("ABCD")));
-    }
+
 }

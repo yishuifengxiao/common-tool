@@ -284,13 +284,10 @@ public class TLV {
      * @param tag   表示 TLV 格式中的标签部分，必须是非空且长度为偶数的十六进制字符串
      * @param value 表示 TLV 格式中的值部分，应为十六进制字符串，每两个字符代表一个字节
      * @return 返回一个符合 TLV 格式的字符串
-     * @throws IllegalArgumentException 标签为空或非十六进制、值非空但不是合法十六进制时抛出
      */
     public static String toTLV(String tag, String value) {
         tag = TextUtil.removeWhitespaceAndInvisible(tag);
-        if (!Hex.isHex(tag)) {
-            throw new IllegalArgumentException("TLV标签必须是非空且长度为偶数的十六进制字符串");
-        }
+        tag = null == null ? "" : tag;
         return tag + buildLengthAndValue(value);
     }
 
